@@ -52,8 +52,6 @@ El objetivo principal de este proyecto es proporcionar un espacio en línea dond
 - JavaScript
 - React.js
 - Node.js
-- Express.js
-- MongoDB
 
 ## Instalación
 
