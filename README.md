@@ -117,7 +117,3 @@ Para detener el servidor de desarrollo, usa el siguiente comando en la terminal:
 Ctrl + C
 ```
 
-Con estos pasos, estarás listo para empezar a trabajar en el proyecto React.
-```
-
-Este formato está estructurado para facilitar la instalación del proyecto y la configuración del entorno.
