@@ -53,8 +53,71 @@ El objetivo principal de este proyecto es proporcionar un espacio en línea dond
 - React.js
 - Node.js
 
+
 ## Instalación
 
-1. Clona este repositorio
-   ```bash
-   git clone https://github.com/Computer-Society-Uniandes/Monitorias.git
+### 1. Clonar el repositorio
+
+Para comenzar, clona este repositorio en tu máquina local usando el siguiente comando:
+
+```bash
+git clone https://github.com/Computer-Society-Uniandes/Monitorias.git
+```
+
+### 2. Verificar instalación de Node.js y npm
+
+Asegúrate de tener instalados **Node.js** y **npm**. Puedes verificarlo ejecutando los siguientes comandos en la terminal:
+
+```bash
+node -v
+npm -v
+```
+
+Si no tienes Node.js instalado, descárgalo desde [https://nodejs.org/](https://nodejs.org/).
+
+### 3. Instalar dependencias
+
+Una vez clonado el repositorio, navega a la carpeta del proyecto y ejecuta:
+
+```bash
+npm install
+```
+
+Esto instalará todas las dependencias necesarias que se encuentran en el archivo `package.json`.
+
+### 4. Iniciar el servidor de desarrollo
+
+Después de instalar las dependencias, inicia el servidor de desarrollo con el siguiente comando:
+
+```bash
+npm start
+```
+
+El proyecto se abrirá automáticamente en tu navegador en la dirección `http://localhost:3000`. Cualquier cambio que realices en el código se reflejará automáticamente.
+
+### 5. Agregar nuevas dependencias
+
+Si necesitas agregar nuevas dependencias al proyecto, puedes hacerlo con:
+
+```bash
+npm install nombre-paquete
+```
+
+Por ejemplo, para instalar **React Router**:
+
+```bash
+npm install react-router-dom
+```
+
+### 6. Finalizar el servidor
+
+Para detener el servidor de desarrollo, usa el siguiente comando en la terminal:
+
+```bash
+Ctrl + C
+```
+
+Con estos pasos, estarás listo para empezar a trabajar en el proyecto React.
+```
+
+Este formato está estructurado para facilitar la instalación del proyecto y la configuración del entorno.
