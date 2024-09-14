@@ -15,11 +15,11 @@ El objetivo principal de este proyecto es proporcionar un espacio en línea dond
   - GitHub: [@Feru34](https://github.com/feru34)
 
 - **Catherine Jaque (Cathe)**  
-  - Correo: No especificado  
+  - Correo: [p.jimenezj@uniandes.edu.co](mailto:p.jimenezj@uniandes.edu.co)  
   - GitHub: No especificado
 
 - **Jorge Bustamante**  
-  - Correo: No especificado  
+  - Correo: [j.bustamantep@uniandes.edu.co](mailto:j.bustamantep@uniandes.edu.co)  
   - GitHub: No especificado
 
 - **Manuela Lovera**  
