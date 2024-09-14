@@ -57,4 +57,4 @@ El objetivo principal de este proyecto es proporcionar un espacio en línea dond
 
 1. Clona este repositorio
    ```bash
-   git clone https://github.com/your-repo-url.git
+   git clone https://github.com/Computer-Society-Uniandes/Monitorias.git
