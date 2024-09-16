@@ -46,7 +46,7 @@ El objetivo principal de este proyecto es proporcionar un espacio en línea dond
   - Correo: [t.pardo@uniandes.edu.co](mailto:t.pardo@uniandes.edu.co)  
   - GitHub: [@Tpardo12](https://github.com/Tpardo12)
 
- - **Santiago Gómez**  
+- **Santiago Gómez**  
   - Correo: [ds.gomezm1@uniandes.edu.co](mailto:ds.gomezm1@uniandes.edu.co)  
   - GitHub: [@Santigogo](https://github.com/Santigogo)
     
