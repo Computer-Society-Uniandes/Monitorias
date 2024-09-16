@@ -16,11 +16,11 @@ El objetivo principal de este proyecto es proporcionar un espacio en línea dond
 
 - **Catherine Jaque (Cathe)**  
   - Correo: [p.jimenezj@uniandes.edu.co](mailto:p.jimenezj@uniandes.edu.co)  
-  - GitHub: No especificado
+  - GitHub: [@catherinejiq](https://github.com/catherinejiq)
 
 - **Jorge Bustamante**  
   - Correo: [j.bustamantep@uniandes.edu.co](mailto:j.bustamantep@uniandes.edu.co)  
-  - GitHub: No especificado
+  - GitHub: [@JorgeB-py](https://github.com/JorgeB-py)
 
 - **Manuela Lovera**  
   - Correo: [m.loveral@uniandes.edu.co](mailto:m.loveral@uniandes.edu.co)  
