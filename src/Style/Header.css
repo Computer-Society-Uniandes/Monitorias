@@ -13,6 +13,7 @@
     justify-content: space-around;
     align-items: center;
     z-index: 100;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .logo {
@@ -48,7 +49,7 @@
 
 .navbar a:hover::before 
 {
-   width: 100%;
+    width: 100%;
 }
 
 .perfil {
@@ -75,4 +76,34 @@
 .espacio {
     height: 80px;
     width: 100%;
+}
+
+@media (max-width: 900px) {
+    .header {
+        flex-direction: column;
+        align-items: center;
+        padding: 10px 20px;
+        padding-top: 20px;
+        padding-bottom: 20px;
+    }
+    .navbar {
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .navbar a {
+        font-size: 16px; 
+    }
+
+    .perfil {
+        font-size: 14px;
+        padding: 4px 8px;
+        margin-top: 10px;
+    }
+    
+    .espacio {
+        height: 80px;
+        width: 100%;
+    }
 }
