@@ -10,7 +10,7 @@
     padding-bottom: 20px;
     background: white;
     display: flex;
-    justify-content: space-between;
+    justify-content: space-around;
     align-items: center;
     z-index: 100;
 }
@@ -49,4 +49,30 @@
 .navbar a:hover::before 
 {
    width: 100%;
+}
+
+.perfil {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 16px;
+    font-size: 18px;
+    font-family: "DM Sans", sans-serif;
+    color: #FF7A7A;
+    border: 2px solid #FF7A7A;
+    border-radius: 25px;
+    background-color: transparent;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.perfil:hover {
+    background-color: #FF7A7A;
+    color: white;
+}
+
+.espacio {
+    height: 80px;
+    width: 100%;
 }
