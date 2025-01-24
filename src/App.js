@@ -11,10 +11,10 @@ function App() {
       {/* <Header />   */}
 
       {/* Ashlee */}
-      <Auth />  
+      {/* <Auth />   */}
 
       {/* Felipe */}
-      {/* <BoxSubject />  */}
+      <BoxSubject /> 
 
       {/* Jorge */}
       {/* <Welcome />  */}

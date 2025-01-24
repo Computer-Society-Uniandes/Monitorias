@@ -1,0 +1,45 @@
+.boxSubject {
+    border-radius:55px;
+    max-height: 80vh;
+    width: 80%; 
+    padding: 10px; 
+    max-width: fit-content;
+    margin: 0 auto; 
+    overflow: hidden;
+}
+
+.titulo{
+    background-color: rgba(121, 134, 203, 0.25);
+    padding: 10px 10px 0px 10px;
+}
+
+h1{
+    color: rgba(121, 134, 203, 1);
+    font-size: 20px;
+    font-weight: bold;
+    margin: 0;
+    padding: 10px 10px 0px 10px;
+
+}
+
+h2{
+    color: rgba(66, 66, 66, 1);
+    font-size: 30px;
+    font-weight: bold;
+    margin: 0;
+    padding: 0px 10px 10px 10px;
+    overflow: hidden;
+}
+
+.inferior{
+    background-color: rgba(121, 134, 203, 1);
+    padding: 0px 10px 10px 10px;
+}
+
+p {
+    color: rgba(66, 66, 66, 0.5);
+    font-size: 20px;
+    font-weight: bold;
+    margin: 0;
+    padding: 10px;
+}
