@@ -1,28 +1,43 @@
+/* BoxSubject.css */
+
 .boxSubject {
-    border-radius:55px;
+    border-radius: 16px;
     max-height: 80vh;
-    width: 80%; 
-    padding: 10px; 
+    width: 80%;
+    padding: 0px;
     max-width: fit-content;
-    margin: 0 auto; 
+    margin: 0 auto;
     overflow: hidden;
+    background: #f9f9f9;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.titulo{
+.boxSubject:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.titulo {
     background-color: rgba(121, 134, 203, 0.25);
     padding: 10px 10px 0px 10px;
+    border-bottom: 2px solid rgba(121, 134, 203, 0.5);
+    transition: background-color 0.3s ease;
 }
 
-h1{
+.titulo:hover {
+    background-color: rgba(121, 134, 203, 0.35);
+}
+
+h1 {
     color: rgba(121, 134, 203, 1);
     font-size: 20px;
     font-weight: bold;
     margin: 0;
     padding: 10px 10px 0px 10px;
-
+    transition: color 0.3s ease;
 }
 
-h2{
+h2 {
     color: rgba(66, 66, 66, 1);
     font-size: 30px;
     font-weight: bold;
@@ -31,9 +46,15 @@ h2{
     overflow: hidden;
 }
 
-.inferior{
+.inferior {
     background-color: rgba(121, 134, 203, 1);
     padding: 0px 10px 10px 10px;
+    border-top: 2px solid rgba(121, 134, 203, 0.5);
+    transition: background-color 0.3s ease;
+}
+
+.inferior:hover {
+    background-color: rgba(121, 134, 203, 0.85);
 }
 
 p {
@@ -42,4 +63,47 @@ p {
     font-weight: bold;
     margin: 0;
     padding: 10px;
+    transition: color 0.3s ease;
+}
+
+p:hover {
+    color: rgba(66, 66, 66, 0.8);
+}
+
+/* Responsiveness */
+@media (max-width: 768px) {
+    .boxSubject {
+        width: 90%;
+    }
+
+    h1 {
+        font-size: 18px;
+    }
+
+    h2 {
+        font-size: 24px;
+    }
+
+    p {
+        font-size: 18px;
+    }
+}
+
+@media (max-width: 480px) {
+    .boxSubject {
+        width: 100%;
+        padding: 5px;
+    }
+
+    h1 {
+        font-size: 16px;
+    }
+
+    h2 {
+        font-size: 20px;
+    }
+
+    p {
+        font-size: 16px;
+    }
 }
