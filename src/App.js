@@ -17,7 +17,7 @@ function App() {
       {/* <BoxSubject />  */}
 
       {/* Jorge */}
-      <Welcome />
+      {/*<Welcome />*/}
     </div>
   );
 }
