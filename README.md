@@ -10,11 +10,11 @@ El objetivo principal de este proyecto es proporcionar un espacio en línea dond
 
 ## Miembros del Equipo
 
-- **Felipe Rueda Rivera - @Feru34**  
+- **Felipe Rueda Rivera**
   - Correo: [f.rueda4@uniandes.edu.co](mailto:m.loveral@uniandes.edu.co)  
   - GitHub: [@Feru34](https://github.com/feru34)
 
-- **Catherine Jaque (Cathe) - @catherinejiq**  
+- **Catherine Jaque (Cathe)**  
   - Correo: [p.jimenezj@uniandes.edu.co](mailto:p.jimenezj@uniandes.edu.co)  
   - GitHub: [@catherinejiq](https://github.com/catherinejiq)
 
@@ -34,7 +34,7 @@ El objetivo principal de este proyecto es proporcionar un espacio en línea dond
   - Correo: [a.yin@uniandes.edu.co](mailto:a.yin@uniandes.edu.co)  
   - GitHub: [@awangran](https://github.com/awangran)
 
-- **Lizeth Bejarano - @lizzz94**  
+- **Lizeth Bejarano**  
   - Correo: [l.bejarano1@uniandes.edu.co](mailto:l.bejarano1@uniandes.edu.co)  
   - GitHub: [@lizzz94](https://github.com/lizzz94)
 
@@ -46,7 +46,7 @@ El objetivo principal de este proyecto es proporcionar un espacio en línea dond
   - Correo: [t.pardo@uniandes.edu.co](mailto:t.pardo@uniandes.edu.co)  
   - GitHub: [@Tpardo12](https://github.com/Tpardo12)
 
-- **Santiago Gómez - @Santigogo**  
+- **Santiago Gómez**  
   - Correo: [ds.gomezm1@uniandes.edu.co](mailto:ds.gomezm1@uniandes.edu.co)  
   - GitHub: [@Santigogo](https://github.com/Santigogo)
     

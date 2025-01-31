@@ -8,16 +8,16 @@ function App() {
   return (
     <div >
       {/* Manu */}
-      <Header />  
+      {/* <Header />   */}
 
-      {/* Ashley */}
-      <Auth />  
+      {/* Ashlee */}
+      {/* <Auth />   */}
 
       {/* Felipe */}
       <BoxSubject /> 
 
       {/* Jorge */}
-      <Welcome /> 
+      {/* <Welcome />  */}
     </div>
   );
 }
