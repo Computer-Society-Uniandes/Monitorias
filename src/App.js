@@ -14,7 +14,7 @@ function App() {
       {/*<Auth />  */}
 
       {/* Felipe */}
-      {/* <BoxSubject />  */}
+      <BoxSubject /> 
 
       {/* Jorge */}
       {/*<Welcome />*/}
