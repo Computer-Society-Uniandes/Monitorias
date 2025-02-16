@@ -11,13 +11,13 @@ function App() {
       {/* <Header />   */}
 
       {/* Ashlee */}
-      {/* <Auth />   */}
+      {/*<Auth />  */}
 
       {/* Felipe */}
       <BoxSubject /> 
 
       {/* Jorge */}
-      {/* <Welcome />  */}
+      {/*<Welcome />*/}
     </div>
   );
 }
