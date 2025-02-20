@@ -3,6 +3,7 @@ import Header from './Components/Header';
 import Auth from './Components/Auth';
 import Welcome from './Components/Welcome';
 import BoxSubject from './Components/BoxSubject';
+import UserContainerInfo from './Components/UserConteinerInfo';
 
 function App() {
   return (
@@ -11,13 +12,18 @@ function App() {
       {/* <Header />   */}
 
       {/* Ashlee */}
-      <Auth />  
+      {/* <Auth />   */}
 
       {/* Felipe */}
       {/* <BoxSubject />  */}
 
       {/* Jorge */}
       {/* <Welcome />  */}
+
+      {/* Marcos */}
+      {/* <UserContainerInfo />  */}
+
+
     </div>
   );
 }
