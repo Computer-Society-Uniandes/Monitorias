@@ -25,11 +25,7 @@ El objetivo principal de este proyecto es proporcionar un espacio en línea dond
 - **Manuela Lovera**  
   - Correo: [m.loveral@uniandes.edu.co](mailto:m.loveral@uniandes.edu.co)  
   - GitHub: [@mloveral](https://github.com/mloveral)
-
-- **Juan David Anzola**  
-  - Correo: [j.anzolaq@uniandes.edu.co](mailto:j.anzolaq@uniandes.edu.co)  
-  - GitHub: [@JuanDa-dev](https://github.com/JuanDa-dev)
-
+    
 - **Ashlee Yin**  
   - Correo: [a.yin@uniandes.edu.co](mailto:a.yin@uniandes.edu.co)  
   - GitHub: [@awangran](https://github.com/awangran)
@@ -37,14 +33,6 @@ El objetivo principal de este proyecto es proporcionar un espacio en línea dond
 - **Lizeth Bejarano**  
   - Correo: [l.bejarano1@uniandes.edu.co](mailto:l.bejarano1@uniandes.edu.co)  
   - GitHub: [@lizzz94](https://github.com/lizzz94)
-
-- **Camila Martínez**  
-  - Correo: [mc.martinezm12@uniandes.edu.co](mailto:mc.martinezm12@uniandes.edu.co)  
-  - GitHub: [@CamilaMartinez-MISO](https://github.com/CamilaMartinez-MISO)
-
-- **Tomás Pardo**  
-  - Correo: [t.pardo@uniandes.edu.co](mailto:t.pardo@uniandes.edu.co)  
-  - GitHub: [@Tpardo12](https://github.com/Tpardo12)
 
 - **Santiago Gómez**  
   - Correo: [ds.gomezm1@uniandes.edu.co](mailto:ds.gomezm1@uniandes.edu.co)  
