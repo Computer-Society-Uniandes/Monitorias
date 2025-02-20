@@ -22,7 +22,7 @@ const Auth = () => {
       </div>
       <div class="h-50 w-full bg-white rounded-tl-full rounded-tr-full ">
         <div className='flex justify-center m-12 '>
-        <button className=' bg-red-400 hover:bg-red-300 text-white font-bold py-2 px-4 rounded-full'>Empieza ahora -> </button>
+        <button className=' bg-red-400 hover:bg-red-300 text-white font-bold py-2 px-4 rounded-full'>Empieza ahora </button>
         </div>
     </div>
     </div> 

@@ -12,7 +12,7 @@ function App() {
       {/* <Header />   */}
 
       {/* Ashlee */}
-      {/* <Auth />   */}
+      <Auth />  
 
       {/* Felipe */}
       {/* <BoxSubject />  */}
@@ -29,3 +29,4 @@ function App() {
 }
 
 export default App;
+
