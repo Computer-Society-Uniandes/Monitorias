@@ -3,6 +3,7 @@ import Header from './Components/Header';
 import Auth from './Components/Auth';
 import Welcome from './Components/Welcome';
 import BoxSubject from './Components/BoxSubject';
+import BoxNewSubject from './Components/BoxNewSubject';
 import UserContainerInfo from './Components/UserConteinerInfo';
 
 function App() {
@@ -15,6 +16,7 @@ function App() {
       <Auth />  
 
       {/* Felipe */}
+      <BoxNewSubject /> 
       {/* <BoxSubject />  */}
 
       {/* Jorge */}
