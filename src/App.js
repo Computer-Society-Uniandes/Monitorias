@@ -3,6 +3,7 @@ import Header from './Components/Header';
 import Auth from './Components/Auth';
 import Welcome from './Components/Welcome';
 import BoxSubject from './Components/BoxSubject';
+import BoxNewSubject from './Components/BoxNewSubject';
 
 function App() {
   return (
@@ -14,7 +15,7 @@ function App() {
       {/* <Auth />   */}
 
       {/* Felipe */}
-      <BoxSubject /> 
+      <BoxNewSubject /> 
 
       {/* Jorge */}
       {/* <Welcome />  */}
