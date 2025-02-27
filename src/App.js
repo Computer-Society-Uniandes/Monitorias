@@ -1,32 +1,14 @@
 import './App.css';
-import Header from './Components/Header';
-import Auth from './Components/Auth';
-import Welcome from './Components/Welcome';
-import BoxSubject from './Components/BoxSubject';
-import BoxNewSubject from './Components/BoxNewSubject';
-import UserContainerInfo from './Components/UserConteinerInfo';
+import routes from './routes';
+import { Routes, Route } from 'react-router-dom';
 
 function App() {
   return (
-    <div >
-      {/* Manu */}
-      {/* <Header />   */}
-
-      {/* Ashlee */}
-      <Auth />  
-
-      {/* Felipe */}
-      <BoxNewSubject /> 
-      {/* <BoxSubject />  */}
-
-      {/* Jorge */}
-      {/* <Welcome />  */}
-
-      {/* Marcos */}
-      {/* <UserContainerInfo />  */}
-
-
-    </div>
+    <Routes>
+      {routes.map((link, index) => (
+        <Route key={index} path={link.url} element={<link.component />} />
+      ))}
+    </Routes>
   );
 }
 
