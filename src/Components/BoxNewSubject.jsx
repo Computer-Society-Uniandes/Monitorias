@@ -1,7 +1,7 @@
 import React from "react";
 import "../Style/BoxNewSubject.css";
 
-const BoxNewSubject = () => {
+const BoxNewSubject = ({name, number}) => {
   return (
     <div className="card-ingenieria">
       <div className="card-ingenieria-left">
@@ -17,10 +17,10 @@ const BoxNewSubject = () => {
 
         <div className="card-ingenieria-text">
           <div className="card-ingenieria-title">
-            Ingeniería
+            {name}
           </div>
           <div className="card-ingenieria-subtitle">
-            209 tutores
+            {number} tutores
           </div>
         </div>
       </div>
