@@ -2,16 +2,16 @@
 import React from 'react';
 import'../Style/BoxSubject.css'
 
-const BoxSubject = () => {
+const BoxSubject = ({codigo, nombre}) => {
   return (
     <div>
       <div className='boxSubject'>
-        <div className='titulo'>
-          <h1>Código materia</h1>
-          <h2>Nombre Materia</h2>
+        <div className='titulo h-32 w-full'>
+          <h1 className='h1-card'>{codigo}</h1>
+          <h2 className='h2-card text-lg'>{nombre}</h2>
         </div>
         <div className='inferior'>
-          <p>Encuentra tutores para esta materia  -&gt; </p>
+          <p className='p-card'>Encuentra tutores para esta materia  -&gt; </p>
         </div>
       </div>
     </div>

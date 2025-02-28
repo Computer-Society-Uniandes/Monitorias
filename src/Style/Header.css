@@ -1,6 +1,5 @@
 .header {
     box-sizing: border-box;
-    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
@@ -12,9 +11,7 @@
     display: flex;
     justify-content: space-around;
     align-items: center;
-    z-index: 100;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    position: fixed;
 }
 
 .logo {
@@ -72,11 +69,6 @@
 .perfil:hover {
     background-color: #FF7A7A;
     color: white;
-}
-
-.espacio {
-    height: 80px;
-    width: 100%;
 }
 
 
