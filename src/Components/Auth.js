@@ -2,6 +2,8 @@
 import React from 'react';
 import Logo from '../assets/monitoriashead.png';
 import Logo2 from '../assets/cabra.png'
+import Search from './Search'
+import Filters from './Filters';
 const Auth = () => {
   return (
     <>
@@ -29,7 +31,12 @@ const Auth = () => {
     <div className='flex justify-center flex-col' >
         <h2 className='mb-2 mt-0 text-5xl font-bold leading-tight text-indigo-400  text-center' >Sobre Nosotros</h2>
         <p className='text-2xl text-gray-800  text-center'> fraoghfiafejwkal</p>
-      </div>
+      
+    </div>
+    <div className='flex justify-center align-center w-full mt-5' >
+    <Search />
+    </div>
+      
     
     </>
   );
