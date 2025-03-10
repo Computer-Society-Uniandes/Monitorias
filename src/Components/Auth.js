@@ -34,7 +34,7 @@ const Auth = () => {
       
     </div>
     <div className='flex justify-center align-center w-full mt-5' >
-    <Search />
+    
     </div>
       
     
