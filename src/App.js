@@ -1,24 +1,28 @@
+// src/App.js
 import './App.css';
-import Header from './Components/Header';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+
 import Auth from './Components/Auth';
+import Login from './Components/Login';
+import Register from './Components/Register';
 import Welcome from './Components/Welcome';
-import BoxSubject from './Components/BoxSubject';
 
 function App() {
   return (
-    <div >
-      {/* Manu */}
-      {/* <Header />   */}
+    <Router>
+      <Routes>
+        {/* Ruta principal (landing page) */}
+        <Route path="/" element={<Auth />} />
 
-      {/* Ashlee */}
-      <Auth />  
+        {/* Ruta para iniciar sesión */}
+        <Route path="/login" element={<Login />} />
 
-      {/* Felipe */}
-      {/* <BoxSubject />  */}
+        {/* Ruta para registro */}
+        <Route path="/register" element={<Register />} />
 
-      {/* Jorge */}
-      {/* <Welcome />  */}
-    </div>
+        <Route path="/home" element={<Welcome />} />
+      </Routes>
+    </Router>
   );
 }
 
