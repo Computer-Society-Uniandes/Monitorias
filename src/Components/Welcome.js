@@ -2,6 +2,7 @@
 import React from 'react';
 import { auth } from '../firebaseConfig';
 import { useNavigate } from 'react-router-dom';
+import Header from './Header';
 
 const Welcome = () => {
   const navigate = useNavigate();

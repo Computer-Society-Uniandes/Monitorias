@@ -19,7 +19,6 @@ const Header = () => {
           <FaRegUserCircle />
       </button>
     </header>
-    <div className='espacio'></div>
     </>
   );
 }
