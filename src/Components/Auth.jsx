@@ -64,8 +64,11 @@ const Auth = () => {
           </div>
           <div className="h-50 w-full bg-white rounded-tl-full rounded-tr-full">
             <div className="flex justify-center m-12">
-              <button className="bg-red-400 hover:bg-red-300 text-white font-bold text-lg py-3 px-8 rounded-full shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300">
+              <button className="bg-red-400 hover:bg-red-300 text-white font-bold text-lg py-3 px-8 rounded-full shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300"
+              onClick={() => navigate('/home')}
+              >
                 Empieza ahora
+                
               </button>
             </div>
           </div>
