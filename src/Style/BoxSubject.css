@@ -6,7 +6,7 @@
     width: 80%;
     padding: 0px;
     max-width: fit-content;
-    margin: 0 auto;
+    margin: auto ;
     overflow: hidden;
     background: #f9f9f9;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -30,7 +30,7 @@
 
 .h1-card {
     color: rgba(121, 134, 203, 1);
-    font-size: 20px;
+    font-size: 18px;
     font-weight: bold;
     margin: 0;
     padding: 10px 10px 0px 10px;
@@ -39,7 +39,7 @@
 
 .h2-card {
     color: rgba(66, 66, 66, 1);
-    font-size: 30px;
+    font-size: 20px;
     font-weight: bold;
     margin: 0;
     padding: 0px 10px 10px 10px;
@@ -59,7 +59,7 @@
 
 .p-card {
     color: rgba(66, 66, 66, 0.5);
-    font-size: 20px;
+    font-size: 15px;
     font-weight: bold;
     margin: 0;
     padding: 10px;
@@ -100,10 +100,10 @@
     }
 
     h2 {
-        font-size: 20px;
+        font-size: 15px;
     }
 
     p {
-        font-size: 16px;
+        font-size: 10px;
     }
 }

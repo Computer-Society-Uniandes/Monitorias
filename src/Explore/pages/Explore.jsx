@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Header from "../../Components/Header";
-import WelcomeBanner from "../../Components/Welcome";
+import WelcomeBanner from "../../Components/WelcomeBanner";
 import BoxNewSubject from "../../Components/BoxNewSubject";
 import { getFacultades } from "../services/ExploreService";
 

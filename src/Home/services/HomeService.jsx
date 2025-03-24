@@ -1,9 +1,13 @@
-const materias = [
-    {codigo: "1105", nombre: "Algebra lineal"},
-    {codigo: "2304", nombre: "Infraestructura computacional"}, 
-    {codigo: "1518", nombre: "Física 1"},];
+// src/Home/services/HomeService.js
+import { db } from '../../firebaseConfig'
+import { collection, getDocs } from 'firebase/firestore'
 
 export async function getMaterias() {
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    return materias;
+  // Leer la coleccion "course" de Firestore
+  const snapshot = await getDocs(collection(db, 'course'))
+  // Retornar un arreglo con { codigo, nombre }
+  return snapshot.docs.map(docSnap => ({
+    codigo: docSnap.id,
+    nombre: docSnap.data().name,
+  }))
 }
