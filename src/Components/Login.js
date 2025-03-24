@@ -13,14 +13,9 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-
-      // Guardar en localStorage
-      localStorage.setItem("userUid", user.uid);
+      await signInWithEmailAndPassword(auth, email, password);
       localStorage.setItem("userEmail", email);
-
-      // Redirigir
+      localStorage.setItem("isLoggedIn", "true");
       navigate("/home");
     } catch (error) {
       console.error("Error al iniciar sesión:", error);

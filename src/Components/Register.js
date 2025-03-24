@@ -1,8 +1,8 @@
 // src/Components/Register.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth, db } from '../firebaseConfig';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, collection, getDocs } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 
 const Register = () => {
@@ -10,60 +10,68 @@ const Register = () => {
 
   const [name, setName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [major, setMajor] = useState("");
+  const [majors, setMajors] = useState([]);   // Lista dinámica de carreras
+  const [selectedMajor, setSelectedMajor] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  // Lista estática de majors; en un caso real podrías cargarlos desde Firestore
-  const majors = [
-    { value: "ingenieria-sistemas", label: "Ingeniería de Sistemas" },
-    { value: "ingenieria-industrial", label: "Ingeniería Industrial" },
-    { value: "ingenieria-electrica", label: "Ingeniería Eléctrica" },
-    { value: "medicina", label: "Medicina" },
-    { value: "economia", label: "Economía" },
-    // Agrega más carreras aquí...
-  ];
+  // 1. Cargar los docs de la colección "major" al montar el componente
+  useEffect(() => {
+    const fetchMajors = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "major"));
+        const majorArray = [];
+        querySnapshot.forEach((docSnap) => {
+          majorArray.push({
+            id: docSnap.id,        // p.e. IELE, IIND, ISIS
+            name: docSnap.data().name, // p.e. "Ingeniería Eléctrica y Electrónica"
+          });
+        });
+        setMajors(majorArray);
+      } catch (error) {
+        console.error("Error al cargar majors:", error);
+      }
+    };
 
+    fetchMajors();
+  }, []);
+
+  // 2. Manejo del registro
   const handleRegister = async (e) => {
     e.preventDefault();
 
-    // 1. Validaciones de campos vacíos
-    if (!name || !phoneNumber || !major || !email || !password || !confirmPassword) {
+    // Validaciones de campos
+    if (!name || !phoneNumber || !selectedMajor || !email || !password || !confirmPassword) {
       alert("Todos los campos son obligatorios.");
       return;
     }
-
-    // 2. Validación de contraseñas
     if (password !== confirmPassword) {
       alert("Las contraseñas no coinciden.");
       return;
     }
-
-    // 3. Validar que el correo sea @uniandes.edu.co
     if (!email.endsWith("@uniandes.edu.co")) {
       alert("Solo se permite registrar con correos @uniandes.edu.co");
       return;
     }
 
     try {
-      // 4. Crear usuario en Firebase Auth
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
+      // 3. Crear usuario en Firebase Auth
+      await createUserWithEmailAndPassword(auth, email, password);
 
-      // 5. Guardar datos adicionales en Firestore
-      await setDoc(doc(db, "user", user.uid), {
+      // 4. Guardar datos adicionales en Firestore, usando el CORREO como ID
+      await setDoc(doc(db, "user", email), {
         name,
         mail: email,
         phone_number: phoneNumber,
-        major,
+        // Guardamos una referencia a la carrera en "major"
+        major: doc(db, "major", selectedMajor),
       });
 
-      // 6. Guardar en localStorage que ya está logueado (por ejemplo, guardamos el uid)
-      localStorage.setItem("userUid", user.uid);
+      // 5. Guardar credenciales en localStorage y redirigir
       localStorage.setItem("userEmail", email);
+      localStorage.setItem("isLoggedIn", "true");
 
-      // 7. Mostrar mensaje y redirigir a /home
       alert("Registro exitoso");
       navigate("/home");
     } catch (error) {
@@ -77,6 +85,7 @@ const Register = () => {
       <h2 className="text-2xl font-bold mb-4 text-indigo-600">Registro</h2>
       <form onSubmit={handleRegister} className="flex flex-col bg-white p-6 rounded shadow-md w-80">
         
+        {/* Nombre */}
         <label className="mb-1 text-sm text-indigo-600">Nombre:</label>
         <input
           type="text"
@@ -86,6 +95,7 @@ const Register = () => {
           onChange={(e) => setName(e.target.value)}
         />
 
+        {/* Teléfono */}
         <label className="mb-1 text-sm text-indigo-600">Teléfono:</label>
         <input
           type="text"
@@ -95,20 +105,22 @@ const Register = () => {
           onChange={(e) => setPhoneNumber(e.target.value)}
         />
 
+        {/* Select de majors dinámicos */}
         <label className="mb-1 text-sm text-indigo-600">Carrera (Major):</label>
         <select
           className="mb-3 p-2 border rounded"
-          value={major}
-          onChange={(e) => setMajor(e.target.value)}
+          value={selectedMajor}
+          onChange={(e) => setSelectedMajor(e.target.value)}
         >
           <option value="">Seleccione...</option>
           {majors.map((m) => (
-            <option key={m.value} value={m.value}>
-              {m.label}
+            <option key={m.id} value={m.id}>
+              {m.name}
             </option>
           ))}
         </select>
 
+        {/* Correo */}
         <label className="mb-1 text-sm text-indigo-600">Correo Uniandes:</label>
         <input
           type="email"
@@ -118,6 +130,7 @@ const Register = () => {
           onChange={(e) => setEmail(e.target.value)}
         />
 
+        {/* Contraseña */}
         <label className="mb-1 text-sm text-indigo-600">Contraseña:</label>
         <input
           type="password"
@@ -127,6 +140,7 @@ const Register = () => {
           onChange={(e) => setPassword(e.target.value)}
         />
 
+        {/* Confirmar contraseña */}
         <label className="mb-1 text-sm text-indigo-600">Repetir Contraseña:</label>
         <input
           type="password"
