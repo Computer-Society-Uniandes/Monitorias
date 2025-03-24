@@ -13,9 +13,15 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      // Una vez logueado con éxito, puedes navegar a otra ruta:
-      navigate("/");
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      // Guardar en localStorage
+      localStorage.setItem("userUid", user.uid);
+      localStorage.setItem("userEmail", email);
+
+      // Redirigir
+      navigate("/home");
     } catch (error) {
       console.error("Error al iniciar sesión:", error);
       alert("Usuario o contraseña incorrectos.");
@@ -26,6 +32,7 @@ const Login = () => {
     <div className="flex flex-col items-center justify-center h-screen bg-indigo-50">
       <h2 className="text-2xl font-bold mb-4 text-indigo-600">Iniciar Sesión</h2>
       <form onSubmit={handleLogin} className="flex flex-col bg-white p-6 rounded shadow-md">
+        
         <label className="mb-2 text-sm text-indigo-600">Correo:</label>
         <input
           type="email"

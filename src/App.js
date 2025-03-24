@@ -11,15 +11,9 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Ruta principal (landing page) */}
         <Route path="/" element={<Auth />} />
-
-        {/* Ruta para iniciar sesión */}
         <Route path="/login" element={<Login />} />
-
-        {/* Ruta para registro */}
         <Route path="/register" element={<Register />} />
-
         <Route path="/home" element={<Welcome />} />
       </Routes>
     </Router>
