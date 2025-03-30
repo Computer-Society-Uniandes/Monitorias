@@ -1,6 +1,5 @@
 "use client"
 import React, { useState, useEffect } from "react";
-import WelcomeBanner from "../../Components/Welcome";
 import BoxNewSubject from "../../Components/BoxNewSubject";
 import { getFacultades } from "../../services/ExploreService.service";
 import ExploreBanner from "app/app/components/ExploreBanner";
@@ -18,7 +17,6 @@ const Explore = () => {
         <div>
             <ExploreBanner
                 titulo="¿Necesitas ayuda en tus clases?"
-                imagenCarga="../../public/explore.png"
             />
             <div className="container flex flex-col text-center mx-auto pt-4">
                 <h2 className="text-4xl font-bold mb-2 text-[#FF7A7A] pb-4">
