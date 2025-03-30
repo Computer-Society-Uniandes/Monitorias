@@ -1,117 +1,36 @@
-# Monitorias - Web Platform
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
-## Descripción del Proyecto
+## Getting Started
 
-Monitorias es un proyecto desarrollado por estudiantes de la Universidad de los Andes, bajo la Computer Society, con el objetivo de crear una plataforma que conecte estudiantes que estén dispuestos a ofrecer tutorías informales sobre diversas asignaturas con aquellos que busquen apoyo académico. La idea es facilitar el acceso a tutorías de calidad y fomentar el intercambio de conocimiento entre estudiantes de la universidad.
-
-## Objetivo
-
-El objetivo principal de este proyecto es proporcionar un espacio en línea donde los estudiantes de la universidad puedan encontrar fácilmente monitores dispuestos a ayudarlos con sus estudios. La plataforma permitirá a los monitores ofrecer sus servicios en asignaturas específicas, y a los estudiantes solicitar tutorías según sus necesidades. Así, buscamos mejorar el rendimiento académico y el sentido de comunidad entre los estudiantes.
-
-## Miembros del Equipo
-
-- **Felipe Rueda Rivera**
-  - Correo: [f.rueda4@uniandes.edu.co](mailto:m.loveral@uniandes.edu.co)  
-  - GitHub: [@Feru34](https://github.com/feru34)
-
-- **Catherine Jaque (Cathe)**  
-  - Correo: [p.jimenezj@uniandes.edu.co](mailto:p.jimenezj@uniandes.edu.co)  
-  - GitHub: [@catherinejiq](https://github.com/catherinejiq)
-
-- **Jorge Bustamante**  
-  - Correo: [j.bustamantep@uniandes.edu.co](mailto:j.bustamantep@uniandes.edu.co)  
-  - GitHub: [@JorgeB-py](https://github.com/JorgeB-py)
-
-- **Manuela Lovera**  
-  - Correo: [m.loveral@uniandes.edu.co](mailto:m.loveral@uniandes.edu.co)  
-  - GitHub: [@mloveral](https://github.com/mloveral)
-    
-- **Ashlee Yin**  
-  - Correo: [a.yin@uniandes.edu.co](mailto:a.yin@uniandes.edu.co)  
-  - GitHub: [@awangran](https://github.com/awangran)
-
-- **Lizeth Bejarano**  
-  - Correo: [l.bejarano1@uniandes.edu.co](mailto:l.bejarano1@uniandes.edu.co)  
-  - GitHub: [@lizzz94](https://github.com/lizzz94)
-
-- **Santiago Gómez**  
-  - Correo: [ds.gomezm1@uniandes.edu.co](mailto:ds.gomezm1@uniandes.edu.co)  
-  - GitHub: [@Santigogo](https://github.com/Santigogo)
-    
-- **Alejandro Ortiz**  
-  - Correo: [a.ortiz1@uniandes.edu.co](mailto:a.ortiz1@uniandes.edu.co)  
-  - GitHub: [@Alortiztique](https://github.com/Alortiztique)
-
-
-
-## Tecnologías Utilizadas
-
-- HTML/CSS
-- JavaScript
-- React.js
-- Node.js
-
-
-## Instalación
-
-### 1. Clonar el repositorio
-
-Para comenzar, clona este repositorio en tu máquina local usando el siguiente comando:
+First, run the development server:
 
 ```bash
-git clone https://github.com/Computer-Society-Uniandes/Monitorias.git
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
 
-### 2. Verificar instalación de Node.js y npm
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-Asegúrate de tener instalados **Node.js** y **npm**. Puedes verificarlo ejecutando los siguientes comandos en la terminal:
+You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
 
-```bash
-node -v
-npm -v
-```
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-Si no tienes Node.js instalado, descárgalo desde [https://nodejs.org/](https://nodejs.org/).
+## Learn More
 
-### 3. Instalar dependencias
+To learn more about Next.js, take a look at the following resources:
 
-Una vez clonado el repositorio, navega a la carpeta del proyecto y ejecuta:
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-```bash
-npm install
-```
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-Esto instalará todas las dependencias necesarias que se encuentran en el archivo `package.json`.
+## Deploy on Vercel
 
-### 4. Iniciar el servidor de desarrollo
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-Después de instalar las dependencias, inicia el servidor de desarrollo con el siguiente comando:
-
-```bash
-npm start
-```
-
-El proyecto se abrirá automáticamente en tu navegador en la dirección `http://localhost:3000`. Cualquier cambio que realices en el código se reflejará automáticamente.
-
-### 5. Agregar nuevas dependencias
-
-Si necesitas agregar nuevas dependencias al proyecto, puedes hacerlo con:
-
-```bash
-npm install nombre-paquete
-```
-
-Por ejemplo, para instalar **React Router**:
-
-```bash
-npm install react-router-dom
-```
-
-### 6. Finalizar el servidor
-
-Para detener el servidor de desarrollo, usa el siguiente comando en la terminal:
-
-```bash
-Ctrl + C
-```
-
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
