@@ -4,9 +4,12 @@ import Logo from "../../../public/Logo.png"
 import Logo2 from "../../../public/Logo2.png"
 import { Users, BookOpen, Award, Clock } from "lucide-react"
 import Image from "next/image"
+import { useRouter } from "next/navigation"
+import routes from "app/routes"
 
 const Auth = () => {
   const [scrolled, setScrolled] = useState(false)
+  const router = useRouter();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -39,12 +42,14 @@ const Auth = () => {
             </div>
             <div className="md:flex items-center justify-end md:flex-1 lg:w-0">
               <button
-                className={`ml-8 whitespace-nowrap inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-full shadow-sm text-base font-medium ${scrolled ? "text-white bg-indigo-600 hover:bg-indigo-700" : "text-indigo-600 bg-white hover:bg-gray-50"} transition-all duration-300`}
+                className={`ml-8 whitespace-nowrap cursor-pointer inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-full shadow-sm text-base font-medium ${scrolled ? "text-white bg-indigo-600 hover:bg-indigo-700" : "text-indigo-600 bg-white hover:bg-gray-50"} transition-all duration-300`}
+                onClick={()=>router.push(routes.REGISTER)}
               >
                 Regístrate
               </button>
               <button
-                className={`ml-8 whitespace-nowrap inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-full shadow-sm text-base font-medium ${scrolled ? "text-indigo-600 bg-white hover:bg-gray-50" : "text-white bg-indigo-600 hover:bg-indigo-700"} transition-all duration-300`}
+                className={`ml-8 whitespace-nowrap cursor-pointer inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-full shadow-sm text-base font-medium ${scrolled ? "text-indigo-600 bg-white hover:bg-gray-50" : "text-white bg-indigo-600 hover:bg-indigo-700"} transition-all duration-300`}
+                onClick={()=>router.push(routes.LOGIN)}
               >
                 Iniciar Sesión
               </button>

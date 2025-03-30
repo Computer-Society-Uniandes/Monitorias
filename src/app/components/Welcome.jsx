@@ -4,9 +4,7 @@ const WelcomeBanner = ({usuario}) => {
 
   return (
     <div
-      className={`relative w-full overflow-hidden bg-gradient-to-b from-indigo-500 to-indigo-900 ${
-        imagenCarga && imageLoaded ? "h-auto" : "h-[270px]"
-      }`}
+      className={`relative w-full overflow-hidden bg-gradient-to-b from-indigo-500 to-indigo-900 h-[270px]`}
     >
       {/* Capa de degradado */}
       <div
@@ -23,7 +21,7 @@ const WelcomeBanner = ({usuario}) => {
 
       <div className="relative z-10 flex flex-col md:flex-row items-center px-12 text-white text-left py-8">
         
-        <div className={`flex flex-col justify-center ${imagenCarga ? "md:w-1/2" : "w-full"}`}>
+        <div className={`flex flex-col justify-center w-full`}>
           <h1 className="text-4xl md:text-5xl font-bold mb-2">Bienvenido, {usuario}</h1>
           <p className="text-lg md:text-xl">Encuentra el tutor para ti</p>
         </div>
