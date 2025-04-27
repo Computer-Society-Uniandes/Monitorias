@@ -7,9 +7,9 @@ const BoxSubject = ({codigo, nombre}) => {
   return (
     <div>
       <div className='boxSubject'>
-        <div className='titulo h-32 w-full'>
-          <h1 className='h1-card'>{codigo}</h1>
-          <h2 className='h2-card text-lg truncate'>{nombre}</h2>
+        <div className='titulo'>
+          <h2 className='h2-card'>{codigo}</h2>
+          <h1 className='h1-card'>{nombre}</h1>
         </div>
         <div className='inferior'>
           <p className='p-card'>Encuentra tutores para esta materia </p>
