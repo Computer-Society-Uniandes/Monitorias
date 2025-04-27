@@ -16,7 +16,7 @@ const Header = () => {
         <Link href = "/">Buscar Tutores</Link>
         <Link href = "/">Acerca de</Link>
       </nav>
-      <button href = "/perfil" className='perfil'>
+      <button href = {routes.PROFILE} className='perfil'>
           Tu Perfil
           <UserRound />
       </button>
