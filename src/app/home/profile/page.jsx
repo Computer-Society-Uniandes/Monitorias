@@ -1,8 +1,11 @@
-// src/Components/Profile.jsx
+// src/app/home/profile/Profile.jsx
+
+'use client';
+
 import React, { useEffect, useState } from 'react'
-import { auth, db } from '../firebaseConfig'
+import { auth, db } from '../../../firebaseConfig'
 import { doc, getDoc } from 'firebase/firestore'
-import Header from './Header'
+import Header from '../../components/Header'
 import { useRouter } from 'next/navigation'
 import routes from 'app/routes'
 
@@ -49,13 +52,13 @@ const Profile = () => {
     }
 
     fetchUserData()
-  }, [isLoggedIn, userEmail, navigate])
+  }, [isLoggedIn, userEmail, router])
 
   const handleLogout = () => {
     auth.signOut()
     localStorage.removeItem('userEmail')
     localStorage.removeItem('isLoggedIn')
-    navigate('/')
+    router.push(routes.LANDING)
   }
 
   if (!userData) {
@@ -64,7 +67,7 @@ const Profile = () => {
 
   return (
     <di>
-        <Header/>
+        
         <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-6">
         <h1 className="text-3xl font-bold mb-6">Perfil del Usuario</h1>
         <div className="bg-white p-6 rounded shadow-md w-full max-w-md">

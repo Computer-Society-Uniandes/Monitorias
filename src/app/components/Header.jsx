@@ -1,11 +1,15 @@
 // src/Components/Header.js
+'use client';
+
 import React from 'react';
 import'../style/Header.css'
 import { UserRound } from 'lucide-react';
 import Link from 'next/link';
-import routes from 'app/routes';
+import { useRouter } from "next/navigation"
+import routes from "app/routes"
 
 const Header = () => {
+  const router = useRouter();
   return (
     <>
     <header className='header'>
@@ -16,7 +20,9 @@ const Header = () => {
         <Link href = "/">Buscar Tutores</Link>
         <Link href = "/">Acerca de</Link>
       </nav>
-      <button href = {routes.PROFILE} className='perfil'>
+      <button 
+        className={'perfil'} 
+        onClick={()=>router.push(routes.PROFILE) } >
           Tu Perfil
           <UserRound />
       </button>
