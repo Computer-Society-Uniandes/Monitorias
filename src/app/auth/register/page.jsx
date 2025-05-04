@@ -82,11 +82,10 @@ const Register = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-indigo-50">
-      <h2 className="text-2xl font-bold mb-4 text-indigo-600">Registro</h2>
+    <div>
+      {/* <h2 className="text-2xl font-bold mb-4 text-indigo-600">Registro</h2>
       <form onSubmit={handleRegister} className="flex flex-col bg-white p-6 rounded shadow-md w-80">
         
-        {/* Nombre */}
         <label className="mb-1 text-sm text-indigo-600">Nombre:</label>
         <input
           type="text"
@@ -96,7 +95,6 @@ const Register = () => {
           onChange={(e) => setName(e.target.value)}
         />
 
-        {/* Teléfono */}
         <label className="mb-1 text-sm text-indigo-600">Teléfono:</label>
         <input
           type="text"
@@ -106,7 +104,6 @@ const Register = () => {
           onChange={(e) => setPhoneNumber(e.target.value)}
         />
 
-        {/* Select de majors dinámicos */}
         <label className="mb-1 text-sm text-indigo-600">Carrera (Major):</label>
         <select
           className="mb-3 p-2 border rounded"
@@ -121,7 +118,6 @@ const Register = () => {
           ))}
         </select>
 
-        {/* Correo */}
         <label className="mb-1 text-sm text-indigo-600">Correo Uniandes:</label>
         <input
           type="email"
@@ -131,7 +127,6 @@ const Register = () => {
           onChange={(e) => setEmail(e.target.value)}
         />
 
-        {/* Contraseña */}
         <label className="mb-1 text-sm text-indigo-600">Contraseña:</label>
         <input
           type="password"
@@ -141,7 +136,6 @@ const Register = () => {
           onChange={(e) => setPassword(e.target.value)}
         />
 
-        {/* Confirmar contraseña */}
         <label className="mb-1 text-sm text-indigo-600">Repetir Contraseña:</label>
         <input
           type="password"
@@ -157,7 +151,113 @@ const Register = () => {
         >
           Registrarme
         </button>
-      </form>
+      </form> */}
+
+  <div
+      className={`relative w-full overflow-hidden bg-gradient-to-b from-indigo-500 to-indigo-900 h-screen`}
+    >
+      {/* Capa de degradado */}
+      <div
+        className="absolute w-full h-full"
+        style={{
+          background: "linear-gradient(180deg, rgba(255,255,255,0) 30%, rgba(76, 81, 191, 0.3) 70%)",
+          borderRadius: "50% 50% 0 0 / 100% 100% 0 0",
+          transform: "scaleX(1.5)",
+          bottom: "-30%",
+          left: 0,
+          right: 0,
+        }}
+      />
+
+      {/*Contenedor */}
+      <div className='flex w-full h-screen z-10 items-center justify-center'>
+
+      <div className='flex flex-col bg-white rounded-xl p-12 shadow-md w-fit h-fit justify-center items-center'>
+        <h2 className="text-3xl font-bold mb-4 text-indigo-400">Regístrate</h2>
+        
+        <div className='flex gap-1'><p className='text-indigo-400'>¿Ya tienes una cuenta? </p> <p onClick={()=>router.push(routes.LOGIN)} className='text-indigo-600 underline hover:cursor-pointer'> Inicia sesión</p></div>  
+        <form onSubmit={handleRegister} className="flex flex-col mt-6 justify-center items-center">
+        
+         <div className='flex flex-col gap-6 w-full md:flex-row'>
+          <div className='flex flex-col w-3xs md:w-2xs'>
+          <label className="mb-1 text-sm text-slate-500">Nombre</label>
+          <input
+            type="text"
+            className="mb-3 p-2 border rounded-lg placeholder:text-gray-200 text-sm"
+            placeholder="Tu nombre"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+
+          <label className="mb-1 text-sm text-slate-500">Teléfono</label>
+          <input
+            type="text"
+            className="mb-3 p-2 border rounded-lg placeholder:text-gray-200 text-sm"
+            placeholder="Número de teléfono"
+            value={phoneNumber}
+            onChange={(e) => setPhoneNumber(e.target.value)}
+          />
+
+          <label className="mb-1 text-sm text-slate-500">Carrera</label>
+          <select
+            className="mb-3 p-2 border rounded-lg placeholder:text-gray-200 text-sm"
+            value={selectedMajor}
+            onChange={(e) => setSelectedMajor(e.target.value)}
+          >
+            <option value="">Seleccione...</option>
+            {majors.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.name}
+              </option>
+            ))}
+          </select>
+          </div>
+
+        <div className='flex flex-col w-3xs md:w-2xs'>
+        <label className="mb-1 text-sm text-slate-500">Correo Uniandes</label>
+        <input
+          type="email"
+          className="mb-3 p-2 border rounded-lg placeholder:text-gray-200 text-sm"
+          placeholder="Tu correo @uniandes.edu.co"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+
+        <label className="mb-1 text-sm text-slate-500">Contraseña</label>
+        <input
+          type="password"
+          className="mb-3 p-2 border rounded-lg placeholder:text-gray-200 text-sm"
+          placeholder="Tu contraseña"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+
+        <label className="mb-1 text-sm text-slate-500">Confirmar contraseña</label>
+        <input
+          type="password"
+          className="mb-4 p-2 border rounded-lg placeholder:text-gray-200 text-sm"
+          placeholder="Repite tu contraseña"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+        />
+        </div>
+        </div>
+
+          <button
+            type="submit"
+            className="bg-indigo-500 hover:bg-indigo-600 text-white py-2 px-4 rounded-lg w-1/2 md:w-50 mt-4"
+          >
+            Registrarme
+          </button>
+        </form>
+      </div>
+
+      </div>
+
+
+  </div>
+
+
     </div>
   );
 };
