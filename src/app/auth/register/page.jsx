@@ -6,6 +6,8 @@ import { auth, db } from '../../../firebaseConfig';
 import { doc, setDoc, collection, getDocs } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import routes from 'app/routes';
+import { FcGoogle } from "react-icons/fc";
+
 
 const Register = () => {
   const router = useRouter();
@@ -170,15 +172,30 @@ const Register = () => {
       />
 
       {/*Contenedor */}
-      <div className='flex w-full h-screen z-10 items-center justify-center'>
+      <div className='flex w-full h-screen z-10 items-center justify-center overflow-auto p-4'>
 
-      <div className='flex flex-col bg-white rounded-xl p-12 shadow-md w-fit h-fit justify-center items-center'>
+      <div className='flex flex-col bg-white rounded-xl p-12 shadow-md w-fit h-fit justify-center items-center mt-10'>
         <h2 className="text-3xl font-bold mb-4 text-indigo-400">Regístrate</h2>
         
         <div className='flex gap-1'><p className='text-indigo-400'>¿Ya tienes una cuenta? </p> <p onClick={()=>router.push(routes.LOGIN)} className='text-indigo-600 underline hover:cursor-pointer'> Inicia sesión</p></div>  
         <form onSubmit={handleRegister} className="flex flex-col mt-6 justify-center items-center">
         
-         <div className='flex flex-col gap-6 w-full md:flex-row'>
+        <div className='mb-4 gap-2 justify-center items-center flex flex-row 
+          align-middle google bg-white border-[#e0e0e0] w-1/2 border rounded-lg px-2 py-2 hover:bg-[#e0e0e0] transition duration-300 cursor-pointer'>
+            <div>
+              <FcGoogle className='text-2xl' />
+            </div>
+
+            <div>
+                <p className='text-center text-sm text-slate-500'>Continua con Google</p>
+            </div> 
+        </div>
+
+        <div className='spacer'>
+            <p className='text-[#E5E5E5] text-center text-md'>––––––––   &nbsp; o &nbsp;   ––––––––</p>
+        </div>
+
+         <div className='flex flex-col gap-6 w-full md:flex-row mt-4'>
           <div className='flex flex-col w-3xs md:w-2xs'>
           <label className="mb-1 text-sm text-slate-500">Nombre</label>
           <input
