@@ -1,0 +1,58 @@
+.background-profile {
+    background: linear-gradient(180deg, #8892d6, #1A237E );
+    height: 100vh;
+    position: relative;
+    overflow: hidden;
+}
+
+.wave-container svg {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 0;
+}
+
+.title {
+    font-size: 35px;
+    color: #FF7A7A;
+    font-weight: 700;
+    font-family: "Poppins", sans-serif;
+    text-decoration: none;
+}
+
+.text-campos {
+    font-size: 20px;
+    color: #FF7A7A;
+    font-weight: 550;
+    font-family: "Poppins", sans-serif;
+    text-decoration: none;
+}
+
+.text-info {
+    font-size: 20px;
+    color: #1a227e9e;
+    font-weight: 300;
+    font-family: "Poppins", sans-serif;
+    text-decoration: none;
+}
+
+.btn-logout {
+    background-color: #FF7A7A;
+    color: white;
+}
+
+.btn-logout:hover {
+    background-color: #f91212;
+}
+
+.btn-editar {
+    background-color: transparent;
+    border: 2px solid #FF7A7A;
+    color: #FF7A7A;
+}
+
+.btn-editar:hover {
+    background-color: #FF7A7A;
+    color: white;
+}
