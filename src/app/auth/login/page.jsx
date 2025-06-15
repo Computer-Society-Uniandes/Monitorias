@@ -1,17 +1,40 @@
+// app/(auth)/login/Login.jsx
 "use client";
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../../firebaseConfig";
 import { useRouter } from "next/navigation";
 import routes from "app/routes";
-import "./Login.css";  
-        
+import "./Login.css";
 
 const Login = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const router = useRouter();
 
+  // Estados de formulario
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  // Marca si React ya montó el componente
+  const [mounted, setMounted] = useState(false);
+
+  // Sólo en cliente: marcamos montagem y, opcionalmente,
+  // redirigimos si ya está logueado
+  useEffect(() => {
+    setMounted(true);
+
+    const alreadyLogged = localStorage.getItem("isLoggedIn") === "true";
+    if (alreadyLogged) {
+      router.replace(routes.HOME);
+    }
+  }, [router]);
+
+  // Mientras no estemos en cliente, no renderizamos nada
+  if (!mounted) {
+    return null;
+  }
+
+  // Función de login (sólo corre en evento, en cliente)
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
