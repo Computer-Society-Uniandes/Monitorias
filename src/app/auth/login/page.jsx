@@ -1,50 +1,46 @@
 // app/(auth)/login/Login.jsx
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../../../firebaseConfig";
-import { useRouter } from "next/navigation";
-import routes from "app/routes";
-import "./Login.css";
+import { useState, useEffect } from 'react';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { useRouter } from 'next/navigation';
+import { auth } from '../../../firebaseConfig';
+import routes from 'app/routes';
+import './Login.css';
 
-const Login = () => {
+export default function Login() {
   const router = useRouter();
-
-  // Estados de formulario
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
-  // Marca si React ya montó el componente
+  const [form, setForm] = useState({ email: '', password: '' });
   const [mounted, setMounted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  // Sólo en cliente: marcamos montagem y, opcionalmente,
-  // redirigimos si ya está logueado
   useEffect(() => {
     setMounted(true);
-
-    const alreadyLogged = localStorage.getItem("isLoggedIn") === "true";
-    if (alreadyLogged) {
+    if (localStorage.getItem('isLoggedIn') === 'true') {
       router.replace(routes.HOME);
     }
   }, [router]);
 
-  // Mientras no estemos en cliente, no renderizamos nada
-  if (!mounted) {
-    return null;
-  }
+  if (!mounted) return null;
 
-  // Función de login (sólo corre en evento, en cliente)
-  const handleLogin = async (e) => {
+  const handleChange = e => {
+    const { name, value } = e.target;
+    setForm(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async e => {
     e.preventDefault();
+    setLoading(true);
+    setError('');
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      localStorage.setItem("userEmail", email);
-      localStorage.setItem("isLoggedIn", "true");
+      await signInWithEmailAndPassword(auth, form.email, form.password);
+      localStorage.setItem('userEmail', form.email);
+      localStorage.setItem('isLoggedIn', 'true');
       router.push(routes.HOME);
-    } catch (error) {
-      console.error("Error al iniciar sesión:", error);
-      alert("Usuario o contraseña incorrectos.");
+    } catch {
+      setError('Usuario o contraseña incorrectos.');
+      setLoading(false);
     }
   };
 
@@ -53,7 +49,6 @@ const Login = () => {
       <section className="login-wrapper">
         <div className="login-card">
           <h2 className="login-title">Inicia Sesión</h2>
-
           <p className="login-text">
             ¿No tienes una cuenta?
             <span
@@ -64,33 +59,47 @@ const Login = () => {
             </span>
           </p>
 
-          <form onSubmit={handleLogin} className="login-form">
-            <label className="login-label">Correo</label>
+          <form onSubmit={handleSubmit} className="login-form">
+            <label htmlFor="email" className="login-label">
+              Correo
+            </label>
             <input
-              className="login-input"
+              id="email"
+              name="email"
               type="email"
-              placeholder="Tu correo"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-
-            <label className="login-label">Contraseña</label>
-            <input
               className="login-input"
-              type="password"
-              placeholder="Tu contraseña"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Tu correo"
+              value={form.email}
+              onChange={handleChange}
+              required
             />
 
-            <button type="submit" className="login-btn">
-              Iniciar Sesión
+            <label htmlFor="password" className="login-label">
+              Contraseña
+            </label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              className="login-input"
+              placeholder="Tu contraseña"
+              value={form.password}
+              onChange={handleChange}
+              required
+            />
+
+            {error && <p className="login-error">{error}</p>}
+
+            <button
+              type="submit"
+              className="login-btn"
+              disabled={loading}
+            >
+              {loading ? 'Cargando...' : 'Iniciar Sesión'}
             </button>
           </form>
         </div>
       </section>
     </main>
   );
-};
-
-export default Login;
+}

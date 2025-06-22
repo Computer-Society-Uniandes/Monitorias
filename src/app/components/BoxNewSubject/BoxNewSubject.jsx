@@ -1,5 +1,5 @@
 import React from "react";
-import "../Style/BoxNewSubject.css";
+import "./BoxNewSubject.css";
 
 const BoxNewSubject = ({name, number}) => {
   return (

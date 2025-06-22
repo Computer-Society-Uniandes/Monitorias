@@ -15,7 +15,7 @@ const Home = ({ nombre="usuario" }) => {
     return (
         <main className="min-h-screen">
             <Header></Header>
-            <WelcomeBanner titulo={`Bienvenido/a ${nombre}`} imagenCarga="" />
+            <WelcomeBanner titulo={`Bienvenido/aaaa ${nombre}`} imagenCarga="" />
             <div className="container mx-auto pt-4">
                 <h2 className="text-4xl font-bold mb-2 text-[#FF7A7A] pb-4">
                     Tus materias este semestre
