@@ -1,10 +1,10 @@
 const routes = {
     LANDING:"/",
-    HOME:"/home",
-    EXPLORE:"/home/explore",
+    HOME:"/Home",
+    EXPLORE:"/Home/explore",
     LOGIN:"/auth/login",
     REGISTER:"/auth/register",
-    PROFILE: "/home/profile"
+    PROFILE: "/Home/profile"
 };
 
 export default routes;

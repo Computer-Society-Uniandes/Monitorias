@@ -3,8 +3,8 @@ import "../globals.css";
 
 export default function Layout({children}) {
     return(
-        <>
-            <Header />
+        < >
+            <Header suppressHydrationWarning/>
             {children}
         </>
     );
