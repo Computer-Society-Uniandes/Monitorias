@@ -1,7 +1,7 @@
 "use client"
 import React from "react";
-import WelcomeBanner from "../components/Welcome";
-import BoxSubject from "../components/BoxSubject";
+import WelcomeBanner from "../components/Welcome/Welcome";
+import BoxSubject from "../components/BoxSubject/BoxSubject";
 import { getMaterias } from "../services/HomeService.service";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";

@@ -1,13 +1,13 @@
 "use client"
 import { useState, useEffect } from "react"
-import Logo from "../../../public/Logo.png"
-import Logo2 from "../../../public/Logo2.png"
+import Logo from "../../../../public/Logo.png"
+import Logo2 from "../../../../public/Logo2.png"
 import { Users, BookOpen, Award, Clock } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import routes from "app/routes"
 
-const Auth = () => {
+const Landing = () => {
   const [scrolled, setScrolled] = useState(false)
   const router = useRouter();
 
@@ -152,5 +152,5 @@ const Auth = () => {
   )
 }
 
-export default Auth
+export default Landing
 

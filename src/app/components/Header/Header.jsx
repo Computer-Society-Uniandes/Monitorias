@@ -2,7 +2,7 @@
 'use client';
 
 import React from 'react';
-import'../style/Header.css'
+import'./Header.css'
 import { UserRound } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from "next/navigation"

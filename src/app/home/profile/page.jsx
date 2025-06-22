@@ -5,7 +5,7 @@
 import React, { useEffect, useState } from 'react'
 import { auth, db } from '../../../firebaseConfig'
 import { doc, getDoc } from 'firebase/firestore'
-import Header from '../../components/Header'
+import Header from '../../components/Header/Header'
 import { useRouter } from 'next/navigation'
 import routes from 'app/routes'
 import './Profile.css'
@@ -107,7 +107,7 @@ const Profile = () => {
             Editar Perfil
             </button>
             <button
-            //onClick={handleLogout}
+            onClick={handleLogout}
             className="mt-4 btn-logout text-white py-2 px-4 rounded mx-4"
             >
             Cerrar Sesión
