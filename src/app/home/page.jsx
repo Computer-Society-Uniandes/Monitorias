@@ -11,7 +11,7 @@ import routes from "app/routes";
 export default function Home(){
     const [materias, setMaterias] = useState([]);
     const router = useRouter();
-    const userEmail = localStorage.getItem('userEmail')
+    const userName = localStorage.getItem('userName')
     const isLoggedIn = localStorage.getItem('isLoggedIn')
 
     useEffect(() => {
@@ -25,7 +25,7 @@ export default function Home(){
     }, []);
     return (
         <main className="min-h-screen">
-            <WelcomeBanner titulo={`Bienvenido/a ${userEmail}`}/>
+            <WelcomeBanner usuario={userName} />
             <div className="container mx-auto pt-4">
                 <h2 className="text-4xl font-bold mb-2 text-[#FF7A7A] pb-4">
                     Tus materias este semestre

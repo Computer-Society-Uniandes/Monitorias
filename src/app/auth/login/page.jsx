@@ -4,7 +4,8 @@
 import { useState, useEffect } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
-import { auth } from '../../../firebaseConfig';
+import { auth, db } from '../../../firebaseConfig';
+import { doc, getDoc } from "firebase/firestore";
 import routes from 'app/routes';
 import './Login.css';
 
@@ -37,6 +38,16 @@ export default function Login() {
       await signInWithEmailAndPassword(auth, form.email, form.password);
       localStorage.setItem('userEmail', form.email);
       localStorage.setItem('isLoggedIn', 'true');
+      const userRef = doc(db, 'user', form.email);
+      const userSnap = await getDoc(userRef);
+
+      if (userSnap.exists()) {
+        const { name } = userSnap.data();
+        localStorage.setItem('userName', name);
+      } else {
+        console.warn(`No existe el usuario ${form.email} en Firestore.`);
+      }
+      
       router.push(routes.HOME);
     } catch {
       setError('Usuario o contraseña incorrectos.');
