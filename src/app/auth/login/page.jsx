@@ -38,6 +38,7 @@ export default function Login() {
       await signInWithEmailAndPassword(auth, form.email, form.password);
       localStorage.setItem('userEmail', form.email);
       localStorage.setItem('isLoggedIn', 'true');
+      localStorage.setItem('rol', 'Student');
       const userRef = doc(db, 'user', form.email);
       const userSnap = await getDoc(userRef);
 
