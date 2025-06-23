@@ -1,42 +1,48 @@
-"use client"
-import React from "react";
+"use client";
+
+import React, { useEffect, useState } from "react";
 import WelcomeBanner from "../components/Welcome/Welcome";
-import BoxSubject from "../components/BoxSubject/BoxSubject";
+import BoxSubject   from "../components/BoxSubject/BoxSubject";
 import { getMaterias } from "../services/HomeService.service";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import routes from "app/routes";
 
+export default function Home() {
+  // datos de Firestore
+  const [materias,   setMaterias]   = useState([]);
+  // estado de sesión (se determina en cliente)
+  const [mounted,    setMounted]    = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userName,   setUserName]   = useState("");
 
-export default function Home(){
-    const [materias, setMaterias] = useState([]);
-    const router = useRouter();
-    const userName = localStorage.getItem('userName')
-    const isLoggedIn = localStorage.getItem('isLoggedIn')
+  /* Leer localStorage solo en cliente */
+  useEffect(() => {
+    setMounted(true);
+    const logged = localStorage.getItem("isLoggedIn") === "true";
+    setIsLoggedIn(logged);
+    setUserName(logged ? localStorage.getItem("userName") ?? "" : "");
+    getMaterias().then(setMaterias);   
 
-    useEffect(() => {
-        if (!isLoggedIn) {
-            router.push(routes.LANDING)
-            return
-          }
-        getMaterias().then((materias) => {
-            setMaterias(materias);
-        });
-    }, []);
-    return (
-        <main className="min-h-screen">
-            <WelcomeBanner usuario={userName} />
-            <div className="container mx-auto pt-4">
-                <h2 className="text-4xl font-bold mb-2 text-[#FF7A7A] pb-4">
-                    Tus materias este semestre
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-4">
-                    {materias.map((materia, index) => (
-                        <BoxSubject key={index} codigo={materia.codigo} nombre={materia.nombre}></BoxSubject>
-                    ))}
-                </div>
+  }, []);
 
-            </div>
-        </main>
-    );
+  if (!mounted) return null;             
+
+  return (
+    <main className="min-h-screen">
+      <WelcomeBanner usuario={userName} />
+
+      {/* Solo mostramos las materias cuando hay login */}
+      {isLoggedIn && (
+        <div className="container mx-auto pt-4">
+          <h2 className="text-4xl font-bold mb-2 text-[#FF7A7A] pb-4">
+            Tus materias este semestre
+          </h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-4">
+            {materias.map(({ codigo, nombre }) => (
+              <BoxSubject key={codigo} codigo={codigo} nombre={nombre} />
+            ))}
+          </div>
+        </div>
+      )}
+    </main>
+  );
 }

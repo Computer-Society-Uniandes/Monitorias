@@ -102,3 +102,23 @@
         width: 100%;
     }
 }
+
+.auth-buttons { display: flex; gap: 1rem; }
+
+.btn-header {
+  padding: 0.4rem 1rem;
+  border: 2px solid #4f46e5;
+  border-radius: 9999px;
+  background: transparent;
+  color: #4f46e5;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .25s, color .25s;
+}
+.btn-header:hover { background:#eef2ff; }
+
+.btn-header--primary {
+  background:#4f46e5;
+  color:#fff;
+}
+.btn-header--primary:hover { background:#4338ca; }

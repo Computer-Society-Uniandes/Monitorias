@@ -69,6 +69,7 @@ const Profile = () => {
   const handleLogout = () => {
     auth.signOut()
     localStorage.removeItem('userEmail')
+    localStorage.removeItem('userName')
     localStorage.removeItem('isLoggedIn')
     router.push(routes.LANDING)
   }
