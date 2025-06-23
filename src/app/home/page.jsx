@@ -28,9 +28,6 @@ export default function Home() {
   return (
     <main className="min-h-screen">
       <WelcomeBanner usuario={userName} />
-
-      {/* Solo mostramos las materias cuando hay login */}
-      {isLoggedIn && (
         <div className="container mx-auto pt-4">
           <h2 className="text-4xl font-bold mb-2 text-[#FF7A7A] pb-4">
             Tus materias este semestre
@@ -42,7 +39,6 @@ export default function Home() {
             ))}
           </div>
         </div>
-      )}
     </main>
   );
 }

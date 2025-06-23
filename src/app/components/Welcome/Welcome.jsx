@@ -1,7 +1,7 @@
 "use client";
 
 const WelcomeBanner = ({ usuario }) => {
-  const saludo = usuario ? `Bienvenido, ${usuario}` : "Bienvenido";
+  const saludo = usuario ? `Bienvenidx, ${usuario}` : "Bienvenido";
 
   return (
     <div className="relative w-full overflow-hidden bg-gradient-to-b from-indigo-500 to-indigo-900 h-[270px]">
