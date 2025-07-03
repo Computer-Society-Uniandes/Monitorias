@@ -5,12 +5,14 @@ import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth, db } from '../../../firebaseConfig';
 import { doc, setDoc, collection, getDocs } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '../../context/AuthContext';
 import routes from 'app/routes';
 import { FcGoogle } from "react-icons/fc";
 
 
 const Register = () => {
   const router = useRouter();
+  const { login } = useAuth();
   const [name, setName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [majors, setMajors] = useState([]);   // Lista dinámica de carreras
@@ -69,14 +71,21 @@ const Register = () => {
         phone_number: phoneNumber,
         // Guardamos una referencia a la carrera en "major"
         major: doc(db, "major", selectedMajor),
+        // Por defecto, todos los usuarios se registran como estudiantes
+        isTutor: false
       });
 
-      // 5. Guardar credenciales en localStorage y redirigir
-      localStorage.setItem("userEmail", email);
-      localStorage.setItem("isLoggedIn", "true");
+      // 5. Usar el contexto de autenticación para el login automático
+      const userData = {
+        email,
+        name,
+        isTutor: false // Por defecto es estudiante
+      };
+      
+      login(userData);
 
       alert("Registro exitoso");
-      router.push(routes.LANDING)
+      router.push(routes.HOME); // Ir directo al home después del registro
     } catch (error) {
       console.error("Error al registrar:", error);
       alert("No se pudo registrar el usuario.");
