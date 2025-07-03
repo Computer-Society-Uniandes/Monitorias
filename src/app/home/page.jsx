@@ -1,44 +1,50 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import WelcomeBanner from "../components/Welcome/Welcome";
-import BoxSubject   from "../components/BoxSubject/BoxSubject";
-import { getMaterias } from "../services/HomeService.service";
+import React, { useState, useEffect } from "react";
+import { useAuth } from "../context/AuthContext";
+import StudentHome from "../components/StudentHome/StudentHome";
+import TutorHome from "../components/TutorHome/TutorHome";
 
 export default function Home() {
-  // datos de Firestore
-  const [materias,   setMaterias]   = useState([]);
-  // estado de sesión (se determina en cliente)
-  const [mounted,    setMounted]    = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userName,   setUserName]   = useState("");
+  const { user, loading } = useAuth();
+  const [mounted, setMounted] = useState(false);
 
-  /* Leer localStorage solo en cliente */
   useEffect(() => {
     setMounted(true);
-    const logged = localStorage.getItem("isLoggedIn") === "true";
-    setIsLoggedIn(logged);
-    setUserName(logged ? localStorage.getItem("userName") ?? "" : "");
-    getMaterias().then(setMaterias);   
-
   }, []);
 
-  if (!mounted) return null;             
-
-  return (
-    <main className="min-h-screen">
-      <WelcomeBanner usuario={userName} />
-        <div className="container mx-auto pt-4">
-          <h2 className="text-4xl font-bold mb-2 text-[#FF7A7A] pb-4">
-            Tus materias este semestre
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-4">
-            {materias.map(({ codigo, nombre }) => (
-              <BoxSubject key={codigo} codigo={codigo} nombre={nombre} />
-            ))}
-          </div>
+  // Mostrar loading mientras se carga el contexto o no está montado
+  if (!mounted || loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#FF7A7A]"></div>
+          <p className="mt-4 text-gray-600">Cargando...</p>
         </div>
-    </main>
-  );
+      </div>
+    );
+  }
+
+  // Si no está logueado, mostrar mensaje
+  if (!user.isLoggedIn) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">
+            Acceso Restringido
+          </h2>
+          <p className="text-gray-600">
+            Debes iniciar sesión para acceder a esta página.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Renderizar la vista apropiada según el rol del usuario
+  if (user.isTutor) {
+    return <TutorHome userName={user.name} />;
+  } else {
+    return <StudentHome userName={user.name} />;
+  }
 }

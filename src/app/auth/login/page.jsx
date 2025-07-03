@@ -6,11 +6,13 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { auth, db } from '../../../firebaseConfig';
 import { doc, getDoc } from "firebase/firestore";
+import { useAuth } from '../../context/AuthContext';
 import routes from 'app/routes';
 import './Login.css';
 
 export default function Login() {
   const router = useRouter();
+  const { user, login } = useAuth();
   const [form, setForm] = useState({ email: '', password: '' });
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -18,10 +20,10 @@ export default function Login() {
 
   useEffect(() => {
     setMounted(true);
-    if (localStorage.getItem('isLoggedIn') === 'true') {
+    if (user.isLoggedIn) {
       router.replace(routes.HOME);
     }
-  }, [router]);
+  }, [router, user.isLoggedIn]);
 
   if (!mounted) return null;
 
@@ -36,19 +38,25 @@ export default function Login() {
     setError('');
     try {
       await signInWithEmailAndPassword(auth, form.email, form.password);
-      localStorage.setItem('userEmail', form.email);
-      localStorage.setItem('isLoggedIn', 'true');
-      localStorage.setItem('rol', 'Student');
+      
       const userRef = doc(db, 'user', form.email);
       const userSnap = await getDoc(userRef);
 
+      let userData = { email: form.email, name: '', isTutor: false };
+      
       if (userSnap.exists()) {
-        const { name } = userSnap.data();
-        localStorage.setItem('userName', name);
+        const firestoreData = userSnap.data();
+        userData = {
+          email: form.email,
+          name: firestoreData.name || '',
+          isTutor: firestoreData.isTutor || false // Por defecto es estudiante
+        };
       } else {
         console.warn(`No existe el usuario ${form.email} en Firestore.`);
       }
       
+      // Usar el contexto para manejar el login
+      login(userData);
       router.push(routes.HOME);
     } catch {
       setError('Usuario o contraseña incorrectos.');
