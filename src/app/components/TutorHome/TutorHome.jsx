@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import WelcomeBanner from "../Welcome/Welcome";
 import BoxNewSubject from "../BoxNewSubject/BoxNewSubject";
-import TutorNavbar from "../TutorNavbar/TutorNavbar";
 import { getMaterias } from "../../services/HomeService.service";
 import routes from "../../../routes";
 
@@ -19,9 +18,6 @@ export default function TutorHome({ userName }) {
 
   return (
     <main className="min-h-screen">
-      {/* Navbar específico para tutores */}
-      <TutorNavbar />
-      
       <WelcomeBanner usuario={userName} />
       
       <div className="container mx-auto pt-4 px-6">

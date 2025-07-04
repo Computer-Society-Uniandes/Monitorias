@@ -3,8 +3,9 @@
 import { useAuth } from "../context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import TutorNavbar from "../components/TutorNavbar/TutorNavbar";
+import Header from "../components/Header/Header";
 import routes from "../../routes";
+import "../globals.css";
 
 export default function TutorLayout({ children }) {
   const { user, loading } = useAuth();
@@ -35,11 +36,15 @@ export default function TutorLayout({ children }) {
   }
 
   return (
-    <div className="tutor-layout">
-      <TutorNavbar />
+    <>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap"
+        rel="stylesheet"
+      />
+      <Header suppressHydrationWarning />
       <main className="tutor-content">
         {children}
       </main>
-    </div>
+    </>
   );
 } 

@@ -32,7 +32,26 @@
   font: 700 18px "DM Sans", sans-serif;
   color: #ff7a7a;
   text-decoration: none;
+  transition: all 0.3s ease;
 }
+
+/* Diferenciación sutil para navbar de tutor */
+.navbar-tutor {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.03) 0%, rgba(118, 75, 162, 0.03) 100%);
+  border-radius: 20px;
+  padding: 8px 0;
+  margin: 0 20px;
+}
+
+.navbar-tutor a {
+  color: #5a67d8;
+  font-weight: 600;
+}
+
+.navbar-tutor a::before {
+  background: linear-gradient(90deg, #667eea, #764ba2);
+}
+
 .navbar a::before {
   content: "";
   position: absolute;
@@ -179,6 +198,22 @@
   .header      { flex-direction: column; padding: 15px 20px; }
   .navbar      { flex-direction: column; margin-top: 10px; }
   .navbar a    { font-size: 16px; margin: 6px 0 0 0; }
+  
+  /* Estilos móviles para navbar de tutor */
+  .navbar-tutor {
+    margin: 10px 0;
+    padding: 12px;
+    border-radius: 15px;
+  }
+  
+  .navbar-tutor a {
+    font-size: 15px;
+    margin: 8px 0;
+    padding: 4px 8px;
+    border-radius: 8px;
+    text-align: center;
+  }
+  
   .right-block { flex-direction: column; gap: 0.75rem; margin-top: 10px; }
   .auth-buttons{ gap: 0.75rem; }
   .user-actions{ flex-direction: column; gap: 0.5rem; }

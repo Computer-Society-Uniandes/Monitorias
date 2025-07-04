@@ -6,7 +6,7 @@ import { UserRound } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../context/AuthContext";
-import routes from "app/routes";
+import routes from "../../../routes";
 
 export default function Header() {
   const router = useRouter();
@@ -30,11 +30,24 @@ export default function Header() {
         Calico
       </Link>
 
-      <nav className="navbar">
-        <Link href={routes.HOME}>Inicio</Link>
-        <Link href={routes.EXPLORE}>Explorar Materias</Link>
-        <Link href="/">Buscar Tutores</Link>
-        <Link href="/">Acerca de</Link>
+      <nav className={`navbar ${user.isLoggedIn && user.isTutor ? 'navbar-tutor' : 'navbar-student'}`}>
+        {user.isLoggedIn && user.isTutor ? (
+          // Navegación para tutores
+          <>
+            <Link href={routes.TUTOR_INICIO}>🏠 Inicio</Link>
+            <Link href={routes.TUTOR_MIS_TUTORIAS}>📚 Mis tutorías</Link>
+            <Link href={routes.TUTOR_MATERIAS}>📖 Materias</Link>
+            <Link href={routes.TUTOR_PAGOS}>💰 Pagos</Link>
+          </>
+        ) : (
+          // Navegación para estudiantes y usuarios no logueados
+          <>
+            <Link href={routes.HOME}>Inicio</Link>
+            <Link href={routes.EXPLORE}>Explorar Materias</Link>
+            <Link href="/">Buscar Tutores</Link>
+            <Link href="/">Acerca de</Link>
+          </>
+        )}
       </nav>
 
       {/* ───────────── BOTONES DERECHA ───────────── */}
