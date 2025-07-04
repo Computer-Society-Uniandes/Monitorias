@@ -1,17 +1,26 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
 import StudentHome from "../components/StudentHome/StudentHome";
-import TutorHome from "../components/TutorHome/TutorHome";
+import routes from "../../routes";
 
 export default function Home() {
   const { user, loading } = useAuth();
   const [mounted, setMounted] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Redirigir automáticamente a tutores a su página de inicio
+  useEffect(() => {
+    if (mounted && !loading && user.isLoggedIn && user.isTutor) {
+      router.push(routes.TUTOR_INICIO);
+    }
+  }, [mounted, loading, user.isLoggedIn, user.isTutor, router]);
 
   // Mostrar loading mientras se carga el contexto o no está montado
   if (!mounted || loading) {
@@ -41,10 +50,6 @@ export default function Home() {
     );
   }
 
-  // Renderizar la vista apropiada según el rol del usuario
-  if (user.isTutor) {
-    return <TutorHome userName={user.name} />;
-  } else {
-    return <StudentHome userName={user.name} />;
-  }
+  // Los tutores son redirigidos automáticamente, así que aquí solo mostramos la vista de estudiante
+  return <StudentHome userName={user.name} />;
 }
