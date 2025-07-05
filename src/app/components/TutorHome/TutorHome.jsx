@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import WelcomeBanner from "../Welcome/Welcome";
 import BoxNewSubject from "../BoxNewSubject/BoxNewSubject";
+import GoogleCalendarButton from "../GoogleCalendarButton/GoogleCalendarButton";
 import { getMaterias } from "../../services/HomeService.service";
 import routes from "../../../routes";
 
@@ -46,6 +47,7 @@ export default function TutorHome({ userName }) {
               >
                 📖 Gestionar Materias
               </Link>
+              <GoogleCalendarButton />
             </div>
           </div>
         </div>
