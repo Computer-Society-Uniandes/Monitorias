@@ -37,6 +37,7 @@ export default function Header() {
             <Link href={routes.TUTOR_INICIO}>Inicio</Link>
             <Link href={routes.TUTOR_MIS_TUTORIAS}>Mis tutorías</Link>
             <Link href={routes.TUTOR_MATERIAS}>Materias</Link>
+            <Link href={routes.TUTOR_DISPONIBILIDAD}>Disponibilidad</Link>
             <Link href={routes.TUTOR_PAGOS}>Pagos</Link>
           </>
         ) : (

@@ -47,6 +47,12 @@ export default function TutorHome({ userName }) {
               >
                 📖 Gestionar Materias
               </Link>
+              <Link 
+                href={routes.TUTOR_DISPONIBILIDAD}
+                className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium transition-colors text-center"
+              >
+                📅 Disponibilidad
+              </Link>
               <GoogleCalendarButton />
             </div>
           </div>
@@ -177,6 +183,10 @@ export default function TutorHome({ userName }) {
             <div className="flex items-center gap-3">
               <span className="text-blue-600">📖</span>
               <span className="text-gray-700">Administración de materias</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="text-blue-600">📅</span>
+              <span className="text-gray-700">Gestión de disponibilidad</span>
             </div>
             <div className="flex items-center gap-3">
               <span className="text-blue-600">💰</span>
