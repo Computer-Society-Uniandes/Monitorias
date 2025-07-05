@@ -16,12 +16,16 @@ export default function Disponibilidad() {
   const [usingMockData, setUsingMockData] = useState(false);
   const [error, setError] = useState(null);
   const [newSlot, setNewSlot] = useState({
+    title: "",
+    date: "",
     startTime: "",
     endTime: "",
-    day: "",
-    title: "",
-    recurring: true
+    description: "",
+    location: "",
+    recurring: false
   });
+  const [creatingEvent, setCreatingEvent] = useState(false);
+  const [validationErrors, setValidationErrors] = useState([]);
 
   useEffect(() => {
     loadAvailability();
@@ -70,16 +74,57 @@ export default function Disponibilidad() {
     setDate(newDate);
   };
 
-  const handleAddSlot = () => {
-    if (newSlot.title && newSlot.day && newSlot.startTime && newSlot.endTime) {
-      const slot = {
-        id: Date.now(),
-        ...newSlot,
-        color: getRandomColor()
-      };
-      setAvailabilitySlots([...availabilitySlots, slot]);
-      setNewSlot({ startTime: "", endTime: "", day: "", title: "", recurring: true });
+  const handleAddSlot = async () => {
+    try {
+      setCreatingEvent(true);
+      setValidationErrors([]);
+      
+      // Validar datos localmente primero
+      const validation = AvailabilityService.validateEventData(newSlot);
+      
+      if (!validation.isValid) {
+        setValidationErrors(validation.errors);
+        return;
+      }
+      
+      // Verificar si está conectado a Google Calendar
+      if (!isConnected) {
+        setValidationErrors(['Debes conectar tu Google Calendar para crear eventos']);
+        return;
+      }
+      
+      console.log('Creating event with data:', newSlot);
+      
+      // Crear evento en Google Calendar
+      const result = await AvailabilityService.createAvailabilityEvent(newSlot);
+      
+      console.log('Event created successfully:', result);
+      
+      // Mostrar mensaje de éxito
+      alert(`✅ ${result.message}`);
+      
+      // Resetear formulario
+      setNewSlot({
+        title: "",
+        date: "",
+        startTime: "",
+        endTime: "",
+        description: "",
+        location: "",
+        recurring: false
+      });
+      
+      // Cerrar modal
       setShowAddModal(false);
+      
+      // Recargar disponibilidad para mostrar el nuevo evento
+      await loadAvailability();
+      
+    } catch (error) {
+      console.error('Error creating event:', error);
+      setValidationErrors([error.message || 'Error al crear el evento']);
+    } finally {
+      setCreatingEvent(false);
     }
   };
 
@@ -331,33 +376,49 @@ export default function Disponibilidad() {
       {showAddModal && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <h3>Agregar Nuevo Horario</h3>
+            <div className="modal-header">
+              <h3>Crear Evento de Disponibilidad</h3>
+              <p className="modal-subtitle">
+                {isConnected ? 
+                  'Este evento se creará en tu Google Calendar' : 
+                  '⚠️ Debes conectar Google Calendar para crear eventos'
+                }
+              </p>
+            </div>
+            
+            {/* Errores de validación */}
+            {validationErrors.length > 0 && (
+              <div className="validation-errors">
+                <h4>⚠️ Errores de validación:</h4>
+                <ul>
+                  {validationErrors.map((error, index) => (
+                    <li key={index}>{error}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
             
             <div className="form-group">
-              <label>Título del horario:</label>
+              <label>Título del evento:</label>
               <input
                 type="text"
                 value={newSlot.title}
                 onChange={(e) => setNewSlot({...newSlot, title: e.target.value})}
-                placeholder="Ej: Disponible para Cálculo"
+                placeholder="Ej: Disponible para tutorías de Cálculo"
+                disabled={creatingEvent}
               />
+              <small className="form-help">Será visible en tu calendario de Google</small>
             </div>
 
             <div className="form-group">
-              <label>Día de la semana:</label>
-              <select
-                value={newSlot.day}
-                onChange={(e) => setNewSlot({...newSlot, day: e.target.value})}
-              >
-                <option value="">Seleccionar día</option>
-                <option value="Lunes">Lunes</option>
-                <option value="Martes">Martes</option>
-                <option value="Miércoles">Miércoles</option>
-                <option value="Jueves">Jueves</option>
-                <option value="Viernes">Viernes</option>
-                <option value="Sábado">Sábado</option>
-                <option value="Domingo">Domingo</option>
-              </select>
+              <label>Fecha del evento:</label>
+              <input
+                type="date"
+                value={newSlot.date}
+                onChange={(e) => setNewSlot({...newSlot, date: e.target.value})}
+                min={new Date().toISOString().split('T')[0]}
+                disabled={creatingEvent}
+              />
             </div>
 
             <div className="form-row">
@@ -367,6 +428,7 @@ export default function Disponibilidad() {
                   type="time"
                   value={newSlot.startTime}
                   onChange={(e) => setNewSlot({...newSlot, startTime: e.target.value})}
+                  disabled={creatingEvent}
                 />
               </div>
 
@@ -376,8 +438,31 @@ export default function Disponibilidad() {
                   type="time"
                   value={newSlot.endTime}
                   onChange={(e) => setNewSlot({...newSlot, endTime: e.target.value})}
+                  disabled={creatingEvent}
                 />
               </div>
+            </div>
+
+            <div className="form-group">
+              <label>Descripción (opcional):</label>
+              <textarea
+                value={newSlot.description}
+                onChange={(e) => setNewSlot({...newSlot, description: e.target.value})}
+                placeholder="Información adicional sobre la disponibilidad..."
+                rows="3"
+                disabled={creatingEvent}
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Ubicación (opcional):</label>
+              <input
+                type="text"
+                value={newSlot.location}
+                onChange={(e) => setNewSlot({...newSlot, location: e.target.value})}
+                placeholder="Ej: Virtual, Aula 205, Biblioteca..."
+                disabled={creatingEvent}
+              />
             </div>
 
             <div className="form-group">
@@ -386,23 +471,34 @@ export default function Disponibilidad() {
                   type="checkbox"
                   checked={newSlot.recurring}
                   onChange={(e) => setNewSlot({...newSlot, recurring: e.target.checked})}
+                  disabled={creatingEvent}
                 />
                 Repetir cada semana
               </label>
+              <small className="form-help">El evento se repetirá cada semana en el mismo día y hora</small>
             </div>
 
             <div className="modal-actions">
               <button 
                 className="btn-cancel"
-                onClick={() => setShowAddModal(false)}
+                onClick={() => {
+                  setShowAddModal(false);
+                  setValidationErrors([]);
+                }}
+                disabled={creatingEvent}
               >
                 Cancelar
               </button>
               <button 
-                className="btn-confirm"
+                className={`btn-confirm ${!isConnected ? 'btn-disabled' : ''}`}
                 onClick={handleAddSlot}
+                disabled={creatingEvent || !isConnected}
               >
-                Agregar Horario
+                {creatingEvent ? (
+                  <>🔄 Creando...</>
+                ) : (
+                  <>📅 Crear en Google Calendar</>
+                )}
               </button>
             </div>
           </div>

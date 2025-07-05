@@ -218,4 +218,69 @@ export class AvailabilityService {
       uniqueDays: [...new Set(slots.map(slot => slot.day))].length
     };
   }
+  
+  // Crear un nuevo evento de disponibilidad en Google Calendar
+  static async createAvailabilityEvent(eventData) {
+    try {
+      const response = await fetch('/api/calendar/create-event', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(eventData),
+      });
+      
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error || 'Error al crear el evento');
+      }
+      
+      return result;
+    } catch (error) {
+      console.error('Error creating availability event:', error);
+      throw error;
+    }
+  }
+  
+  // Validar datos del evento antes de enviarlo
+  static validateEventData(eventData) {
+    const errors = [];
+    
+    if (!eventData.date) {
+      errors.push('La fecha es requerida');
+    }
+    
+    if (!eventData.startTime) {
+      errors.push('La hora de inicio es requerida');
+    }
+    
+    if (!eventData.endTime) {
+      errors.push('La hora de fin es requerida');
+    }
+    
+    if (eventData.startTime && eventData.endTime) {
+      const startTime = new Date(`2000-01-01T${eventData.startTime}:00`);
+      const endTime = new Date(`2000-01-01T${eventData.endTime}:00`);
+      
+      if (endTime <= startTime) {
+        errors.push('La hora de fin debe ser posterior a la hora de inicio');
+      }
+    }
+    
+    if (eventData.date) {
+      const selectedDate = new Date(eventData.date);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      if (selectedDate < today) {
+        errors.push('No se puede crear un evento en una fecha pasada');
+      }
+    }
+    
+    return {
+      isValid: errors.length === 0,
+      errors
+    };
+  }
 } 

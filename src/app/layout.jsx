@@ -33,7 +33,9 @@ export default function RootLayout({ children }) {
                       // Disparar evento personalizado después de un breve delay
                       setTimeout(function() {
                         console.log('📤 Dispatching calendar-status-update event...');
-                        window.dispatchEvent(new CustomEvent('calendar-status-update'));
+                        window.dispatchEvent(new CustomEvent('calendar-status-update', { 
+                          detail: { connected: true } 
+                        }));
                       }, 500);
                     }
                   }
