@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import GoogleCalendarButton from "../../components/GoogleCalendarButton/GoogleCalendarButton";
 
 export default function MisTutorias() {
   const [filterStatus, setFilterStatus] = useState("todas");
@@ -61,9 +62,12 @@ export default function MisTutorias() {
           </p>
         </div>
         
-        <button className="mt-4 md:mt-0 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors">
-          + Nueva Tutoría
-        </button>
+        <div className="flex flex-col md:flex-row gap-3 mt-4 md:mt-0">
+          <GoogleCalendarButton />
+          <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors">
+            + Nueva Tutoría
+          </button>
+        </div>
       </div>
 
       {/* Filtros */}

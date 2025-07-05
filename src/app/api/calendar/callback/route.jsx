@@ -23,8 +23,10 @@ export async function GET(request) {
         throw new Error('No access token received');
       }
 
-      // Create the redirect URL
+      // Create the redirect URL with success parameter
+      // Default to /home, but this could be enhanced to redirect based on user role
       const redirectUrl = new URL('/home', request.url);
+      redirectUrl.searchParams.set('calendar_connected', 'true');
       
       // Create the response with the redirect
       const response = new Response(null, {
@@ -44,6 +46,7 @@ export async function GET(request) {
       };
 
       // Set access token cookie
+      console.log('Setting access token cookie...');
       response.headers.append(
         'Set-Cookie',
         `calendar_access_token=${tokens.access_token}; ${Object.entries(cookieOptions)
