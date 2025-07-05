@@ -55,9 +55,7 @@ export async function GET(request) {
       // Filtrar eventos que parezcan disponibilidad (puedes ajustar estos criterios)
       const title = slot.title.toLowerCase();
       return title.includes('disponible') || 
-             title.includes('libre') || 
-             title.includes('tutoria') || 
-             title.includes('tutoría') ||
+             title.includes('libre') ||
              title.includes('disponibilidad');
     });
 
