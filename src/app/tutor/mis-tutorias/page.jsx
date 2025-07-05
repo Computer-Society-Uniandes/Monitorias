@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import GoogleCalendarButton from "../../components/GoogleCalendarButton/GoogleCalendarButton";
+import DisponibilidadSummary from "../../components/DisponibilidadSummary/DisponibilidadSummary";
 
 export default function MisTutorias() {
   const [filterStatus, setFilterStatus] = useState("todas");
@@ -149,6 +150,9 @@ export default function MisTutorias() {
           <p className="text-sm text-gray-600">Calificación ⭐</p>
         </div>
       </div>
+
+      {/* Resumen de Disponibilidad */}
+      <DisponibilidadSummary />
 
       {/* Notas de desarrollo */}
       <div className="bg-gray-50 rounded-xl p-6 border-l-4 border-gray-400 mt-8">
