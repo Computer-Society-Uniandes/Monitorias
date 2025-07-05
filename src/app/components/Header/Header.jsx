@@ -34,10 +34,10 @@ export default function Header() {
         {user.isLoggedIn && user.isTutor ? (
           // Navegación para tutores
           <>
-            <Link href={routes.TUTOR_INICIO}>🏠 Inicio</Link>
-            <Link href={routes.TUTOR_MIS_TUTORIAS}>📚 Mis tutorías</Link>
-            <Link href={routes.TUTOR_MATERIAS}>📖 Materias</Link>
-            <Link href={routes.TUTOR_PAGOS}>💰 Pagos</Link>
+            <Link href={routes.TUTOR_INICIO}>Inicio</Link>
+            <Link href={routes.TUTOR_MIS_TUTORIAS}>Mis tutorías</Link>
+            <Link href={routes.TUTOR_MATERIAS}>Materias</Link>
+            <Link href={routes.TUTOR_PAGOS}>Pagos</Link>
           </>
         ) : (
           // Navegación para estudiantes y usuarios no logueados
