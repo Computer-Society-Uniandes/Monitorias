@@ -318,9 +318,16 @@
   transition: all 0.2s ease;
 }
 
-.btn-delete-slot:hover {
+.btn-delete-slot:hover:not(:disabled) {
   background: #dc3545;
   color: white;
+}
+
+.btn-delete-slot:disabled {
+  background: rgba(108, 117, 125, 0.1);
+  color: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .no-slots {
@@ -438,9 +445,19 @@
   transition: all 0.2s ease;
 }
 
-.btn-delete:hover {
+.btn-delete:hover:not(:disabled) {
   background: #c82333;
   transform: translateY(-2px);
+}
+
+.btn-delete:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.btn-delete:disabled:hover {
+  transform: none;
 }
 
 .no-slots-message {
