@@ -64,7 +64,9 @@ export default function GoogleCalendarButton() {
       if (response.ok) {
         setIsConnected(false);
         // Disparar evento personalizado para actualizar otros botones
-        window.dispatchEvent(new CustomEvent('calendar-status-update'));
+        window.dispatchEvent(new CustomEvent('calendar-status-update', { 
+          detail: { connected: false } 
+        }));
         // Opcional: mostrar mensaje de éxito
         alert('Desconectado de Google Calendar exitosamente');
       } else {
