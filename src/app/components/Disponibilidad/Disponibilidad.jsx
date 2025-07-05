@@ -26,6 +26,7 @@ export default function Disponibilidad() {
   });
   const [creatingEvent, setCreatingEvent] = useState(false);
   const [validationErrors, setValidationErrors] = useState([]);
+  const [deletingSlots, setDeletingSlots] = useState(new Set());
 
   useEffect(() => {
     loadAvailability();
@@ -128,8 +129,72 @@ export default function Disponibilidad() {
     }
   };
 
-  const handleDeleteSlot = (slotId) => {
-    setAvailabilitySlots(availabilitySlots.filter(slot => slot.id !== slotId));
+  const handleDeleteSlot = async (slotId) => {
+    try {
+      const slot = availabilitySlots.find(slot => slot.id === slotId);
+      
+      if (!slot) {
+        console.error('Slot not found');
+        return;
+      }
+      
+      // Confirmar eliminación
+      const confirmed = window.confirm(`¿Estás seguro de que quieres eliminar "${slot.title}"?`);
+      
+      if (!confirmed) {
+        return;
+      }
+      
+      // Marcar como eliminándose
+      setDeletingSlots(prev => new Set(prev).add(slotId));
+      
+      // Si es un evento de Google Calendar (no mock), eliminarlo del calendario
+      if (isConnected && slot.googleEventId) {
+        console.log('Deleting event from Google Calendar:', slot.googleEventId);
+        
+        try {
+          await AvailabilityService.deleteAvailabilityEvent(slot.googleEventId);
+          alert('✅ Evento eliminado exitosamente del Google Calendar');
+        } catch (error) {
+          console.error('Error deleting from Google Calendar:', error);
+          alert(`❌ Error al eliminar del Google Calendar: ${error.message}`);
+          // Remover del estado de eliminación
+          setDeletingSlots(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(slotId);
+            return newSet;
+          });
+          return; // No eliminar localmente si falla la eliminación en Google Calendar
+        }
+      }
+      
+      // Eliminar del estado local
+      setAvailabilitySlots(availabilitySlots.filter(slot => slot.id !== slotId));
+      
+      // Remover del estado de eliminación
+      setDeletingSlots(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(slotId);
+        return newSet;
+      });
+      
+      // Si es un evento de Google Calendar, recargar la disponibilidad para reflejar los cambios
+      if (isConnected && slot.googleEventId) {
+        setTimeout(() => {
+          loadAvailability();
+        }, 1000); // Pequeño delay para asegurar que el evento se haya eliminado
+      }
+      
+    } catch (error) {
+      console.error('Error deleting slot:', error);
+      alert(`❌ Error al eliminar el evento: ${error.message}`);
+      // Remover del estado de eliminación
+      setDeletingSlots(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(slotId);
+        return newSet;
+      });
+    }
   };
 
   const getRandomColor = () => {
@@ -274,8 +339,9 @@ export default function Disponibilidad() {
                             <button 
                               className="btn-delete-slot"
                               onClick={() => handleDeleteSlot(slot.id)}
+                              disabled={deletingSlots.has(slot.id)}
                             >
-                              ×
+                              {deletingSlots.has(slot.id) ? '🔄' : '×'}
                             </button>
                           </div>
                         ))
@@ -351,8 +417,9 @@ export default function Disponibilidad() {
                     <button 
                       className="btn-delete"
                       onClick={() => handleDeleteSlot(slot.id)}
+                      disabled={deletingSlots.has(slot.id)}
                     >
-                      Eliminar
+                      {deletingSlots.has(slot.id) ? '🔄 Eliminando...' : 'Eliminar'}
                     </button>
                   </div>
                 ))}

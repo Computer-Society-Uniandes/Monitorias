@@ -242,6 +242,29 @@ export class AvailabilityService {
       throw error;
     }
   }
+
+  // Eliminar un evento de disponibilidad de Google Calendar
+  static async deleteAvailabilityEvent(eventId) {
+    try {
+      const response = await fetch(`/api/calendar/delete-event?eventId=${eventId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error || 'Error al eliminar el evento');
+      }
+      
+      return result;
+    } catch (error) {
+      console.error('Error deleting availability event:', error);
+      throw error;
+    }
+  }
   
   // Validar datos del evento antes de enviarlo
   static validateEventData(eventData) {
