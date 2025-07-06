@@ -27,9 +27,39 @@ export default function Disponibilidad() {
   const [creatingEvent, setCreatingEvent] = useState(false);
   const [validationErrors, setValidationErrors] = useState([]);
   const [deletingSlots, setDeletingSlots] = useState(new Set());
+  const [syncing, setSyncing] = useState(false);
 
   useEffect(() => {
     loadAvailability();
+    
+    // Sincronización automática cuando se conecta por primera vez (opcional)
+    const checkAndSync = async () => {
+      try {
+        const isConnected = await AvailabilityService.checkConnection();
+        if (isConnected) {
+          // Sincronizar automáticamente solo si hay datos en Google Calendar
+          // pero no de forma molesta (tal vez solo la primera vez del día)
+          const lastSync = localStorage.getItem('lastAvailabilitySync');
+          const today = new Date().toDateString();
+          
+          if (lastSync !== today) {
+            console.log('Auto-syncing availabilities with Firebase...');
+            try {
+              await AvailabilityService.syncAvailabilitiesToFirebase();
+              localStorage.setItem('lastAvailabilitySync', today);
+              console.log('Auto-sync completed');
+            } catch (error) {
+              console.log('Auto-sync failed, but continuing normally:', error.message);
+            }
+          }
+        }
+      } catch (error) {
+        console.log('Auto-sync check failed:', error.message);
+      }
+    };
+    
+    // Ejecutar sincronización después de cargar disponibilidad
+    setTimeout(checkAndSync, 2000);
     
     // Escuchar eventos de actualización de Google Calendar
     const handleCalendarUpdate = () => {
@@ -61,7 +91,18 @@ export default function Disponibilidad() {
       console.log('Availability loaded:', result);
     } catch (error) {
       console.error('Error loading availability:', error);
-      setError(error.message);
+      
+      // Manejar específicamente errores de token expirado
+      if (error.message.includes('Token expirado') || 
+          error.message.includes('reconecta') ||
+          error.message.includes('authentication')) {
+        
+        setError('🔑 Sesión de Google Calendar expirada. Haz click en "Reconectar" para continuar.');
+        setIsConnected(false);
+      } else {
+        setError(error.message);
+      }
+      
       // Fallback a mock data en caso de error
       setAvailabilitySlots(AvailabilityService.getMockAvailability());
       setUsingMockData(true);
@@ -197,6 +238,49 @@ export default function Disponibilidad() {
     }
   };
 
+  const handleSyncWithFirebase = async () => {
+    try {
+      setSyncing(true);
+      
+      if (!isConnected) {
+        alert('❌ Debes estar conectado a Google Calendar para sincronizar');
+        return;
+      }
+      
+      console.log('Syncing availabilities with Firebase...');
+      
+      const result = await AvailabilityService.syncAvailabilitiesToFirebase();
+      
+      alert(`✅ Sincronización completada: ${result.syncResults.created} creados, ${result.syncResults.updated} actualizados`);
+      
+      // Recargar disponibilidad después de sincronizar
+      await loadAvailability();
+      
+    } catch (error) {
+      console.error('Error syncing with Firebase:', error);
+      
+      // Manejar específicamente errores de token expirado
+      if (error.message.includes('Token expirado') || 
+          error.message.includes('reconecta') ||
+          error.message.includes('authentication')) {
+        
+        const shouldReconnect = window.confirm(
+          `🔑 Tu sesión de Google Calendar ha expirado.\n\n` +
+          `¿Quieres reconectar ahora para continuar sincronizando?`
+        );
+        
+        if (shouldReconnect) {
+          // Redirigir a reconectar Google Calendar
+          window.location.href = '/api/calendar/auth';
+        }
+      } else {
+        alert(`❌ Error al sincronizar: ${error.message}`);
+      }
+    } finally {
+      setSyncing(false);
+    }
+  };
+
   const getRandomColor = () => {
     const colors = ["#4CAF50", "#2196F3", "#FF9800", "#9C27B0", "#607D8B", "#E91E63"];
     return colors[Math.floor(Math.random() * colors.length)];
@@ -270,6 +354,15 @@ export default function Disponibilidad() {
           >
             {loading ? '🔄' : '🔄'} Actualizar
           </button>
+          {isConnected && (
+            <button 
+              className="btn-sync"
+              onClick={handleSyncWithFirebase}
+              disabled={syncing}
+            >
+              {syncing ? '🔄 Sincronizando...' : '🔄 Sincronizar Firebase'}
+            </button>
+          )}
           <button 
             className="btn-add-slot"
             onClick={() => setShowAddModal(true)}
@@ -283,10 +376,21 @@ export default function Disponibilidad() {
         {/* Mensaje de error */}
         {error && (
           <div className="error-message">
-            <p>⚠️ Error al cargar disponibilidad: {error}</p>
-            <button className="btn-retry" onClick={loadAvailability}>
-              Reintentar
-            </button>
+            <p>⚠️ {error}</p>
+            <div className="error-actions">
+              {error.includes('expirada') || error.includes('reconecta') ? (
+                <button 
+                  className="btn-reconnect" 
+                  onClick={() => window.location.href = '/api/calendar/auth'}
+                >
+                  🔑 Reconectar Google Calendar
+                </button>
+              ) : (
+                <button className="btn-retry" onClick={loadAvailability}>
+                  Reintentar
+                </button>
+              )}
+            </div>
           </div>
         )}
         

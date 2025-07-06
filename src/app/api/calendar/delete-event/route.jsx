@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { deleteEvent } from '../../../services/GoogleCalendarService';
+import { FirebaseAvailabilityService } from '../../../services/FirebaseAvailabilityService';
 
 export async function DELETE(request) {
   try {
@@ -31,9 +32,18 @@ export async function DELETE(request) {
     // Eliminar el evento del Google Calendar
     await deleteEvent(accessToken.value, eventId);
     
+    // Eliminar también de Firebase
+    try {
+      await FirebaseAvailabilityService.deleteAvailability(eventId);
+      console.log('Event also deleted from Firebase:', eventId);
+    } catch (firebaseError) {
+      console.error('Error deleting from Firebase (but Google Calendar event was deleted):', firebaseError);
+      // No fallar la petición por error de Firebase, pero logearlo
+    }
+    
     return NextResponse.json({
       success: true,
-      message: 'Evento eliminado exitosamente del Google Calendar',
+      message: 'Evento eliminado exitosamente del Google Calendar y Firebase',
       eventId: eventId
     });
 
