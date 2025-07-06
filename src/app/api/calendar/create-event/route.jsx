@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers';
 import { createEvent } from '../../../services/GoogleCalendarService.js';
+import { FirebaseAvailabilityService } from '../../../services/FirebaseAvailabilityService.js';
 
 export async function POST(request) {
   try {
@@ -14,12 +15,19 @@ export async function POST(request) {
     }
 
     const body = await request.json();
-    const { title, date, startTime, endTime, description, location, recurring } = body;
+    const { title, date, startTime, endTime, description, location, recurring, tutorId, tutorEmail } = body;
 
     // Validaciones básicas
     if (!date || !startTime || !endTime) {
       return Response.json({ 
         error: 'Fecha, hora de inicio y fin son requeridas'
+      }, { status: 400 });
+    }
+
+    // Validar información del tutor
+    if (!tutorId || !tutorEmail) {
+      return Response.json({ 
+        error: 'Información del tutor es requerida (tutorId, tutorEmail)'
       }, { status: 400 });
     }
 
@@ -62,6 +70,21 @@ export async function POST(request) {
 
     console.log('Event created successfully:', createdEvent.id);
 
+    // Guardar también en Firebase
+    try {
+      const firebaseData = FirebaseAvailabilityService.googleEventToFirebaseFormat(
+        createdEvent, 
+        tutorId, 
+        tutorEmail
+      );
+      
+      await FirebaseAvailabilityService.saveAvailability(createdEvent.id, firebaseData);
+      console.log('Event also saved to Firebase:', createdEvent.id);
+    } catch (firebaseError) {
+      console.error('Error saving to Firebase (but Google Calendar event was created):', firebaseError);
+      // No fallar la petición por error de Firebase, pero logearlo
+    }
+
     return Response.json({
       success: true,
       event: {
@@ -75,7 +98,7 @@ export async function POST(request) {
         googleEventId: createdEvent.id,
         htmlLink: createdEvent.htmlLink
       },
-      message: 'Evento creado exitosamente en Google Calendar'
+      message: 'Evento creado exitosamente en Google Calendar y sincronizado con Firebase'
     });
 
   } catch (error) {

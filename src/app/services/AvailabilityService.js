@@ -30,10 +30,40 @@ export class AvailabilityService {
     const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
     const endOfWeek = new Date(startOfWeek.getTime() + 7 * 24 * 60 * 60 * 1000);
     
-    return this.getAvailability(
+    return this.getAvailabilityWithRetry(
       startOfWeek.toISOString().split('T')[0],
       endOfWeek.toISOString().split('T')[0]
     );
+  }
+
+  // Obtener disponibilidad con reintentos automáticos para tokens expirados
+  static async getAvailabilityWithRetry(startDate = null, endDate = null, maxResults = 50) {
+    try {
+      return await this.getAvailability(startDate, endDate, maxResults);
+    } catch (error) {
+      console.log('First attempt failed, checking if token needs refresh...');
+      
+      // Si es un error de autenticación, intentar renovar el token
+      if (error.message.includes('401') || 
+          error.message.includes('authentication') || 
+          error.message.includes('credential')) {
+        
+        console.log('Attempting to refresh token...');
+        const refreshResult = await this.refreshGoogleToken();
+        
+        if (refreshResult.success) {
+          console.log('Token refreshed, retrying availability request...');
+          // Reintentar después de renovar el token
+          return await this.getAvailability(startDate, endDate, maxResults);
+        } else {
+          console.log('Token refresh failed, user needs to reconnect');
+          throw new Error(`Token expirado. ${refreshResult.error}. Por favor, reconecta tu Google Calendar.`);
+        }
+      }
+      
+      // Si no es un error de autenticación, relanzar el error original
+      throw error;
+    }
   }
   
   // Obtener disponibilidad para un rango de fechas específico
@@ -52,6 +82,36 @@ export class AvailabilityService {
       return false;
     }
   }
+
+  // Intentar renovar el token de Google Calendar
+  static async refreshGoogleToken() {
+    try {
+      const response = await fetch('/api/calendar/refresh-token', {
+        method: 'POST'
+      });
+      
+      const result = await response.json();
+      
+      if (response.ok) {
+        console.log('Google Calendar token refreshed successfully');
+        return { success: true };
+      } else {
+        console.log('Token refresh failed:', result.error);
+        return { 
+          success: false, 
+          needsReconnection: result.needsReconnection,
+          error: result.error 
+        };
+      }
+    } catch (error) {
+      console.error('Error refreshing Google token:', error);
+      return { 
+        success: false, 
+        needsReconnection: true,
+        error: error.message 
+      };
+    }
+  }
   
   // Obtener disponibilidad con fallback a mock data
   static async getAvailabilityWithFallback() {
@@ -59,7 +119,22 @@ export class AvailabilityService {
       const isConnected = await this.checkConnection();
       
       if (!isConnected) {
-        console.log('Not connected to Google Calendar, using mock data');
+        console.log('Not connected to Google Calendar, checking Firebase...');
+        
+        // Intentar obtener desde Firebase
+        try {
+          const firebaseResult = await this.getAvailabilitiesFromFirebase();
+          if (firebaseResult.success && firebaseResult.availabilitySlots.length > 0) {
+            return {
+              ...firebaseResult,
+              connected: false,
+              source: 'firebase'
+            };
+          }
+        } catch (firebaseError) {
+          console.log('Firebase also unavailable, using mock data');
+        }
+        
         return {
           success: true,
           connected: false,
@@ -222,12 +297,24 @@ export class AvailabilityService {
   // Crear un nuevo evento de disponibilidad en Google Calendar
   static async createAvailabilityEvent(eventData) {
     try {
+      // Obtener información del usuario desde localStorage
+      const tutorId = localStorage.getItem('userEmail') || 'unknown';
+      const tutorEmail = localStorage.getItem('userEmail') || '';
+      
+      if (!tutorEmail) {
+        throw new Error('No se encontró información del usuario. Por favor, inicia sesión nuevamente.');
+      }
+      
       const response = await fetch('/api/calendar/create-event', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(eventData),
+        body: JSON.stringify({
+          ...eventData,
+          tutorId,
+          tutorEmail
+        }),
       });
       
       const result = await response.json();
@@ -305,5 +392,163 @@ export class AvailabilityService {
       isValid: errors.length === 0,
       errors
     };
+  }
+
+  // Obtener disponibilidades desde Firebase
+  static async getAvailabilitiesFromFirebase() {
+    try {
+      const tutorId = localStorage.getItem('userEmail') || '';
+      
+      if (!tutorId) {
+        throw new Error('No se encontró información del usuario');
+      }
+
+      const response = await fetch(`/api/availability?tutorId=${tutorId}`);
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Error al obtener disponibilidades');
+      }
+
+      return {
+        success: true,
+        availabilitySlots: result.availabilities || [],
+        totalEvents: result.totalCount || 0,
+        source: 'firebase'
+      };
+    } catch (error) {
+      console.error('Error fetching availabilities from Firebase:', error);
+      throw error;
+    }
+  }
+
+  // Sincronizar disponibilidades desde Google Calendar hacia Firebase
+  static async syncAvailabilitiesToFirebase() {
+    try {
+      const tutorId = localStorage.getItem('userEmail') || '';
+      const tutorEmail = localStorage.getItem('userEmail') || '';
+      
+      if (!tutorEmail) {
+        throw new Error('No se encontró información del usuario. Por favor, inicia sesión nuevamente.');
+      }
+
+      return await this.syncWithRetry(tutorId, tutorEmail);
+    } catch (error) {
+      console.error('Error syncing availabilities to Firebase:', error);
+      throw error;
+    }
+  }
+
+  // Sincronizar con reintentos automáticos para tokens expirados
+  static async syncWithRetry(tutorId, tutorEmail) {
+    try {
+      const response = await fetch('/api/availability/sync', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          tutorId,
+          tutorEmail
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Error al sincronizar disponibilidades');
+      }
+
+      return result;
+    } catch (error) {
+      console.log('Sync attempt failed, checking if token needs refresh...');
+      
+      // Si es un error de autenticación, intentar renovar el token
+      if (error.message.includes('401') || 
+          error.message.includes('authentication') || 
+          error.message.includes('credential')) {
+        
+        console.log('Attempting to refresh token for sync...');
+        const refreshResult = await this.refreshGoogleToken();
+        
+        if (refreshResult.success) {
+          console.log('Token refreshed, retrying sync...');
+          // Reintentar la sincronización después de renovar el token
+          const response = await fetch('/api/availability/sync', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              tutorId,
+              tutorEmail
+            }),
+          });
+
+          const result = await response.json();
+
+          if (!response.ok) {
+            throw new Error(result.error || 'Error al sincronizar disponibilidades después de renovar token');
+          }
+
+          return result;
+        } else {
+          console.log('Token refresh failed for sync, user needs to reconnect');
+          throw new Error(`Token expirado. ${refreshResult.error}. Por favor, reconecta tu Google Calendar para sincronizar.`);
+        }
+      }
+      
+      // Si no es un error de autenticación, relanzar el error original
+      throw error;
+    }
+  }
+
+  // Obtener disponibilidades por materia (para estudiantes)
+  static async getAvailabilitiesBySubject(subject) {
+    try {
+      const response = await fetch(`/api/availability?subject=${encodeURIComponent(subject)}`);
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Error al obtener disponibilidades');
+      }
+
+      return {
+        success: true,
+        availabilitySlots: result.availabilities || [],
+        totalEvents: result.totalCount || 0,
+        source: 'firebase'
+      };
+    } catch (error) {
+      console.error('Error fetching availabilities by subject:', error);
+      throw error;
+    }
+  }
+
+  // Obtener disponibilidades en un rango de fechas (para estudiantes)
+  static async getAvailabilitiesInRange(startDate, endDate) {
+    try {
+      const params = new URLSearchParams({
+        startDate: startDate,
+        endDate: endDate
+      });
+
+      const response = await fetch(`/api/availability?${params}`);
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Error al obtener disponibilidades');
+      }
+
+      return {
+        success: true,
+        availabilitySlots: result.availabilities || [],
+        totalEvents: result.totalCount || 0,
+        source: 'firebase'
+      };
+    } catch (error) {
+      console.error('Error fetching availabilities in range:', error);
+      throw error;
+    }
   }
 } 

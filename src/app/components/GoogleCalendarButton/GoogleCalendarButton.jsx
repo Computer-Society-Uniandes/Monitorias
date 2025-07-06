@@ -1,169 +1,204 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import './GoogleCalendarButton.css';
 
 export default function GoogleCalendarButton() {
+  const [connectionStatus, setConnectionStatus] = useState('checking'); // 'checking', 'connected', 'disconnected', 'expired'
   const [isLoading, setIsLoading] = useState(false);
-  const [isConnected, setIsConnected] = useState(false);
-  const [checkingConnection, setCheckingConnection] = useState(true);
-
-  // Verificar el estado de conexión al montar el componente
-  useEffect(() => {
-    checkConnectionStatus();
-    
-    // Agregar listener para cuando el usuario regresa a la ventana
-    const handleFocus = () => {
-      console.log('🔍 Window focus event - rechecking connection...');
-      checkConnectionStatus();
-    };
-    
-    // Agregar listener para eventos personalizados de actualización
-    const handleCalendarUpdate = () => {
-      console.log('🔄 Calendar status update event received - rechecking connection...');
-      checkConnectionStatus();
-    };
-    
-    window.addEventListener('focus', handleFocus);
-    window.addEventListener('calendar-status-update', handleCalendarUpdate);
-    
-    return () => {
-      window.removeEventListener('focus', handleFocus);
-      window.removeEventListener('calendar-status-update', handleCalendarUpdate);
-    };
-  }, []);
+  const [lastChecked, setLastChecked] = useState(null);
 
   const checkConnectionStatus = async () => {
     try {
-      setCheckingConnection(true);
-      console.log('🔍 Checking Google Calendar connection status...');
+      setConnectionStatus('checking');
       const response = await fetch('/api/calendar/check-connection');
       const data = await response.json();
-      console.log('Connection status response:', data);
-      setIsConnected(data.connected || false);
-      console.log('Connection status updated:', data.connected || false);
+      
+      if (data.connected) {
+        setConnectionStatus('connected');
+      } else {
+        setConnectionStatus('disconnected');
+      }
+      
+      setLastChecked(new Date());
     } catch (error) {
-      console.error('Error checking connection status:', error);
-      setIsConnected(false);
-    } finally {
-      setCheckingConnection(false);
+      console.error('Error checking Google Calendar connection:', error);
+      setConnectionStatus('disconnected');
     }
   };
 
-  const handleConnectCalendar = () => {
+  const handleConnect = async () => {
     setIsLoading(true);
-    window.location.href = '/api/calendar/auth';
+    try {
+      // Redirigir a la autorización de Google Calendar
+      window.location.href = '/api/calendar/auth';
+    } catch (error) {
+      console.error('Error connecting to Google Calendar:', error);
+      setIsLoading(false);
+    }
   };
 
-  const handleDisconnectCalendar = async () => {
+  const handleDisconnect = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch('/api/calendar/disconnect', {
-        method: 'POST',
-      });
       
-      if (response.ok) {
-        setIsConnected(false);
-        // Disparar evento personalizado para actualizar otros botones
-        window.dispatchEvent(new CustomEvent('calendar-status-update', { 
-          detail: { connected: false } 
-        }));
-        // Opcional: mostrar mensaje de éxito
-        alert('Desconectado de Google Calendar exitosamente');
-      } else {
-        throw new Error('Error al desconectar');
-      }
+      // Limpiar cookies del lado del cliente si es posible
+      document.cookie = 'calendar_access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      document.cookie = 'calendar_refresh_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      
+      setConnectionStatus('disconnected');
+      
+      // Notificar a otros componentes que el estado cambió
+      window.dispatchEvent(new CustomEvent('calendar-status-update'));
+      
+      console.log('Google Calendar desconectado');
     } catch (error) {
-      console.error('Error disconnecting calendar:', error);
-      alert('Error al desconectar de Google Calendar');
+      console.error('Error disconnecting Google Calendar:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  if (checkingConnection) {
-    return (
-      <button
-        disabled
-        className="flex items-center gap-2 px-4 py-2 bg-gray-400 text-white rounded-lg cursor-not-allowed"
-      >
-        <svg
-          className="w-5 h-5 animate-spin"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-        >
-          <circle
-            className="opacity-25"
-            cx="12"
-            cy="12"
-            r="10"
-            stroke="currentColor"
-            strokeWidth="4"
-          ></circle>
-          <path
-            className="opacity-75"
-            fill="currentColor"
-            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-          ></path>
-        </svg>
-        <span>Verificando...</span>
-      </button>
-    );
-  }
+  // Intentar renovar token cuando sea necesario
+  const tryRefreshToken = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch('/api/calendar/refresh-token', {
+        method: 'POST'
+      });
+
+      if (response.ok) {
+        setConnectionStatus('connected');
+        alert('✅ Conexión renovada exitosamente');
+        
+        // Notificar a otros componentes
+        window.dispatchEvent(new CustomEvent('calendar-status-update'));
+      } else {
+        const data = await response.json();
+        if (data.needsReconnection) {
+          setConnectionStatus('expired');
+          
+          const shouldReconnect = window.confirm(
+            '🔑 Tu sesión de Google Calendar ha expirado.\n\n¿Quieres reconectar ahora?'
+          );
+          
+          if (shouldReconnect) {
+            handleConnect();
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error refreshing token:', error);
+      setConnectionStatus('expired');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    checkConnectionStatus();
+    
+    // Verificar cuando la ventana recibe foco (útil después de OAuth)
+    const handleFocus = () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('calendar_connected') === 'true') {
+        checkConnectionStatus();
+        // Limpiar el parámetro de la URL
+        urlParams.delete('calendar_connected');
+        const newUrl = window.location.pathname + 
+          (urlParams.toString() ? '?' + urlParams.toString() : '');
+        window.history.replaceState({}, '', newUrl);
+      }
+    };
+
+    const handleStorageChange = () => {
+      checkConnectionStatus();
+    };
+
+    // Escuchar eventos personalizados de cambio de estado
+    const handleCalendarUpdate = () => {
+      checkConnectionStatus();
+    };
+
+    window.addEventListener('focus', handleFocus);
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('calendar-status-update', handleCalendarUpdate);
+
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('calendar-status-update', handleCalendarUpdate);
+    };
+  }, []);
+
+  const getButtonText = () => {
+    if (isLoading) return '🔄 Cargando...';
+    
+    switch (connectionStatus) {
+      case 'checking':
+        return '🔄 Verificando...';
+      case 'connected':
+        return '✅ Conectado';
+      case 'expired':
+        return '🔑 Sesión Expirada';
+      case 'disconnected':
+      default:
+        return '📅 Conectar Google Calendar';
+    }
+  };
+
+  const getButtonClass = () => {
+    const base = 'google-calendar-btn';
+    switch (connectionStatus) {
+      case 'connected':
+        return `${base} connected`;
+      case 'expired':
+        return `${base} expired`;
+      case 'disconnected':
+      default:
+        return `${base} disconnected`;
+    }
+  };
+
+  const handleButtonClick = () => {
+    if (isLoading) return;
+    
+    switch (connectionStatus) {
+      case 'connected':
+        handleDisconnect();
+        break;
+      case 'expired':
+        tryRefreshToken();
+        break;
+      case 'disconnected':
+      default:
+        handleConnect();
+        break;
+    }
+  };
 
   return (
-    <button
-      onClick={isConnected ? handleDisconnectCalendar : handleConnectCalendar}
-      disabled={isLoading}
-      className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-        isConnected
-          ? 'bg-red-600 text-white hover:bg-red-700'
-          : 'bg-blue-600 text-white hover:bg-blue-700'
-      }`}
-    >
-      {isLoading ? (
-        <>
-          <svg
-            className="w-5 h-5 animate-spin"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="4"
-            ></circle>
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-            ></path>
-          </svg>
-          <span>{isConnected ? 'Desconectando...' : 'Conectando...'}</span>
-        </>
-      ) : (
-        <>
-          <svg
-            className="w-5 h-5"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            {isConnected ? (
-              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
-            ) : (
-              <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z" />
-            )}
-          </svg>
-          <span>
-            {isConnected ? 'Desconectar Google Calendar' : 'Conectar con Google Calendar'}
-          </span>
-        </>
+    <div className="google-calendar-container">
+      <button
+        className={getButtonClass()}
+        onClick={handleButtonClick}
+        disabled={isLoading}
+        title={
+          connectionStatus === 'connected' 
+            ? `Conectado a Google Calendar (verificado: ${lastChecked?.toLocaleTimeString()})`
+            : connectionStatus === 'expired'
+            ? 'Sesión expirada - Haz click para renovar'
+            : 'Conectar con Google Calendar'
+        }
+      >
+        {getButtonText()}
+      </button>
+      
+      {connectionStatus === 'expired' && (
+        <div className="token-expired-notice">
+          <small>⚠️ Tu sesión ha expirado. Haz click para renovar la conexión.</small>
+        </div>
       )}
-    </button>
+    </div>
   );
 } 

@@ -118,6 +118,29 @@
   cursor: not-allowed;
 }
 
+.btn-sync {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+}
+
+.btn-sync:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-1px);
+}
+
+.btn-sync:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 /* Mensaje de error */
 .error-message {
   background: #ffebee;
@@ -134,6 +157,12 @@
   margin: 0;
   color: #c62828;
   font-weight: 500;
+  flex: 1;
+}
+
+.error-actions {
+  display: flex;
+  gap: 10px;
 }
 
 .btn-retry {
@@ -149,6 +178,22 @@
 
 .btn-retry:hover {
   background: #d32f2f;
+}
+
+.btn-reconnect {
+  background: #ff9800;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: background 0.2s ease;
+}
+
+.btn-reconnect:hover {
+  background: #f57c00;
 }
 
 /* Skeleton Loading */
