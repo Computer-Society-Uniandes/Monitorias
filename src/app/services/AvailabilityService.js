@@ -1,6 +1,13 @@
 // Servicio para manejar la disponibilidad del tutor
 export class AvailabilityService {
   
+  // Variables estáticas para control de sincronización automática
+  static autoSyncInterval = null;
+  static lastSyncTimestamp = 0;
+  static syncInProgress = false;
+  static AUTO_SYNC_INTERVAL_MS = 5 * 60 * 1000; // 5 minutos
+  static MIN_SYNC_INTERVAL_MS = 30 * 1000; // Mínimo 30 segundos entre syncs
+
   // Obtener disponibilidad desde Google Calendar
   static async getAvailability(startDate = null, endDate = null, maxResults = 50) {
     try {
@@ -145,6 +152,9 @@ export class AvailabilityService {
       }
       
       const result = await this.getWeeklyAvailability();
+      
+      // Iniciar sincronización automática si está conectado y hay eventos
+      this.startAutoSync();
       
       // Si no hay eventos de disponibilidad, usar mock data como ejemplo
       if (result.availabilitySlots.length === 0) {
@@ -789,6 +799,213 @@ export class AvailabilityService {
     } catch (error) {
       console.error('❌ Error en debugging:', error);
       return { error: error.message };
+    }
+  }
+
+  // Función principal de sincronización automática
+  static async performAutoSync() {
+    // Evitar múltiples sincronizaciones simultáneas
+    if (this.syncInProgress) {
+      console.log('🔄 Sync ya en progreso, saltando...');
+      return { success: false, reason: 'sync_in_progress' };
+    }
+
+    // Verificar intervalo mínimo entre sincronizaciones
+    const now = Date.now();
+    if (now - this.lastSyncTimestamp < this.MIN_SYNC_INTERVAL_MS) {
+      console.log('⏰ Sync demasiado frecuente, saltando...');
+      return { success: false, reason: 'too_frequent' };
+    }
+
+    try {
+      this.syncInProgress = true;
+      console.log('🔄 Iniciando sincronización automática...');
+
+      // Verificar si el usuario está conectado
+      const isConnected = await this.checkConnection();
+      if (!isConnected) {
+        console.log('❌ No hay conexión con Google Calendar, saltando sync automático');
+        return { success: false, reason: 'not_connected' };
+      }
+
+      // Obtener información del usuario
+      const tutorEmail = localStorage.getItem('userEmail') || '';
+      if (!tutorEmail) {
+        console.log('❌ No hay información del usuario, saltando sync automático');
+        return { success: false, reason: 'no_user_info' };
+      }
+
+      // Realizar sincronización inteligente
+      const result = await this.intelligentSync(tutorEmail, tutorEmail);
+      
+      this.lastSyncTimestamp = now;
+      console.log('✅ Sincronización automática completada:', result);
+      
+      return { success: true, result };
+    } catch (error) {
+      console.error('❌ Error en sincronización automática:', error);
+      return { success: false, error: error.message };
+    } finally {
+      this.syncInProgress = false;
+    }
+  }
+
+  // Sincronización inteligente - solo sincroniza lo que no existe en Firebase
+  static async intelligentSync(tutorId, tutorEmail) {
+    try {
+      console.log('🧠 Iniciando sincronización inteligente para:', tutorEmail);
+
+      // 1. Obtener eventos desde Google Calendar (próximos 30 días)
+      const now = new Date();
+      const futureDate = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+      
+      const googleResult = await this.getAvailability(
+        now.toISOString().split('T')[0],
+        futureDate.toISOString().split('T')[0],
+        100
+      );
+
+      if (!googleResult.events || googleResult.events.length === 0) {
+        console.log('📅 No hay eventos en Google Calendar');
+        return { synced: 0, skipped: 0, message: 'No hay eventos para sincronizar' };
+      }
+
+      // 2. Filtrar eventos de disponibilidad
+      const availabilityKeywords = [
+        'disponible', 'libre', 'tutoria', 'tutoría', 'sesión', 'sesion',
+        'clase', 'enseñanza', 'apoyo', 'ayuda', 'consulta', 'available',
+        'free', 'teaching', 'support', 'help', 'consultation'
+      ];
+
+      const availabilityEvents = googleResult.events.filter(event => {
+        if (!event.summary) return false;
+        const summary = event.summary.toLowerCase();
+        return availabilityKeywords.some(keyword => 
+          summary.includes(keyword.toLowerCase())
+        );
+      });
+
+      console.log(`📋 Encontrados ${availabilityEvents.length} eventos de disponibilidad en Google Calendar`);
+
+      if (availabilityEvents.length === 0) {
+        return { synced: 0, skipped: 0, message: 'No hay eventos de disponibilidad para sincronizar' };
+      }
+
+      // 3. Verificar cuáles ya existen en Firebase
+      const existingEvents = new Set();
+      for (const event of availabilityEvents) {
+        try {
+          const exists = await this.checkEventExistsInFirebase(event.id);
+          if (exists) {
+            existingEvents.add(event.id);
+          }
+        } catch (error) {
+          console.warn(`⚠️ Error verificando evento ${event.id}:`, error.message);
+        }
+      }
+
+      console.log(`🔍 ${existingEvents.size} eventos ya existen en Firebase`);
+
+      // 4. Filtrar solo eventos nuevos
+      const newEvents = availabilityEvents.filter(event => !existingEvents.has(event.id));
+      
+      if (newEvents.length === 0) {
+        console.log('✅ Todos los eventos ya están sincronizados');
+        return { 
+          synced: 0, 
+          skipped: availabilityEvents.length, 
+          message: 'Todos los eventos ya están sincronizados' 
+        };
+      }
+
+      console.log(`⬆️ Sincronizando ${newEvents.length} eventos nuevos...`);
+
+      // 5. Sincronizar solo los eventos nuevos
+      const syncResult = await this.syncSpecificEvents(newEvents, tutorId, tutorEmail);
+      
+      return {
+        synced: syncResult.created,
+        skipped: existingEvents.size,
+        updated: syncResult.updated,
+        errors: syncResult.errors.length,
+        message: `Sincronizados ${syncResult.created} eventos nuevos, ${existingEvents.size} ya existían`
+      };
+
+    } catch (error) {
+      console.error('❌ Error en sincronización inteligente:', error);
+      throw error;
+    }
+  }
+
+  // Verificar si un evento existe en Firebase
+  static async checkEventExistsInFirebase(googleEventId) {
+    try {
+      const response = await fetch(`/api/availability/check-event?eventId=${googleEventId}`);
+      if (response.ok) {
+        const result = await response.json();
+        return result.exists;
+      }
+      return false;
+    } catch (error) {
+      console.warn('Error checking event existence:', error);
+      return false;
+    }
+  }
+
+  // Sincronizar eventos específicos
+  static async syncSpecificEvents(events, tutorId, tutorEmail) {
+    try {
+      const response = await fetch('/api/availability/sync-specific', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          tutorId,
+          tutorEmail,
+          events
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Error al sincronizar eventos específicos');
+      }
+
+      return result.syncResults;
+    } catch (error) {
+      console.error('Error syncing specific events:', error);
+      throw error;
+    }
+  }
+
+  // Iniciar sincronización automática
+  static startAutoSync() {
+    // No iniciar si ya está corriendo
+    if (this.autoSyncInterval) {
+      return;
+    }
+
+    console.log('🚀 Iniciando sincronización automática cada', this.AUTO_SYNC_INTERVAL_MS / 1000, 'segundos');
+
+    // Ejecutar primera sincronización después de un delay pequeño
+    setTimeout(() => {
+      this.performAutoSync();
+    }, 10000); // 10 segundos después de cargar
+
+    // Configurar intervalo para sincronización automática
+    this.autoSyncInterval = setInterval(() => {
+      this.performAutoSync();
+    }, this.AUTO_SYNC_INTERVAL_MS);
+  }
+
+  // Detener sincronización automática
+  static stopAutoSync() {
+    if (this.autoSyncInterval) {
+      clearInterval(this.autoSyncInterval);
+      this.autoSyncInterval = null;
+      console.log('⏹️ Sincronización automática detenida');
     }
   }
 } 

@@ -24,6 +24,7 @@ export default function DisponibilidadSummary() {
     
     return () => {
       window.removeEventListener('calendar-status-update', handleCalendarUpdate);
+      // No detenemos el auto-sync aquí ya que puede estar siendo usado por otros componentes
     };
   }, []);
 
