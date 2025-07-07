@@ -425,80 +425,136 @@ export class AvailabilityService {
   // Sincronizar disponibilidades desde Google Calendar hacia Firebase
   static async syncAvailabilitiesToFirebase() {
     try {
-      const tutorId = localStorage.getItem('userEmail') || '';
+      // Obtener información del usuario desde localStorage
       const tutorEmail = localStorage.getItem('userEmail') || '';
+      const tutorId = tutorEmail; // Usar email como ID por consistencia
       
-      if (!tutorEmail) {
-        throw new Error('No se encontró información del usuario. Por favor, inicia sesión nuevamente.');
+      console.log('Starting sync process for tutor:', tutorEmail);
+
+      // Validar información del usuario
+      if (!tutorEmail || tutorEmail.trim() === '') {
+        throw new Error('No se encontró información del usuario en el almacenamiento local. Por favor, inicia sesión nuevamente.');
       }
 
-      return await this.syncWithRetry(tutorId, tutorEmail);
+      // Validar formato de email
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(tutorEmail)) {
+        throw new Error('El email del usuario no tiene un formato válido. Por favor, inicia sesión nuevamente.');
+      }
+
+      // Verificar conexión antes de intentar sincronizar
+      const isConnected = await this.checkConnection();
+      if (!isConnected) {
+        throw new Error('No hay conexión activa con Google Calendar. Por favor, conecta tu calendario primero.');
+      }
+
+      console.log('Starting sync with retry for tutor:', tutorEmail);
+      const result = await this.syncWithRetry(tutorId, tutorEmail);
+      
+      console.log('Sync completed successfully:', result);
+      return result;
     } catch (error) {
       console.error('Error syncing availabilities to Firebase:', error);
-      throw error;
+      
+      // Añadir contexto adicional al error
+      if (error.message.includes('localStorage') || error.message.includes('almacenamiento')) {
+        throw new Error(`Error de autenticación: ${error.message}`);
+      } else if (error.message.includes('conexión') || error.message.includes('Calendar')) {
+        throw new Error(`Error de conexión con Google Calendar: ${error.message}`);
+      } else {
+        throw new Error(`Error durante la sincronización: ${error.message}`);
+      }
     }
   }
 
   // Sincronizar con reintentos automáticos para tokens expirados
-  static async syncWithRetry(tutorId, tutorEmail) {
+  static async syncWithRetry(tutorId, tutorEmail, retryCount = 0) {
+    const maxRetries = 2;
+    
     try {
+      // Validar parámetros antes de hacer la llamada
+      if (!tutorId || !tutorEmail) {
+        throw new Error('tutorId y tutorEmail son requeridos para la sincronización');
+      }
+
+      console.log(`Sync attempt ${retryCount + 1} for tutor:`, tutorEmail);
+
+      const requestBody = {
+        tutorId,
+        tutorEmail
+      };
+
+      console.log('Sending sync request with body:', requestBody);
+
       const response = await fetch('/api/availability/sync', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          tutorId,
-          tutorEmail
-        }),
+        body: JSON.stringify(requestBody),
       });
 
-      const result = await response.json();
+      console.log('Sync response status:', response.status);
+
+      let result;
+      try {
+        result = await response.json();
+      } catch (parseError) {
+        console.error('Failed to parse sync response:', parseError);
+        throw new Error('Respuesta inválida del servidor de sincronización');
+      }
+
+      console.log('Sync response:', result);
 
       if (!response.ok) {
-        throw new Error(result.error || 'Error al sincronizar disponibilidades');
+        // Manejar diferentes tipos de errores del servidor
+        if (response.status === 401 && result.needsReconnection) {
+          throw new Error('NEEDS_RECONNECTION: ' + (result.error || 'Token expirado'));
+        }
+        throw new Error(result.error || `Error del servidor (${response.status})`);
       }
 
       return result;
     } catch (error) {
-      console.log('Sync attempt failed, checking if token needs refresh...');
+      console.error(`Sync attempt ${retryCount + 1} failed:`, error.message);
       
-      // Si es un error de autenticación, intentar renovar el token
-      if (error.message.includes('401') || 
+      // Si es un error de reconexión necesaria, no reintentar
+      if (error.message.includes('NEEDS_RECONNECTION')) {
+        throw new Error(error.message.replace('NEEDS_RECONNECTION: ', '') + ' Por favor, reconecta tu Google Calendar.');
+      }
+      
+      // Si es un error de autenticación y aún tenemos reintentos disponibles
+      if ((error.message.includes('401') || 
           error.message.includes('authentication') || 
-          error.message.includes('credential')) {
+          error.message.includes('credential') ||
+          error.message.includes('Token expirado')) && 
+          retryCount < maxRetries) {
         
-        console.log('Attempting to refresh token for sync...');
-        const refreshResult = await this.refreshGoogleToken();
+        console.log(`Attempting to refresh token for sync (retry ${retryCount + 1})...`);
         
-        if (refreshResult.success) {
-          console.log('Token refreshed, retrying sync...');
-          // Reintentar la sincronización después de renovar el token
-          const response = await fetch('/api/availability/sync', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              tutorId,
-              tutorEmail
-            }),
-          });
-
-          const result = await response.json();
-
-          if (!response.ok) {
-            throw new Error(result.error || 'Error al sincronizar disponibilidades después de renovar token');
+        try {
+          const refreshResult = await this.refreshGoogleToken();
+          
+          if (refreshResult.success) {
+            console.log('Token refreshed successfully, retrying sync...');
+            // Reintentar la sincronización con contador incrementado
+            return await this.syncWithRetry(tutorId, tutorEmail, retryCount + 1);
+          } else {
+            console.log('Token refresh failed for sync, user needs to reconnect');
+            throw new Error(`Token expirado y no se pudo renovar. ${refreshResult.error || 'Error desconocido'}. Por favor, reconecta tu Google Calendar.`);
           }
-
-          return result;
-        } else {
-          console.log('Token refresh failed for sync, user needs to reconnect');
-          throw new Error(`Token expirado. ${refreshResult.error}. Por favor, reconecta tu Google Calendar para sincronizar.`);
+        } catch (refreshError) {
+          console.error('Error durante refresh de token:', refreshError);
+          throw new Error(`Error renovando token: ${refreshError.message}. Por favor, reconecta tu Google Calendar.`);
         }
       }
       
-      // Si no es un error de autenticación, relanzar el error original
+      // Si no es un error de autenticación o ya agotamos los reintentos
+      if (retryCount >= maxRetries) {
+        throw new Error(`Sincronización falló después de ${maxRetries + 1} intentos: ${error.message}`);
+      }
+      
+      // Para otros errores, relanzar el error original
       throw error;
     }
   }
@@ -549,6 +605,190 @@ export class AvailabilityService {
     } catch (error) {
       console.error('Error fetching availabilities in range:', error);
       throw error;
+    }
+  }
+
+  // Función de testing y debugging para verificar la sincronización completa
+  static async testFirebaseSync() {
+    console.log('🔄 Iniciando test completo de sincronización con Firebase...');
+    
+    const testResults = {
+      userValidation: false,
+      connectionCheck: false,
+      googleCalendarAccess: false,
+      firebaseSync: false,
+      firebaseRead: false,
+      errors: [],
+      details: {}
+    };
+
+    try {
+      // 1. Validar información del usuario
+      console.log('1️⃣ Validando información del usuario...');
+      const tutorEmail = localStorage.getItem('userEmail') || '';
+      const tutorId = tutorEmail;
+
+      if (!tutorEmail) {
+        throw new Error('No se encontró información del usuario');
+      }
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(tutorEmail)) {
+        throw new Error('Email inválido');
+      }
+
+      testResults.userValidation = true;
+      testResults.details.userEmail = tutorEmail;
+      console.log('✅ Usuario validado:', tutorEmail);
+
+      // 2. Verificar conexión con Google Calendar
+      console.log('2️⃣ Verificando conexión con Google Calendar...');
+      const isConnected = await this.checkConnection();
+      
+      if (!isConnected) {
+        throw new Error('No hay conexión con Google Calendar');
+      }
+
+      testResults.connectionCheck = true;
+      console.log('✅ Conexión con Google Calendar verificada');
+
+      // 3. Probar acceso a Google Calendar
+      console.log('3️⃣ Probando acceso a eventos de Google Calendar...');
+      try {
+        const now = new Date();
+        const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+        
+        const googleResult = await this.getAvailability(
+          now.toISOString().split('T')[0],
+          nextWeek.toISOString().split('T')[0],
+          10
+        );
+
+        testResults.googleCalendarAccess = true;
+        testResults.details.googleEvents = googleResult.totalEvents || 0;
+        console.log(`✅ Google Calendar accesible - ${googleResult.totalEvents} eventos encontrados`);
+      } catch (calendarError) {
+        console.error('❌ Error accediendo a Google Calendar:', calendarError.message);
+        testResults.errors.push(`Google Calendar: ${calendarError.message}`);
+      }
+
+      // 4. Probar sincronización con Firebase
+      console.log('4️⃣ Probando sincronización con Firebase...');
+      try {
+        const syncResult = await this.syncWithRetry(tutorId, tutorEmail);
+        
+        testResults.firebaseSync = true;
+        testResults.details.syncResults = {
+          created: syncResult.syncResults?.created || 0,
+          updated: syncResult.syncResults?.updated || 0,
+          totalProcessed: syncResult.syncResults?.totalProcessed || 0
+        };
+        console.log('✅ Sincronización con Firebase exitosa:', testResults.details.syncResults);
+      } catch (syncError) {
+        console.error('❌ Error en sincronización:', syncError.message);
+        testResults.errors.push(`Sync: ${syncError.message}`);
+      }
+
+      // 5. Verificar lectura desde Firebase
+      console.log('5️⃣ Verificando lectura desde Firebase...');
+      try {
+        const firebaseResult = await this.getAvailabilitiesFromFirebase();
+        
+        testResults.firebaseRead = true;
+        testResults.details.firebaseEvents = firebaseResult.totalEvents || 0;
+        console.log(`✅ Lectura desde Firebase exitosa - ${firebaseResult.totalEvents} eventos`);
+      } catch (readError) {
+        console.error('❌ Error leyendo desde Firebase:', readError.message);
+        testResults.errors.push(`Firebase Read: ${readError.message}`);
+      }
+
+    } catch (error) {
+      console.error('❌ Error en test:', error.message);
+      testResults.errors.push(`General: ${error.message}`);
+    }
+
+    // Resumen de resultados
+    const allPassed = testResults.userValidation && 
+                     testResults.connectionCheck && 
+                     testResults.googleCalendarAccess && 
+                     testResults.firebaseSync && 
+                     testResults.firebaseRead;
+
+    console.log('\n📊 RESUMEN DEL TEST:');
+    console.log('👤 Validación usuario:', testResults.userValidation ? '✅' : '❌');
+    console.log('🔗 Conexión Google Calendar:', testResults.connectionCheck ? '✅' : '❌');
+    console.log('📅 Acceso Google Calendar:', testResults.googleCalendarAccess ? '✅' : '❌');
+    console.log('🔄 Sincronización Firebase:', testResults.firebaseSync ? '✅' : '❌');
+    console.log('📖 Lectura Firebase:', testResults.firebaseRead ? '✅' : '❌');
+    console.log('\n' + (allPassed ? '🎉 TODOS LOS TESTS PASARON' : '⚠️ ALGUNOS TESTS FALLARON'));
+
+    if (testResults.errors.length > 0) {
+      console.log('\n❌ Errores encontrados:');
+      testResults.errors.forEach((error, index) => {
+        console.log(`${index + 1}. ${error}`);
+      });
+    }
+
+    if (testResults.details.syncResults) {
+      console.log('\n📈 Detalles de sincronización:');
+      console.log(`- Creados: ${testResults.details.syncResults.created}`);
+      console.log(`- Actualizados: ${testResults.details.syncResults.updated}`);
+      console.log(`- Total procesados: ${testResults.details.syncResults.totalProcessed}`);
+    }
+
+    return {
+      success: allPassed,
+      results: testResults,
+      summary: {
+        totalTests: 5,
+        passed: [
+          testResults.userValidation,
+          testResults.connectionCheck,
+          testResults.googleCalendarAccess,
+          testResults.firebaseSync,
+          testResults.firebaseRead
+        ].filter(Boolean).length,
+        errors: testResults.errors
+      }
+    };
+  }
+
+  // Función auxiliar para debugging de conexión
+  static async debugConnection() {
+    console.log('🔍 Debugging conexión con Google Calendar...');
+    
+    try {
+      // Verificar cookies
+      const cookieStore = document.cookie;
+      const hasAccessToken = cookieStore.includes('calendar_access_token');
+      const hasRefreshToken = cookieStore.includes('calendar_refresh_token');
+      
+      console.log('🍪 Cookies:');
+      console.log('- Access Token:', hasAccessToken ? '✅ Presente' : '❌ Ausente');
+      console.log('- Refresh Token:', hasRefreshToken ? '✅ Presente' : '❌ Ausente');
+
+      // Probar endpoint de verificación
+      const checkResponse = await fetch('/api/calendar/check-connection');
+      const checkResult = await checkResponse.json();
+      
+      console.log('🔗 Check Connection API:', checkResult);
+
+      // Probar refresh de token si es necesario
+      if (!checkResult.connected && hasRefreshToken) {
+        console.log('🔄 Intentando refresh de token...');
+        const refreshResponse = await fetch('/api/calendar/refresh-token', { method: 'POST' });
+        const refreshResult = await refreshResponse.json();
+        console.log('🔄 Refresh Token Result:', refreshResult);
+      }
+
+      return {
+        cookies: { hasAccessToken, hasRefreshToken },
+        connectionCheck: checkResult,
+        connected: checkResult.connected
+      };
+    } catch (error) {
+      console.error('❌ Error en debugging:', error);
+      return { error: error.message };
     }
   }
 } 

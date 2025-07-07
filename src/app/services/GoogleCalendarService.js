@@ -61,9 +61,90 @@ export const getTokens = async (code) => {
   }
 };
 
-export const listEvents = async (accessToken, timeMin, timeMax, maxResults = 10) => {
+// Función auxiliar para manejar refresh de tokens automáticamente
+const handleTokenRefresh = async (accessToken) => {
   try {
+    // Intentar usar el token actual primero
     oauth2Client.setCredentials({ access_token: accessToken });
+    return { success: true, refreshed: false };
+  } catch (error) {
+    console.log('Token may be expired, attempting refresh...');
+    
+    try {
+      // Intentar refresh del token llamando al endpoint de refresh
+      const response = await fetch('/api/calendar/refresh-token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      if (response.ok) {
+        console.log('Token refreshed successfully');
+        return { success: true, refreshed: true };
+      } else {
+        const errorData = await response.json();
+        console.error('Token refresh failed:', errorData);
+        return { 
+          success: false, 
+          error: errorData.error,
+          needsReconnection: errorData.needsReconnection 
+        };
+      }
+    } catch (refreshError) {
+      console.error('Error during token refresh:', refreshError);
+      return { 
+        success: false, 
+        error: 'Failed to refresh token',
+        needsReconnection: true 
+      };
+    }
+  }
+};
+
+// Función wrapper para ejecutar operaciones con retry automático
+const executeWithRetry = async (operation, accessToken, operationName = 'Google Calendar operation') => {
+  try {
+    // Intentar configurar el token
+    const tokenResult = await handleTokenRefresh(accessToken);
+    if (!tokenResult.success) {
+      throw new Error(`Authentication failed: ${tokenResult.error}`);
+    }
+    
+    // Ejecutar la operación
+    return await operation();
+  } catch (error) {
+    console.error(`${operationName} failed:`, error);
+    
+    // Si es un error de autenticación, intentar refresh y retry
+    if (error.code === 401 || error.message.includes('authentication') || error.message.includes('credential')) {
+      console.log(`${operationName} failed with auth error, attempting token refresh...`);
+      
+      try {
+        const refreshResponse = await fetch('/api/calendar/refresh-token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        
+        if (refreshResponse.ok) {
+          console.log(`Token refreshed, retrying ${operationName}...`);
+          // Retry la operación después del refresh exitoso
+          return await operation();
+        } else {
+          const errorData = await refreshResponse.json();
+          throw new Error(`Token refresh failed: ${errorData.error}. Please reconnect your Google Calendar.`);
+        }
+      } catch (refreshError) {
+        console.error('Token refresh attempt failed:', refreshError);
+        throw new Error(`Authentication expired. Please reconnect your Google Calendar. Details: ${refreshError.message}`);
+      }
+    }
+    
+    // Si no es un error de autenticación, relanzar el error original
+    throw error;
+  }
+};
+
+export const listEvents = async (accessToken, timeMin, timeMax, maxResults = 10) => {
+  const operation = async () => {
     const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
     
     const response = await calendar.events.list({
@@ -76,15 +157,13 @@ export const listEvents = async (accessToken, timeMin, timeMax, maxResults = 10)
     });
 
     return response.data.items;
-  } catch (error) {
-    console.error('Error fetching events:', error);
-    throw error;
-  }
+  };
+
+  return executeWithRetry(operation, accessToken, 'List events');
 };
 
 export const createEvent = async (accessToken, event) => {
-  try {
-    oauth2Client.setCredentials({ access_token: accessToken });
+  const operation = async () => {
     const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
     
     const response = await calendar.events.insert({
@@ -92,15 +171,13 @@ export const createEvent = async (accessToken, event) => {
       resource: event,
     });
     return response.data;
-  } catch (error) {
-    console.error('Error creating event:', error);
-    throw error;
-  }
+  };
+
+  return executeWithRetry(operation, accessToken, 'Create event');
 };
 
 export const deleteEvent = async (accessToken, eventId) => {
-  try {
-    oauth2Client.setCredentials({ access_token: accessToken });
+  const operation = async () => {
     const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
     
     await calendar.events.delete({
@@ -108,15 +185,13 @@ export const deleteEvent = async (accessToken, eventId) => {
       eventId: eventId,
     });
     return true;
-  } catch (error) {
-    console.error('Error deleting event:', error);
-    throw error;
-  }
+  };
+
+  return executeWithRetry(operation, accessToken, 'Delete event');
 };
 
 export const getFreeBusy = async (accessToken, timeMin, timeMax) => {
-  try {
-    oauth2Client.setCredentials({ access_token: accessToken });
+  const operation = async () => {
     const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
     
     const response = await calendar.freebusy.query({
@@ -127,8 +202,7 @@ export const getFreeBusy = async (accessToken, timeMin, timeMax) => {
       },
     });
     return response.data.calendars.primary.busy;
-  } catch (error) {
-    console.error('Error getting free/busy information:', error);
-    throw error;
-  }
+  };
+
+  return executeWithRetry(operation, accessToken, 'Get free/busy');
 }; 

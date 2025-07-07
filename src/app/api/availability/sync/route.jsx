@@ -15,13 +15,35 @@ export async function POST(request) {
       }, { status: 401 });
     }
 
-    const body = await request.json();
+    // Mejorar validación del body
+    let body;
+    try {
+      const requestText = await request.text();
+      console.log('Request body text:', requestText);
+      
+      if (!requestText || requestText.trim() === '') {
+        console.log('Empty request body received');
+        return NextResponse.json({ 
+          error: 'Request body is empty. Please provide tutorId and tutorEmail.'
+        }, { status: 400 });
+      }
+      
+      body = JSON.parse(requestText);
+    } catch (parseError) {
+      console.error('JSON parsing error:', parseError);
+      return NextResponse.json({ 
+        error: 'Invalid JSON in request body. Please check the request format.',
+        details: parseError.message
+      }, { status: 400 });
+    }
+
     const { tutorId, tutorEmail, startDate, endDate, forceSync = false } = body;
 
     // Validar información del tutor
     if (!tutorId || !tutorEmail) {
       return NextResponse.json({ 
-        error: 'Información del tutor es requerida (tutorId, tutorEmail)'
+        error: 'Información del tutor es requerida (tutorId, tutorEmail)',
+        received: { tutorId: !!tutorId, tutorEmail: !!tutorEmail }
       }, { status: 400 });
     }
 
@@ -35,8 +57,33 @@ export async function POST(request) {
     console.log('Time range:', timeMin, 'to', timeMax);
     console.log('Tutor:', tutorId, tutorEmail);
 
-    // Obtener eventos desde Google Calendar
-    const googleEvents = await listEvents(accessToken.value, timeMin, timeMax, 100);
+    // Obtener eventos desde Google Calendar con manejo mejorado de errores
+    let googleEvents;
+    try {
+      googleEvents = await listEvents(accessToken.value, timeMin, timeMax, 100);
+    } catch (calendarError) {
+      console.error('Google Calendar API error:', calendarError);
+      
+      // Manejar errores específicos de Google Calendar
+      if (calendarError.code === 401 || calendarError.message.includes('authentication')) {
+        return NextResponse.json({ 
+          success: false,
+          error: 'Token de acceso expirado. Por favor, vuelve a conectar tu calendario.',
+          needsReconnection: true
+        }, { status: 401 });
+      }
+      
+      return NextResponse.json({ 
+        success: false,
+        error: `Error al acceder a Google Calendar: ${calendarError.message}`,
+        syncResults: {
+          created: 0,
+          updated: 0,
+          errors: [{ error: calendarError.message }],
+          totalProcessed: 0
+        }
+      }, { status: 500 });
+    }
     
     console.log(`Found ${googleEvents.length} events in Google Calendar`);
 
