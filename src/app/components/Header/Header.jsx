@@ -1,47 +1,27 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import "./Header.css";
-import { UserRound, ChevronDown } from "lucide-react";
+import { UserRound } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import routes from "app/routes";
+import { useAuth } from "../../context/AuthContext";
+import routes from "../../../routes";
 
 export default function Header() {
   const router = useRouter();
-  const [mounted, setMounted]     = useState(false);
-  const [isLogged, setIsLogged]   = useState(false);
-  const [role, setRole]           = useState("Student");          
-  const [open, setOpen]           = useState(false);      
-  const dropRef                   = useRef(null);
+  const { user, logout } = useAuth();
+  const [mounted, setMounted] = useState(false);
 
-  /* Leer flags de localStorage solo en cliente */
   useEffect(() => {
     setMounted(true);
-    setIsLogged(localStorage.getItem("isLoggedIn") === "true");
-
-    const storedRole = localStorage.getItem("rol");
-    if (storedRole === "Tutor" || storedRole === "student") {
-      setRole(storedRole);
-    }
   }, []);
-
-  /* Cerrar dropdown al hacer click fuera */
-  useEffect(() => {
-    const handleClick = e => {
-      if (dropRef.current && !dropRef.current.contains(e.target)) setOpen(false);
-    };
-    if (open) document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, [open]);
 
   if (!mounted) return null;
 
-  /* Cambia rol y guarda en localStorage */
-  const selectRole = newRole => {
-    setRole(newRole);
-    localStorage.setItem("rol", newRole);
-    setOpen(false);
+  const handleLogout = () => {
+    logout();
+    router.push(routes.LOGIN);
   };
 
   return (
@@ -50,49 +30,53 @@ export default function Header() {
         Calico
       </Link>
 
-      <nav className="navbar">
-        <Link href={routes.HOME}>Inicio</Link>
-        <Link href={routes.EXPLORE}>Explorar Materias</Link>
-        <Link href="/">Buscar Tutores</Link>
-        <Link href="/">Acerca de</Link>
+      <nav className={`navbar ${user.isLoggedIn && user.isTutor ? 'navbar-tutor' : 'navbar-student'}`}>
+        {user.isLoggedIn && user.isTutor ? (
+          // Navegación para tutores
+          <>
+            <Link href={routes.TUTOR_INICIO}>Inicio</Link>
+            <Link href={routes.TUTOR_MIS_TUTORIAS}>Mis tutorías</Link>
+            <Link href={routes.TUTOR_MATERIAS}>Materias</Link>
+            <Link href={routes.TUTOR_DISPONIBILIDAD}>Disponibilidad</Link>
+            <Link href={routes.TUTOR_PAGOS}>Pagos</Link>
+          </>
+        ) : (
+          // Navegación para estudiantes y usuarios no logueados
+          <>
+            <Link href={routes.HOME}>Inicio</Link>
+            <Link href={routes.EXPLORE}>Explorar Materias</Link>
+            <Link href="/">Buscar Tutores</Link>
+            <Link href="/">Acerca de</Link>
+          </>
+        )}
       </nav>
 
       {/* ───────────── BOTONES DERECHA ───────────── */}
       <div className="right-block">
-        {/* Dropdown de rol: visible siempre */}
-        <div
-          className={`role-dropdown ${open ? "open" : ""}`}
-          ref={dropRef}
-          onClick={() => setOpen(o => !o)}
-        >
-          <button className="role-btn">
-            {role === "Tutor" ? "Tutor" : "Estudiante"}
-            <ChevronDown size={16} />
-          </button>
+        {/* Mostrar rol actual solo si está logueado */}
+        {user.isLoggedIn && (
+          <div className="role-indicator">
+            <span className={`role-badge ${user.isTutor ? 'tutor' : 'student'}`}>
+              {user.isTutor ? "Tutor" : "Estudiante"}
+            </span>
+          </div>
+        )}
 
-          <ul className="role-menu">
-            <li
-              className={role === "Student" ? "active" : ""}
-              onClick={() => selectRole("student")}
+        {user.isLoggedIn ? (
+          <div className="user-actions">
+            <button
+              className="perfil"
+              onClick={() => router.push(routes.PROFILE)}
             >
-              Estudiante
-            </li>
-            <li
-              className={role === "Tutor" ? "active" : ""}
-              onClick={() => selectRole("Tutor")}
+              Tu Perfil <UserRound size={18} />
+            </button>
+            <button
+              className="btn-logout"
+              onClick={handleLogout}
             >
-              Tutor
-            </li>
-          </ul>
-        </div>
-
-        {isLogged ? (
-          <button
-            className="perfil"
-            onClick={() => router.push(routes.PROFILE)}
-          >
-            Tu Perfil <UserRound size={18} />
-          </button>
+              Cerrar Sesión
+            </button>
+          </div>
         ) : (
           <div className="auth-buttons">
             <button
