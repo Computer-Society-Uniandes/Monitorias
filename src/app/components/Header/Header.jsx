@@ -45,7 +45,7 @@ export default function Header() {
           <>
             <Link href={routes.HOME}>Inicio</Link>
             <Link href={routes.EXPLORE}>Explorar Materias</Link>
-            <Link href="/">Buscar Tutores</Link>
+            <Link href={routes.SEARCH_TUTORS}>Buscar Tutores</Link>
             <Link href="/">Acerca de</Link>
           </>
         )}

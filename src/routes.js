@@ -2,6 +2,7 @@ const routes = {
     LANDING:"/",
     HOME:"/home",
     EXPLORE:"/home/explore",
+    SEARCH_TUTORS:"/home/buscar-tutores",
     LOGIN:"/auth/login",
     REGISTER:"/auth/register",
     PROFILE: "/home/profile",
