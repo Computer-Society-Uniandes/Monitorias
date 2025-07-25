@@ -154,20 +154,6 @@ export default function MisTutorias() {
       {/* Resumen de Disponibilidad */}
       <DisponibilidadSummary />
 
-      {/* Notas de desarrollo */}
-      <div className="bg-gray-50 rounded-xl p-6 border-l-4 border-gray-400 mt-8">
-        <h3 className="text-lg font-semibold text-gray-700 mb-2">
-          🚧 Funcionalidades a Implementar
-        </h3>
-        <ul className="list-disc list-inside text-gray-600 space-y-1">
-          <li>CRUD completo de tutorías (crear, editar, cancelar)</li>
-          <li>Calendario interactivo para gestionar horarios</li>
-          <li>Sistema de notificaciones automáticas</li>
-          <li>Chat integrado con estudiantes</li>
-          <li>Reportes y análisis de sesiones</li>
-          <li>Integración con sistema de pagos</li>
-        </ul>
-      </div>
     </div>
   );
 } 

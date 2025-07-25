@@ -161,18 +161,6 @@ export default function TutorMaterias() {
         </div>
       </div>
 
-      {/* Notas de desarrollo */}
-      <div className="bg-gray-50 rounded-xl p-6 border-l-4 border-gray-400 mt-8">
-        <h3 className="text-lg font-semibold text-gray-700 mb-2">
-          🚧 Funcionalidades a Implementar
-        </h3>
-        <ul className="list-disc list-inside text-gray-600 space-y-1">
-          <li>CRUD completo de materias (agregar, editar, eliminar)</li>
-          <li>Configuración de tarifas dinámicas por materia</li>
-          <li>Sistema de demanda en tiempo real</li>
-          <li>Análisis de rendimiento por materia</li>
-        </ul>
-      </div>
     </div>
   );
 } 

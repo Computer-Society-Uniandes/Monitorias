@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "firebase": "^11.5.0",
+    "dotenv": "^17.2.1",
+    "firebase": "^11.10.0",
+    "firebase-admin": "^13.4.0",
     "googleapis": "^150.0.1",
     "lucide-react": "^0.485.0",
     "next": "15.2.4",
@@ -13,10 +15,11 @@
     "react-icons": "^5.5.0"
   },
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "firebase-init": "npm install firebase && node scripts/firebase-init-data.js"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

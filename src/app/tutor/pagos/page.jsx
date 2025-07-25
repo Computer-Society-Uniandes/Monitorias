@@ -210,21 +210,6 @@ export default function TutorPagos() {
         </div>
       </div>
 
-      {/* Notas de desarrollo */}
-      <div className="bg-gray-50 rounded-xl p-6 border-l-4 border-gray-400">
-        <h3 className="text-lg font-semibold text-gray-700 mb-2">
-          🚧 Funcionalidades a Implementar
-        </h3>
-        <ul className="list-disc list-inside text-gray-600 space-y-1">
-          <li>Integración con pasarelas de pago (PSE, Tarjetas, Nequi)</li>
-          <li>Sistema de retiros automáticos y manuales</li>
-          <li>Reportes financieros detallados con gráficos</li>
-          <li>Configuración de tarifas personalizadas</li>
-          <li>Facturación electrónica automática</li>
-          <li>Notificaciones de pagos en tiempo real</li>
-          <li>Sistema de disputas y reembolsos</li>
-        </ul>
-      </div>
     </div>
   );
 } 
