@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import WelcomeBanner from "../Welcome/Welcome";
 import BoxNewSubject from "../BoxNewSubject/BoxNewSubject";
 import GoogleCalendarButton from "../GoogleCalendarButton/GoogleCalendarButton";
+import TutoringSummary from "../TutoringSummary/TutoringSummary";
 import { getMaterias } from "../../services/HomeService.service";
 import routes from "../../../routes";
 
@@ -135,33 +136,12 @@ export default function TutorHome({ userName }) {
         </div>
 
         {/* Próximas tutorías */}
-        <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-800">
-              Próximas Tutorías 📚
-            </h2>
-            <Link 
-              href={routes.TUTOR_MIS_TUTORIAS}
-              className="text-blue-600 hover:text-blue-800 font-medium"
-            >
-              Ver todas →
-            </Link>
-          </div>
-          
-          <div className="space-y-4">
-            <div className="border-l-4 border-blue-500 pl-4 py-3 bg-blue-50 rounded-r-lg">
-              <p className="font-semibold text-gray-700">Cálculo Diferencial</p>
-              <p className="text-sm text-gray-600">Hoy 3:00 PM - 4:00 PM</p>
-              <p className="text-sm text-blue-600">Estudiante: María García</p>
-            </div>
-            
-            <div className="border-l-4 border-green-500 pl-4 py-3 bg-green-50 rounded-r-lg">
-              <p className="font-semibold text-gray-700">Física I</p>
-              <p className="text-sm text-gray-600">Mañana 10:00 AM - 11:30 AM</p>
-              <p className="text-sm text-green-600">Estudiante: Carlos López</p>
-            </div>
-          </div>
-        </div>
+        <TutoringSummary 
+          userType="tutor"
+          title="Próximas Tutorías 📚"
+          linkText="Ver todas"
+          linkHref={routes.TUTOR_MIS_TUTORIAS}
+        />
 
         {/* Nota de funcionalidades */}
         <div className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl p-6 border-l-4 border-blue-400">
