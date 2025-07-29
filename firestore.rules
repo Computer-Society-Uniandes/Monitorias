@@ -52,6 +52,21 @@ service cloud.firestore {
          (request.resource.data.isBooked == true && request.resource.data.bookedBy == request.auth.token.email));
     }
     
+    // Reservas de slots específicos de 1 hora
+    match /slot_bookings/{bookingId} {
+      allow read: if request.auth != null && 
+        (request.auth.token.email == resource.data.tutorEmail || 
+         request.auth.token.email == resource.data.studentEmail);
+      allow create: if request.auth != null &&
+        request.auth.token.email == request.resource.data.studentEmail;
+      allow update: if request.auth != null && 
+        (request.auth.token.email == resource.data.tutorEmail || 
+         request.auth.token.email == resource.data.studentEmail);
+      allow delete: if request.auth != null && 
+        (request.auth.token.email == resource.data.tutorEmail || 
+         request.auth.token.email == resource.data.studentEmail);
+    }
+    
     // Sesiones de tutoría
     match /tutoring_sessions/{sessionId} {
       allow read: if request.auth != null && 
