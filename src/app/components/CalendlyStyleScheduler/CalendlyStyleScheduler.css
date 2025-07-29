@@ -25,11 +25,43 @@
   margin-bottom: 4px;
 }
 
+.slot-info {
+  font-size: 14px;
+  color: #059669;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
 .price-info {
   font-size: 14px;
   color: #059669;
   font-weight: 500;
-  margin: 0;
+  margin-bottom: 8px;
+}
+
+.slots-summary {
+  margin-top: 12px;
+}
+
+.slots-count {
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Loading states */
+.loading-spinner-large {
+  font-size: 32px;
+  animation: spin 1s linear infinite;
+  margin: 20px 0;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 /* Messages */
@@ -80,7 +112,12 @@
 
 .no-availability-message p {
   color: #6b7280;
-  margin: 0;
+  margin: 4px 0;
+}
+
+.no-availability-message .hint {
+  font-style: italic;
+  font-size: 14px;
 }
 
 /* Available dates */
@@ -120,30 +157,33 @@
   text-transform: capitalize;
 }
 
-.slots-count {
-  font-size: 14px;
+.date-header .slots-count {
+  font-size: 12px;
   color: #6b7280;
   background-color: #e5e7eb;
-  padding: 4px 12px;
-  border-radius: 20px;
+  padding: 4px 10px;
+  border-radius: 16px;
 }
 
-/* Time slots */
+/* Time slots - Updated for hourly slots */
 .time-slots {
   padding: 16px;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 12px;
 }
 
 .time-slot {
   border: 2px solid #e5e7eb;
   border-radius: 8px;
-  padding: 16px;
+  padding: 14px;
   cursor: pointer;
   transition: all 0.2s ease;
   background-color: white;
   position: relative;
+  min-height: 100px;
+  display: flex;
+  flex-direction: column;
 }
 
 .time-slot:hover {
@@ -159,37 +199,61 @@
   color: white;
 }
 
+.time-slot.hourly-slot {
+  border-left: 4px solid #10b981;
+}
+
+.time-slot.hourly-slot.selected {
+  border-left: 4px solid #ffffff;
+}
+
+/* Slot time display */
 .slot-time {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
+  gap: 6px;
+  margin-bottom: 10px;
+  font-weight: 600;
 }
 
 .start-time {
   font-size: 16px;
-  font-weight: 600;
 }
 
-.duration {
-  font-size: 12px;
+.end-time {
+  font-size: 14px;
   opacity: 0.8;
 }
 
-.time-slot.selected .duration {
-  opacity: 0.9;
+.duration-badge {
+  background-color: #10b981;
+  color: white;
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-weight: 600;
+  margin-left: auto;
+}
+
+.time-slot.selected .duration-badge {
+  background-color: rgba(255, 255, 255, 0.3);
 }
 
 .slot-location {
-  font-size: 14px;
-  margin-bottom: 4px;
+  font-size: 13px;
+  margin-bottom: 6px;
   opacity: 0.8;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .slot-description {
   font-size: 12px;
   opacity: 0.7;
   line-height: 1.4;
+  margin-bottom: 8px;
+  flex-grow: 1;
 }
 
 .time-slot.selected .slot-location,
@@ -197,7 +261,40 @@
   opacity: 0.9;
 }
 
-/* Booking modal */
+/* Slot footer */
+.slot-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px solid #f3f4f6;
+}
+
+.time-slot.selected .slot-footer {
+  border-top-color: rgba(255, 255, 255, 0.3);
+}
+
+.slot-index {
+  font-size: 11px;
+  font-weight: 500;
+  color: #6b7280;
+  background-color: #f3f4f6;
+  padding: 2px 6px;
+  border-radius: 8px;
+}
+
+.time-slot.selected .slot-index {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.recurring-indicator {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+/* Booking modal updates */
 .booking-modal {
   position: fixed;
   top: 0;
@@ -257,15 +354,17 @@
 }
 
 .selected-slot-info,
-.tutor-info {
-  margin-bottom: 24px;
+.tutor-info,
+.slot-details {
+  margin-bottom: 20px;
   padding: 16px;
   background-color: #f9fafb;
   border-radius: 8px;
 }
 
 .selected-slot-info h5,
-.tutor-info h5 {
+.tutor-info h5,
+.slot-details h5 {
   font-size: 16px;
   font-weight: 600;
   color: #1f2937;
@@ -275,11 +374,33 @@
 .slot-datetime {
   font-size: 16px;
   font-weight: 500;
-  color: #059669;
+  color: #1f2937;
   margin-bottom: 4px;
 }
 
-.slot-duration,
+.slot-time-range {
+  font-size: 18px;
+  font-weight: 600;
+  color: #059669;
+  margin-bottom: 8px;
+}
+
+.slot-duration {
+  font-size: 14px;
+  color: #dc2626;
+  margin-bottom: 4px;
+}
+
+.session-price {
+  font-size: 16px;
+  font-weight: 600;
+  color: #059669;
+  background-color: #ecfdf5;
+  padding: 6px 10px;
+  border-radius: 6px;
+  display: inline-block;
+}
+
 .slot-location {
   font-size: 14px;
   color: #6b7280;
@@ -371,6 +492,11 @@
     padding: 12px;
   }
   
+  .time-slot {
+    min-height: 90px;
+    padding: 12px;
+  }
+  
   .date-header {
     flex-direction: column;
     gap: 8px;
@@ -419,6 +545,23 @@
   }
   
   .time-slot {
-    padding: 12px;
+    min-height: 85px;
+    padding: 10px;
+  }
+  
+  .slot-time {
+    font-size: 14px;
+  }
+  
+  .start-time {
+    font-size: 15px;
+  }
+  
+  .scheduler-overlay {
+    padding: 8px;
+  }
+  
+  .scheduler-header-bar {
+    padding: 12px 16px;
   }
 } 
