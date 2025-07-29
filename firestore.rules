@@ -20,83 +20,57 @@ service cloud.firestore {
              get(/databases/$(database)/documents/user/$(request.auth.token.email)).data.isTutor == true;
     }
 
-    // COLECCIÓN: user
-    // Los usuarios pueden leer y escribir su propia información
-    // Todos los usuarios autenticados pueden leer información de otros usuarios (para buscar tutores)
+    // Usuarios pueden leer y escribir su propia información
     match /user/{userId} {
-      allow read: if isAuthenticated();
-      allow write: if isAuthenticated() && isOwner(userId);
-      allow create: if isAuthenticated() && isOwner(userId);
-      allow update: if isAuthenticated() && isOwner(userId);
-      allow delete: if isAuthenticated() && isOwner(userId);
+      allow read, write: if request.auth != null && request.auth.token.email == userId;
+      allow read: if request.auth != null; // Lectura para buscar tutores
     }
     
-    // COLECCIÓN: course
-    // Las materias son de solo lectura para usuarios autenticados
-    // Solo administradores pueden modificar (por ahora bloqueado)
+    // Materias son de solo lectura para usuarios autenticados
     match /course/{courseId} {
-      allow read: if isAuthenticated();
-      allow write: if false; // Solo administradores - configurar después
-      allow create: if false;
-      allow update: if false;
-      allow delete: if false;
+      allow read: if request.auth != null;
+      allow write: if false; // Solo administradores pueden modificar
     }
     
-    // COLECCIÓN: major
-    // Las carreras son de solo lectura para usuarios autenticados
-    // Solo administradores pueden modificar (por ahora bloqueado)
+    // Carreras son de solo lectura
     match /major/{majorId} {
-      allow read: if isAuthenticated();
-      allow write: if false; // Solo administradores - configurar después
-      allow create: if false;
-      allow update: if false;
-      allow delete: if false;
+      allow read: if request.auth != null;
+      allow write: if false;
     }
     
-    // COLECCIÓN: availabilities
-    // Todos pueden leer disponibilidades (para buscar tutores)
-    // Solo el tutor propietario puede crear/modificar sus disponibilidades
+    // Disponibilidades
     match /availabilities/{availId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated() && 
-                     isTutor() && 
-                     isOwner(request.resource.data.tutorEmail);
-      allow update: if isAuthenticated() && 
-                     isTutor() && 
-                     isOwner(resource.data.tutorEmail);
-      allow delete: if isAuthenticated() && 
-                     isTutor() && 
-                     isOwner(resource.data.tutorEmail);
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && 
+        (request.auth.token.email == resource.data.tutorEmail ||
+         request.auth.token.email == resource.data.tutorId);
+      allow create: if request.auth != null;
+      allow update: if request.auth != null &&
+        (request.auth.token.email == resource.data.tutorEmail ||
+         request.auth.token.email == resource.data.tutorId ||
+         // Permitir que estudiantes marquen como reservado
+         (request.resource.data.isBooked == true && request.resource.data.bookedBy == request.auth.token.email));
     }
     
-    // COLECCIÓN: tutoring_sessions (para futuras implementaciones)
-    // Solo los participantes (tutor y estudiante) pueden ver y modificar las sesiones
+    // Sesiones de tutoría
     match /tutoring_sessions/{sessionId} {
-      allow read: if isAuthenticated() && 
-                     (isOwner(resource.data.tutorEmail) || 
-                      isOwner(resource.data.studentEmail));
-      allow create: if isAuthenticated() && 
-                       (isOwner(request.resource.data.tutorEmail) || 
-                        isOwner(request.resource.data.studentEmail));
-      allow update: if isAuthenticated() && 
-                       (isOwner(resource.data.tutorEmail) || 
-                        isOwner(resource.data.studentEmail));
-      allow delete: if isAuthenticated() && 
-                       (isOwner(resource.data.tutorEmail) || 
-                        isOwner(resource.data.studentEmail));
+      allow read: if request.auth != null && 
+        (request.auth.token.email == resource.data.tutorEmail || 
+         request.auth.token.email == resource.data.studentEmail);
+      allow create: if request.auth != null &&
+        request.auth.token.email == request.resource.data.studentEmail;
+      allow update: if request.auth != null && 
+        (request.auth.token.email == resource.data.tutorEmail || 
+         request.auth.token.email == resource.data.studentEmail);
+      allow delete: if false; // No permitir eliminación, solo cancelación via update
     }
     
-    // COLECCIÓN: payments (para futuras implementaciones)
-    // Solo los participantes pueden ver los pagos
-    // Los pagos se crean/modifican solo por la aplicación (funciones serverless)
+    // Pagos - solo lectura para usuarios involucrados
     match /payments/{paymentId} {
-      allow read: if isAuthenticated() && 
-                     (isOwner(resource.data.tutorEmail) || 
-                      isOwner(resource.data.studentEmail));
-      allow write: if false; // Los pagos se manejan por Cloud Functions
-      allow create: if false;
-      allow update: if false;
-      allow delete: if false;
+      allow read: if request.auth != null && 
+        (request.auth.token.email == resource.data.tutorEmail || 
+         request.auth.token.email == resource.data.studentEmail);
+      allow write: if false; // Los pagos se manejan por la aplicación
     }
     
     // REGLAS ESPECIALES: Para desarrollo y testing

@@ -51,47 +51,87 @@ export class TutorSearchService {
     }
   }
 
-  // Obtener tutores que tienen disponibilidad para una materia específica
+  // Obtener tutores que enseñan una materia específica
   static async getTutorsBySubject(subjectName) {
     try {
-      // Primero obtener todas las disponibilidades para esa materia
-      const availabilities = await FirebaseAvailabilityService.getAvailabilitiesBySubject(subjectName);
+      console.log('Buscando tutores para la materia:', subjectName);
       
-      // Extraer los IDs únicos de tutores que tienen disponibilidad en esa materia
-      const tutorIds = [...new Set(availabilities.map(avail => avail.tutorId))];
-      
-      if (tutorIds.length === 0) {
-        return [];
-      }
+      // Método 1: Buscar tutores que tienen esa materia en su array de subjects
+      const q = query(
+        collection(db, 'user'),
+        where('isTutor', '==', true),
+        where('subjects', 'array-contains', subjectName)
+      );
 
-      // Obtener la información de esos tutores
+      const querySnapshot = await getDocs(q);
       const tutors = [];
-      for (const tutorId of tutorIds) {
-        try {
-          const q = query(
-            collection(db, 'user'),
-            where('isTutor', '==', true)
-          );
-          
-          const querySnapshot = await getDocs(q);
-          querySnapshot.forEach((doc) => {
-            if (doc.id === tutorId || doc.data().mail === tutorId) {
-              tutors.push({
-                id: doc.id,
-                email: doc.id,
-                ...doc.data(),
-                // Agregar las disponibilidades de este tutor para esta materia
-                availabilities: availabilities.filter(avail => 
-                  avail.tutorId === tutorId || avail.tutorEmail === tutorId
-                )
-              });
-            }
-          });
-        } catch (error) {
-          console.warn(`Error obteniendo tutor ${tutorId}:`, error);
+
+      querySnapshot.forEach((doc) => {
+        tutors.push({
+          id: doc.id,
+          email: doc.id,
+          ...doc.data()
+        });
+      });
+
+      console.log(`Encontrados ${tutors.length} tutores que enseñan ${subjectName}`);
+
+      // Si no se encuentran tutores con el método exacto, intentar búsqueda más flexible
+      if (tutors.length === 0) {
+        console.log('No se encontraron tutores con coincidencia exacta, buscando con disponibilidad...');
+        
+        // Buscar tutores que tienen disponibilidad para esa materia
+        const availabilities = await FirebaseAvailabilityService.getAvailabilitiesBySubject(subjectName);
+        const tutorIds = [...new Set(availabilities.map(avail => avail.tutorId || avail.tutorEmail))];
+        
+        console.log(`Encontrados ${tutorIds.length} tutores con disponibilidad en ${subjectName}`);
+
+        if (tutorIds.length === 0) {
+          return [];
+        }
+
+        // Obtener información de esos tutores
+        const allTutorsQuery = query(
+          collection(db, 'user'),
+          where('isTutor', '==', true)
+        );
+
+        const allTutorsSnapshot = await getDocs(allTutorsQuery);
+        
+        allTutorsSnapshot.forEach((doc) => {
+          if (tutorIds.includes(doc.id) || tutorIds.includes(doc.data().mail)) {
+            // Filtrar las disponibilidades de este tutor para esta materia
+            const tutorAvailabilities = availabilities.filter(avail => 
+              avail.tutorId === doc.id || 
+              avail.tutorEmail === doc.id || 
+              avail.tutorId === doc.data().mail || 
+              avail.tutorEmail === doc.data().mail
+            );
+
+            tutors.push({
+              id: doc.id,
+              email: doc.id,
+              ...doc.data(),
+              availabilities: tutorAvailabilities
+            });
+          }
+        });
+      } else {
+        // Si encontramos tutores por el método exacto, obtener sus disponibilidades
+        for (const tutor of tutors) {
+          try {
+            const tutorAvailabilities = await FirebaseAvailabilityService.getAvailabilitiesByTutor(tutor.id, 20);
+            tutor.availabilities = tutorAvailabilities.filter(avail => 
+              !subjectName || avail.subject === subjectName || !avail.subject
+            );
+          } catch (error) {
+            console.warn(`Error obteniendo disponibilidades para tutor ${tutor.id}:`, error);
+            tutor.availabilities = [];
+          }
         }
       }
 
+      console.log(`Retornando ${tutors.length} tutores para ${subjectName}`);
       return tutors;
     } catch (error) {
       console.error('Error obteniendo tutores por materia:', error);
