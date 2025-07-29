@@ -19,7 +19,10 @@ export default function TutorAvailabilityCard({ tutor, materia }) {
     try {
       setLoading(true);
       setError(null);
+      console.log(`🔄 Cargando disponibilidad para tutor ${tutor.id} (${tutor.name})`);
+      
       const availability = await TutorSearchService.getTutorAvailability(tutor.id, 50);
+      console.log(`📋 Obtenidas ${availability.length} disponibilidades para ${tutor.name}`);
       
       // Filtrar solo las disponibilidades futuras y para la materia actual si se especifica
       const now = new Date();
@@ -30,9 +33,10 @@ export default function TutorAvailabilityCard({ tutor, materia }) {
         return isUpcoming && isRelevantSubject;
       });
       
+      console.log(`✅ Filtradas ${filtered.length} disponibilidades relevantes para ${tutor.name} en ${materia || 'cualquier materia'}`);
       setAvailabilities(filtered);
     } catch (error) {
-      console.error("Error cargando disponibilidad:", error);
+      console.error(`❌ Error cargando disponibilidad para ${tutor.name}:`, error);
       setError("Error cargando disponibilidad del tutor");
       setAvailabilities([]);
     } finally {
@@ -41,14 +45,17 @@ export default function TutorAvailabilityCard({ tutor, materia }) {
   };
 
   const handleScheduleClick = () => {
+    console.log(`🎯 Abriendo scheduler para ${tutor.name} con ${availabilities.length} disponibilidades`);
     setShowScheduler(true);
   };
 
   const handleCloseScheduler = () => {
+    console.log('❌ Cerrando scheduler');
     setShowScheduler(false);
   };
 
   const handleBookingComplete = () => {
+    console.log('✅ Reserva completada - recargando disponibilidades');
     // Recargar la disponibilidad después de una reserva exitosa
     loadTutorAvailability();
     setShowScheduler(false);

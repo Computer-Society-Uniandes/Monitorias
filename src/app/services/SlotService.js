@@ -35,6 +35,7 @@ export class SlotService {
         status: availability.status,
         isBooked: false, // Por defecto no está reservado
         bookedBy: null,
+        sessionId: null,
         // Información adicional del slot
         originalStartDateTime: availability.startDateTime,
         originalEndDateTime: availability.endDateTime,
@@ -61,13 +62,106 @@ export class SlotService {
     return allSlots;
   }
   
-  // Filtrar slots disponibles (no reservados y futuros)
+  // Aplicar reservas existentes a los slots generados - MEJORADO
+  static applySavedBookingsToSlots(slots, bookedSlots) {
+    if (!bookedSlots || bookedSlots.length === 0) {
+      console.log('No hay reservas existentes para aplicar');
+      return slots;
+    }
+    
+    console.log(`Aplicando ${bookedSlots.length} reservas existentes a ${slots.length} slots`);
+    
+    return slots.map(slot => {
+      // Buscar si este slot específico está reservado
+      const booking = bookedSlots.find(booking => {
+        const parentMatch = booking.parentAvailabilityId === slot.parentAvailabilityId;
+        const indexMatch = booking.slotIndex === slot.slotIndex;
+        
+        // Log detallado para debugging
+        if (parentMatch && indexMatch) {
+          console.log(`✅ Slot encontrado como reservado:`, {
+            slotId: slot.id,
+            parentAvailabilityId: slot.parentAvailabilityId,
+            slotIndex: slot.slotIndex,
+            bookedBy: booking.studentEmail,
+            sessionId: booking.sessionId
+          });
+        }
+        
+        return parentMatch && indexMatch;
+      });
+      
+      if (booking) {
+        return {
+          ...slot,
+          isBooked: true,
+          bookedBy: booking.studentEmail,
+          sessionId: booking.sessionId,
+          bookingId: booking.id,
+          bookedAt: booking.bookedAt
+        };
+      }
+      
+      return slot;
+    });
+  }
+  
+  // Filtrar slots disponibles (no reservados y futuros) - MEJORADO
   static getAvailableSlots(slots) {
     const now = new Date();
-    return slots.filter(slot => {
+    const availableSlots = slots.filter(slot => {
       const slotStart = new Date(slot.startDateTime);
-      return slotStart > now && !slot.isBooked;
+      const isFuture = slotStart > now;
+      const isNotBooked = !slot.isBooked;
+      
+      // Log para debugging
+      if (!isFuture) {
+        console.log(`❌ Slot excluido (pasado):`, slot.id, slotStart);
+      }
+      if (slot.isBooked) {
+        console.log(`❌ Slot excluido (reservado):`, slot.id, 'por', slot.bookedBy);
+      }
+      if (isFuture && isNotBooked) {
+        console.log(`✅ Slot disponible:`, slot.id, slotStart);
+      }
+      
+      return isFuture && isNotBooked;
     });
+    
+    console.log(`Filtrados ${availableSlots.length} slots disponibles de ${slots.length} slots totales`);
+    return availableSlots;
+  }
+  
+  // Obtener todas las reservas para múltiples disponibilidades - NUEVO
+  static async getAllBookingsForAvailabilities(availabilities, TutoringSessionService) {
+    const allBookings = [];
+    
+    console.log(`Obteniendo reservas para ${availabilities.length} disponibilidades`);
+    
+    for (const availability of availabilities) {
+      try {
+        const bookings = await TutoringSessionService.getSlotBookingsForAvailability(availability.id);
+        if (bookings.length > 0) {
+          console.log(`📅 Encontradas ${bookings.length} reservas para disponibilidad ${availability.id}`);
+          allBookings.push(...bookings);
+        }
+      } catch (error) {
+        console.warn(`Error obteniendo reservas para disponibilidad ${availability.id}:`, error);
+      }
+    }
+    
+    console.log(`📊 Total de reservas encontradas: ${allBookings.length}`);
+    return allBookings;
+  }
+  
+  // Verificar si un slot específico está disponible - MEJORADO
+  static isSlotAvailable(slot) {
+    const now = new Date();
+    const slotStart = new Date(slot.startDateTime);
+    const isFuture = slotStart > now;
+    const isNotBooked = !slot.isBooked;
+    
+    return isFuture && isNotBooked;
   }
   
   // Agrupar slots por fecha
@@ -98,13 +192,6 @@ export class SlotService {
     return grouped;
   }
   
-  // Verificar si un slot específico está disponible
-  static isSlotAvailable(slot) {
-    const now = new Date();
-    const slotStart = new Date(slot.startDateTime);
-    return slotStart > now && !slot.isBooked;
-  }
-  
   // Formatear información del slot para display
   static formatSlotInfo(slot) {
     const startTime = new Date(slot.startDateTime);
@@ -132,32 +219,10 @@ export class SlotService {
       description: slot.description,
       tutorId: slot.tutorId,
       tutorEmail: slot.tutorEmail,
-      isAvailable: this.isSlotAvailable(slot)
+      isAvailable: this.isSlotAvailable(slot),
+      isBooked: slot.isBooked,
+      bookedBy: slot.bookedBy
     };
-  }
-  
-  // Aplicar reservas existentes a los slots generados
-  static applySavedBookingsToSlots(slots, bookedSlots) {
-    // bookedSlots sería un array de objetos con información sobre qué slots específicos están reservados
-    if (!bookedSlots || bookedSlots.length === 0) return slots;
-    
-    return slots.map(slot => {
-      const booking = bookedSlots.find(booking => 
-        booking.parentAvailabilityId === slot.parentAvailabilityId &&
-        booking.slotIndex === slot.slotIndex
-      );
-      
-      if (booking) {
-        return {
-          ...slot,
-          isBooked: true,
-          bookedBy: booking.bookedBy,
-          sessionId: booking.sessionId
-        };
-      }
-      
-      return slot;
-    });
   }
   
   // Obtener slots consecutivos disponibles (para sesiones más largas en el futuro)
@@ -200,7 +265,7 @@ export class SlotService {
     return consecutiveGroups;
   }
   
-  // Validar que un slot puede ser reservado
+  // Validar que un slot puede ser reservado - MEJORADO
   static validateSlotForBooking(slot) {
     const errors = [];
     
@@ -210,7 +275,7 @@ export class SlotService {
     }
     
     if (slot.isBooked) {
-      errors.push('Este horario ya está reservado');
+      errors.push(`Este horario ya está reservado por ${slot.bookedBy || 'otro estudiante'}`);
     }
     
     const now = new Date();
@@ -230,5 +295,39 @@ export class SlotService {
       isValid: errors.length === 0,
       errors
     };
+  }
+  
+  // Verificar conflictos de reserva en tiempo real - NUEVO
+  static async checkSlotAvailabilityRealTime(slot, TutoringSessionService) {
+    try {
+      // Verificar si el slot ya fue reservado por otro usuario
+      const existingBooking = await TutoringSessionService.getSlotBooking(
+        slot.parentAvailabilityId, 
+        slot.slotIndex
+      );
+      
+      if (existingBooking) {
+        console.log(`❌ Slot ${slot.id} ya está reservado en tiempo real por ${existingBooking.studentEmail}`);
+        return {
+          available: false,
+          reason: `Este horario ya fue reservado por otro estudiante`,
+          booking: existingBooking
+        };
+      }
+      
+      console.log(`✅ Slot ${slot.id} disponible en tiempo real`);
+      return {
+        available: true,
+        reason: 'Slot disponible',
+        booking: null
+      };
+    } catch (error) {
+      console.error('Error verificando disponibilidad en tiempo real:', error);
+      return {
+        available: false,
+        reason: 'Error verificando disponibilidad',
+        booking: null
+      };
+    }
   }
 } 
