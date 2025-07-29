@@ -30,4 +30,23 @@
 
 .session-item:hover {
   transform: translateX(4px);
+}
+
+.details-button {
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.details-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.session-content {
+  transition: all 0.2s ease;
+}
+
+.session-item:hover .details-button {
+  opacity: 1;
+  transform: scale(1.05);
 } 

@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { TutoringSessionService } from "../../services/TutoringSessionService";
 import { useAuth } from "../../context/AuthContext";
+import TutoringDetailsModal from "../TutoringDetailsModal/TutoringDetailsModal";
 import routes from "../../../routes";
 import "./TutoringSummary.css";
 
@@ -12,6 +13,8 @@ export default function TutoringSummary({ userType, title, linkText, linkHref })
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedSession, setSelectedSession] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchSessions = async () => {
@@ -95,6 +98,16 @@ export default function TutoringSummary({ userType, title, linkText, linkHref })
     return colors[index % colors.length];
   };
 
+  const handleShowDetails = (session) => {
+    setSelectedSession(session);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedSession(null);
+  };
+
   if (loading) {
     return (
       <div className="bg-white rounded-xl shadow-sm p-6 mb-8 tutoring-card">
@@ -145,35 +158,54 @@ export default function TutoringSummary({ userType, title, linkText, linkHref })
           {sessions.map((session, index) => {
             const colors = getSessionColor(index);
             return (
-                             <div 
-                 key={session.id}
-                 className={`border-l-4 ${colors.border} pl-4 py-3 ${colors.bg} rounded-r-lg session-item`}
-               >
-                <p className="font-semibold text-gray-700">{session.subject}</p>
-                <p className="text-sm text-gray-600">
-                  {formatDateTime(session.scheduledDateTime)}
-                </p>
-                <p className={`text-sm ${colors.text}`}>
-                  {userType === 'tutor' 
-                    ? `Estudiante: ${session.studentEmail}`
-                    : `Tutor: ${session.tutorEmail}`
-                  }
-                </p>
-                {session.location && (
-                  <p className="text-sm text-gray-500">
-                    📍 {session.location}
-                  </p>
-                )}
-                {session.price && (
-                  <p className="text-sm text-gray-500">
-                    💰 ${session.price.toLocaleString()}
-                  </p>
-                )}
+              <div 
+                key={session.id}
+                className={`border-l-4 ${colors.border} pl-4 py-3 ${colors.bg} rounded-r-lg session-item relative`}
+              >
+                <div className="flex justify-between items-start">
+                  <div className="flex-1 session-content">
+                    <p className="font-semibold text-gray-700">{session.subject}</p>
+                    <p className="text-sm text-gray-600">
+                      {formatDateTime(session.scheduledDateTime)}
+                    </p>
+                    <p className={`text-sm ${colors.text}`}>
+                      {userType === 'tutor' 
+                        ? `Estudiante: ${session.studentEmail}`
+                        : `Tutor: ${session.tutorEmail}`
+                      }
+                    </p>
+                    {session.location && (
+                      <p className="text-sm text-gray-500">
+                        📍 {session.location}
+                      </p>
+                    )}
+                    {session.price && (
+                      <p className="text-sm text-gray-500">
+                        💰 ${session.price.toLocaleString()}
+                      </p>
+                    )}
+                  </div>
+                  
+                  <button
+                    onClick={() => handleShowDetails(session)}
+                    className="ml-3 px-3 py-1 text-xs bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-colors font-medium text-gray-700 details-button"
+                  >
+                    Ver detalles
+                  </button>
+                </div>
               </div>
             );
           })}
         </div>
       )}
+
+      {/* Modal de detalles */}
+      <TutoringDetailsModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        session={selectedSession}
+        userType={userType}
+      />
     </div>
   );
 } 
