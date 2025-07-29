@@ -24,32 +24,38 @@ export default function CalendlyStyleScheduler({ tutor, availabilities, materia,
   const generateHourlySlots = async () => {
     try {
       setSlotsLoading(true);
-      console.log('Generando slots de 1 hora a partir de', availabilities.length, 'disponibilidades');
+      setError(null);
+      console.log('🔄 Iniciando generación de slots de 1 hora...');
+      console.log('📋 Disponibilidades recibidas:', availabilities.length);
+
+      if (availabilities.length === 0) {
+        console.log('❌ No hay disponibilidades para procesar');
+        setHourlySlots([]);
+        return;
+      }
 
       // Generar slots de 1 hora a partir de las disponibilidades
       const generatedSlots = SlotService.generateHourlySlotsFromAvailabilities(availabilities);
-      console.log('Slots generados:', generatedSlots.length);
+      console.log('⚡ Slots generados:', generatedSlots.length);
 
-      // Obtener las reservas existentes para aplicarlas a los slots
-      const allBookings = [];
-      for (const availability of availabilities) {
-        const bookings = await TutoringSessionService.getSlotBookingsForAvailability(availability.id);
-        allBookings.push(...bookings);
-      }
-
-      console.log('Reservas existentes encontradas:', allBookings.length);
+      // Obtener las reservas existentes de manera más eficiente
+      const allBookings = await SlotService.getAllBookingsForAvailabilities(
+        availabilities, 
+        TutoringSessionService
+      );
 
       // Aplicar las reservas existentes a los slots
       const slotsWithBookings = SlotService.applySavedBookingsToSlots(generatedSlots, allBookings);
+      console.log('🔗 Slots con reservas aplicadas:', slotsWithBookings.length);
       
       // Filtrar solo slots disponibles y futuros
       const availableSlots = SlotService.getAvailableSlots(slotsWithBookings);
-      console.log('Slots disponibles:', availableSlots.length);
+      console.log('✅ Slots finalmente disponibles:', availableSlots.length);
 
       setHourlySlots(availableSlots);
     } catch (error) {
-      console.error('Error generando slots de 1 hora:', error);
-      setError('Error cargando horarios disponibles');
+      console.error('❌ Error generando slots de 1 hora:', error);
+      setError('Error cargando horarios disponibles. Por favor intenta de nuevo.');
     } finally {
       setSlotsLoading(false);
     }
@@ -76,11 +82,26 @@ export default function CalendlyStyleScheduler({ tutor, availabilities, materia,
     });
   };
 
-  const handleSlotSelect = (slot) => {
-    // Validar el slot antes de seleccionarlo
+  const handleSlotSelect = async (slot) => {
+    console.log('🎯 Slot seleccionado:', slot.id);
+
+    // Validar el slot básicamente
     const validation = SlotService.validateSlotForBooking(slot);
     if (!validation.isValid) {
       setError(validation.errors.join(', '));
+      return;
+    }
+
+    // Verificar disponibilidad en tiempo real
+    const realTimeCheck = await SlotService.checkSlotAvailabilityRealTime(
+      slot, 
+      TutoringSessionService
+    );
+
+    if (!realTimeCheck.available) {
+      setError(realTimeCheck.reason);
+      // Regenerar slots para reflejar el cambio
+      await generateHourlySlots();
       return;
     }
 
@@ -105,29 +126,46 @@ export default function CalendlyStyleScheduler({ tutor, availabilities, materia,
       setLoading(true);
       setError(null);
 
-      console.log('Reservando slot:', selectedSlot.id);
+      console.log('🚀 Iniciando proceso de reserva para slot:', selectedSlot.id);
 
-      // Usar el nuevo método para reservar slots específicos
-      await TutoringSessionService.bookSpecificSlot(
+      // Verificación final antes de reservar
+      const finalCheck = await SlotService.checkSlotAvailabilityRealTime(
+        selectedSlot, 
+        TutoringSessionService
+      );
+
+      if (!finalCheck.available) {
+        setError('Lo sentimos, este horario acaba de ser reservado por otro estudiante. Por favor selecciona otro horario.');
+        setShowBookingForm(false);
+        setSelectedSlot(null);
+        await generateHourlySlots();
+        return;
+      }
+
+      // Proceder con la reserva
+      const result = await TutoringSessionService.bookSpecificSlot(
         selectedSlot,
         user.email,
         user.name,
         bookingNotes
       );
 
-      setSuccess('¡Horario de 1 hora reservado exitosamente!');
+      console.log('✅ Reserva exitosa:', result);
+
+      setSuccess('¡Horario de 1 hora reservado exitosamente! 🎉');
       setShowBookingForm(false);
       setSelectedSlot(null);
       setBookingNotes('');
       
       // Regenerar slots para reflejar la nueva reserva
+      console.log('🔄 Actualizando lista de slots disponibles...');
       await generateHourlySlots();
       
       if (onBookingComplete) {
         onBookingComplete();
       }
     } catch (error) {
-      console.error('Error booking slot:', error);
+      console.error('❌ Error en la reserva:', error);
       setError(error.message);
     } finally {
       setLoading(false);
@@ -141,12 +179,18 @@ export default function CalendlyStyleScheduler({ tutor, availabilities, materia,
     setError(null);
   };
 
+  const handleRefreshSlots = async () => {
+    console.log('🔄 Refrescando slots manualmente...');
+    await generateHourlySlots();
+  };
+
   if (slotsLoading) {
     return (
       <div className="calendly-scheduler">
         <div className="scheduler-header">
           <h3>Cargando horarios disponibles...</h3>
           <div className="loading-spinner-large">🔄</div>
+          <p className="loading-text">Verificando disponibilidad en tiempo real</p>
         </div>
       </div>
     );
@@ -160,6 +204,12 @@ export default function CalendlyStyleScheduler({ tutor, availabilities, materia,
           <h3>No hay horarios de 1 hora disponibles</h3>
           <p>Este tutor no tiene horarios disponibles para {materia} en este momento.</p>
           <p className="hint">Los horarios se dividen automáticamente en sesiones de 1 hora.</p>
+          <button 
+            className="refresh-btn"
+            onClick={handleRefreshSlots}
+          >
+            🔄 Actualizar disponibilidad
+          </button>
         </div>
       </div>
     );
@@ -176,6 +226,13 @@ export default function CalendlyStyleScheduler({ tutor, availabilities, materia,
         )}
         <div className="slots-summary">
           <span className="slots-count">{hourlySlots.length} horarios de 1 hora disponibles</span>
+          <button 
+            className="refresh-slots-btn"
+            onClick={handleRefreshSlots}
+            title="Actualizar disponibilidad"
+          >
+            🔄
+          </button>
         </div>
       </div>
 
@@ -285,6 +342,9 @@ export default function CalendlyStyleScheduler({ tutor, availabilities, materia,
                 {selectedSlot.recurring && (
                   <p>🔄 Este es un horario recurrente</p>
                 )}
+                <p className="availability-note">
+                  ⚡ Este horario será marcado como no disponible una vez confirmado
+                </p>
               </div>
 
               <div className="notes-section">
@@ -311,7 +371,7 @@ export default function CalendlyStyleScheduler({ tutor, availabilities, materia,
                   onClick={handleBooking}
                   disabled={loading}
                 >
-                  {loading ? 'Reservando...' : 'Confirmar Reserva de 1h'}
+                  {loading ? 'Verificando y reservando...' : 'Confirmar Reserva de 1h'}
                 </button>
               </div>
             </div>

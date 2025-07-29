@@ -3,98 +3,59 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Función para verificar si el usuario está autenticado
-    function isAuthenticated() {
-      return request.auth != null;
-    }
+    // ⚠️ REGLAS TEMPORALES PARA DESARROLLO ⚠️
+    // La aplicación usa localStorage para auth, no Firebase Auth
+    // Por lo tanto, permitimos acceso libre durante desarrollo
     
-    // Función para verificar si el usuario es el propietario del documento
-    function isOwner(userId) {
-      return request.auth.token.email == userId;
-    }
-    
-    // Función para verificar si el usuario es tutor
-    function isTutor() {
-      return isAuthenticated() && 
-             exists(/databases/$(database)/documents/user/$(request.auth.token.email)) &&
-             get(/databases/$(database)/documents/user/$(request.auth.token.email)).data.isTutor == true;
-    }
-
-    // Usuarios pueden leer y escribir su propia información
+    // Usuarios - acceso libre para búsqueda de tutores
     match /user/{userId} {
-      allow read, write: if request.auth != null && request.auth.token.email == userId;
-      allow read: if request.auth != null; // Lectura para buscar tutores
+      allow read, write: if true;
     }
     
-    // Materias son de solo lectura para usuarios autenticados
+    // Materias - solo lectura
     match /course/{courseId} {
-      allow read: if request.auth != null;
-      allow write: if false; // Solo administradores pueden modificar
-    }
-    
-    // Carreras son de solo lectura
-    match /major/{majorId} {
-      allow read: if request.auth != null;
+      allow read: if true;
       allow write: if false;
     }
     
-    // Disponibilidades
+    // Carreras - solo lectura
+    match /major/{majorId} {
+      allow read: if true;
+      allow write: if false;
+    }
+    
+    // Disponibilidades - acceso libre para funcionalidad de slots
     match /availabilities/{availId} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null && 
-        (request.auth.token.email == resource.data.tutorEmail ||
-         request.auth.token.email == resource.data.tutorId);
-      allow create: if request.auth != null;
-      allow update: if request.auth != null &&
-        (request.auth.token.email == resource.data.tutorEmail ||
-         request.auth.token.email == resource.data.tutorId ||
-         // Permitir que estudiantes marquen como reservado
-         (request.resource.data.isBooked == true && request.resource.data.bookedBy == request.auth.token.email));
+      allow read, write: if true;
     }
     
-    // Reservas de slots específicos de 1 hora
+    // Reservas de slots - acceso libre para sistema de slots
     match /slot_bookings/{bookingId} {
-      allow read: if request.auth != null && 
-        (request.auth.token.email == resource.data.tutorEmail || 
-         request.auth.token.email == resource.data.studentEmail);
-      allow create: if request.auth != null &&
-        request.auth.token.email == request.resource.data.studentEmail;
-      allow update: if request.auth != null && 
-        (request.auth.token.email == resource.data.tutorEmail || 
-         request.auth.token.email == resource.data.studentEmail);
-      allow delete: if request.auth != null && 
-        (request.auth.token.email == resource.data.tutorEmail || 
-         request.auth.token.email == resource.data.studentEmail);
+      allow read, write: if true;
     }
     
-    // Sesiones de tutoría
+    // Sesiones de tutoría - acceso libre para funcionalidad completa
     match /tutoring_sessions/{sessionId} {
-      allow read: if request.auth != null && 
-        (request.auth.token.email == resource.data.tutorEmail || 
-         request.auth.token.email == resource.data.studentEmail);
-      allow create: if request.auth != null &&
-        request.auth.token.email == request.resource.data.studentEmail;
-      allow update: if request.auth != null && 
-        (request.auth.token.email == resource.data.tutorEmail || 
-         request.auth.token.email == resource.data.studentEmail);
-      allow delete: if false; // No permitir eliminación, solo cancelación via update
+      allow read, write: if true;
     }
     
-    // Pagos - solo lectura para usuarios involucrados
+    // Pagos - solo lectura libre, sin escritura
     match /payments/{paymentId} {
-      allow read: if request.auth != null && 
-        (request.auth.token.email == resource.data.tutorEmail || 
-         request.auth.token.email == resource.data.studentEmail);
-      allow write: if false; // Los pagos se manejan por la aplicación
+      allow read: if true;
+      allow write: if false;
     }
     
-    // REGLAS ESPECIALES: Para desarrollo y testing
-    // Puedes habilitar estas reglas temporalmente para testing
-    // ⚠️ REMOVER EN PRODUCCIÓN ⚠️
-    /*
+    // Regla de fallback para cualquier otra colección
     match /{document=**} {
-      allow read, write: if true; // ⚠️ SOLO PARA DESARROLLO - REMOVER EN PRODUCCIÓN
+      allow read: if true;
+      allow write: if true;
     }
-    */
   }
-} 
+}
+
+// 📝 NOTA IMPORTANTE:
+// Estas reglas son permisivas para desarrollo con localStorage auth.
+// Para producción, necesitarás:
+// 1. Implementar Firebase Auth adecuadamente
+// 2. Actualizar estas reglas con validaciones de seguridad apropiadas
+// 3. Verificar request.auth != null en todas las operaciones 
