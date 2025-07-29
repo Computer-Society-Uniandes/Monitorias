@@ -287,6 +287,7 @@ export class TutoringSessionService {
   // Obtener sesiones de un tutor (manteniendo compatibilidad)
   static async getTutorSessions(tutorEmail) {
     try {
+      console.log('tutorEmail', tutorEmail);
       const q = query(
         collection(db, this.COLLECTION_NAME),
         where('tutorEmail', '==', tutorEmail),
@@ -306,6 +307,7 @@ export class TutoringSessionService {
           endDateTime: doc.data().endDateTime?.toDate(),
         });
       });
+      console.log('sessions', sessions);
 
       return sessions;
     } catch (error) {
