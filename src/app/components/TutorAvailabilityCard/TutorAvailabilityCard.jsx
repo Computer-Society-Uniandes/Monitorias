@@ -2,12 +2,14 @@
 
 import React, { useState, useEffect } from "react";
 import { TutorSearchService } from "../../services/TutorSearchService";
+import CalendlyStyleScheduler from "../CalendlyStyleScheduler/CalendlyStyleScheduler";
 import "./TutorAvailabilityCard.css";
 
 export default function TutorAvailabilityCard({ tutor, materia }) {
   const [availabilities, setAvailabilities] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [expanded, setExpanded] = useState(false);
+  const [showScheduler, setShowScheduler] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     loadTutorAvailability();
@@ -16,9 +18,10 @@ export default function TutorAvailabilityCard({ tutor, materia }) {
   const loadTutorAvailability = async () => {
     try {
       setLoading(true);
-      const availability = await TutorSearchService.getTutorAvailability(tutor.id, 10);
+      setError(null);
+      const availability = await TutorSearchService.getTutorAvailability(tutor.id, 50);
       
-      // Filtrar solo las disponibilidades futuras y para la materia actual
+      // Filtrar solo las disponibilidades futuras y para la materia actual si se especifica
       const now = new Date();
       const filtered = availability.filter(avail => {
         const startDate = new Date(avail.startDateTime);
@@ -30,15 +33,44 @@ export default function TutorAvailabilityCard({ tutor, materia }) {
       setAvailabilities(filtered);
     } catch (error) {
       console.error("Error cargando disponibilidad:", error);
+      setError("Error cargando disponibilidad del tutor");
       setAvailabilities([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const formatDateTime = (dateTime) => {
-    if (!dateTime) return '';
-    const date = new Date(dateTime);
+  const handleScheduleClick = () => {
+    setShowScheduler(true);
+  };
+
+  const handleCloseScheduler = () => {
+    setShowScheduler(false);
+  };
+
+  const handleBookingComplete = () => {
+    // Recargar la disponibilidad después de una reserva exitosa
+    loadTutorAvailability();
+    setShowScheduler(false);
+  };
+
+  const getAvailableHours = () => {
+    if (!availabilities.length) return 0;
+    return availabilities.filter(avail => !avail.isBooked).length;
+  };
+
+  const getNextAvailableSlot = () => {
+    const availableSlots = availabilities.filter(avail => !avail.isBooked);
+    if (availableSlots.length === 0) return null;
+    
+    // Ordenar por fecha y tomar el primero
+    const sorted = availableSlots.sort((a, b) => new Date(a.startDateTime) - new Date(b.startDateTime));
+    return sorted[0];
+  };
+
+  const formatNextSlot = (slot) => {
+    if (!slot) return null;
+    const date = new Date(slot.startDateTime);
     return {
       date: date.toLocaleDateString('es-ES', { 
         weekday: 'short', 
@@ -52,26 +84,32 @@ export default function TutorAvailabilityCard({ tutor, materia }) {
     };
   };
 
-  const getDayFromDate = (dateTime) => {
-    if (!dateTime) return '';
-    const date = new Date(dateTime);
-    return date.toLocaleDateString('es-ES', { weekday: 'long' });
-  };
+  const nextSlot = getNextAvailableSlot();
+  const nextSlotFormatted = formatNextSlot(nextSlot);
 
-  const groupAvailabilitiesByDay = (availabilities) => {
-    const grouped = {};
-    availabilities.forEach(avail => {
-      const day = getDayFromDate(avail.startDateTime);
-      if (!grouped[day]) {
-        grouped[day] = [];
-      }
-      grouped[day].push(avail);
-    });
-    return grouped;
-  };
-
-  const groupedAvailabilities = groupAvailabilitiesByDay(availabilities);
-  const visibleAvailabilities = expanded ? availabilities : availabilities.slice(0, 3);
+  if (showScheduler) {
+    return (
+      <div className="scheduler-overlay">
+        <div className="scheduler-container">
+          <div className="scheduler-header-bar">
+            <h3>Reservar con {tutor.name}</h3>
+            <button 
+              className="close-scheduler-btn"
+              onClick={handleCloseScheduler}
+            >
+              ✕
+            </button>
+          </div>
+          <CalendlyStyleScheduler
+            tutor={tutor}
+            availabilities={availabilities}
+            materia={materia}
+            onBookingComplete={handleBookingComplete}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="tutor-card">
@@ -82,14 +120,34 @@ export default function TutorAvailabilityCard({ tutor, materia }) {
         <div className="tutor-info">
           <h3 className="tutor-name">{tutor.name || 'Tutor'}</h3>
           <p className="tutor-email">{tutor.email}</p>
-          {tutor.stats && (
-            <div className="tutor-stats">
-              <span className="stat-item">
-                📚 {tutor.stats.subjectCount} materia{tutor.stats.subjectCount !== 1 ? 's' : ''}
+          {tutor.subjects && tutor.subjects.length > 0 && (
+            <div className="tutor-subjects">
+              <span className="subjects-label">Materias:</span>
+              <div className="subjects-list">
+                {tutor.subjects.slice(0, 3).map((subject, index) => (
+                  <span key={index} className="subject-tag">
+                    {subject}
+                  </span>
+                ))}
+                {tutor.subjects.length > 3 && (
+                  <span className="more-subjects">+{tutor.subjects.length - 3} más</span>
+                )}
+              </div>
+            </div>
+          )}
+          {tutor.rating && (
+            <div className="tutor-rating">
+              <span className="rating-stars">
+                {'⭐'.repeat(Math.floor(tutor.rating))}
               </span>
-              <span className="stat-item">
-                ⏰ {tutor.stats.upcomingSessions} sesiones disponibles
+              <span className="rating-number">
+                {tutor.rating.toFixed(1)} ({tutor.totalSessions || 0} sesiones)
               </span>
+            </div>
+          )}
+          {tutor.hourlyRate && (
+            <div className="tutor-rate">
+              <span className="rate-amount">${tutor.hourlyRate.toLocaleString()} COP/hora</span>
             </div>
           )}
         </div>
@@ -97,100 +155,74 @@ export default function TutorAvailabilityCard({ tutor, materia }) {
 
       <div className="availability-section">
         <h4 className="availability-title">
-          Disponibilidad próxima
+          Disponibilidad
           {loading && <span className="loading-spinner">🔄</span>}
         </h4>
 
+        {error && (
+          <div className="error-message">
+            <span className="error-icon">⚠️</span>
+            {error}
+            <button 
+              className="retry-btn"
+              onClick={loadTutorAvailability}
+            >
+              Reintentar
+            </button>
+          </div>
+        )}
+
         {loading ? (
           <div className="availability-skeleton">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="skeleton-slot"></div>
-            ))}
+            <div className="skeleton-slot"></div>
+            <div className="skeleton-slot"></div>
+            <div className="skeleton-slot"></div>
           </div>
         ) : availabilities.length === 0 ? (
           <div className="no-availability">
+            <div className="no-availability-icon">📅</div>
             <p>No hay disponibilidad próxima para esta materia</p>
           </div>
         ) : (
           <>
-            <div className="availability-grid">
-              {visibleAvailabilities.map((availability, index) => {
-                const { date, time } = formatDateTime(availability.startDateTime);
-                return (
-                  <div key={availability.id || index} className="availability-slot">
-                    <div className="slot-header">
-                      <span className="slot-date">{date}</span>
-                      <span className="slot-time">{time}</span>
-                    </div>
-                    
-                    {availability.subject && (
-                      <div 
-                        className="subject-badge"
-                        style={{ backgroundColor: availability.color || '#FF7A7A' }}
-                      >
-                        {availability.subject}
-                      </div>
-                    )}
-                    
-                    {availability.location && (
-                      <div className="location-info">
-                        📍 {availability.location}
-                      </div>
-                    )}
-                    
-                    {availability.description && (
-                      <div className="description-info">
-                        {availability.description.length > 50 
-                          ? `${availability.description.substring(0, 50)}...`
-                          : availability.description
-                        }
-                      </div>
-                    )}
-                    
-                    {availability.recurring && (
-                      <div className="recurring-badge">
-                        🔄 Semanal
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+            <div className="availability-summary">
+              <div className="summary-item">
+                <span className="summary-number">{getAvailableHours()}</span>
+                <span className="summary-label">horarios disponibles</span>
+              </div>
+              
+              {nextSlotFormatted && (
+                <div className="next-slot">
+                  <span className="next-slot-label">Próximo horario:</span>
+                  <span className="next-slot-info">
+                    {nextSlotFormatted.date} a las {nextSlotFormatted.time}
+                  </span>
+                </div>
+              )}
             </div>
 
-            {availabilities.length > 3 && (
+            <div className="schedule-actions">
               <button 
-                className="view-more-btn"
-                onClick={() => setExpanded(!expanded)}
+                className="schedule-btn"
+                onClick={handleScheduleClick}
               >
-                {expanded ? 'Ver menos' : `Ver ${availabilities.length - 3} más`}
+                📅 Ver todos los horarios
               </button>
-            )}
+            </div>
           </>
         )}
       </div>
 
-      <div className="availability-summary">
-        <h5>Horarios por día:</h5>
-        <div className="day-summary">
-          {Object.keys(groupedAvailabilities).length === 0 ? (
-            <p className="no-schedule">Sin horarios disponibles</p>
-          ) : (
-            Object.entries(groupedAvailabilities).map(([day, dayAvails]) => (
-              <div key={day} className="day-item">
-                <span className="day-name">{day}</span>
-                <span className="day-count">{dayAvails.length} sesión{dayAvails.length !== 1 ? 'es' : ''}</span>
-              </div>
-            ))
-          )}
-        </div>
-      </div>
-
       <div className="tutor-actions">
-        <button className="contact-btn">
-          💬 Contactar Tutor
+        <button 
+          className="book-now-btn"
+          onClick={handleScheduleClick}
+          disabled={loading || availabilities.length === 0}
+        >
+          {availabilities.length > 0 ? '🚀 Reservar ahora' : '❌ Sin disponibilidad'}
         </button>
-        <button className="view-profile-btn">
-          👤 Ver Perfil
+        <button className="contact-btn">
+          💬 Contactar
         </button>
       </div>
     </div>

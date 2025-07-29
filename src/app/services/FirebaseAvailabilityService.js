@@ -147,6 +147,46 @@ export class FirebaseAvailabilityService {
       return availabilities;
     } catch (error) {
       console.error('Error getting availabilities by subject:', error);
+      
+      // Si hay un error con el índice compuesto, intentar sin orderBy
+      if (error.code === 'failed-precondition') {
+        console.warn('Índice compuesto no encontrado, buscando sin ordenar...');
+        try {
+          const simpleQuery = query(
+            collection(db, this.COLLECTION_NAME),
+            where('subject', '==', subject),
+            limit(limitCount)
+          );
+
+          const querySnapshot = await getDocs(simpleQuery);
+          const availabilities = [];
+
+          querySnapshot.forEach((doc) => {
+            availabilities.push({
+              id: doc.id,
+              ...doc.data(),
+              createdAt: doc.data().createdAt?.toDate(),
+              updatedAt: doc.data().updatedAt?.toDate(),
+              syncedAt: doc.data().syncedAt?.toDate(),
+              startDateTime: doc.data().startDateTime?.toDate(),
+              endDateTime: doc.data().endDateTime?.toDate(),
+            });
+          });
+
+          // Ordenar manualmente por fecha
+          availabilities.sort((a, b) => {
+            const dateA = new Date(a.startDateTime);
+            const dateB = new Date(b.startDateTime);
+            return dateA - dateB;
+          });
+
+          return availabilities;
+        } catch (fallbackError) {
+          console.error('Error in fallback query:', fallbackError);
+          throw new Error(`Error obteniendo disponibilidades por materia: ${fallbackError.message}`);
+        }
+      }
+      
       throw new Error(`Error obteniendo disponibilidades por materia: ${error.message}`);
     }
   }

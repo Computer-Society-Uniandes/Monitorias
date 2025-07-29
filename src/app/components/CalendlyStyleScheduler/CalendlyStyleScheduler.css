@@ -1,0 +1,424 @@
+.calendly-scheduler {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.scheduler-header {
+  text-align: center;
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.scheduler-header h3 {
+  font-size: 28px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 8px;
+}
+
+.subject-info {
+  font-size: 16px;
+  color: #6b7280;
+  margin-bottom: 4px;
+}
+
+.price-info {
+  font-size: 14px;
+  color: #059669;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* Messages */
+.error-message {
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.success-message {
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* No availability message */
+.no-availability-message {
+  text-align: center;
+  padding: 64px 32px;
+  background-color: #f9fafb;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+}
+
+.no-availability-message .icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.no-availability-message h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 8px;
+}
+
+.no-availability-message p {
+  color: #6b7280;
+  margin: 0;
+}
+
+/* Available dates */
+.available-dates {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.date-section {
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.2s ease;
+}
+
+.date-section:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.date-header {
+  background-color: #f9fafb;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.date-header h4 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+  text-transform: capitalize;
+}
+
+.slots-count {
+  font-size: 14px;
+  color: #6b7280;
+  background-color: #e5e7eb;
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+
+/* Time slots */
+.time-slots {
+  padding: 16px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.time-slot {
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: white;
+  position: relative;
+}
+
+.time-slot:hover {
+  border-color: #FF7A7A;
+  background-color: #fef8f8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.time-slot.selected {
+  border-color: #FF7A7A;
+  background-color: #FF7A7A;
+  color: white;
+}
+
+.slot-time {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.start-time {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.duration {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.time-slot.selected .duration {
+  opacity: 0.9;
+}
+
+.slot-location {
+  font-size: 14px;
+  margin-bottom: 4px;
+  opacity: 0.8;
+}
+
+.slot-description {
+  font-size: 12px;
+  opacity: 0.7;
+  line-height: 1.4;
+}
+
+.time-slot.selected .slot-location,
+.time-slot.selected .slot-description {
+  opacity: 0.9;
+}
+
+/* Booking modal */
+.booking-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.booking-form {
+  background-color: white;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.booking-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.booking-header h4 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.close-btn:hover {
+  background-color: #f3f4f6;
+}
+
+.booking-details {
+  padding: 24px;
+}
+
+.selected-slot-info,
+.tutor-info {
+  margin-bottom: 24px;
+  padding: 16px;
+  background-color: #f9fafb;
+  border-radius: 8px;
+}
+
+.selected-slot-info h5,
+.tutor-info h5 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 8px;
+}
+
+.slot-datetime {
+  font-size: 16px;
+  font-weight: 500;
+  color: #059669;
+  margin-bottom: 4px;
+}
+
+.slot-duration,
+.slot-location {
+  font-size: 14px;
+  color: #6b7280;
+  margin-bottom: 2px;
+}
+
+.notes-section {
+  margin-bottom: 24px;
+}
+
+.notes-section label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 8px;
+}
+
+.notes-section textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
+}
+
+.notes-section textarea:focus {
+  outline: none;
+  border-color: #FF7A7A;
+  box-shadow: 0 0 0 3px rgba(255, 122, 122, 0.1);
+}
+
+.booking-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.cancel-btn,
+.confirm-btn {
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.cancel-btn {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.cancel-btn:hover:not(:disabled) {
+  background-color: #e5e7eb;
+}
+
+.confirm-btn {
+  background-color: #FF7A7A;
+  color: white;
+}
+
+.confirm-btn:hover:not(:disabled) {
+  background-color: #ff6b6b;
+}
+
+.cancel-btn:disabled,
+.confirm-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .calendly-scheduler {
+    padding: 16px;
+  }
+  
+  .scheduler-header h3 {
+    font-size: 24px;
+  }
+  
+  .time-slots {
+    grid-template-columns: 1fr;
+    padding: 12px;
+  }
+  
+  .date-header {
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+  }
+  
+  .booking-modal {
+    padding: 12px;
+  }
+  
+  .booking-details {
+    padding: 16px;
+  }
+  
+  .booking-actions {
+    flex-direction: column-reverse;
+  }
+  
+  .cancel-btn,
+  .confirm-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .scheduler-header {
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+  }
+  
+  .scheduler-header h3 {
+    font-size: 20px;
+  }
+  
+  .available-dates {
+    gap: 16px;
+  }
+  
+  .date-header {
+    padding: 12px 16px;
+  }
+  
+  .time-slots {
+    padding: 8px;
+    gap: 8px;
+  }
+  
+  .time-slot {
+    padding: 12px;
+  }
+} 
