@@ -1,6 +1,6 @@
 "use client";
 
-import { AuthProvider } from './AuthContext';
+import { AuthProvider } from './SecureAuthContext';
 
 export default function AuthWrapper({ children }) {
   return (

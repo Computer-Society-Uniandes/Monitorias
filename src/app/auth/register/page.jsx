@@ -5,7 +5,7 @@ import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth, db } from '../../../firebaseConfig';
 import { doc, setDoc, collection, getDocs } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../context/SecureAuthContext';
 import routes from 'app/routes';
 import { FcGoogle } from "react-icons/fc";
 
