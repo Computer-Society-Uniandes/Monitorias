@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/SecureAuthContext";
 import { TutoringSessionService } from "../../services/TutoringSessionService";
 import TutoringDetailsModal from "../TutoringDetailsModal/TutoringDetailsModal";
 import GoogleCalendarButton from "../GoogleCalendarButton/GoogleCalendarButton";

@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { TutoringSessionService } from "../../services/TutoringSessionService";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/SecureAuthContext";
 import TutoringDetailsModal from "../TutoringDetailsModal/TutoringDetailsModal";
 import routes from "../../../routes";
 import "./TutoringSummary.css";

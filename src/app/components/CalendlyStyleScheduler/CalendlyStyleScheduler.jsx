@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { TutoringSessionService } from "../../services/TutoringSessionService";
 import { SlotService } from "../../services/SlotService";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/SecureAuthContext";
 import "./CalendlyStyleScheduler.css";
 
 export default function CalendlyStyleScheduler({ tutor, availabilities, materia, onBookingComplete }) {

@@ -15,10 +15,8 @@ export class AuthService {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
       
-      // Actualizar localStorage para compatibilidad con el sistema existente
-      localStorage.setItem('isLoggedIn', 'true');
-      localStorage.setItem('userEmail', user.email);
-      localStorage.setItem('userName', user.displayName || user.email.split('@')[0]);
+      // Firebase Auth maneja la persistencia automáticamente
+      // Los datos del usuario se obtienen via onAuthStateChanged en AuthContext
       
       return {
         success: true,
@@ -49,10 +47,8 @@ export class AuthService {
         await updateProfile(user, { displayName });
       }
       
-      // Actualizar localStorage para compatibilidad
-      localStorage.setItem('isLoggedIn', 'true');
-      localStorage.setItem('userEmail', user.email);
-      localStorage.setItem('userName', displayName || user.email.split('@')[0]);
+      // Firebase Auth maneja la persistencia automáticamente
+      // Los datos del usuario se obtienen via onAuthStateChanged en AuthContext
       
       return {
         success: true,
@@ -77,12 +73,8 @@ export class AuthService {
     try {
       await signOut(auth);
       
-      // Limpiar localStorage
-      localStorage.removeItem('isLoggedIn');
-      localStorage.removeItem('userEmail');
-      localStorage.removeItem('userName');
-      localStorage.removeItem('isTutor');
-      localStorage.removeItem('rol');
+      // Firebase Auth maneja la limpieza de sesión automáticamente
+      // El estado se actualiza via onAuthStateChanged en AuthContext
       
       return { success: true };
     } catch (error) {

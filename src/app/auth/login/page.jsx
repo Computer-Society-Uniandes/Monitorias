@@ -6,7 +6,7 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { auth, db } from '../../../firebaseConfig';
 import { doc, getDoc } from "firebase/firestore";
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../context/SecureAuthContext';
 import routes from 'app/routes';
 import './Login.css';
 

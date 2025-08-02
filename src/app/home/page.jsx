@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/SecureAuthContext";
 import StudentHome from "../components/StudentHome/StudentHome";
 import routes from "../../routes";
 

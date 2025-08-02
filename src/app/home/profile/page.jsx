@@ -9,40 +9,28 @@ import Header from '../../components/Header/Header'
 import { useRouter } from 'next/navigation'
 import routes from 'app/routes'
 import './Profile.css'
+import { useAuth } from '../../context/SecureAuthContext'
 
 const Profile = () => {
   const [userData, setUserData] = useState(null)
   const [majorName, setMajorName] = useState('')
-  const [userEmail, setUserEmail] = useState(null)
-  const [isLoggedIn, setIsLoggedIn] = useState(null)
-
-  // const userEmail = localStorage.getItem('userEmail')
-  // const isLoggedIn = localStorage.getItem('isLoggedIn')
-
   const router = useRouter();
-  
-  useEffect(() => {
-    const email = localStorage.getItem('userEmail')
-    const loggedIn = localStorage.getItem('isLoggedIn')
-
-    setUserEmail(email)
-    setIsLoggedIn(loggedIn)
-  }, [])
+  const { user, loading, logout } = useAuth();
 
   // Cargar datos de perfil
   useEffect(() => {
-    if (isLoggedIn === null) return; 
+    if (loading) return; 
     // Si no está logueado, redirige
-    if (!isLoggedIn) {
+    if (!user.isLoggedIn) {
       router.push(routes.LANDING)
       return
     }
-    if (!userEmail) return
+    if (!user.email) return
 
     const fetchUserData = async () => {
       try {
         // 1. Obtener doc del usuario
-        const userDocRef = doc(db, 'user', userEmail)
+        const userDocRef = doc(db, 'user', user.email)
         const userSnap = await getDoc(userDocRef)
         if (userSnap.exists()) {
           const data = userSnap.data()
@@ -64,14 +52,15 @@ const Profile = () => {
     }
 
     fetchUserData()
-  }, [isLoggedIn, userEmail, router])
+  }, [loading, user.isLoggedIn, user.email, router])
 
-  const handleLogout = () => {
-    auth.signOut()
-    localStorage.removeItem('userEmail')
-    localStorage.removeItem('userName')
-    localStorage.removeItem('isLoggedIn')
-    router.push(routes.LANDING)
+  const handleLogout = async () => {
+    try {
+      await logout()
+      router.push(routes.LANDING)
+    } catch (error) {
+      console.error('Error logging out:', error)
+    }
   }
 
   if (!userData) {
@@ -99,7 +88,7 @@ const Profile = () => {
             {/* aqui se debe cambiar por los datos del usuario */}
             <p className='text-info'><strong className='text-campos'>Nombre: </strong> {userData.name}</p>
             <p className='text-info'><strong className='text-campos'>Teléfono: </strong>{userData.phone_number} </p>
-            <p className='text-info'><strong className='text-campos'>Correo: </strong>{userEmail} </p>
+            <p className='text-info'><strong className='text-campos'>Correo: </strong>{user.email} </p>
             <p className='text-info'><strong className='text-campos'>Carrera:</strong> {majorName || 'No definida'}</p>
 
             <button

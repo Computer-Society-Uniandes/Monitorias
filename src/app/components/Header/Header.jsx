@@ -5,7 +5,7 @@ import "./Header.css";
 import { UserRound } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/SecureAuthContext";
 import routes from "../../../routes";
 
 export default function Header() {
@@ -19,9 +19,15 @@ export default function Header() {
 
   if (!mounted) return null;
 
-  const handleLogout = () => {
-    logout();
-    router.push(routes.LOGIN);
+  const handleLogout = async () => {
+    try {
+      await logout();
+      router.push(routes.LOGIN);
+    } catch (error) {
+      console.error('Error during logout:', error);
+      // Aún así redirigir al login en caso de error
+      router.push(routes.LOGIN);
+    }
   };
 
   return (

@@ -8,12 +8,13 @@ import Logo from "../../../../public/Logo.png";
 import Logo2 from "../../../../public/Logo2.png";
 import routes from "app/routes";
 import styles from "./Landing.module.css";
+import { useAuth } from "../../context/SecureAuthContext";
 
 export default function Landing() {
   const [scrolled, setScrolled] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
+  const { user, loading } = useAuth();
 
   /* Detectar scroll */
   useEffect(() => {
@@ -25,13 +26,12 @@ export default function Landing() {
     return () => document.removeEventListener("scroll", handleScroll);
   }, [scrolled]);
 
-  /* Leer flag de login solo en cliente */
+  /* Verificar que estamos en el cliente */
   useEffect(() => {
     setMounted(true);
-    setIsLoggedIn(localStorage.getItem("isLoggedIn") === "true");
   }, []);
 
-  if (!mounted) return null;
+  if (!mounted || loading) return null;
 
   return (
     <>
@@ -45,7 +45,7 @@ export default function Landing() {
 
           {/* Acciones */}
           <div className={styles.actions}>
-            {isLoggedIn ? (
+            {user.isLoggedIn ? (
               <button
                 className={`${styles.btn} ${
                   scrolled ? styles.btnSecondaryScrolled : styles.btnSecondary

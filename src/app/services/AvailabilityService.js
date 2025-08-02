@@ -1,4 +1,6 @@
 // Servicio para manejar la disponibilidad del tutor
+import { auth } from '../../firebaseConfig';
+
 export class AvailabilityService {
   
   // Variables estáticas para control de sincronización automática
@@ -307,9 +309,10 @@ export class AvailabilityService {
   // Crear un nuevo evento de disponibilidad en Google Calendar
   static async createAvailabilityEvent(eventData) {
     try {
-      // Obtener información del usuario desde localStorage
-      const tutorId = localStorage.getItem('userEmail') || 'unknown';
-      const tutorEmail = localStorage.getItem('userEmail') || '';
+      // Obtener información del usuario desde Firebase Auth
+      const currentUser = auth.currentUser;
+      const tutorId = currentUser?.email || 'unknown';
+      const tutorEmail = currentUser?.email || '';
       
       if (!tutorEmail) {
         throw new Error('No se encontró información del usuario. Por favor, inicia sesión nuevamente.');
@@ -407,7 +410,8 @@ export class AvailabilityService {
   // Obtener disponibilidades desde Firebase
   static async getAvailabilitiesFromFirebase() {
     try {
-      const tutorId = localStorage.getItem('userEmail') || '';
+      const currentUser = auth.currentUser;
+      const tutorId = currentUser?.email || '';
       
       if (!tutorId) {
         throw new Error('No se encontró información del usuario');
@@ -436,7 +440,7 @@ export class AvailabilityService {
   static async syncAvailabilitiesToFirebase() {
     try {
       // Obtener información del usuario desde localStorage
-      const tutorEmail = localStorage.getItem('userEmail') || '';
+      const tutorEmail = auth.currentUser?.email || '';
       const tutorId = tutorEmail; // Usar email como ID por consistencia
       
       console.log('Starting sync process for tutor:', tutorEmail);
@@ -635,7 +639,7 @@ export class AvailabilityService {
     try {
       // 1. Validar información del usuario
       console.log('1️⃣ Validando información del usuario...');
-      const tutorEmail = localStorage.getItem('userEmail') || '';
+      const tutorEmail = auth.currentUser?.email || '';
       const tutorId = tutorEmail;
 
       if (!tutorEmail) {
@@ -829,7 +833,7 @@ export class AvailabilityService {
       }
 
       // Obtener información del usuario
-      const tutorEmail = localStorage.getItem('userEmail') || '';
+      const tutorEmail = auth.currentUser?.email || '';
       if (!tutorEmail) {
         console.log('❌ No hay información del usuario, saltando sync automático');
         return { success: false, reason: 'no_user_info' };
