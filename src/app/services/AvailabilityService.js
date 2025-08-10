@@ -905,6 +905,7 @@ export class AvailabilityService {
           const exists = await this.checkEventExistsInFirebase(event.id);
           if (exists) {
             existingEvents.add(event.id);
+            console.log(`✅ Evento ${event.id} ya existe en Firebase`);
           }
         } catch (error) {
           console.warn(`⚠️ Error verificando evento ${event.id}:`, error.message);
