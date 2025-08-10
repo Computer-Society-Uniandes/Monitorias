@@ -190,6 +190,84 @@ export const deleteEvent = async (accessToken, eventId) => {
   return executeWithRetry(operation, accessToken, 'Delete event');
 };
 
+// Función para encontrar el calendario "Disponibilidad" del tutor
+export const findAvailabilityCalendar = async (accessToken) => {
+  const operation = async () => {
+    const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
+    
+    const response = await calendar.calendarList.list();
+    const calendars = response.data.items;
+    
+    // Buscar el calendario que contenga "Disponibilidad" en el nombre
+    const availabilityCalendar = calendars.find(cal => 
+      cal.summary && cal.summary.toLowerCase().includes('disponibilidad')
+    );
+    
+    if (availabilityCalendar) {
+      return {
+        id: availabilityCalendar.id,
+        summary: availabilityCalendar.summary,
+        description: availabilityCalendar.description,
+        accessRole: availabilityCalendar.accessRole
+      };
+    }
+    
+    return null;
+  };
+
+  return executeWithRetry(operation, accessToken, 'Find availability calendar');
+};
+
+// Función modificada para listar eventos de un calendario específico
+export const listEventsFromCalendar = async (accessToken, calendarId, timeMin, timeMax, maxResults = 10) => {
+  const operation = async () => {
+    const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
+    
+    const response = await calendar.events.list({
+      calendarId: calendarId,
+      timeMin: timeMin || new Date().toISOString(),
+      timeMax: timeMax,
+      maxResults: maxResults,
+      singleEvents: true,
+      orderBy: 'startTime',
+    });
+
+    return response.data.items;
+  };
+
+  return executeWithRetry(operation, accessToken, 'List events from specific calendar');
+};
+
+// Función para crear evento en un calendario específico
+export const createEventInCalendar = async (accessToken, calendarId, event) => {
+  const operation = async () => {
+    const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
+    
+    const response = await calendar.events.insert({
+      calendarId: calendarId,
+      resource: event,
+    });
+    return response.data;
+  };
+
+  return executeWithRetry(operation, accessToken, 'Create event in specific calendar');
+};
+
+// Función para eliminar evento de un calendario específico
+export const deleteEventFromCalendar = async (accessToken, calendarId, eventId) => {
+  const operation = async () => {
+    const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
+    
+    await calendar.events.delete({
+      calendarId: calendarId,
+      eventId: eventId,
+    });
+    return true;
+  };
+
+  return executeWithRetry(operation, accessToken, 'Delete event from specific calendar');
+};
+
 export const getFreeBusy = async (accessToken, timeMin, timeMax) => {
   const operation = async () => {
     const calendar = google.calendar({ version: 'v3', auth: oauth2Client });

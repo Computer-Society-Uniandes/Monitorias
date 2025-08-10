@@ -178,14 +178,18 @@ Este documento define la estructura exacta de las colecciones en Firebase Firest
   "recurring": true,
   "recurrenceRule": "RRULE:FREQ=WEEKLY;BYDAY=MO",
   
-  // Materia y visualización
-  "subject": "Cálculo Diferencial",
-  "color": "#FF5722", // Color hexadecimal para mostrar
+  // Visualización
+  "color": "#FF5722", // Color hexadecimal asignado aleatoriamente
   
   // Integración con Google Calendar
   "googleEventId": "abc123def456ghi789",
   "htmlLink": "https://calendar.google.com/event?eid=...",
   "status": "confirmed", // confirmed, tentative, cancelled
+  
+  // Información del calendario específico (nuevo)
+  "sourceCalendarId": "calendar123@group.calendar.google.com",
+  "sourceCalendarName": "Disponibilidad",
+  "fromAvailabilityCalendar": true // Indica que viene del calendario específico
   
   // Campos de control
   "createdAt": "2025-01-15T10:30:00Z",
@@ -212,11 +216,13 @@ Este documento define la estructura exacta de las colecciones en Firebase Firest
   "location": "Biblioteca ML - Sala 101",
   "recurring": true,
   "recurrenceRule": "RRULE:FREQ=WEEKLY;BYDAY=TU",
-  "subject": "Cálculo Diferencial",
   "color": "#FF5722",
   "googleEventId": "abc123def456ghi789",
   "htmlLink": "https://calendar.google.com/calendar/event?eid=YWJjMTIz",
   "status": "confirmed",
+  "sourceCalendarId": "disponibilidad-maria@group.calendar.google.com",
+  "sourceCalendarName": "Disponibilidad",
+  "fromAvailabilityCalendar": true,
   "createdAt": "2025-01-15T10:30:00.000Z",
   "updatedAt": "2025-01-15T10:30:00.000Z",
   "syncedAt": "2025-01-15T10:30:00.000Z",
