@@ -10,7 +10,7 @@ export class AvailabilityService {
   static AUTO_SYNC_INTERVAL_MS = 5 * 60 * 1000; // 5 minutos
   static MIN_SYNC_INTERVAL_MS = 30 * 1000; // Mínimo 30 segundos entre syncs
 
-  // Obtener disponibilidad desde Google Calendar
+  // Obtener disponibilidad desde el calendario "Disponibilidad" específico
   static async getAvailability(startDate = null, endDate = null, maxResults = 50) {
     try {
       const params = new URLSearchParams();
@@ -19,6 +19,7 @@ export class AvailabilityService {
       if (endDate) params.append('endDate', endDate);
       if (maxResults) params.append('maxResults', maxResults.toString());
       
+      // Ahora por defecto usa el calendario específico
       const response = await fetch(`/api/calendar/availability?${params}`);
       const data = await response.json();
       
@@ -32,6 +33,8 @@ export class AvailabilityService {
       throw error;
     }
   }
+
+
   
   // Obtener disponibilidad para la semana actual
   static async getWeeklyAvailability() {
@@ -859,7 +862,7 @@ export class AvailabilityService {
     try {
       console.log('🧠 Iniciando sincronización inteligente para:', tutorEmail);
 
-      // 1. Obtener eventos desde Google Calendar (próximos 30 días)
+      // 1. Obtener eventos desde el calendario "Disponibilidad" específico (próximos 30 días)
       const now = new Date();
       const futureDate = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
       
@@ -870,29 +873,29 @@ export class AvailabilityService {
       );
 
       if (!googleResult.events || googleResult.events.length === 0) {
-        console.log('📅 No hay eventos en Google Calendar');
+        if (googleResult.calendarFound === false) {
+          console.log('📅 No se encontró calendario "Disponibilidad"');
+          return { 
+            synced: 0, 
+            skipped: 0, 
+            message: 'No se encontró un calendario llamado "Disponibilidad". Por favor, crea uno.',
+            calendarFound: false
+          };
+        }
+        console.log('📅 No hay eventos en el calendario Disponibilidad');
         return { synced: 0, skipped: 0, message: 'No hay eventos para sincronizar' };
       }
 
-      // 2. Filtrar eventos de disponibilidad
-      const availabilityKeywords = [
-        'disponible', 'libre', 'tutoria', 'tutoría', 'sesión', 'sesion',
-        'clase', 'enseñanza', 'apoyo', 'ayuda', 'consulta', 'available',
-        'free', 'teaching', 'support', 'help', 'consultation'
-      ];
-
+      // 2. Como todos los eventos vienen del calendario "Disponibilidad", no filtramos por palabras clave
       const availabilityEvents = googleResult.events.filter(event => {
-        if (!event.summary) return false;
-        const summary = event.summary.toLowerCase();
-        return availabilityKeywords.some(keyword => 
-          summary.includes(keyword.toLowerCase())
-        );
+        // Solo filtrar eventos que tengan información básica
+        return event.summary && (event.start.dateTime || event.start.date);
       });
 
-      console.log(`📋 Encontrados ${availabilityEvents.length} eventos de disponibilidad en Google Calendar`);
+      console.log(`📋 Encontrados ${availabilityEvents.length} eventos en el calendario Disponibilidad`);
 
       if (availabilityEvents.length === 0) {
-        return { synced: 0, skipped: 0, message: 'No hay eventos de disponibilidad para sincronizar' };
+        return { synced: 0, skipped: 0, message: 'No hay eventos válidos para sincronizar' };
       }
 
       // 3. Verificar cuáles ya existen en Firebase

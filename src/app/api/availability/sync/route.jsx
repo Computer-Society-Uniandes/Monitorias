@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { listEvents } from '../../../services/GoogleCalendarService';
+import { findAvailabilityCalendar, listEventsFromCalendar } from '../../../services/GoogleCalendarService';
 import { FirebaseAvailabilityService } from '../../../services/FirebaseAvailabilityService';
 
 export async function POST(request) {
@@ -57,10 +57,59 @@ export async function POST(request) {
     console.log('Time range:', timeMin, 'to', timeMax);
     console.log('Tutor:', tutorId, tutorEmail);
 
-    // Obtener eventos desde Google Calendar con manejo mejorado de errores
+    // Primero buscar el calendario de "Disponibilidad"
+    let availabilityCalendar;
+    try {
+      availabilityCalendar = await findAvailabilityCalendar(accessToken.value);
+      
+      if (!availabilityCalendar) {
+        return NextResponse.json({ 
+          success: false,
+          error: 'No se encontró un calendario llamado "Disponibilidad". Por favor, crea un calendario con ese nombre en tu cuenta de Google.',
+          calendarFound: false,
+          syncResults: {
+            created: 0,
+            updated: 0,
+            errors: [{ error: 'Calendario "Disponibilidad" no encontrado' }],
+            totalProcessed: 0
+          }
+        }, { status: 404 });
+      }
+      
+      console.log(`Using calendar: "${availabilityCalendar.summary}" (ID: ${availabilityCalendar.id})`);
+    } catch (calendarError) {
+      console.error('Error finding availability calendar:', calendarError);
+      
+      if (calendarError.code === 401 || calendarError.message.includes('authentication')) {
+        return NextResponse.json({ 
+          success: false,
+          error: 'Token de acceso expirado. Por favor, vuelve a conectar tu calendario.',
+          needsReconnection: true
+        }, { status: 401 });
+      }
+      
+      return NextResponse.json({ 
+        success: false,
+        error: `Error al buscar el calendario de disponibilidad: ${calendarError.message}`,
+        syncResults: {
+          created: 0,
+          updated: 0,
+          errors: [{ error: calendarError.message }],
+          totalProcessed: 0
+        }
+      }, { status: 500 });
+    }
+
+    // Obtener eventos desde el calendario "Disponibilidad" específico
     let googleEvents;
     try {
-      googleEvents = await listEvents(accessToken.value, timeMin, timeMax, 100);
+      googleEvents = await listEventsFromCalendar(
+        accessToken.value, 
+        availabilityCalendar.id, 
+        timeMin, 
+        timeMax, 
+        100
+      );
     } catch (calendarError) {
       console.error('Google Calendar API error:', calendarError);
       
@@ -75,7 +124,7 @@ export async function POST(request) {
       
       return NextResponse.json({ 
         success: false,
-        error: `Error al acceder a Google Calendar: ${calendarError.message}`,
+        error: `Error al acceder al calendario de disponibilidad: ${calendarError.message}`,
         syncResults: {
           created: 0,
           updated: 0,
@@ -85,30 +134,23 @@ export async function POST(request) {
       }, { status: 500 });
     }
     
-    console.log(`Found ${googleEvents.length} events in Google Calendar`);
+    console.log(`Found ${googleEvents.length} events in Disponibilidad calendar`);
 
-    // Filtrar eventos que parecen ser de disponibilidad
-    const availabilityKeywords = [
-      'disponible', 'libre', 'tutoria', 'tutoría', 'sesión', 'sesion',
-      'clase', 'enseñanza', 'apoyo', 'ayuda', 'consulta', 'available',
-      'free', 'teaching', 'support', 'help', 'consultation'
-    ];
-
+    // Como todos los eventos vienen del calendario "Disponibilidad", 
+    // no necesitamos filtrar por palabras clave - todos son válidos
     const availabilityEvents = googleEvents.filter(event => {
-      if (!event.summary) return false;
-      
-      const summary = event.summary.toLowerCase();
-      return availabilityKeywords.some(keyword => 
-        summary.includes(keyword.toLowerCase())
-      );
+      // Solo filtrar eventos que no tengan información básica
+      return event.summary && (event.start.dateTime || event.start.date);
     });
 
-    console.log(`Found ${availabilityEvents.length} availability events`);
+    console.log(`Found ${availabilityEvents.length} availability events in Disponibilidad calendar`);
 
     if (availabilityEvents.length === 0) {
       return NextResponse.json({
         success: true,
-        message: 'No se encontraron eventos de disponibilidad para sincronizar',
+        message: 'No se encontraron eventos en el calendario de Disponibilidad para sincronizar',
+        calendarFound: true,
+        calendar: availabilityCalendar,
         syncResults: {
           created: 0,
           updated: 0,
@@ -122,7 +164,8 @@ export async function POST(request) {
     const syncResults = await FirebaseAvailabilityService.syncGoogleEventsToFirebase(
       availabilityEvents,
       tutorId,
-      tutorEmail
+      tutorEmail,
+      availabilityCalendar
     );
 
     console.log('Sync completed:', syncResults);
