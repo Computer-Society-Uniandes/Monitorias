@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import "./Header.css";
-import { UserRound } from "lucide-react";
+import { UserRound, Menu, X } from "lucide-react";   // ⟵ añadí Menu y X
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../context/SecureAuthContext";
@@ -14,38 +14,36 @@ export default function Header() {
 
   const [mounted, setMounted] = useState(false);
   const [role, setRole] = useState("student"); // 'student' | 'tutor'
+  const [menuOpen, setMenuOpen] = useState(false);   // ⟵ estado del menú
 
-  // 1) Montado para evitar hidratar distinto
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  useEffect(() => { setMounted(true); }, []);
 
-  // 2) Leer rol inicial y suscribirse a cambios (evento custom + storage)
   useEffect(() => {
     if (!mounted) return;
 
-    // valor inicial
     const initial = typeof window !== "undefined"
       ? (localStorage.getItem("rol") || "student")
       : "student";
     setRole(initial);
 
-    // cambios desde Profile (misma pestaña)
     const onRoleChange = (e) => {
       setRole(e?.detail || (localStorage.getItem("rol") || "student"));
     };
     window.addEventListener("role-change", onRoleChange);
 
-    // cambios desde otras pestañas/ventanas
     const onStorage = (e) => {
       if (e.key === "rol") setRole(e.newValue || "student");
     };
     window.addEventListener("storage", onStorage);
 
-    // cleanup
+    // cerrar menú si ensanchas la pantalla
+    const onResize = () => { if (window.innerWidth > 950) setMenuOpen(false); };
+    window.addEventListener("resize", onResize);
+
     return () => {
       window.removeEventListener("role-change", onRoleChange);
       window.removeEventListener("storage", onStorage);
+      window.removeEventListener("resize", onResize);
     };
   }, [mounted]);
 
@@ -60,10 +58,25 @@ export default function Header() {
   };
 
   return (
-    <header className="header">
+    <header className={`header ${menuOpen ? "is-open" : ""}`}>
       <Link href="/" className="logo">Calico</Link>
 
-      <nav className={`navbar ${tutorMode ? "navbar-tutor" : "navbar-student"}`}>
+      {/* Botón hamburguesa solo móvil */}
+      <button
+        className="hamburger"
+        aria-label={menuOpen ? "Cerrar menú" : "Abrir menú"}
+        aria-expanded={menuOpen}
+        aria-controls="site-nav"
+        onClick={() => setMenuOpen((v) => !v)}
+      >
+        {menuOpen ? <X size={20}/> : <Menu size={20}/>}
+      </button>
+
+      <nav
+        id="site-nav"
+        className={`navbar ${tutorMode ? "navbar-tutor" : "navbar-student"}`}
+        onClick={() => setMenuOpen(false)}   // cerrar al elegir una opción
+      >
         {tutorMode ? (
           <>
             <Link href={routes.TUTOR_INICIO}>Inicio</Link>
@@ -85,7 +98,7 @@ export default function Header() {
       <div className="right-block">
         {user.isLoggedIn ? (
           <div className="user-actions">
-            <button className="perfil" onClick={() => router.push(routes.PROFILE)}>
+            <button className="perfil" onClick={() => { setMenuOpen(false); router.push(routes.PROFILE); }}>
               Tu Perfil <UserRound size={18} />
             </button>
             <button className="btn-logout" onClick={handleLogout}>
@@ -94,10 +107,10 @@ export default function Header() {
           </div>
         ) : (
           <div className="auth-buttons">
-            <button className="btn-header" onClick={() => router.push(routes.LOGIN)}>
+            <button className="btn-header" onClick={() => { setMenuOpen(false); router.push(routes.LOGIN); }}>
               Iniciar Sesión
             </button>
-            <button className="btn-header btn-header--primary" onClick={() => router.push(routes.REGISTER)}>
+            <button className="btn-header btn-header--primary" onClick={() => { setMenuOpen(false); router.push(routes.REGISTER); }}>
               Regístrate
             </button>
           </div>
