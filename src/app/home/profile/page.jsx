@@ -104,6 +104,7 @@ const Profile = () => {
     } finally {
       localStorage.setItem('rol', 'student');
       setActiveRole('student');
+      notifyRoleChange('student');
       router.push(routes.LANDING);
     }
   };
@@ -116,16 +117,25 @@ const Profile = () => {
     }
     localStorage.setItem('rol', 'tutor');
     setActiveRole('tutor');
+    notifyRoleChange('tutor');
   };
 
   const handleBackToStudent = () => {
     localStorage.setItem('rol', 'student');
     setActiveRole('student');
+    notifyRoleChange('student');
   };
 
   if (!userData) {
     return <div className="p-6">Cargando perfil...</div>;
   }
+
+  const notifyRoleChange = (next) => {
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('role-change', { detail: next }));
+    }
+  };
+
 
   return (
     <div className="background-profile">
