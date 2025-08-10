@@ -11,34 +11,60 @@ import routes from "../../../routes";
 export default function Header() {
   const router = useRouter();
   const { user, logout } = useAuth();
-  const [mounted, setMounted] = useState(false);
 
+  const [mounted, setMounted] = useState(false);
+  const [role, setRole] = useState("student"); // 'student' | 'tutor'
+
+  // 1) Montado para evitar hidratar distinto
   useEffect(() => {
     setMounted(true);
   }, []);
 
+  // 2) Leer rol inicial y suscribirse a cambios (evento custom + storage)
+  useEffect(() => {
+    if (!mounted) return;
+
+    // valor inicial
+    const initial = typeof window !== "undefined"
+      ? (localStorage.getItem("rol") || "student")
+      : "student";
+    setRole(initial);
+
+    // cambios desde Profile (misma pestaña)
+    const onRoleChange = (e) => {
+      setRole(e?.detail || (localStorage.getItem("rol") || "student"));
+    };
+    window.addEventListener("role-change", onRoleChange);
+
+    // cambios desde otras pestañas/ventanas
+    const onStorage = (e) => {
+      if (e.key === "rol") setRole(e.newValue || "student");
+    };
+    window.addEventListener("storage", onStorage);
+
+    // cleanup
+    return () => {
+      window.removeEventListener("role-change", onRoleChange);
+      window.removeEventListener("storage", onStorage);
+    };
+  }, [mounted]);
+
   if (!mounted) return null;
 
+  const tutorMode = user.isLoggedIn && user.isTutor && role === "tutor";
+
   const handleLogout = async () => {
-    try {
-      await logout();
-      router.push(routes.LOGIN);
-    } catch (error) {
-      console.error('Error during logout:', error);
-      // Aún así redirigir al login en caso de error
-      router.push(routes.LOGIN);
-    }
+    try { await logout(); }
+    catch (error) { console.error("Error during logout:", error); }
+    finally { router.push(routes.LOGIN); }
   };
 
   return (
     <header className="header">
-      <Link href="/" className="logo">
-        Calico
-      </Link>
+      <Link href="/" className="logo">Calico</Link>
 
-      <nav className={`navbar ${user.isLoggedIn && user.isTutor ? 'navbar-tutor' : 'navbar-student'}`}>
-        {user.isLoggedIn && user.isTutor && localStorage.getItem('rol') === ('tutor') ? (
-          // Navegación para tutores
+      <nav className={`navbar ${tutorMode ? "navbar-tutor" : "navbar-student"}`}>
+        {tutorMode ? (
           <>
             <Link href={routes.TUTOR_INICIO}>Inicio</Link>
             <Link href={routes.TUTOR_MIS_TUTORIAS}>Mis tutorías</Link>
@@ -47,7 +73,6 @@ export default function Header() {
             <Link href={routes.TUTOR_PAGOS}>Pagos</Link>
           </>
         ) : (
-          // Navegación para estudiantes y usuarios no logueados
           <>
             <Link href={routes.HOME}>Inicio</Link>
             <Link href={routes.EXPLORE}>Explorar Materias</Link>
@@ -57,38 +82,22 @@ export default function Header() {
         )}
       </nav>
 
-      {/* ───────────── BOTONES DERECHA ───────────── */}
       <div className="right-block">
-        {/* Mostrar rol actual solo si está logueado */}
-
-
         {user.isLoggedIn ? (
           <div className="user-actions">
-            <button
-              className="perfil"
-              onClick={() => router.push(routes.PROFILE)}
-            >
+            <button className="perfil" onClick={() => router.push(routes.PROFILE)}>
               Tu Perfil <UserRound size={18} />
             </button>
-            <button
-              className="btn-logout"
-              onClick={handleLogout}
-            >
+            <button className="btn-logout" onClick={handleLogout}>
               Cerrar Sesión
             </button>
           </div>
         ) : (
           <div className="auth-buttons">
-            <button
-              className="btn-header"
-              onClick={() => router.push(routes.LOGIN)}
-            >
+            <button className="btn-header" onClick={() => router.push(routes.LOGIN)}>
               Iniciar Sesión
             </button>
-            <button
-              className="btn-header btn-header--primary"
-              onClick={() => router.push(routes.REGISTER)}
-            >
+            <button className="btn-header btn-header--primary" onClick={() => router.push(routes.REGISTER)}>
               Regístrate
             </button>
           </div>
