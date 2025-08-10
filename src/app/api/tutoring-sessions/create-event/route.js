@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { CalicoCalendarService } from '../../../services/CalicoCalendarService';
-import { auth } from '../../../firebaseConfig';
 
 export async function POST(request) {
   try {
@@ -78,7 +77,9 @@ export async function POST(request) {
       summary: sessionData.summary,
       start: sessionData.startDateTime,
       end: sessionData.endDateTime,
-      attendees: sessionData.attendees.map(a => a.email)
+      attendees: Array.isArray(sessionData.attendees) ? sessionData.attendees.map(a => a.email) : 'Invalid attendees array',
+      attendeesType: typeof sessionData.attendees,
+      attendeesIsArray: Array.isArray(sessionData.attendees)
     });
 
     // Crear el evento en el calendario central de Calico

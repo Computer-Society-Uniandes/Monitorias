@@ -73,6 +73,14 @@ export class CalicoCalendarService {
    */
   static async createTutoringSessionEvent(sessionData) {
     try {
+      console.log('🔧 CalicoCalendarService: Creating tutoring session event...');
+      console.log('📥 Received sessionData:', {
+        keys: Object.keys(sessionData),
+        attendees: sessionData.attendees,
+        attendeesType: typeof sessionData.attendees,
+        attendeesIsArray: Array.isArray(sessionData.attendees)
+      });
+
       const {
         summary,
         description,
@@ -84,6 +92,12 @@ export class CalicoCalendarService {
         tutorName
       } = sessionData;
 
+      console.log('🔍 After destructuring:', {
+        attendees,
+        attendeesType: typeof attendees,
+        attendeesIsArray: Array.isArray(attendees)
+      });
+
       // Validaciones
       if (!summary || !startDateTime || !endDateTime) {
         throw new Error('summary, startDateTime, and endDateTime are required');
@@ -93,15 +107,26 @@ export class CalicoCalendarService {
         throw new Error('tutorEmail is required');
       }
 
+      // Validar y normalizar la lista de attendees
+      let normalizedAttendees = [];
+      if (Array.isArray(attendees)) {
+        normalizedAttendees = [...attendees];
+      } else if (attendees && typeof attendees === 'object') {
+        // Si attendees es un objeto, convertirlo a array
+        normalizedAttendees = [attendees];
+      }
+
       // Asegurar que el tutor esté en la lista de asistentes
-      const attendeeEmails = attendees.map(a => a.email);
+      const attendeeEmails = normalizedAttendees.map(a => a.email || a);
       if (!attendeeEmails.includes(tutorEmail)) {
-        attendees.push({
+        normalizedAttendees.push({
           email: tutorEmail,
           displayName: tutorName || tutorEmail,
           responseStatus: 'accepted' // El tutor siempre acepta
         });
       }
+
+      console.log('👥 Normalized attendees:', normalizedAttendees);
 
       // Configurar fechas con zona horaria de Colombia
       const timeZone = 'America/Bogota';
@@ -110,10 +135,14 @@ export class CalicoCalendarService {
       const start = startDateTime instanceof Date ? startDateTime.toISOString() : startDateTime;
       const end = endDateTime instanceof Date ? endDateTime.toISOString() : endDateTime;
 
-      // Configurar el evento
+      // Encontrar el estudiante (quien no es el tutor)
+      const studentInfo = normalizedAttendees.find(a => (a.email || a) !== tutorEmail);
+      const studentName = studentInfo?.displayName || studentInfo?.email || studentInfo || 'Estudiante';
+
+      // Configurar el evento SIN attendees para evitar problemas de permisos
       const event = {
         summary: summary,
-        description: description || `Sesión de tutoría agendada a través de Calico.\n\nTutor: ${tutorName || tutorEmail}`,
+        description: description || `Sesión de tutoría agendada a través de Calico.\n\nTutor: ${tutorName || tutorEmail}\nEstudiante: ${studentName}\n\nNOTA: Este evento se creó en el calendario central de Calico. Los participantes serán notificados por separado.`,
         start: {
           dateTime: start,
           timeZone: timeZone
@@ -123,22 +152,20 @@ export class CalicoCalendarService {
           timeZone: timeZone
         },
         location: location,
-        attendees: attendees.map(attendee => ({
-          email: attendee.email,
-          displayName: attendee.displayName || attendee.email,
-          responseStatus: attendee.responseStatus || 'needsAction'
-        })),
+        // NO incluir attendees para evitar problemas de permisos con Service Account
+        // attendees: [...], // Comentado para evitar Domain-Wide Delegation requirement
+        
         // Configuraciones adicionales
         status: 'confirmed',
         visibility: 'default',
         guestsCanInviteOthers: false,
         guestsCanModify: false,
-        guestsCanSeeOtherGuests: true,
-        // Recordatorios
+        guestsCanSeeOtherGuests: false,
+        
+        // Recordatorios solo para el calendario central
         reminders: {
           useDefault: false,
           overrides: [
-            { method: 'email', minutes: 24 * 60 }, // 1 día antes
             { method: 'popup', minutes: 30 }       // 30 minutos antes
           ]
         }
@@ -149,18 +176,19 @@ export class CalicoCalendarService {
         summary: event.summary,
         start: event.start,
         end: event.end,
-        attendees: event.attendees.map(a => a.email),
+        location: event.location,
+        attendeesInfo: `${normalizedAttendees.length} attendees (not included in event due to Service Account limitations)`,
         calendarId: this.calenderId
       });
 
       // Obtener el cliente de Calendar
       const calendar = await this.getCalendarClient();
 
-      // Crear el evento en el calendario central
+      // Crear el evento en el calendario central SIN enviar invitaciones
       const response = await calendar.events.insert({
         calendarId: this.calenderId,
         resource: event,
-        sendUpdates: 'all' // Enviar invitaciones por email a todos los asistentes
+        sendUpdates: 'none' // No enviar invitaciones para evitar problemas de permisos
       });
 
       console.log('✅ Tutoring session event created successfully:', response.data.id);
@@ -217,12 +245,12 @@ export class CalicoCalendarService {
         end: updateData.end || currentEvent.data.end
       };
 
-      // Actualizar el evento
+      // Actualizar el evento SIN enviar invitaciones
       const response = await calendar.events.update({
         calendarId: this.calenderId,
         eventId: eventId,
         resource: updatedEvent,
-        sendUpdates: 'all'
+        sendUpdates: 'none' // No enviar invitaciones para evitar problemas de permisos
       });
 
       console.log('✅ Tutoring session event updated successfully');
@@ -260,7 +288,7 @@ export class CalicoCalendarService {
           status: 'cancelled',
           summary: `[CANCELADA] ${reason}`
         },
-        sendUpdates: 'all'
+        sendUpdates: 'none' // No enviar invitaciones para evitar problemas de permisos
       });
 
       console.log('✅ Tutoring session event cancelled successfully');
@@ -293,7 +321,7 @@ export class CalicoCalendarService {
       await calendar.events.delete({
         calendarId: this.calenderId,
         eventId: eventId,
-        sendUpdates: 'all'
+        sendUpdates: 'none' // No enviar invitaciones para evitar problemas de permisos
       });
 
       console.log('✅ Tutoring session event deleted successfully');

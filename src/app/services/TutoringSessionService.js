@@ -23,18 +23,24 @@ export class TutoringSessionService {
   // Crear una nueva sesión de tutoría para un slot específico
   static async createTutoringSession(sessionData) {
     try {
+      // Validar y limpiar datos antes de enviar a Firebase
+      const cleanedData = this.validateAndCleanSessionData(sessionData);
+      
+      console.log('📋 Creating tutoring session with cleaned data:', cleanedData);
+      
       const docRef = await addDoc(collection(db, this.COLLECTION_NAME), {
-        ...sessionData,
+        ...cleanedData,
         status: 'scheduled',
         paymentStatus: 'pending',
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       });
 
-      console.log('Tutoring session created with ID:', docRef.id);
+      console.log('✅ Tutoring session created with ID:', docRef.id);
       return { success: true, id: docRef.id };
     } catch (error) {
-      console.error('Error creating tutoring session:', error);
+      console.error('❌ Error creating tutoring session:', error);
+      console.error('🔍 Session data that caused error:', sessionData);
       throw new Error(`Error creando sesión de tutoría: ${error.message}`);
     }
   }
@@ -42,6 +48,15 @@ export class TutoringSessionService {
   // Reservar un slot específico de 1 hora
   static async bookSpecificSlot(slot, studentEmail, studentName, notes = '') {
     try {
+      console.log('🎯 BookSpecificSlot called with:', {
+        slotId: slot?.id,
+        slotSubject: slot?.subject,
+        slotTitle: slot?.title,
+        studentEmail,
+        studentName,
+        notes
+      });
+
       // Verificar que el slot esté disponible
       if (slot.isBooked) {
         throw new Error('Este horario ya no está disponible');
@@ -53,24 +68,41 @@ export class TutoringSessionService {
         throw new Error('Este horario ya fue reservado por otro estudiante');
       }
 
+      // Generar subject de manera robusta
+      let extractedSubject = 'Tutoría General';
+      
+      if (slot.subject && slot.subject !== undefined && slot.subject !== '') {
+        extractedSubject = slot.subject;
+      } else if (slot.title) {
+        extractedSubject = this.extractSubjectFromTitle(slot.title);
+      }
+      
+      console.log('🔍 Subject extraction:', {
+        originalSubject: slot.subject,
+        slotTitle: slot.title,
+        extractedSubject: extractedSubject
+      });
+
       // Crear la sesión de tutoría con información del slot específico
       const sessionData = {
         tutorEmail: slot.tutorEmail,
         studentEmail: studentEmail,
-        subject: slot.subject,
+        subject: extractedSubject,
         scheduledDateTime: slot.startDateTime,
         endDateTime: slot.endDateTime,
-        location: slot.location,
+        location: slot.location || 'Por definir',
         price: 25000, // Precio por hora
         // Información específica del slot
         parentAvailabilityId: slot.parentAvailabilityId,
         slotIndex: slot.slotIndex,
         slotId: slot.id,
         googleEventId: slot.googleEventId,
-        notes: notes,
+        notes: notes || '',
         status: 'scheduled',
         paymentStatus: 'pending'
       };
+
+      console.log('📋 Session data to be created:', sessionData);
 
       // Crear la sesión de tutoría en Firebase
       const sessionResult = await this.createTutoringSession(sessionData);
@@ -83,7 +115,7 @@ export class TutoringSessionService {
           tutorName: slot.tutorName || slot.tutorEmail,
           studentEmail: studentEmail,
           studentName: studentName,
-          subject: slot.subject,
+          subject: sessionData.subject, // Usar el subject ya procesado
           startDateTime: slot.startDateTime,
           endDateTime: slot.endDateTime,
           location: slot.location,
@@ -639,6 +671,147 @@ export class TutoringSessionService {
     } catch (error) {
       console.error('Error cancelling tutoring session with calendar:', error);
       throw new Error(`Error cancelando sesión con calendario: ${error.message}`);
+    }
+  }
+
+  // Método auxiliar para extraer materia del título del evento
+  static extractSubjectFromTitle(title) {
+    if (!title) return 'Tutoría General';
+    
+    const titleLower = title.toLowerCase();
+    
+    // Buscar palabras clave comunes de materias
+    if (titleLower.includes('cálculo') || titleLower.includes('calculo')) return 'Cálculo';
+    if (titleLower.includes('física') || titleLower.includes('fisica')) return 'Física';
+    if (titleLower.includes('matemáticas') || titleLower.includes('matematicas') || titleLower.includes('math')) return 'Matemáticas';
+    if (titleLower.includes('programación') || titleLower.includes('programacion') || titleLower.includes('programming')) return 'Programación';
+    if (titleLower.includes('química') || titleLower.includes('quimica')) return 'Química';
+    if (titleLower.includes('biología') || titleLower.includes('biologia')) return 'Biología';
+    if (titleLower.includes('historia')) return 'Historia';
+    if (titleLower.includes('inglés') || titleLower.includes('ingles') || titleLower.includes('english')) return 'Inglés';
+    if (titleLower.includes('estadística') || titleLower.includes('estadistica') || titleLower.includes('statistics')) return 'Estadística';
+    if (titleLower.includes('economía') || titleLower.includes('economia')) return 'Economía';
+    if (titleLower.includes('algebra') || titleLower.includes('álgebra')) return 'Álgebra';
+    if (titleLower.includes('geometría') || titleLower.includes('geometria')) return 'Geometría';
+    if (titleLower.includes('trigonometría') || titleLower.includes('trigonometria')) return 'Trigonometría';
+    
+    // Si contiene "tutoria" o "tutoría", usar el título completo como materia
+    if (titleLower.includes('tutoria') || titleLower.includes('tutoría')) {
+      return title.replace(/tutoria|tutoría/gi, '').trim() || 'Tutoría General';
+    }
+    
+    // Si no encuentra palabras clave específicas, usar el título como materia
+    return title.length > 30 ? 'Tutoría General' : title;
+  }
+
+  // Validar y limpiar datos de sesión para Firebase
+  static validateAndCleanSessionData(sessionData) {
+    const cleaned = {};
+    
+    // Lista de campos requeridos con valores por defecto
+    const fieldDefaults = {
+      tutorEmail: null,
+      studentEmail: null,
+      subject: 'Tutoría General',
+      scheduledDateTime: null,
+      endDateTime: null,
+      location: 'Por definir',
+      price: 25000,
+      notes: '',
+      parentAvailabilityId: null,
+      slotIndex: null,
+      slotId: null,
+      googleEventId: null
+    };
+
+    // Copiar solo campos válidos (no undefined, no null en campos requeridos)
+    Object.keys(fieldDefaults).forEach(key => {
+      let value = sessionData[key];
+      
+      // Si el valor es undefined o null, usar el default
+      if (value === undefined || value === null) {
+        value = fieldDefaults[key];
+      }
+      
+      // Solo agregar al objeto limpio si no es undefined o null
+      if (value !== undefined && value !== null) {
+        cleaned[key] = value;
+      }
+    });
+
+    // También agregar cualquier campo adicional que no esté en defaults (pero que no sea undefined)
+    Object.keys(sessionData).forEach(key => {
+      if (!fieldDefaults.hasOwnProperty(key) && sessionData[key] !== undefined && sessionData[key] !== null) {
+        cleaned[key] = sessionData[key];
+      }
+    });
+
+    // Validaciones específicas
+    if (!cleaned.tutorEmail) {
+      throw new Error('tutorEmail is required');
+    }
+    
+    if (!cleaned.studentEmail) {
+      throw new Error('studentEmail is required');
+    }
+    
+    if (!cleaned.scheduledDateTime) {
+      throw new Error('scheduledDateTime is required');
+    }
+    
+    if (!cleaned.endDateTime) {
+      throw new Error('endDateTime is required');
+    }
+
+    // Asegurar que subject nunca sea undefined, null o vacío
+    if (!cleaned.subject || cleaned.subject === undefined || cleaned.subject === null || cleaned.subject === '') {
+      cleaned.subject = 'Tutoría General';
+    }
+
+    console.log('🔧 Cleaned session data:', {
+      originalFields: Object.keys(sessionData),
+      cleanedFields: Object.keys(cleaned),
+      subject: cleaned.subject
+    });
+
+    return cleaned;
+  }
+
+  // Enviar notificación manual por email sobre la sesión creada (opcional)
+  static async sendTutoringSessionNotification(sessionData, calendarEventData) {
+    try {
+      console.log('📧 Sending manual tutoring session notification...');
+      
+      // Aquí puedes implementar el envío de emails usando tu servicio preferido
+      // Por ejemplo: SendGrid, Nodemailer, etc.
+      
+      const notificationData = {
+        tutorEmail: sessionData.tutorEmail,
+        studentEmail: sessionData.studentEmail,
+        subject: sessionData.subject,
+        scheduledDateTime: sessionData.scheduledDateTime,
+        endDateTime: sessionData.endDateTime,
+        location: sessionData.location,
+        notes: sessionData.notes,
+        calendarLink: calendarEventData?.htmlLink,
+        sessionId: calendarEventData?.sessionId
+      };
+
+      // TODO: Implementar envío de email
+      console.log('📧 Email notification data prepared:', notificationData);
+      console.log('💡 Implementa aquí tu servicio de email preferido (SendGrid, Nodemailer, etc.)');
+
+      return {
+        success: true,
+        message: 'Notification data prepared (email service not implemented yet)'
+      };
+
+    } catch (error) {
+      console.error('❌ Error preparing notification:', error);
+      return {
+        success: false,
+        error: error.message
+      };
     }
   }
 } 

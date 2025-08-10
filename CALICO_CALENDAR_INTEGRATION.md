@@ -237,9 +237,10 @@ Las sesiones de tutoría ahora incluyen:
 - Gestión unificada de horarios
 
 ### **2. Automatización**
-- Invitaciones automáticas por email
+- ~~Invitaciones automáticas por email~~ (Deshabilitado por limitaciones de Service Account)
 - Recordatorios configurados automáticamente
 - Sincronización automática con cambios
+- **NOTA**: Los eventos se crean en el calendario central SIN invitados para evitar problemas de permisos
 
 ### **3. Confiabilidad**
 - No depende de tokens de usuario
@@ -252,6 +253,17 @@ Las sesiones de tutoría ahora incluyen:
 - Fácil mantenimiento
 
 ## 🚨 Consideraciones Importantes
+
+### **Limitaciones de Service Account**
+- **No se pueden enviar invitaciones automáticas** por email sin Domain-Wide Delegation
+- **Los eventos se crean SIN attendees** para evitar errores de permisos
+- **Los participantes deben ser notificados manualmente** o mediante otro sistema
+- **La información de participantes está en la descripción** del evento
+
+### **Solución Alternativa para Notificaciones**
+- Los datos de tutor y estudiante se incluyen en la descripción del evento
+- Se puede implementar un sistema de email separado (SendGrid, Nodemailer, etc.)
+- El método `sendTutoringSessionNotification()` está preparado para esto
 
 ### **Seguridad**
 - La Service Account key debe mantenerse segura
