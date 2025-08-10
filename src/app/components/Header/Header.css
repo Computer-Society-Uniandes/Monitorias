@@ -44,7 +44,6 @@
 }
 
 .navbar-tutor a {
-  color: #5a67d8;
   font-weight: 600;
 }
 
@@ -60,6 +59,7 @@
   height: 2px;
   background: #ff7a7a;
   transition: width 0.2s;
+  color: #FF7A7A;
 }
 .navbar a:hover::before { width: 100%; }
 

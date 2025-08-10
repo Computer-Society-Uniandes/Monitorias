@@ -37,7 +37,7 @@ export default function Header() {
       </Link>
 
       <nav className={`navbar ${user.isLoggedIn && user.isTutor ? 'navbar-tutor' : 'navbar-student'}`}>
-        {user.isLoggedIn && user.isTutor ? (
+        {user.isLoggedIn && user.isTutor && localStorage.getItem('rol') === ('tutor') ? (
           // Navegación para tutores
           <>
             <Link href={routes.TUTOR_INICIO}>Inicio</Link>
@@ -60,13 +60,7 @@ export default function Header() {
       {/* ───────────── BOTONES DERECHA ───────────── */}
       <div className="right-block">
         {/* Mostrar rol actual solo si está logueado */}
-        {user.isLoggedIn && (
-          <div className="role-indicator">
-            <span className={`role-badge ${user.isTutor ? 'tutor' : 'student'}`}>
-              {user.isTutor ? "Tutor" : "Estudiante"}
-            </span>
-          </div>
-        )}
+
 
         {user.isLoggedIn ? (
           <div className="user-actions">
