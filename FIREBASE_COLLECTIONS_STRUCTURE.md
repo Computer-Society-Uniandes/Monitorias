@@ -309,9 +309,11 @@ Este documento define la estructura exacta de las colecciones en Firebase Firest
   "price": 25000,
   "paymentStatus": "pending", // pending, paid, refunded
   
-  // Integración
-  "googleEventId": "xyz789abc123def456",
+  // Integración con calendarios
+  "googleEventId": "xyz789abc123def456", // ID del evento original de disponibilidad
   "availabilityId": "abc123def456ghi789", // ID de la disponibilidad original
+  "calicoCalendarEventId": "calico123abc456def789", // ID del evento en calendario central de Calico
+  "calicoCalendarHtmlLink": "https://calendar.google.com/calendar/event?eid=...", // Link al evento central
   
   // Notas y calificación
   "notes": "Revisar ejercicios de derivadas",
