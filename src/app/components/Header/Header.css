@@ -242,9 +242,14 @@
 /* ====== MÓVIL ====== */
 @media (max-width: 950px) {
   /* layout base */
-  .header { padding: 12px 16px; gap: 8px; }
-  .hamburger { display: inline-flex; }
-  /* por defecto oculto (ahora ya no ocupa toda la pantalla) */
+  .header {
+    flex-direction: row;              /* sobreescribe column */
+    justify-content: space-between;   /* separa logo y botón */
+    align-items: center;
+    flex-wrap: wrap;                  /* permite que el nav baje cuando se abra */
+  }
+  .hamburger { display: inline-flex; margin-left: auto;}
+  .logo { margin-right: auto; }
   .navbar,
   .right-block { display: none; }
 
