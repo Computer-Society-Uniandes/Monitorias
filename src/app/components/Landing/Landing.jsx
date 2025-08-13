@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Users, BookOpen, Award, Clock } from "lucide-react";
 import Logo from "../../../../public/Logo.png";
 import Logo2 from "../../../../public/Logo2.png";
+import CalicoLogo from "../../../../public/CalicoLogo.png";
 import routes from "app/routes";
 import styles from "./Landing.module.css";
 import { useAuth } from "../../context/SecureAuthContext";
@@ -41,7 +42,7 @@ export default function Landing() {
       >
         <div className={styles.headerInner}>
           {/* Logo */}
-          <Image src={Logo2} alt="Logo cabra" className={styles.logoImg} priority />
+          <Image src={CalicoLogo} alt="Calico" className={styles.logoImg} priority />
 
           {/* Acciones */}
           <div className={styles.actions}>
