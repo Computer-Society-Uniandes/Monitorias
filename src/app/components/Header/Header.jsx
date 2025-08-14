@@ -4,6 +4,8 @@ import React, { useEffect, useState } from "react";
 import "./Header.css";
 import { UserRound } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
+import CalicoLogo from "../../../../public/CalicoLogo.png";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../context/SecureAuthContext";
 import routes from "../../../routes";
@@ -33,7 +35,7 @@ export default function Header() {
   return (
     <header className="header">
       <Link href="/" className="logo">
-        Calico
+        <Image src={CalicoLogo} alt="Calico" className="logoImg" priority />
       </Link>
 
       <nav className={`navbar ${user.isLoggedIn && user.isTutor ? 'navbar-tutor' : 'navbar-student'}`}>
