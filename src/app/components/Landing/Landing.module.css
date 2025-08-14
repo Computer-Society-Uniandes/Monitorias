@@ -50,7 +50,7 @@
 
 /* variante "primaria" (registrarse) cuando NO hay scroll */
 .btnPrimary {
-  color: #f9fafb; /* indigo-600 */
+  color: #f9fafb;
   background: #262528;
 }
 .btnPrimary:hover {
@@ -60,21 +60,21 @@
 /* primaria con scroll (fondo naranja oscuro, texto blanco) */
 .btnPrimaryScrolled {
   color: #f9fafb;
-  background: #FF9505;
+  background: #fdb61e;
 }
 .btnPrimaryScrolled:hover {
-  background: #febe64; /* indigo-700 */
+  background: #ff9505; /* indigo-700 */
 }
 
 /* variante "secundaria" (login) cuando NO hay scroll */
 .btnSecondary {
   color: #ffffff;
-  background: #FCAE1E;
+  background: #fdb61e;
   border-color: #ffffff;
   border-width: 1px;
 }
 .btnSecondary:hover {
-  background: #ff9602;
+  background: #ff9505;
 }
 
 /* secundaria con scroll (texto indigo sobre fondo blanco) */
@@ -91,8 +91,8 @@
 /* ---------- HERO ---------- */
 .hero {
   width: 100%;
-    background: linear-gradient(to bottom, #f7b02b, #FCAE1E);
-  padding-top: 3rem;          /* despejar el header */
+    background: linear-gradient(to bottom, #fdb61e, #ff9505); /* Calico Main Color */
+  padding-top: 5rem;          /* despejar el header */
 }
 
 .heroHidden {
@@ -109,7 +109,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: linear-gradient(to bottom, #FCAE1E 0%, #A14D00 100%);
+  background: linear-gradient(to bottom, #fdb61e 0%, #cc7704 100%);
   padding-top: 4rem; /* pt-16 */
 }
 
@@ -137,7 +137,7 @@
 }
 
 .ctaButton {
-  background: #FCAE1E; /* red-400 */
+  background: #fdb61e; /* main color calico */
   color: #ffffff;
   font-weight: 700;
   font-size: 1.125rem; /* text-lg */
@@ -147,7 +147,7 @@
   transition: transform 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
 }
 .ctaButton:hover {
-  background: #ff9602; /* red-300 aprox */
+  background: #ff9505; /* calico darker */
   transform: scale(1.05);
   box-shadow: 0 6px 12px rgba(0,0,0,0.12);
 }
@@ -178,7 +178,7 @@
 .sectionTitle {
   font-size: 3rem; /* text-5xl */
   font-weight: 700;
-  color: #FF9505; /* indigo-500 */
+  color: #ff9505; /* Calico darker */
   margin-bottom: 1rem;
   text-align: center;
 }
@@ -186,7 +186,7 @@
 .sectionLine {
   width: 6rem;
   height: 0.25rem;
-  background: #FF9505; /* indigo-400 */
+  background: #fdb61e; /* indigo-400 */
   margin: 0 auto 2rem auto;
 }
 
@@ -259,10 +259,10 @@
 
 /* ---------- MISSION ---------- */
 .mission {
-  background: #fcae1e0f; /* indigo-50 */
+  background: #fff8e8; /* indigo-50 */
   margin-top: 4rem; /* mt-16 */
   padding: 2rem; /* p-8 */
-  border: 1px solid #fcae1ed2; /* border-indigo-100 */
+  border: 1px solid #ffdaa8; /* border-indigo-100 */
   border-radius: 0.5rem;
   display: flex;
   flex-direction: column;
@@ -282,7 +282,7 @@
 .missionTitle {
   font-size: 1.5rem; /* text-2xl */
   font-weight: 700;
-  color: #FF9505; /* indigo-600 */
+  color: #262528; /* text color */
   margin-bottom: 1rem;
 }
 
