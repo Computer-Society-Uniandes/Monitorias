@@ -76,7 +76,7 @@ const Profile = () => {
     </div>
         <div className="relative z-10 max-w-4xl mx-auto bg-white rounded-xl shadow p-8 mt-10 justify-items-center">
         <h1 className="text-3xl font-bold mb-6 title">Perfil del Usuario</h1>
-        <div class="row-span-3"><img
+        <div className="row-span-3"><img
         //placeholder sacado de https://avatar-placeholder.iran.liara.run/
             src='https://avatar.iran.liara.run/public/40' // Cambiar esto por la imagen del usuario
             alt="Foto de perfil"
