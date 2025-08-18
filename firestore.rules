@@ -1,0 +1,61 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ⚠️ REGLAS TEMPORALES PARA DESARROLLO ⚠️
+    // La aplicación usa localStorage para auth, no Firebase Auth
+    // Por lo tanto, permitimos acceso libre durante desarrollo
+    
+    // Usuarios - acceso libre para búsqueda de tutores
+    match /user/{userId} {
+      allow read, write: if true;
+    }
+    
+    // Materias - solo lectura
+    match /course/{courseId} {
+      allow read: if true;
+      allow write: if false;
+    }
+    
+    // Carreras - solo lectura
+    match /major/{majorId} {
+      allow read: if true;
+      allow write: if false;
+    }
+    
+    // Disponibilidades - acceso libre para funcionalidad de slots
+    match /availabilities/{availId} {
+      allow read, write: if true;
+    }
+    
+    // Reservas de slots - acceso libre para sistema de slots
+    match /slot_bookings/{bookingId} {
+      allow read, write: if true;
+    }
+    
+    // Sesiones de tutoría - acceso libre para funcionalidad completa
+    match /tutoring_sessions/{sessionId} {
+      allow read, write: if true;
+    }
+    
+    // Pagos - solo lectura libre, sin escritura
+    match /payments/{paymentId} {
+      allow read: if true;
+      allow write: if false;
+    }
+    
+    // Regla de fallback para cualquier otra colección
+    match /{document=**} {
+      allow read: if true;
+      allow write: if true;
+    }
+  }
+}
+
+// 📝 NOTA IMPORTANTE:
+// Estas reglas son permisivas para desarrollo con localStorage auth.
+// Para producción, necesitarás:
+// 1. Implementar Firebase Auth adecuadamente
+// 2. Actualizar estas reglas con validaciones de seguridad apropiadas
+// 3. Verificar request.auth != null en todas las operaciones 

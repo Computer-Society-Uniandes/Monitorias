@@ -1,26 +1,71 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #ededed;
-    --foreground: #ededed;
-  }
-}
-
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+  background: #F3FFF6;
+  animation: fadeIn 0.6s ease-out both; /* <-- entrada suave de la página */
+}
+body.dark-mode { background: #282828; }
+
+/* Semi-Bold (≈600) */
+.SemiBoldText { font-weight: 400; }
+
+/* Títulos */
+.title {
+  font-weight: 900;
+  line-height: 1.2;
+  margin-bottom: 1rem;
+  font-size: clamp(2rem, 4vw, 4rem);
+}
+
+/* —— Paleta clara —— */
+.PrimaryBackground   { background: #368039; color:#F3FFF6; }
+.PrimaryText         { color:#368039; }
+.SecondaryBackground { background:#E1FAE3; }
+.AccentBackground    { background:#CF3476; }
+.AccentText          { color:#CF3476; }
+.Background          { background:#F3FFF6; }
+.BackgroundText      { color:#F3FFF6; }
+.TextPrimary         { color:#333; }
+.TextSecondary       { color:#666; }
+
+/* —— Paleta en modo oscuro —— */
+.dark-mode .PrimaryBackground   { background:#289656; color:#F1F1F1; }
+.dark-mode .PrimaryText         { color:#289656; }
+.dark-mode .SecondaryBackground { background:#1A3C2F; }
+.dark-mode .AccentBackground    { background:#FF4F81; }
+.dark-mode .AccentText          { color:#FF4F81; }
+.dark-mode .Background          { background:#282828; }
+.dark-mode .BackgroundText      { color:#F1F1F1; }
+.dark-mode .TextPrimary         { color:#F1F1F1; }
+.dark-mode .TextSecondary       { color:#A0A0A0; }
+
+/* ========== Animaciones básicas ========== */
+/* Keyframes */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-40px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* Utilidades listas para usar */
+.fade-in        { opacity:0; animation:fadeIn 0.8s ease-out forwards; }
+.fade-in-up     { opacity:0; animation:fadeInUp 0.8s ease-out forwards; }
+.slide-in-left  { opacity:0; animation:slideInLeft 0.8s ease-out forwards; }
+
+/* Hover zoom para imágenes / tarjetas */
+.hover-zoom {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.hover-zoom:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 14px rgba(0,0,0,0.15);
 }

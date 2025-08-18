@@ -1,7 +1,7 @@
 "use client"
 
 import Image from "next/image"
-import imagenCarga from "../../../public/explore.png"
+import imagenCarga from "../../../../public/explore.png"
 
 const ExploreBanner = ({ titulo}) => {
 
