@@ -1,53 +1,56 @@
-"use client"
-import React from "react";
-import WelcomeBanner from "../components/Welcome";
-import BoxSubject from "../components/BoxSubject";
-import { getMaterias } from "../services/HomeService.service";
-import { useEffect, useState } from "react";
+"use client";
+
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import routes from "app/routes";
+import { useAuth } from "../context/SecureAuthContext";
+import StudentHome from "../components/StudentHome/StudentHome";
+import routes from "../../routes";
 
+export default function Home() {
+  const { user, loading } = useAuth();
+  const [mounted, setMounted] = useState(false);
+  const router = useRouter();
 
-export default function Home(){
-    const [materias, setMaterias] = useState([]);
-    const [userEmail, setUserEmail] = useState('');
-    const [isLoggedIn, setIsLoggedIn] = useState(null);
-    const router = useRouter();
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
-    useEffect(() => {
-        // Acceder a localStorage solo en el cliente
-        const email = localStorage.getItem('userEmail');
-        const loggedIn = localStorage.getItem('isLoggedIn');
+  // Redirigir automáticamente a tutores a su página de inicio
+  useEffect(() => {
+    if (mounted && !loading && user.isLoggedIn && user.isTutor) {
+      router.push(routes.TUTOR_INICIO);
+    }
+  }, [mounted, loading, user.isLoggedIn, user.isTutor, router]);
 
-        setUserEmail(email);
-        setIsLoggedIn(loggedIn);
-
-        if (!loggedIn) {
-            router.push(routes.LANDING);
-            return;
-        }
-
-        getMaterias().then((materias) => {
-            setMaterias(materias);
-        });
-    }, []);
-
-    if (isLoggedIn === null) return <div>Cargando...</div>;
+  // Mostrar loading mientras se carga el contexto o no está montado
+  if (!mounted || loading) {
 
     return (
-        <main className="min-h-screen">
-            <WelcomeBanner titulo={`Bienvenido/a ${userEmail}`}/>
-            <div className="container mx-auto pt-4">
-                <h2 className="text-4xl font-bold mb-2 text-[#FF7A7A] pb-4">
-                    Tus materias este semestre
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-4">
-                    {materias.map((materia, index) => (
-                        <BoxSubject key={index} codigo={materia.codigo} nombre={materia.nombre}></BoxSubject>
-                    ))}
-                </div>
-
-            </div>
-        </main>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#FF7A7A]"></div>
+          <p className="mt-4 text-gray-600">Cargando...</p>
+        </div>
+      </div>
     );
+  }
+
+  // Si no está logueado, mostrar mensaje
+  if (!user.isLoggedIn) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">
+            Acceso Restringido
+          </h2>
+          <p className="text-gray-600">
+            Debes iniciar sesión para acceder a esta página.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Los tutores son redirigidos automáticamente, así que aquí solo mostramos la vista de estudiante
+  return <StudentHome userName={user.name} />;
 }

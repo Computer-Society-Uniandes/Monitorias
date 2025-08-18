@@ -1,62 +1,125 @@
-"use client"
-import React, { useState } from 'react';
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../../../firebaseConfig";
-import { useRouter } from 'next/navigation'
+// app/(auth)/login/Login.jsx
+'use client';
+
+import { useState, useEffect } from 'react';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { useRouter } from 'next/navigation';
+import { auth, db } from '../../../firebaseConfig';
+import { doc, getDoc } from "firebase/firestore";
+import { useAuth } from '../../context/SecureAuthContext';
 import routes from 'app/routes';
+import './Login.css';
 
-const Login = () => {
-
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
+export default function Login() {
   const router = useRouter();
+  const { user, login } = useAuth();
+  const [form, setForm] = useState({ email: '', password: '' });
+  const [mounted, setMounted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleLogin = async (e) => {
+  useEffect(() => {
+    setMounted(true);
+    if (user.isLoggedIn) {
+      router.replace(routes.HOME);
+    }
+  }, [router, user.isLoggedIn]);
+
+  if (!mounted) return null;
+
+  const handleChange = e => {
+    const { name, value } = e.target;
+    setForm(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async e => {
     e.preventDefault();
+    setLoading(true);
+    setError('');
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      localStorage.setItem("userEmail", email);
-      localStorage.setItem("isLoggedIn", "true");
-      router.push(routes.HOME)
-    } catch (error) {
-      console.error("Error al iniciar sesión:", error);
-      alert("Usuario o contraseña incorrectos.");
+      await signInWithEmailAndPassword(auth, form.email, form.password);
+      
+      const userRef = doc(db, 'user', form.email);
+      const userSnap = await getDoc(userRef);
+
+      let userData = { email: form.email, name: '', isTutor: false };
+      
+      if (userSnap.exists()) {
+        const firestoreData = userSnap.data();
+        userData = {
+          email: form.email,
+          name: firestoreData.name || '',
+          isTutor: firestoreData.isTutor || false // Por defecto es estudiante
+        };
+      } else {
+        console.warn(`No existe el usuario ${form.email} en Firestore.`);
+      }
+      
+      // Usar el contexto para manejar el login
+      login(userData);
+      router.push(routes.HOME);
+    } catch {
+      setError('Usuario o contraseña incorrectos.');
+      setLoading(false);
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-indigo-50">
-      <h2 className="text-2xl font-bold mb-4 text-indigo-600">Iniciar Sesión</h2>
-      <form onSubmit={handleLogin} className="flex flex-col bg-white p-6 rounded shadow-md">
-        
-        <label className="mb-2 text-sm text-indigo-600">Correo:</label>
-        <input
-          type="email"
-          className="mb-4 p-2 border rounded"
-          placeholder="Tu correo"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        
-        <label className="mb-2 text-sm text-indigo-600">Contraseña:</label>
-        <input
-          type="password"
-          className="mb-4 p-2 border rounded"
-          placeholder="Tu contraseña"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+    <main className="login-page">
+      <section className="login-wrapper">
+        <div className="login-card">
+          <h2 className="login-title">Inicia Sesión</h2>
+          <p className="login-text">
+            ¿No tienes una cuenta?
+            <span
+              className="login-link"
+              onClick={() => router.push(routes.REGISTER)}
+            >
+              &nbsp;Regístrate
+            </span>
+          </p>
 
-        <button
-          type="submit"
-          className="bg-indigo-500 cursor-pointer hover:bg-indigo-600 text-white py-2 px-4 rounded"
-        >
-          Iniciar Sesión
-        </button>
-      </form>
-    </div>
+          <form onSubmit={handleSubmit} className="login-form">
+            <label htmlFor="email" className="login-label">
+              Correo
+            </label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              className="login-input"
+              placeholder="Tu correo"
+              value={form.email}
+              onChange={handleChange}
+              required
+            />
+
+            <label htmlFor="password" className="login-label">
+              Contraseña
+            </label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              className="login-input"
+              placeholder="Tu contraseña"
+              value={form.password}
+              onChange={handleChange}
+              required
+            />
+
+            {error && <p className="login-error">{error}</p>}
+
+            <button
+              type="submit"
+              className="login-btn"
+              disabled={loading}
+            >
+              {loading ? 'Cargando...' : 'Iniciar Sesión'}
+            </button>
+          </form>
+        </div>
+      </section>
+    </main>
   );
-};
-
-export default Login;
+}

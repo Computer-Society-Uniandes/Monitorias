@@ -1,8 +1,8 @@
 "use client"
 import React, { useState, useEffect } from "react";
-import BoxNewSubject from "../../Components/BoxNewSubject";
+import BoxNewSubject from "../../components/BoxNewSubject/BoxNewSubject";
 import { getFacultades } from "../../services/ExploreService.service";
-import ExploreBanner from "app/app/components/ExploreBanner";
+import ExploreBanner from "app/app/components/ExploreBanner/ExploreBanner";
 
 const Explore = () => {
     const [facultades, setFacultades] = useState([]);

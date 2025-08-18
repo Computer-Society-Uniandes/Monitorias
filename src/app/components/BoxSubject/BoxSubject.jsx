@@ -1,6 +1,6 @@
 // src/Components/BoxSubject.js
 import React from 'react';
-import'../Style/BoxSubject.css'
+import'./BoxSubject.css'
 import { MoveRight } from 'lucide-react';
 
 const BoxSubject = ({codigo, nombre}) => {

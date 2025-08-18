@@ -1,11 +1,11 @@
-import Auth from '../app/components/Auth';
+import Landing from './components/Landing/Landing';
 import React from 'react';
 
-const Landing = () => {
+const Index = () => {
     return (
         <div>
-            <Auth></Auth>
+            <Landing></Landing>
         </div>
     );
 }
-export default Landing;
+export default Index;
