@@ -147,7 +147,8 @@ export default function CalendlyStyleScheduler({ tutor, availabilities, materia,
         selectedSlot,
         user.email,
         user.name,
-        bookingNotes
+        bookingNotes,
+        materia // Pasar la materia seleccionada
       );
 
       console.log('✅ Reserva exitosa:', result);
