@@ -46,7 +46,7 @@ export class TutoringSessionService {
   }
 
   // Reservar un slot específico de 1 hora
-  static async bookSpecificSlot(slot, studentEmail, studentName, notes = '') {
+  static async bookSpecificSlot(slot, studentEmail, studentName, notes = '', selectedSubject = null) {
     try {
       console.log('🎯 BookSpecificSlot called with:', {
         slotId: slot?.id,
@@ -54,7 +54,8 @@ export class TutoringSessionService {
         slotTitle: slot?.title,
         studentEmail,
         studentName,
-        notes
+        notes,
+        selectedSubject
       });
 
       // Verificar que el slot esté disponible
@@ -68,16 +69,19 @@ export class TutoringSessionService {
         throw new Error('Este horario ya fue reservado por otro estudiante');
       }
 
-      // Generar subject de manera robusta
+      // Usar la materia seleccionada por el estudiante como prioridad
       let extractedSubject = 'Tutoría General';
       
-      if (slot.subject && slot.subject !== undefined && slot.subject !== '') {
+      if (selectedSubject && selectedSubject !== undefined && selectedSubject !== '') {
+        extractedSubject = selectedSubject;
+      } else if (slot.subject && slot.subject !== undefined && slot.subject !== '') {
         extractedSubject = slot.subject;
       } else if (slot.title) {
         extractedSubject = this.extractSubjectFromTitle(slot.title);
       }
       
       console.log('🔍 Subject extraction:', {
+        selectedSubject: selectedSubject,
         originalSubject: slot.subject,
         slotTitle: slot.title,
         extractedSubject: extractedSubject
@@ -502,8 +506,8 @@ export class TutoringSessionService {
 
       // Preparar datos para el evento
       const eventPayload = {
-        summary: `Tutoría de ${subject || 'materia'} - ${tutorName || tutorEmail} con ${studentName || studentEmail}`,
-        description: `Sesión de tutoría agendada a través de Calico\n\nMateria: ${subject || 'No especificada'}\nTutor: ${tutorName || tutorEmail}\nEstudiante: ${studentName || studentEmail}\n\nNotas: ${notes || 'Sin notas adicionales'}\n\nID de sesión: ${sessionId}`,
+        summary: `Tutoria ${subject || 'General'}`,
+        description: `Sesión de tutoría agendada a través de Calico\n\nMateria seleccionada: ${subject || 'No especificada'}\nTutor: ${tutorName || tutorEmail}\nEstudiante: ${studentName || studentEmail}\n\nNotas: ${notes || 'Sin notas adicionales'}\n\nID de sesión: ${sessionId}`,
         startDateTime: startDateTime,
         endDateTime: endDateTime,
         studentEmail: studentEmail,
@@ -516,6 +520,7 @@ export class TutoringSessionService {
       };
 
       console.log('🚀 Calling Calico Calendar API to create event...');
+      console.log('📤 Event payload:', eventPayload);
 
       // Llamar a la API de creación de eventos
       const response = await fetch('/api/tutoring-sessions/create-event', {
@@ -526,7 +531,29 @@ export class TutoringSessionService {
         body: JSON.stringify(eventPayload)
       });
 
-      const result = await response.json();
+      console.log('📡 Response status:', response.status, response.statusText);
+      console.log('📡 Response headers:', response.headers);
+
+      // Leer la respuesta como texto primero para poder manejar errores
+      const responseText = await response.text();
+      console.log('📄 Raw response:', responseText.substring(0, 500));
+
+      // Verificar si la respuesta es JSON válido
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        console.error('❌ Non-JSON response received:', responseText);
+        throw new Error(`La API devolvió una respuesta no-JSON (${response.status}): ${responseText.substring(0, 200)}...`);
+      }
+
+      let result;
+      try {
+        result = JSON.parse(responseText);
+      } catch (jsonError) {
+        console.error('❌ Error parsing JSON response:', jsonError);
+        throw new Error(`Error parsing JSON response: ${jsonError.message}. Response: ${responseText.substring(0, 200)}...`);
+      }
+
+      console.log('📥 Parsed response:', result);
 
       if (!response.ok) {
         throw new Error(result.error || `HTTP ${response.status}: ${response.statusText}`);

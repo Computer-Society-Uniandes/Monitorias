@@ -55,10 +55,7 @@ const Register = () => {
       alert("Las contraseñas no coinciden.");
       return;
     }
-    if (!email.endsWith("@uniandes.edu.co")) {
-      alert("Solo se permite registrar con correos @uniandes.edu.co");
-      return;
-    }
+
 
     try {
       // 3. Crear usuario en Firebase Auth
@@ -180,7 +177,7 @@ const Register = () => {
         <input
           type="email"
           className="mb-3 p-2 border rounded-lg placeholder:text-gray-200 text-sm"
-          placeholder="Tu correo @uniandes.edu.co"
+          placeholder="Tu correo"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />

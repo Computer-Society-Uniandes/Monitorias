@@ -3,10 +3,13 @@ import { CalicoCalendarService } from '../../../services/CalicoCalendarService';
 
 export async function POST(request) {
   try {
+    console.log('🔄 Starting tutoring session event creation API...');
+    
     // Validar que el usuario esté autenticado (si es necesario)
     // Nota: Puedes ajustar esta lógica según tu sistema de autenticación
     
     const body = await request.json();
+    console.log('📋 Received request body:', body);
     const { 
       summary,
       description,
@@ -82,8 +85,17 @@ export async function POST(request) {
       attendeesIsArray: Array.isArray(sessionData.attendees)
     });
 
+    // Verificar variables de entorno críticas
+    console.log('🔧 Environment check:', {
+      hasServiceAccountKey: !!process.env.GOOGLE_SERVICE_ACCOUNT_KEY,
+      hasCalendarId: !!process.env.CALICO_CALENDAR_ID,
+      calendarIdValue: process.env.CALICO_CALENDAR_ID ? 'SET' : 'NOT SET'
+    });
+
     // Crear el evento en el calendario central de Calico
+    console.log('📞 Calling CalicoCalendarService.createTutoringSessionEvent...');
     const result = await CalicoCalendarService.createTutoringSessionEvent(sessionData);
+    console.log('📞 CalicoCalendarService responded with:', result);
 
     if (!result.success) {
       throw new Error('Failed to create event in Calico calendar');
