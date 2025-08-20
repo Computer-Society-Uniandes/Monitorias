@@ -35,27 +35,31 @@
 .navbar a {
   position: relative;
   margin-left: 40px;
-  font: 700 18px "DM Sans", sans-serif;
-  color: #374151;
+  font: 700 18px "Montserrat", sans-serif;
+  color: #412d08;
   text-decoration: none;
   transition: all 0.3s ease;
 }
 
 /* Diferenciación sutil para navbar de tutor */
 .navbar-tutor {
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.03) 0%, rgba(118, 75, 162, 0.03) 100%);
+  background: linear-gradient(180deg, rgba(102, 126, 234, 0.03) 0%, rgba(255, 244, 218, 0.7) 100%);
   border-radius: 20px;
-  padding: 8px 0;
+  padding: 20px 0;
   margin: 0 20px;
 }
 
 .navbar-tutor a {
-  color: #5a67d8;
+  color: #4d4c4b;
   font-weight: 600;
 }
 
 .navbar-tutor a::before {
-  background: linear-gradient(90deg, #667eea, #764ba2);
+  background: linear-gradient(90deg, #fff4da, #fdb61b);
+}
+
+.navbar-student a::before {
+  background: #ff9505;
 }
 
 .navbar a::before {
@@ -63,8 +67,8 @@
   position: absolute;
   inset: 100% 0 auto 0;
   width: 0;
-  height: 2px;
-  background: #ff9505;
+  height: 2.5px;
+  border-radius: 20%;
   transition: width 0.2s;
 }
 .navbar a:hover::before { width: 100%; }
@@ -83,15 +87,15 @@
   padding: 0.4rem 1rem;
   font: 600 14px "DM Sans", sans-serif;
   border-radius: 9999px;
-  border: 2px solid #4f46e5;
+  border: 2px solid #ff9505;
   background: transparent;
-  color: #4f46e5;
+  color: #ff9505;
   cursor: pointer;
   transition: background 0.25s, color 0.25s;
 }
 .btn-header:hover    { background: #eef2ff; }
-.btn-header--primary { background: #4f46e5; color: #fff; }
-.btn-header--primary:hover { background: #4338ca; }
+.btn-header--primary { background: #262528; color: #fff; }
+.btn-header--primary:hover { background: #39383c; }
 
 /* --- Indicador de rol --- */
 .role-indicator {
@@ -133,28 +137,28 @@
   gap: 8px;
   padding: 8px 16px;
   font: 600 15px "DM Sans", sans-serif;
-  color: #ff7a7a;
+  color: #ff9505;
   background: transparent;
-  border: 2px solid #ff7a7a;
+  border: 2px solid #ff9505;
   border-radius: 25px;
   cursor: pointer;
   transition: background 0.3s, color 0.3s;
 }
-.perfil:hover { background: #ff7a7a; color: #fff; }
+.perfil:hover { background: #ff9505; color: #fff; }
 
 /* --- Botón logout --- */
 .btn-logout {
   padding: 8px 16px;
   font: 600 14px "DM Sans", sans-serif;
-  color: #dc2626;
+  color: #262528;
   background: transparent;
-  border: 2px solid #dc2626;
+  border: 2px solid #262528;
   border-radius: 25px;
   cursor: pointer;
   transition: background 0.3s, color 0.3s;
 }
 .btn-logout:hover {
-  background: #dc2626;
+  background: #262528;
   color: #fff;
 }
 
