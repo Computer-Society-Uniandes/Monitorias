@@ -1,26 +1,37 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore"
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+// firebaseConfig.js
+'use client';
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+import { initializeApp, getApps, getApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
+
 const firebaseConfig = {
-  apiKey: "AIzaSyDb2GN2-LekkIvCWHxosb4hAndg96JPSOo",
-  authDomain: "calico-5980a.firebaseapp.com",
-  projectId: "calico-5980a",
-  storageBucket: "calico-5980a.firebasestorage.app",
-  messagingSenderId: "1056254794426",
-  appId: "1:1056254794426:web:c5180b737a674fd6188083",
-  measurementId: "G-RT5XVGCN92"
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY ?? "",
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN ?? "",
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ?? "",
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET ?? "",
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID ?? "",
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID ?? "",
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID ?? "",
 };
 
-// Initialize Firebase
-const app_Firebase = initializeApp(firebaseConfig);
+// Log útil (solo en dev, lado cliente)
+if (typeof window !== "undefined") {
+  const masked = (s) => (s ? `${s.slice(0,6)}…${s.slice(-4)}` : "(vacía)");
+  console.log("[firebase] apiKey:", masked(firebaseConfig.apiKey));
+}
 
-export default app_Firebase;
-export const auth = getAuth(app_Firebase);
-export const db = getFirestore(app_Firebase);
+// Si falta la apiKey, corta aquí para no inicializar mal
+if (!firebaseConfig.apiKey) {
+  throw new Error(
+    "[firebase] NEXT_PUBLIC_FIREBASE_API_KEY no está definida. Revisa tu .env.local y reinicia el dev server."
+  );
+}
+
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+
+// En cliente estarán disponibles; en SSR no los uses
+export const auth = getAuth(app);
+export const db = getFirestore(app);
+
+export default app;

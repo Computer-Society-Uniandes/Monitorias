@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import React, { useState, useEffect } from 'react';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
@@ -100,7 +100,7 @@ const Register = () => {
       >
         {/* Capa de degradado */}
         <div
-          className="absolute w-full h-full"
+          className="absolute w-full h-full pointer-events-none"
           style={{
             background: "linear-gradient(180deg, rgba(255,255,255,0) 30%, rgba(76, 81, 191, 0.3) 70%)",
             borderRadius: "50% 50% 0 0 / 100% 100% 0 0",
