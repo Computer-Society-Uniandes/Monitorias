@@ -70,6 +70,7 @@
   height: 2.5px;
   border-radius: 20%;
   transition: width 0.2s;
+  color: #FF7A7A;
 }
 .navbar a:hover::before { width: 100%; }
 
@@ -232,4 +233,76 @@
   .perfil,
   .btn-logout  { font-size: 13px; padding: 6px 14px; }
   .role-badge  { font-size: 11px; padding: 4px 8px; }
+}
+
+/* Botón hamburguesa */
+.hamburger {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+  border-radius: 12px;
+  border: 2px solid #ff7a7a;
+  background: transparent;
+  color: #ff7a7a;
+  cursor: pointer;
+  transition: background .25s, color .25s, border-color .25s;
+}
+.hamburger:hover { background: #fff1f1; }
+
+/* ====== MÓVIL ====== */
+@media (max-width: 950px) {
+  /* layout base */
+  .header {
+    flex-direction: row;              /* sobreescribe column */
+    justify-content: space-between;   /* separa logo y botón */
+    align-items: center;
+    flex-wrap: wrap;                  /* permite que el nav baje cuando se abra */
+  }
+  .hamburger { display: inline-flex; margin-left: auto;}
+  .logo { margin-right: auto; }
+  .navbar,
+  .right-block { display: none; }
+
+  /* cuando está abierto el menú */
+  .header.is-open .navbar,
+  .header.is-open .right-block {
+    display: flex;
+  }
+
+  /* Estética del panel móvil */
+  .header.is-open .navbar {
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.9), #ffffff);
+    border-radius: 18px;
+    padding: 14px 18px;
+    box-shadow: 0 10px 22px rgba(0,0,0,0.08);
+  }
+
+  .header.is-open .navbar a {
+    margin: 0;                 /* quitamos el margin-left grande */
+    font-size: 16px;
+    text-align: left;
+    padding: 6px 2px;
+  }
+
+  .header.is-open .right-block {
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+    margin-top: 10px;
+  }
+
+  /* Botones un poco más compactos en móvil */
+  .perfil,
+  .btn-logout,
+  .btn-header {
+    font-size: 14px;
+    padding: 8px 14px;
+  }
+
+  /* limpio el subrayado animado para móvil (más sobrio) */
+  .navbar a::before { display: none; }
 }
