@@ -85,26 +85,6 @@
   font-weight: 600;
 }
 
-.navbar-tutor a::before {
-  background: linear-gradient(90deg, #fff4da, #fdb61b);
-}
-
-.navbar-student a::before {
-  background: #ff9505;
-}
-
-.navbar a::before {
-  content: "";
-  position: absolute;
-  inset: 100% 0 auto 0;
-  width: 0;
-  height: 2.5px;
-  border-radius: 20%;
-  transition: width 0.2s;
-  color: #FF7A7A;
-}
-.navbar a:hover::before { width: 100%; }
-
 /* -------------- DERECHA -------------- */
 .right-block {
   display: flex;
@@ -352,13 +332,6 @@
     margin-top: 10px;
   }
 
-  /* Botones un poco más compactos en móvil */
-  .perfil,
-  .btn-logout,
-  .btn-header {
-    font-size: 14px;
-    padding: 8px 14px;
-  }
 
   /* limpio el subrayado animado para móvil (más sobrio) */
   .navbar a::before { display: none; }
