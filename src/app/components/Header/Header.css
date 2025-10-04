@@ -31,14 +31,45 @@
   display: flex;
   flex: 1;
   justify-content: center;
+  align-items: center;
+  gap: 2rem;
 }
-.navbar a {
-  position: relative;
-  margin-left: 40px;
-  font: 700 18px "Montserrat", sans-serif;
-  color: #412d08;
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 16px;
+  border-radius: 8px;
   text-decoration: none;
   transition: all 0.3s ease;
+  color: #ff9505;
+  font: 600 14px "DM Sans", sans-serif;
+}
+
+.nav-item:hover {
+  background-color: rgba(255, 149, 5, 0.1);
+  color: #ff7a00;
+}
+
+.nav-item.active {
+  color: #ff7a00;
+  background-color: rgba(255, 149, 5, 0.15);
+}
+
+.nav-icon {
+  transition: all 0.3s ease;
+}
+
+.nav-item.active .nav-icon {
+  color: #ff7a00;
+}
+
+.nav-label {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
 }
 
 /* Diferenciación sutil para navbar de tutor */
@@ -102,50 +133,74 @@
 .role-indicator {
   display: flex;
   align-items: center;
+  margin-right: 1rem;
 }
 
 .role-badge {
-  padding: 6px 12px;
-  font: 600 12px "DM Sans", sans-serif;
+  padding: 8px 16px;
+  font: 600 14px "DM Sans", sans-serif;
   border-radius: 20px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 700;
 }
 
 .role-badge.tutor {
   background: #dbeafe;
   color: #1e40af;
-  border: 1px solid #3b82f6;
 }
 
 .role-badge.student {
   background: #fef3c7;
   color: #92400e;
-  border: 1px solid #f59e0b;
+}
+
+.role-badge:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* --- Acciones de usuario --- */
 .user-actions {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 1rem;
 }
 
-/* --- Botón perfil --- */
-.perfil {
-  display: inline-flex;
+/* --- Botones de notificación y perfil --- */
+.notification-btn,
+.profile-btn {
+  display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  font: 600 15px "DM Sans", sans-serif;
-  color: #ff9505;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
   background: transparent;
-  border: 2px solid #ff9505;
-  border-radius: 25px;
+  color: #ff9505;
   cursor: pointer;
-  transition: background 0.3s, color 0.3s;
+  transition: all 0.3s ease;
 }
-.perfil:hover { background: #ff9505; color: #fff; }
+
+.notification-btn:hover,
+.profile-btn:hover {
+  background-color: rgba(255, 149, 5, 0.1);
+  color: #ff7a00;
+}
+
+.profile-btn {
+  background-color: #ff9505;
+  color: white;
+}
+
+.profile-btn:hover {
+  background-color: #ff7a00;
+  color: white;
+}
 
 /* --- Botón logout --- */
 .btn-logout {
@@ -207,8 +262,9 @@
 /* -------------- RESPONSIVE -------------- */
 @media (max-width: 950px) {
   .header      { flex-direction: column; padding: 15px 20px; }
-  .navbar      { flex-direction: column; margin-top: 10px; }
-  .navbar a    { font-size: 16px; margin: 6px 0 0 0; }
+  .navbar      { flex-direction: row; margin-top: 10px; gap: 1rem; }
+  .nav-item    { padding: 6px 12px; }
+  .nav-label   { font-size: 10px; }
   
   /* Estilos móviles para navbar de tutor */
   .navbar-tutor {
@@ -217,22 +273,14 @@
     border-radius: 15px;
   }
   
-  .navbar-tutor a {
-    font-size: 15px;
-    margin: 8px 0;
-    padding: 4px 8px;
-    border-radius: 8px;
-    text-align: center;
-  }
-  
-  .right-block { flex-direction: column; gap: 0.75rem; margin-top: 10px; }
+  .right-block { flex-direction: row; gap: 0.75rem; margin-top: 10px; justify-content: space-between; }
   .auth-buttons{ gap: 0.75rem; }
-  .user-actions{ flex-direction: column; gap: 0.5rem; }
+  .user-actions{ gap: 0.75rem; }
   .btn-header,
-  .role-btn,
-  .perfil,
   .btn-logout  { font-size: 13px; padding: 6px 14px; }
   .role-badge  { font-size: 11px; padding: 4px 8px; }
+  .notification-btn,
+  .profile-btn { width: 35px; height: 35px; }
 }
 
 /* Botón hamburguesa */
@@ -281,11 +329,20 @@
     box-shadow: 0 10px 22px rgba(0,0,0,0.08);
   }
 
-  .header.is-open .navbar a {
-    margin: 0;                 /* quitamos el margin-left grande */
-    font-size: 16px;
-    text-align: left;
-    padding: 6px 2px;
+  .header.is-open .navbar {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .header.is-open .nav-item {
+    padding: 8px 16px;
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 12px;
+  }
+  
+  .header.is-open .nav-label {
+    font-size: 14px;
   }
 
   .header.is-open .right-block {
