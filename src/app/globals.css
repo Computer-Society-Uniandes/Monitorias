@@ -20,10 +20,10 @@ body.dark-mode { background: #282828; }
 }
 
 /* —— Paleta clara —— */
-.PrimaryBackground   { background: #368039; color:#F3FFF6; }
-.PrimaryText         { color:#368039; }
-.SecondaryBackground { background:#E1FAE3; }
-.AccentBackground    { background:#CF3476; }
+.PrimaryBackground   { background: #F5F0E5; color:#7d7d7d; }
+.PrimaryText         { color:#000000; }
+.SecondaryBackground { background:#FF9505; }
+.AccentBackground    { background:#FAA324; }
 .AccentText          { color:#CF3476; }
 .Background          { background:#F3FFF6; }
 .BackgroundText      { color:#F3FFF6; }
