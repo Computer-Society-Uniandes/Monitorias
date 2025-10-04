@@ -76,6 +76,7 @@ export default function Header() {
 
   const tutorNavItems = [
     { href: routes.TUTOR_INICIO, label: "Home", icon: Home },
+    { href: routes.TUTOR_DISPONIBILIDAD, label: "Availability", icon: Calendar },
     { href: "/tutor/statistics", label: "Statistics", icon: BarChart3 },
     { href: routes.TUTOR_MATERIAS, label: "Subjects", icon: BookOpen }
   ];
