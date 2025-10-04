@@ -5,7 +5,6 @@
   height: 100vh;
   overflow: hidden;
   /* gradiente de fondo principal */
-  background: linear-gradient(to bottom, #4c51bf 0%, #1a237e 100%);
 }
 
 /* Degradado extra con forma curva (pseudo-elemento) */
@@ -18,11 +17,6 @@
   height: 100%;
   transform: scaleX(1.5);
   border-radius: 50% 50% 0 0 / 100% 100% 0 0;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0) 30%,
-    rgba(76, 81, 191, 0.3) 70%
-  );
   pointer-events: none;
 }
 
@@ -50,20 +44,20 @@
 
 /* Tipografía & enlaces */
 .login-title {
-  margin-bottom: 1rem;
+  margin-bottom: 0.25rem;
   font-size: 1.9rem;
   font-weight: 700;
-  color: #5b6be0;
+  color: #1e2939;
 }
 
 .login-text {
-  margin-bottom: 2rem;
+  margin-top: 2rem;
   font-size: 0.9rem;
-  color: #64748b;
+  color: #1e2939;
 }
 
 .login-link {
-  color: #4c51bf;
+  color: #FF9505;
   text-decoration: underline;
   cursor: pointer;
 }
@@ -81,7 +75,8 @@
 .login-label {
   text-align: left;
   font-size: 0.8rem;
-  color: #64748b;
+  color: #1e2939;
+  font-weight: 500;
 }
 
 .login-input {
@@ -99,8 +94,8 @@
 .login-btn {
   margin-top: 0.5rem;
   padding: 0.65rem 0.75rem;
-  background: #4c51bf;
-  color: #ffffff;
+  background: #FAA324;
+  color: #000000;
   font-weight: 600;
   border: none;
   border-radius: 0.5rem;
@@ -109,4 +104,17 @@
 }
 .login-btn:hover {
   background: #3d43a6;
+}
+
+.logoImg {
+  height: 6rem; /* h-8 */
+  width: auto;
+  transition: filter 0.3s ease;
+}
+
+@media (max-width: 950px) {
+    .logoImg {
+        height: 5rem; /* h-8 */
+        width: auto;
+    }
 }
