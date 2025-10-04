@@ -2,16 +2,30 @@
 
 import React, { useEffect, useState } from "react";
 import "./Header.css";
-import { UserRound, Menu, X } from "lucide-react";   // ⟵ añadí Menu y X
+import { 
+  UserRound, 
+  Menu, 
+  X, 
+  Home, 
+  Search, 
+  Heart, 
+  BarChart3, 
+  BookOpen,
+  Bell,
+  Calendar,
+  GraduationCap,
+  CreditCard
+} from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import CalicoLogo from "../../../../public/CalicoLogo.png";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "../../context/SecureAuthContext";
 import routes from "../../../routes";
 
 export default function Header() {
   const router = useRouter();
+  const pathname = usePathname();
   const { user, logout } = useAuth();
 
   const [mounted, setMounted] = useState(false);
@@ -53,6 +67,27 @@ export default function Header() {
 
   const tutorMode = user.isLoggedIn && user.isTutor && role === "tutor";
 
+  // Navigation items configuration
+  const studentNavItems = [
+    { href: routes.HOME, label: "Home", icon: Home },
+    { href: routes.SEARCH_TUTORS, label: "Search", icon: Search },
+    { href: "/favorites", label: "Favorites", icon: Heart }
+  ];
+
+  const tutorNavItems = [
+    { href: routes.TUTOR_INICIO, label: "Home", icon: Home },
+    { href: "/tutor/statistics", label: "Statistics", icon: BarChart3 },
+    { href: routes.TUTOR_MATERIAS, label: "Subjects", icon: BookOpen }
+  ];
+
+  // Check if current path matches navigation item
+  const isActiveRoute = (href) => {
+    if (href === routes.HOME || href === routes.TUTOR_INICIO) {
+      return pathname === href || pathname === "/";
+    }
+    return pathname.startsWith(href);
+  };
+
   const handleLogout = async () => {
     try { await logout(); }
     catch (error) { console.error("Error during logout:", error); }
@@ -81,29 +116,46 @@ export default function Header() {
         className={`navbar ${tutorMode ? "navbar-tutor" : "navbar-student"}`}
         onClick={() => setMenuOpen(false)}   // cerrar al elegir una opción
       >
-        {tutorMode ? (
-          <>
-            <Link href={routes.TUTOR_INICIO}>Inicio</Link>
-            <Link href={routes.TUTOR_MIS_TUTORIAS}>Mis tutorías</Link>
-            <Link href={routes.TUTOR_MATERIAS}>Materias</Link>
-            <Link href={routes.TUTOR_DISPONIBILIDAD}>Disponibilidad</Link>
-            <Link href={routes.TUTOR_PAGOS}>Pagos</Link>
-          </>
-        ) : (
-          <>
-            <Link href={routes.HOME}>Inicio</Link>
-            <Link href={routes.EXPLORE}>Explorar Materias</Link>
-            <Link href={routes.SEARCH_TUTORS}>Buscar Tutores</Link>
-            <Link href="/">Acerca de</Link>
-          </>
-        )}
+        {(tutorMode ? tutorNavItems : studentNavItems).map(({ href, label, icon: IconComponent }) => (
+          <Link 
+            key={href}
+            href={href} 
+            className={`nav-item ${isActiveRoute(href) ? 'active' : ''}`}
+          >
+            <IconComponent 
+              size={24} 
+              fill={isActiveRoute(href) ? "currentColor" : "none"} 
+              className="nav-icon"
+            />
+            <span className="nav-label">{label}</span>
+          </Link>
+        ))}
       </nav>
 
       <div className="right-block">
+        {user.isLoggedIn && (
+          <div className="role-indicator">
+            <button 
+              className={`role-badge ${tutorMode ? 'tutor' : 'student'}`}
+              onClick={() => {
+                const newRole = role === "student" ? "tutor" : "student";
+                setRole(newRole);
+                localStorage.setItem("rol", newRole);
+                window.dispatchEvent(new CustomEvent("role-change", { detail: newRole }));
+              }}
+            >
+              {tutorMode ? "TUTOR" : "ESTUDIANTE"}
+            </button>
+          </div>
+        )}
+        
         {user.isLoggedIn ? (
           <div className="user-actions">
-            <button className="perfil" onClick={() => { setMenuOpen(false); router.push(routes.PROFILE); }}>
-              Tu Perfil <UserRound size={18} />
+            <button className="notification-btn" aria-label="Notifications">
+              <Bell size={20} />
+            </button>
+            <button className="profile-btn" onClick={() => { setMenuOpen(false); router.push(routes.PROFILE); }}>
+              <UserRound size={20} />
             </button>
             <button className="btn-logout" onClick={handleLogout}>
               Cerrar Sesión
