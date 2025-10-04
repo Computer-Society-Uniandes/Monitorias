@@ -9,6 +9,8 @@ import { doc, getDoc } from "firebase/firestore";
 import { useAuth } from '../../context/SecureAuthContext';
 import routes from 'app/routes';
 import './Login.css';
+import CalicoLogo from "../../../../public/CalicoLogo.png";
+import Image from "next/image";
 
 export default function Login() {
   const router = useRouter();
@@ -65,20 +67,15 @@ export default function Login() {
   };
 
   return (
-    <main className="login-page">
+    <main className="login-page PrimaryBackground">
       <section className="login-wrapper">
         <div className="login-card">
-          <h2 className="login-title">Inicia Sesión</h2>
-          <p className="login-text">
-            ¿No tienes una cuenta?
-            <span
-              className="login-link"
-              onClick={() => router.push(routes.REGISTER)}
-            >
-              &nbsp;Regístrate
-            </span>
-          </p>
-
+          <div className='flex flex-col justify-center items-center'>
+            <Image src={CalicoLogo} alt="Calico" className="logoImg w-28 md:w-36 " priority />
+            <h2 className="login-title">Bienvenido de Vuelta!</h2>
+            <div className='flex gap-1 mb-2'><p className='text-gray-600 text-bold'>Registrate para acceder a Calico</p> </div> 
+          </div>
+          
           <form onSubmit={handleSubmit} className="login-form">
             <label htmlFor="email" className="login-label">
               Correo
@@ -118,8 +115,18 @@ export default function Login() {
               {loading ? 'Cargando...' : 'Iniciar Sesión'}
             </button>
           </form>
+          <p className="login-text">
+            ¿No tienes una cuenta?
+            <span
+              className="login-link"
+              onClick={() => router.push(routes.REGISTER)}
+            >
+              &nbsp;Regístrate
+            </span>
+          </p>
         </div>
       </section>
+      
     </main>
   );
 }
