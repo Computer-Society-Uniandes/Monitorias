@@ -71,7 +71,7 @@ export default function Header() {
   const studentNavItems = [
     { href: routes.HOME, label: "Home", icon: Home },
     { href: routes.SEARCH_TUTORS, label: "Search", icon: Search },
-    { href: "/favorites", label: "Favorites", icon: Heart }
+    { href: routes.FAVORITES, label: "Favorites", icon: Heart }
   ];
 
   const tutorNavItems = [
