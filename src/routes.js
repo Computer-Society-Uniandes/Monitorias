@@ -6,6 +6,7 @@ const routes = {
     LOGIN:"/auth/login",
     REGISTER:"/auth/register",
     PROFILE: "/home/profile",
+    FAVORITES: "/home/favorites",
     
     // Rutas específicas para tutores
     TUTOR_INICIO: "/tutor/inicio",
