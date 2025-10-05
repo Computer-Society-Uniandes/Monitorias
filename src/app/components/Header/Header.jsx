@@ -2,19 +2,19 @@
 
 import React, { useEffect, useState } from "react";
 import "./Header.css";
-import { 
-  UserRound, 
-  Menu, 
-  X, 
-  Home, 
-  Search, 
-  Heart, 
-  BarChart3, 
+import {
+  UserRound,
+  Menu,
+  X,
+  Home,
+  Search,
+  Heart,
+  BarChart3,
   BookOpen,
   Bell,
   Calendar,
   GraduationCap,
-  CreditCard
+  CreditCard,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -30,20 +30,23 @@ export default function Header() {
 
   const [mounted, setMounted] = useState(false);
   const [role, setRole] = useState("student"); // 'student' | 'tutor'
-  const [menuOpen, setMenuOpen] = useState(false);   // ⟵ estado del menú
+  const [menuOpen, setMenuOpen] = useState(false); // ⟵ estado del menú
 
-  useEffect(() => { setMounted(true); }, []);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!mounted) return;
 
-    const initial = typeof window !== "undefined"
-      ? (localStorage.getItem("rol") || "student")
-      : "student";
+    const initial =
+      typeof window !== "undefined"
+        ? localStorage.getItem("rol") || "student"
+        : "student";
     setRole(initial);
 
     const onRoleChange = (e) => {
-      setRole(e?.detail || (localStorage.getItem("rol") || "student"));
+      setRole(e?.detail || localStorage.getItem("rol") || "student");
     };
     window.addEventListener("role-change", onRoleChange);
 
@@ -53,7 +56,9 @@ export default function Header() {
     window.addEventListener("storage", onStorage);
 
     // cerrar menú si ensanchas la pantalla
-    const onResize = () => { if (window.innerWidth > 950) setMenuOpen(false); };
+    const onResize = () => {
+      if (window.innerWidth > 950) setMenuOpen(false);
+    };
     window.addEventListener("resize", onResize);
 
     return () => {
@@ -71,13 +76,13 @@ export default function Header() {
   const studentNavItems = [
     { href: routes.HOME, label: "Home", icon: Home },
     { href: routes.SEARCH_TUTORS, label: "Search", icon: Search },
-    { href: "/favorites", label: "Favorites", icon: Heart }
+    { href: "/home/favorites", label: "Favorites", icon: Heart },
   ];
 
   const tutorNavItems = [
     { href: routes.TUTOR_INICIO, label: "Home", icon: Home },
     { href: "/tutor/statistics", label: "Statistics", icon: BarChart3 },
-    { href: routes.TUTOR_MATERIAS, label: "Subjects", icon: BookOpen }
+    { href: routes.TUTOR_MATERIAS, label: "Subjects", icon: BookOpen },
   ];
 
   // Check if current path matches navigation item
@@ -89,9 +94,13 @@ export default function Header() {
   };
 
   const handleLogout = async () => {
-    try { await logout(); }
-    catch (error) { console.error("Error during logout:", error); }
-    finally { router.push(routes.LOGIN); }
+    try {
+      await logout();
+    } catch (error) {
+      console.error("Error during logout:", error);
+    } finally {
+      router.push(routes.LOGIN);
+    }
   };
 
   return (
@@ -108,53 +117,63 @@ export default function Header() {
         aria-controls="site-nav"
         onClick={() => setMenuOpen((v) => !v)}
       >
-        {menuOpen ? <X size={20}/> : <Menu size={20}/>}
+        {menuOpen ? <X size={20} /> : <Menu size={20} />}
       </button>
 
       <nav
         id="site-nav"
         className={`navbar ${tutorMode ? "navbar-tutor" : "navbar-student"}`}
-        onClick={() => setMenuOpen(false)}   // cerrar al elegir una opción
+        onClick={() => setMenuOpen(false)} // cerrar al elegir una opción
       >
-        {(tutorMode ? tutorNavItems : studentNavItems).map(({ href, label, icon: IconComponent }) => (
-          <Link 
-            key={href}
-            href={href} 
-            className={`nav-item ${isActiveRoute(href) ? 'active' : ''}`}
-          >
-            <IconComponent 
-              size={24} 
-              fill={isActiveRoute(href) ? "currentColor" : "none"} 
-              className="nav-icon"
-            />
-            <span className="nav-label">{label}</span>
-          </Link>
-        ))}
+        {(tutorMode ? tutorNavItems : studentNavItems).map(
+          ({ href, label, icon: IconComponent }) => (
+            <Link
+              key={href}
+              href={href}
+              className={`nav-item ${isActiveRoute(href) ? "active" : ""}`}
+            >
+              <IconComponent
+                size={24}
+                fill={isActiveRoute(href) ? "currentColor" : "none"}
+                className="nav-icon"
+              />
+              <span className="nav-label">{label}</span>
+            </Link>
+          )
+        )}
       </nav>
 
       <div className="right-block">
         {user.isLoggedIn && (
           <div className="role-indicator">
-            <button 
-              className={`role-badge ${tutorMode ? 'tutor' : 'student'}`}
+            <button
+              className={`role-badge ${tutorMode ? "tutor" : "student"}`}
               onClick={() => {
                 const newRole = role === "student" ? "tutor" : "student";
                 setRole(newRole);
                 localStorage.setItem("rol", newRole);
-                window.dispatchEvent(new CustomEvent("role-change", { detail: newRole }));
+                window.dispatchEvent(
+                  new CustomEvent("role-change", { detail: newRole })
+                );
               }}
             >
               {tutorMode ? "TUTOR" : "ESTUDIANTE"}
             </button>
           </div>
         )}
-        
+
         {user.isLoggedIn ? (
           <div className="user-actions">
             <button className="notification-btn" aria-label="Notifications">
               <Bell size={20} />
             </button>
-            <button className="profile-btn" onClick={() => { setMenuOpen(false); router.push(routes.PROFILE); }}>
+            <button
+              className="profile-btn"
+              onClick={() => {
+                setMenuOpen(false);
+                router.push(routes.PROFILE);
+              }}
+            >
               <UserRound size={20} />
             </button>
             <button className="btn-logout" onClick={handleLogout}>
@@ -163,10 +182,22 @@ export default function Header() {
           </div>
         ) : (
           <div className="auth-buttons">
-            <button className="btn-header" onClick={() => { setMenuOpen(false); router.push(routes.LOGIN); }}>
+            <button
+              className="btn-header"
+              onClick={() => {
+                setMenuOpen(false);
+                router.push(routes.LOGIN);
+              }}
+            >
               Iniciar Sesión
             </button>
-            <button className="btn-header btn-header--primary" onClick={() => { setMenuOpen(false); router.push(routes.REGISTER); }}>
+            <button
+              className="btn-header btn-header--primary"
+              onClick={() => {
+                setMenuOpen(false);
+                router.push(routes.REGISTER);
+              }}
+            >
               Regístrate
             </button>
           </div>
@@ -175,3 +206,4 @@ export default function Header() {
     </header>
   );
 }
+
