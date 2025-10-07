@@ -101,7 +101,7 @@ export default function Header() {
   };
 
   return (
-    <header className="header">
+    <header className={`header ${menuOpen ? 'is-open' : ''}`}>
       <Link href="/" className="logo">
         <Image src={CalicoLogo} alt="Calico" className="logoImg" priority />
       </Link>
@@ -178,6 +178,19 @@ export default function Header() {
           </div>
         )}
       </div>
+      {/* Bottom mobile nav */}
+      <nav className={`bottom-nav ${tutorMode ? 'bottom-nav-tutor' : 'bottom-nav-student'}`} aria-label="Mobile bottom navigation">
+        {(tutorMode ? tutorNavItems : studentNavItems).map(({ href, label, icon: IconComponent }) => (
+          <Link 
+            key={`bottom-${href}`}
+            href={href}
+            className={`bottom-nav-item ${isActiveRoute(href) ? 'active' : ''}`}
+          >
+            <IconComponent size={22} className="bottom-nav-icon" />
+            <span className="bottom-nav-label">{label}</span>
+          </Link>
+        ))}
+      </nav>
     </header>
   );
 }
