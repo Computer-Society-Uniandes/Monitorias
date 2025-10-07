@@ -40,7 +40,7 @@ export class TutoringSessionService {
   }
 
   // Reservar un slot específico de 1 hora
-  static async bookSpecificSlot(slot, studentEmail, studentName, notes = '') {
+  static async bookSpecificSlot(slot, studentEmail, studentName, notes = '', selectedSubject = null) {
     try {
       // Verificar que el slot esté disponible
       if (slot.isBooked) {
@@ -54,10 +54,20 @@ export class TutoringSessionService {
       }
 
       // Crear la sesión de tutoría con información del slot específico
+      // Usar la materia seleccionada por el estudiante si está disponible, sino usar la del slot
+      const sessionSubject = selectedSubject || slot.subject;
+      
+      console.log('🎯 Materia para la sesión:', {
+        selectedByStudent: selectedSubject,
+        fromSlot: slot.subject,
+        finalSubject: sessionSubject,
+        studentEmail: studentEmail
+      });
+      
       const sessionData = {
         tutorEmail: slot.tutorEmail,
         studentEmail: studentEmail,
-        subject: slot.subject,
+        subject: sessionSubject, // Usar la materia seleccionada por el estudiante
         scheduledDateTime: slot.startDateTime,
         endDateTime: slot.endDateTime,
         location: slot.location,
@@ -86,7 +96,7 @@ export class TutoringSessionService {
         bookedAt: serverTimestamp(),
         slotStartTime: slot.startDateTime,
         slotEndTime: slot.endDateTime,
-        subject: slot.subject
+        subject: sessionSubject // Usar la misma materia que se usó para la sesión
       };
 
       await this.createSlotBooking(slotBookingData);

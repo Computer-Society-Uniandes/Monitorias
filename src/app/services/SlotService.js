@@ -28,7 +28,9 @@ export class SlotService {
         startDateTime: slotStart,
         endDateTime: slotEnd,
         location: availability.location,
-        subject: availability.subject,
+        subject: availability.subject, // Mantener para compatibilidad
+        subjects: availability.subjects || [availability.subject], // NUEVO: Array de materias
+        isGeneralAvailability: availability.isGeneralAvailability || false, // NUEVO: Indicador
         color: availability.color,
         googleEventId: availability.googleEventId,
         htmlLink: availability.htmlLink,
