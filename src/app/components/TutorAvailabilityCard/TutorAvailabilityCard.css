@@ -20,6 +20,8 @@
   display: flex;
   gap: 16px;
   margin-bottom: 20px;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 .tutor-avatar {
@@ -56,6 +58,9 @@
   font-size: 14px;
   color: #6b7280;
   margin: 0 0 12px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Tutor subjects */
