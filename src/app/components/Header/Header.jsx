@@ -65,7 +65,7 @@ export default function Header() {
 
   if (!mounted) return null;
 
-  const tutorMode = user.isLoggedIn && user.isTutor && role === "tutor";
+  const tutorMode = user.isLoggedIn && role === "tutor";
 
   // Navigation items configuration
   const studentNavItems = [
@@ -76,15 +76,21 @@ export default function Header() {
 
   const tutorNavItems = [
     { href: routes.TUTOR_INICIO, label: "Home", icon: Home },
+    { href: routes.TUTOR_DISPONIBILIDAD, label: "Availability", icon: Calendar },
     { href: "/tutor/statistics", label: "Statistics", icon: BarChart3 },
     { href: routes.TUTOR_MATERIAS, label: "Subjects", icon: BookOpen }
   ];
 
   // Check if current path matches navigation item
   const isActiveRoute = (href) => {
-    if (href === routes.HOME || href === routes.TUTOR_INICIO) {
-      return pathname === href || pathname === "/";
+    // Special handling for home routes
+    if (href === routes.HOME) {
+      return pathname === routes.HOME || pathname === "/";
     }
+    if (href === routes.TUTOR_INICIO) {
+      return pathname === routes.TUTOR_INICIO;
+    }
+    // For other routes, check if pathname starts with the href
     return pathname.startsWith(href);
   };
 
