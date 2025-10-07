@@ -281,16 +281,18 @@
     flex-direction: row;              /* sobreescribe column */
     justify-content: space-between;   /* separa logo y botón */
     align-items: center;
-    flex-wrap: wrap;                  /* permite que el nav baje cuando se abra */
+    flex-wrap: nowrap;
+    padding: 8px 12px;
   }
   .hamburger { display: none; }
   .logo { margin-right: auto; }
-  .navbar,
-  .right-block { display: none; }
+  .navbar { display: none; }
+
+  /* Compactar logo */
+  .logoImg { height: 2.4rem; }
 
   /* cuando está abierto el menú */
-  .header.is-open .navbar,
-  .header.is-open .right-block { display: none; }
+  .header.is-open .navbar { display: none; }
 
   /* Estética del panel móvil */
   .header.is-open .navbar { display: none; }
@@ -321,6 +323,19 @@
 
   /* limpio el subrayado animado para móvil (más sobrio) */
   .navbar a::before { display: none; }
+
+  /* Mostrar bloque derecho compacto (perfil + rol) */
+  .right-block {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+  }
+  .user-actions { gap: 8px; }
+  .notification-btn,
+  .btn-logout { display: none; }
+  .role-badge  { font-size: 11px; padding: 4px 8px; }
+  .profile-btn { width: 34px; height: 34px; }
 }
 
 /* ====== BOTTOM NAV (SIEMPRE VISIBLE) ====== */

@@ -163,9 +163,6 @@ export default function Header() {
             <button className="profile-btn" onClick={() => { setMenuOpen(false); router.push(routes.PROFILE); }}>
               <UserRound size={20} />
             </button>
-            <button className="btn-logout" onClick={handleLogout}>
-              Cerrar Sesión
-            </button>
           </div>
         ) : (
           <div className="auth-buttons">
