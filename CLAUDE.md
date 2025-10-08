@@ -232,3 +232,4 @@ API routes follow Next.js App Router conventions:
 2. Run `npm run dev` and navigate to http://localhost:3000
 3. Register as tutor or student to test flows
 4. Connect Google Calendar as tutor to sync availability
+- Use ALWAYS shadcn for the building components of the application

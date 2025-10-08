@@ -1,244 +1,322 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
-import { TutorSearchService } from "../../services/TutorSearchService";
-import ExploreBanner from "../../components/ExploreBanner/ExploreBanner";
-import TutorAvailabilityCard from "../../components/TutorAvailabilityCard/TutorAvailabilityCard";
+import React, { useState, useEffect, Suspense, useCallback } from 'react';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
+import { TutorSearchService } from '../../services/TutorSearchService';
+import { FavoritesService } from '../../services/FavoritesService';
+import { useUser } from '../../hooks/useUser';
+import { useDebounce } from '../../hooks/useDebounce';
+import TutorCard from '../../components/TutorCard/TutorCard';
+import SubjectCard from '../../components/SubjectCard/SubjectCard';
+import { Input } from '../../../components/ui/input';
+import { Tabs, TabsList, TabsTrigger } from '../../../components/ui/tabs';
+import { Search } from 'lucide-react';
+import TutorAvailabilityCard from '../../components/TutorAvailabilityCard/TutorAvailabilityCard';
+
+function BuscarTutoresContent() {
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const pathname = usePathname();
+    const { email: userEmail } = useUser();
+
+    const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
+    const debouncedSearch = useDebounce(searchTerm, 300);
+    const [results, setResults] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [searchType, setSearchType] = useState('tutors'); // 'tutors' or 'subjects'
+    const [favoriteTutors, setFavoriteTutors] = useState([]);
+    const [favoriteCourses, setFavoriteCourses] = useState([]);
+    const [selectedSubject, setSelectedSubject] = useState(null);
+    const [tutorsForSubject, setTutorsForSubject] = useState([]);
+    const [loadingTutors, setLoadingTutors] = useState(false);
+    const [activeTab, setActiveTab] = useState('ambos'); // 'tutores', 'materias', 'ambos'
+    const currentSearchParams = searchParams.toString();
+
+    // Cargar favoritos
+    useEffect(() => {
+        if (userEmail) {
+            loadFavorites();
+        }
+    }, [userEmail]);
+
+    const loadDefaultResults = useCallback(async () => {
+        try {
+            setLoading(true);
+
+            if (activeTab === 'tutores') {
+                const tutors = await TutorSearchService.getAllTutors();
+                setResults(tutors);
+                setSearchType('tutors');
+            } else if (activeTab === 'materias') {
+                const subjects = await TutorSearchService.getMaterias();
+                setResults(subjects);
+                setSearchType('subjects');
+            } else {
+                const subjects = await TutorSearchService.getMaterias();
+                setResults(subjects);
+                setSearchType('subjects');
+            }
+        } catch (error) {
+            console.error('Error cargando resultados:', error);
+        } finally {
+            setLoading(false);
+        }
+    }, [activeTab]);
+
+    const performSearch = useCallback(async () => {
+        if (!debouncedSearch) {
+            return;
+        }
+
+        try {
+            setLoading(true);
+
+            if (activeTab === 'tutores') {
+                const tutors = await TutorSearchService.searchTutors(debouncedSearch);
+                setResults(tutors);
+                setSearchType('tutors');
+            } else if (activeTab === 'materias') {
+                const allSubjects = await TutorSearchService.getMaterias();
+                const filteredSubjects = allSubjects.filter(subject =>
+                    subject.nombre.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+                    subject.codigo.toLowerCase().includes(debouncedSearch.toLowerCase())
+                );
+                setResults(filteredSubjects);
+                setSearchType('subjects');
+            } else {
+                const tutors = await TutorSearchService.searchTutors(debouncedSearch);
+
+                if (tutors.length > 0) {
+                    setResults(tutors);
+                    setSearchType('tutors');
+                } else {
+                    const allSubjects = await TutorSearchService.getMaterias();
+                    const filteredSubjects = allSubjects.filter(subject =>
+                        subject.nombre.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+                        subject.codigo.toLowerCase().includes(debouncedSearch.toLowerCase())
+                    );
+                    setResults(filteredSubjects);
+                    setSearchType('subjects');
+                }
+            }
+        } catch (error) {
+            console.error('Error en búsqueda:', error);
+            setResults([]);
+        } finally {
+            setLoading(false);
+        }
+    }, [activeTab, debouncedSearch]);
+
+    // Búsqueda y resultados por defecto según el estado del buscador
+    useEffect(() => {
+        if (debouncedSearch) {
+            performSearch();
+        } else if (!searchTerm) {
+            loadDefaultResults();
+        }
+    }, [debouncedSearch, searchTerm, loadDefaultResults, performSearch]);
+
+    // Actualizar query params
+    useEffect(() => {
+        const params = new URLSearchParams(currentSearchParams);
+
+        if (searchTerm) {
+            params.set('search', searchTerm);
+        } else {
+            params.delete('search');
+        }
+
+        const nextQuery = params.toString();
+
+        if (nextQuery === currentSearchParams) {
+            return;
+        }
+
+        const nextUrl = nextQuery ? `${pathname}?${nextQuery}` : pathname;
+        router.replace(nextUrl, { scroll: false });
+    }, [searchTerm, router, pathname, currentSearchParams]);
+
+    const loadFavorites = async () => {
+        try {
+            const result = await FavoritesService.getFavorites(userEmail);
+            if (result.success && result.data) {
+                setFavoriteTutors(result.data.tutors || []);
+                setFavoriteCourses(result.data.courses || []);
+            }
+        } catch (error) {
+            console.error('Error cargando favoritos:', error);
+        }
+    };
+
+    const handleToggleFavoriteTutor = async (tutorEmail) => {
+        if (!userEmail) return;
+        try {
+            await FavoritesService.toggleFavoriteTutor(userEmail, tutorEmail);
+            await loadFavorites();
+        } catch (error) {
+            console.error('Error toggle favorito:', error);
+        }
+    };
+
+    const handleToggleFavoriteCourse = async (courseCode) => {
+        if (!userEmail) return;
+        try {
+            await FavoritesService.toggleFavoriteCourse(userEmail, courseCode);
+            await loadFavorites();
+        } catch (error) {
+            console.error('Error toggle favorito:', error);
+        }
+    };
+
+    const handleFindTutor = async (subject) => {
+        try {
+            setLoadingTutors(true);
+            setSelectedSubject(subject);
+            const tutors = await TutorSearchService.getTutorsBySubject(subject.nombre);
+            setTutorsForSubject(tutors);
+        } catch (error) {
+            console.error('Error cargando tutores:', error);
+            setTutorsForSubject([]);
+        } finally {
+            setLoadingTutors(false);
+        }
+    };
+
+    const handleBackToSubjects = () => {
+        setSelectedSubject(null);
+        setTutorsForSubject([]);
+    };
+
+    const isFavoriteTutor = (email) => favoriteTutors.includes(email);
+    const isFavoriteCourse = (code) => favoriteCourses.includes(code);
+
+    // Vista de tutores para una materia específica
+    if (selectedSubject) {
+        return (
+            <div className="min-h-screen bg-white">
+                <div className="max-w-5xl mx-auto px-6 py-8">
+                    <button
+                        onClick={handleBackToSubjects}
+                        className="text-gray-600 hover:text-gray-900 mb-6 flex items-center gap-2"
+                    >
+                        ← Volver a materias
+                    </button>
+
+                    <h1 className="text-3xl font-bold text-gray-900 mb-8">
+                        Tutores para {selectedSubject.nombre}
+                    </h1>
+
+                    {loadingTutors ? (
+                        <div className="text-center py-12">
+                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF8C00] mx-auto"></div>
+                            <p className="mt-4 text-gray-600">Cargando tutores...</p>
+                        </div>
+                    ) : tutorsForSubject.length === 0 ? (
+                        <div className="text-center py-12">
+                            <p className="text-gray-600">No hay tutores disponibles para esta materia.</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            {tutorsForSubject.map((tutor) => (
+                                <TutorAvailabilityCard
+                                    key={tutor.id}
+                                    tutor={tutor}
+                                    materia={selectedSubject.nombre}
+                                />
+                            ))}
+                        </div>
+                    )}
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="min-h-screen bg-white">
+            <div className="max-w-5xl mx-auto px-6 py-8">
+                {/* Búsqueda */}
+                <div className="mb-8">
+                    <div className="relative">
+                        <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                        <Input
+                            type="text"
+                            placeholder="Buscar tutores o materias"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="pl-12 py-6 text-base bg-[#FEF9F6] border-0 rounded-lg focus:ring-2 focus:ring-[#FF8C00]"
+                        />
+                    </div>
+                </div>
+
+                {/* Tabs */}
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
+                    <TabsList className="grid w-full max-w-md grid-cols-3">
+                        <TabsTrigger value="tutores">Tutores</TabsTrigger>
+                        <TabsTrigger value="materias">Materias</TabsTrigger>
+                        <TabsTrigger value="ambos">Ambos</TabsTrigger>
+                    </TabsList>
+                </Tabs>
+
+                {/* Resultados */}
+                {loading ? (
+                    <div className="text-center py-12">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF8C00] mx-auto"></div>
+                        <p className="mt-4 text-gray-600">Buscando...</p>
+                    </div>
+                ) : results.length === 0 ? (
+                    <div className="text-center py-12">
+                        <p className="text-gray-600">
+                            {searchTerm ? 'No se encontraron resultados.' : 'Comienza buscando tutores o materias.'}
+                        </p>
+                    </div>
+                ) : (
+                    <div className="space-y-4">
+                        {searchType === 'tutors' ? (
+                            // Mostrar tutores
+                            results.map((tutor, index) => (
+                                <TutorCard
+                                    key={tutor.id || index}
+                                    tutor={tutor}
+                                    isFavorite={isFavoriteTutor(tutor.email)}
+                                    onBookNow={() => {
+                                        // Abrir modal de disponibilidad o navegar
+                                        console.log('Book tutor:', tutor);
+                                    }}
+                                    onToggleFavorite={() => handleToggleFavoriteTutor(tutor.email)}
+                                />
+                            ))
+                        ) : (
+                            // Mostrar materias
+                            results.map((subject, index) => (
+                                <SubjectCard
+                                    key={subject.codigo || index}
+                                    subject={subject}
+                                    isFavorite={isFavoriteCourse(subject.codigo)}
+                                    onFindTutor={() => handleFindTutor(subject)}
+                                    onToggleFavorite={() => handleToggleFavoriteCourse(subject.codigo)}
+                                />
+                            ))
+                        )}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}
 
 export default function BuscarTutores() {
-  const [materias, setMaterias] = useState([]);
-  const [filteredMaterias, setFilteredMaterias] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedMateria, setSelectedMateria] = useState(null);
-  const [tutores, setTutores] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [loadingMaterias, setLoadingMaterias] = useState(true);
-  const [error, setError] = useState(null);
-
-  // Cargar materias al montar el componente
-  useEffect(() => {
-    loadMaterias();
-  }, []);
-
-  // Filtrar materias según el término de búsqueda
-  useEffect(() => {
-    if (searchTerm.trim() === "") {
-      setFilteredMaterias(materias);
-    } else {
-      const filtered = materias.filter((materia) =>
-        materia.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        materia.codigo.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-      setFilteredMaterias(filtered);
-    }
-  }, [searchTerm, materias]);
-
-  const loadMaterias = async () => {
-    try {
-      setLoadingMaterias(true);
-      setError(null);
-      const materiasData = await TutorSearchService.getMaterias();
-      setMaterias(materiasData);
-      setFilteredMaterias(materiasData);
-    } catch (error) {
-      console.error("Error cargando materias:", error);
-      setError("Error cargando materias. Por favor, inténtalo de nuevo.");
-    } finally {
-      setLoadingMaterias(false);
-    }
-  };
-
-  const handleMateriaSelect = async (materia) => {
-    try {
-      setLoading(true);
-      setSelectedMateria(materia);
-      setError(null);
-      
-      console.log("Buscando tutores para:", materia.nombre);
-      const tutoresData = await TutorSearchService.getTutorsBySubject(materia.nombre);
-      
-      // Obtener estadísticas para cada tutor
-      const tutoresWithStats = await Promise.all(
-        tutoresData.map(async (tutor) => {
-          const stats = await TutorSearchService.getTutorStats(tutor.id);
-          return { ...tutor, stats };
-        })
-      );
-      
-      setTutores(tutoresWithStats);
-    } catch (error) {
-      console.error("Error cargando tutores:", error);
-      setError("Error cargando tutores. Por favor, inténtalo de nuevo.");
-      setTutores([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleBackToMaterias = () => {
-    setSelectedMateria(null);
-    setTutores([]);
-    setError(null);
-  };
-
-  if (selectedMateria) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <ExploreBanner titulo={`Tutores de ${selectedMateria.nombre}`} />
-        
-        <div className="container mx-auto px-4 py-8">
-          <div className="mb-6">
-            <button
-              onClick={handleBackToMaterias}
-              className="flex items-center text-[#FF7A7A] hover:text-[#ff6b6b] transition-colors font-medium"
-            >
-              ← Volver a materias
-            </button>
-          </div>
-
-          {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
-              {error}
-            </div>
-          )}
-
-          {loading ? (
-            <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF7A7A] mx-auto"></div>
-              <p className="mt-4 text-gray-600">Cargando tutores...</p>
-            </div>
-          ) : tutores.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="text-6xl mb-4">📚</div>
-              <h3 className="text-xl font-semibold text-gray-700 mb-2">
-                No se encontraron tutores disponibles
-              </h3>
-              <p className="text-gray-500 mb-4">
-                Actualmente no hay tutores disponibles para {selectedMateria.nombre}.
-              </p>
-              <button
-                onClick={handleBackToMaterias}
-                className="bg-[#FF7A7A] text-white px-6 py-2 rounded-lg hover:bg-[#ff6b6b] transition-colors"
-              >
-                Explorar otras materias
-              </button>
-            </div>
-          ) : (
-            <div>
-              <div className="mb-6">
-                <h2 className="text-2xl font-bold text-gray-800 mb-2">
-                  Tutores disponibles ({tutores.length})
-                </h2>
-                <p className="text-gray-600">
-                  Encuentra el tutor perfecto para {selectedMateria.nombre}
-                </p>
-              </div>
-
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {tutores.map((tutor) => (
-                  <TutorAvailabilityCard 
-                    key={tutor.id} 
-                    tutor={tutor} 
-                    materia={selectedMateria.nombre}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <ExploreBanner titulo="Buscar Tutores" />
-      
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-800 mb-4">
-              Encuentra tu tutor ideal
-            </h2>
-            <p className="text-gray-600 text-lg">
-              Explora las materias disponibles y descubre tutores expertos listos para ayudarte
-            </p>
-          </div>
-
-          {/* Barra de búsqueda */}
-          <div className="mb-8">
-            <div className="relative max-w-md mx-auto">
-              <input
-                type="text"
-                placeholder="Buscar materias..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF7A7A] focus:border-transparent outline-none"
-              />
-              <div className="absolute right-3 top-3 text-gray-400">
-                🔍
-              </div>
-            </div>
-          </div>
-
-          {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
-              {error}
-            </div>
-          )}
-
-          {/* Lista de materias */}
-          {loadingMaterias ? (
-            <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF7A7A] mx-auto"></div>
-              <p className="mt-4 text-gray-600">Cargando materias...</p>
-            </div>
-          ) : filteredMaterias.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="text-6xl mb-4">🔍</div>
-              <h3 className="text-xl font-semibold text-gray-700 mb-2">
-                No se encontraron materias
-              </h3>
-              <p className="text-gray-500">
-                {searchTerm ? `No hay materias que coincidan con "${searchTerm}"` : "No hay materias disponibles"}
-              </p>
-            </div>
-          ) : (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {filteredMaterias.map((materia) => (
-                <div
-                  key={materia.codigo}
-                  onClick={() => handleMateriaSelect(materia)}
-                  className="bg-white rounded-lg shadow-md hover:shadow-lg transition-all cursor-pointer border border-gray-200 hover:border-[#FF7A7A] group"
-                >
-                  <div className="p-6">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="bg-[#FF7A7A] bg-opacity-10 p-3 rounded-lg group-hover:bg-opacity-20 transition-colors">
-                        <span className="text-2xl">📚</span>
-                      </div>
-                      <span className="text-sm font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                        {materia.codigo}
-                      </span>
+        <Suspense fallback={
+            <div className="min-h-screen bg-white">
+                <div className="max-w-5xl mx-auto px-6 py-8">
+                    <div className="text-center py-12">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF8C00] mx-auto"></div>
+                        <p className="mt-4 text-gray-600">Cargando...</p>
                     </div>
-                    
-                    <h3 className="text-lg font-semibold text-gray-800 mb-2 group-hover:text-[#FF7A7A] transition-colors">
-                      {materia.nombre}
-                    </h3>
-                    
-                    <p className="text-gray-600 text-sm mb-4">
-                      Buscar tutores disponibles para esta materia
-                    </p>
-                    
-                    <div className="flex items-center text-[#FF7A7A] font-medium text-sm">
-                      Ver tutores disponibles →
-                    </div>
-                  </div>
                 </div>
-              ))}
             </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-} 
+        }>
+            <BuscarTutoresContent />
+        </Suspense>
+    );
+}
