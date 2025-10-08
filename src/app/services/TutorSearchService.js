@@ -8,6 +8,9 @@ import {
   doc,
 } from 'firebase/firestore';
 import { FirebaseAvailabilityService } from './FirebaseAvailabilityService';
+import pino from 'pino';
+
+const logger = pino({ name: 'TutorSearchService' });
 
 export class TutorSearchService {
   // -------- Helpers --------
@@ -69,14 +72,16 @@ export class TutorSearchService {
   // Materias disponibles (colección "course")
   static async getMaterias() {
     try {
+      logger.info('Obteniendo todas las materias');
       const snapshot = await getDocs(collection(db, 'course'));
       const items = snapshot.docs.map((docSnap) => ({
         codigo: docSnap.id,
         nombre: docSnap.data().name,
+        base_price: docSnap.data().base_price || null,
       }));
       return items.sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
     } catch (error) {
-      console.error('Error obteniendo materias:', error);
+      logger.error({ error }, 'Error obteniendo materias');
       throw new Error(`Error obteniendo materias: ${error.message}`);
     }
   }
@@ -92,7 +97,7 @@ export class TutorSearchService {
       tutors.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
       return tutors;
     } catch (error) {
-      console.error('Error obteniendo tutores:', error);
+      logger.error({ error }, 'Error obteniendo tutores');
       throw new Error(`Error obteniendo tutores: ${error.message}`);
     }
   }
@@ -211,7 +216,7 @@ export class TutorSearchService {
         limitCount
       );
     } catch (error) {
-      console.error('Error obteniendo disponibilidad del tutor:', error);
+      logger.error({ error, tutorId }, 'Error obteniendo disponibilidad del tutor');
       throw new Error(`Error obteniendo disponibilidad: ${error.message}`);
     }
   }
@@ -229,8 +234,11 @@ export class TutorSearchService {
           (Array.isArray(t.subjects) &&
             t.subjects.join(' ').toLowerCase().includes(q))
       );
+
+      logger.info({ searchTerm, count: filtered.length }, 'Tutores filtrados exitosamente');
+      return filtered;
     } catch (error) {
-      console.error('Error buscando tutores:', error);
+      logger.error({ error, searchTerm }, 'Error buscando tutores');
       throw new Error(`Error en búsqueda: ${error.message}`);
     }
   }
@@ -251,8 +259,11 @@ export class TutorSearchService {
         subjects,
         subjectCount: subjects.length,
       };
+
+      logger.info({ tutorId, stats }, 'Estadísticas obtenidas exitosamente');
+      return stats;
     } catch (error) {
-      console.error('Error obteniendo estadísticas del tutor:', error);
+      logger.error({ error, tutorId }, 'Error obteniendo estadísticas del tutor');
       return {
         totalAvailabilities: 0,
         upcomingSessions: 0,
