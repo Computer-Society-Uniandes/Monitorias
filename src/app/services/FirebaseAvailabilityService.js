@@ -121,47 +121,80 @@ export class FirebaseAvailabilityService {
   // Obtener disponibilidades por materia
   static async getAvailabilitiesBySubject(subject, limitCount = 50) {
     try {
-      const q = query(
-        collection(db, this.COLLECTION_NAME),
-        where('subject', '==', subject),
-        orderBy('startDateTime', 'asc'),
-        limit(limitCount)
-      );
-
-      const querySnapshot = await getDocs(q);
-      const availabilities = [];
-
-      querySnapshot.forEach((doc) => {
-        availabilities.push({
-          id: doc.id,
-          ...doc.data(),
-          // Convertir timestamps a objetos Date
-          createdAt: doc.data().createdAt?.toDate(),
-          updatedAt: doc.data().updatedAt?.toDate(),
-          syncedAt: doc.data().syncedAt?.toDate(),
-          startDateTime: doc.data().startDateTime?.toDate(),
-          endDateTime: doc.data().endDateTime?.toDate(),
-        });
-      });
-
-      return availabilities;
-    } catch (error) {
-      console.error('Error getting availabilities by subject:', error);
+      console.log(`🔍 Buscando disponibilidades para materia: ${subject}`);
       
-      // Si hay un error con el índice compuesto, intentar sin orderBy
-      if (error.code === 'failed-precondition') {
-        console.warn('Índice compuesto no encontrado, buscando sin ordenar...');
+      const availabilities = [];
+      const processedIds = new Set(); // Para evitar duplicados
+
+      // Buscar por el campo subject (compatibilidad con datos existentes)
+      try {
+        const subjectQuery = query(
+          collection(db, this.COLLECTION_NAME),
+          where('subject', '==', subject),
+          orderBy('startDateTime', 'asc'),
+          limit(limitCount)
+        );
+
+        const subjectSnapshot = await getDocs(subjectQuery);
+        subjectSnapshot.forEach((doc) => {
+          if (!processedIds.has(doc.id)) {
+            processedIds.add(doc.id);
+            availabilities.push({
+              id: doc.id,
+              ...doc.data(),
+              // Convertir timestamps a objetos Date
+              createdAt: doc.data().createdAt?.toDate(),
+              updatedAt: doc.data().updatedAt?.toDate(),
+              syncedAt: doc.data().syncedAt?.toDate(),
+              startDateTime: doc.data().startDateTime?.toDate(),
+              endDateTime: doc.data().endDateTime?.toDate(),
+            });
+          }
+        });
+      } catch (subjectError) {
+        console.warn('Error con consulta por subject, intentando sin orderBy...');
+        
+        // Fallback sin orderBy
         try {
-          const simpleQuery = query(
+          const simpleSubjectQuery = query(
             collection(db, this.COLLECTION_NAME),
             where('subject', '==', subject),
             limit(limitCount)
           );
 
-          const querySnapshot = await getDocs(simpleQuery);
-          const availabilities = [];
+          const subjectSnapshot = await getDocs(simpleSubjectQuery);
+          subjectSnapshot.forEach((doc) => {
+            if (!processedIds.has(doc.id)) {
+              processedIds.add(doc.id);
+              availabilities.push({
+                id: doc.id,
+                ...doc.data(),
+                createdAt: doc.data().createdAt?.toDate(),
+                updatedAt: doc.data().updatedAt?.toDate(),
+                syncedAt: doc.data().syncedAt?.toDate(),
+                startDateTime: doc.data().startDateTime?.toDate(),
+                endDateTime: doc.data().endDateTime?.toDate(),
+              });
+            }
+          });
+        } catch (fallbackError) {
+          console.warn('Error en fallback de subject:', fallbackError);
+        }
+      }
 
-          querySnapshot.forEach((doc) => {
+      // Buscar por el campo subjects (nuevo campo con array de materias)
+      try {
+        const subjectsQuery = query(
+          collection(db, this.COLLECTION_NAME),
+          where('subjects', 'array-contains', subject),
+          orderBy('startDateTime', 'asc'),
+          limit(limitCount)
+        );
+
+        const subjectsSnapshot = await getDocs(subjectsQuery);
+        subjectsSnapshot.forEach((doc) => {
+          if (!processedIds.has(doc.id)) {
+            processedIds.add(doc.id);
             availabilities.push({
               id: doc.id,
               ...doc.data(),
@@ -171,22 +204,50 @@ export class FirebaseAvailabilityService {
               startDateTime: doc.data().startDateTime?.toDate(),
               endDateTime: doc.data().endDateTime?.toDate(),
             });
-          });
+          }
+        });
+      } catch (subjectsError) {
+        console.warn('Error con consulta por subjects, intentando sin orderBy...');
+        
+        // Fallback sin orderBy
+        try {
+          const simpleSubjectsQuery = query(
+            collection(db, this.COLLECTION_NAME),
+            where('subjects', 'array-contains', subject),
+            limit(limitCount)
+          );
 
-          // Ordenar manualmente por fecha
-          availabilities.sort((a, b) => {
-            const dateA = new Date(a.startDateTime);
-            const dateB = new Date(b.startDateTime);
-            return dateA - dateB;
+          const subjectsSnapshot = await getDocs(simpleSubjectsQuery);
+          subjectsSnapshot.forEach((doc) => {
+            if (!processedIds.has(doc.id)) {
+              processedIds.add(doc.id);
+              availabilities.push({
+                id: doc.id,
+                ...doc.data(),
+                createdAt: doc.data().createdAt?.toDate(),
+                updatedAt: doc.data().updatedAt?.toDate(),
+                syncedAt: doc.data().syncedAt?.toDate(),
+                startDateTime: doc.data().startDateTime?.toDate(),
+                endDateTime: doc.data().endDateTime?.toDate(),
+              });
+            }
           });
-
-          return availabilities;
         } catch (fallbackError) {
-          console.error('Error in fallback query:', fallbackError);
-          throw new Error(`Error obteniendo disponibilidades por materia: ${fallbackError.message}`);
+          console.warn('Error en fallback de subjects:', fallbackError);
         }
       }
-      
+
+      // Ordenar por fecha de inicio
+      availabilities.sort((a, b) => {
+        const dateA = new Date(a.startDateTime);
+        const dateB = new Date(b.startDateTime);
+        return dateA - dateB;
+      });
+
+      console.log(`✅ Encontradas ${availabilities.length} disponibilidades para ${subject}`);
+      return availabilities;
+    } catch (error) {
+      console.error('Error getting availabilities by subject:', error);
       throw new Error(`Error obteniendo disponibilidades por materia: ${error.message}`);
     }
   }
@@ -255,10 +316,13 @@ export class FirebaseAvailabilityService {
   }
 
   // Convertir evento de Google Calendar a formato Firebase
-  static googleEventToFirebaseFormat(googleEvent, tutorId, tutorEmail) {
+  static async googleEventToFirebaseFormat(googleEvent, tutorId, tutorEmail) {
     try {
-      // Extraer materia del título
-      const subject = this.extractSubjectFromTitle(googleEvent.summary || '');
+      // Obtener las materias del tutor desde la base de datos
+      const tutorSubjects = await this.getTutorSubjects(tutorEmail);
+      
+      // Extraer materia del título (para compatibilidad)
+      const extractedSubject = this.extractSubjectFromTitle(googleEvent.summary || '');
       
       // Convertir fechas
       const startDateTime = new Date(googleEvent.start.dateTime || googleEvent.start.date);
@@ -274,8 +338,10 @@ export class FirebaseAvailabilityService {
         location: googleEvent.location || 'No especificado',
         recurring: !!(googleEvent.recurrence && googleEvent.recurrence.length > 0),
         recurrenceRule: googleEvent.recurrence ? googleEvent.recurrence.join(';') : '',
-        subject,
-        color: this.getColorForSubject(subject),
+        subject: extractedSubject, // Mantener para compatibilidad
+        subjects: tutorSubjects, // NUEVO: Array con todas las materias del tutor
+        isGeneralAvailability: tutorSubjects.length > 0, // NUEVO: Indicar si es disponibilidad general
+        color: this.getColorForSubject(extractedSubject),
         googleEventId: googleEvent.id,
         htmlLink: googleEvent.htmlLink || '',
         status: googleEvent.status || 'confirmed'
@@ -283,6 +349,29 @@ export class FirebaseAvailabilityService {
     } catch (error) {
       console.error('Error converting Google event to Firebase format:', error);
       throw new Error(`Error convirtiendo evento: ${error.message}`);
+    }
+  }
+
+  // Obtener las materias que enseña un tutor
+  static async getTutorSubjects(tutorEmail) {
+    try {
+      const userDoc = await getDoc(doc(db, 'user', tutorEmail));
+      
+      if (!userDoc.exists()) {
+        console.warn(`Tutor ${tutorEmail} not found in database`);
+        return ['General']; // Fallback
+      }
+      
+      const userData = userDoc.data();
+      const subjects = userData.subjects || [];
+      
+      console.log(`Tutor ${tutorEmail} teaches subjects:`, subjects);
+      
+      // Si no tiene materias definidas, retornar General
+      return subjects.length > 0 ? subjects : ['General'];
+    } catch (error) {
+      console.error('Error getting tutor subjects:', error);
+      return ['General']; // Fallback en caso de error
     }
   }
 

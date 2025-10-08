@@ -29,8 +29,7 @@ export default function TutorAvailabilityCard({ tutor, materia }) {
       const filtered = availability.filter(avail => {
         const startDate = new Date(avail.startDateTime);
         const isUpcoming = startDate > now;
-        const isRelevantSubject = !materia || avail.subject === materia || !avail.subject;
-        return isUpcoming && isRelevantSubject;
+        return isUpcoming;
       });
       
       console.log(`✅ Filtradas ${filtered.length} disponibilidades relevantes para ${tutor.name} en ${materia || 'cualquier materia'}`);
