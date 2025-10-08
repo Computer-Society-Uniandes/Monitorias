@@ -97,3 +97,6 @@
   vertical-align: middle;
   pointer-events: none; /* evita que el click afecte a la imagen */
 }
+
+.cal-rating{ color:#9E7847; font-size:14px; font-weight:600; display:inline-flex; align-items:center; gap:4px; }
+.cal-star{ color:#FF9505; font-weight:900; }
