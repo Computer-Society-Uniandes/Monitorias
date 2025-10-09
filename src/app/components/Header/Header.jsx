@@ -214,7 +214,11 @@ export default function Header() {
             href={href}
             className={`bottom-nav-item ${isActiveRoute(href) ? 'active' : ''}`}
           >
-            <IconComponent size={22} className="bottom-nav-icon" />
+            <IconComponent 
+              size={22} 
+              className="bottom-nav-icon" 
+              fill={isActiveRoute(href) ? 'currentColor' : 'none'}
+            />
             <span className="bottom-nav-label">{label}</span>
           </Link>
         ))}
