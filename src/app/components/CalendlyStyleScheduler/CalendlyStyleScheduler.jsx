@@ -142,12 +142,13 @@ export default function CalendlyStyleScheduler({ tutor, availabilities, materia,
         return;
       }
 
-      // Proceder con la reserva
+      // Proceder con la reserva usando la materia seleccionada por el estudiante
       const result = await TutoringSessionService.bookSpecificSlot(
         selectedSlot,
         user.email,
         user.name,
-        bookingNotes
+        bookingNotes,
+        materia // Pasar la materia que seleccionó el estudiante en buscar-tutores
       );
 
       console.log('✅ Reserva exitosa:', result);

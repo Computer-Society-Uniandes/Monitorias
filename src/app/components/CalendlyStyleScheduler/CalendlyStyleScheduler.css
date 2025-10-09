@@ -45,6 +45,7 @@
   align-items: center;
   justify-content: center;
   gap: 12px;
+  flex-wrap: wrap;
 }
 
 .slots-count {
@@ -216,7 +217,7 @@
 .time-slots {
   padding: 16px;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 12px;
 }
 
@@ -301,6 +302,10 @@
   line-height: 1.4;
   margin-bottom: 8px;
   flex-grow: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .time-slot.selected .slot-location,

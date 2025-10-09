@@ -29,10 +29,8 @@
 /* -------------- NAVEGACIÓN -------------- */
 .navbar {
   display: flex;
-  flex: 1;
-  justify-content: center;
   align-items: center;
-  gap: 2rem;
+  gap: 0.5rem;
 }
 
 .nav-item {
@@ -81,29 +79,22 @@
 }
 
 .navbar-tutor a {
-  color: #4d4c4b;
+  color: inherit; /* usar los mismos colores que .nav-item */
   font-weight: 600;
 }
 
-.navbar-tutor a::before {
-  background: linear-gradient(90deg, #fff4da, #fdb61b);
+/* Estilos de estudiante igual que tutor */
+.navbar-student {
+  background: linear-gradient(180deg, rgba(102, 126, 234, 0.03) 0%, rgba(255, 244, 218, 0.7) 100%);
+  border-radius: 20px;
+  padding: 20px 0;
+  margin: 0 20px;
 }
 
-.navbar-student a::before {
-  background: #ff9505;
+.navbar-student a {
+  color: inherit; /* usar los mismos colores que .nav-item */
+  font-weight: 600;
 }
-
-.navbar a::before {
-  content: "";
-  position: absolute;
-  inset: 100% 0 auto 0;
-  width: 0;
-  height: 2.5px;
-  border-radius: 20%;
-  transition: width 0.2s;
-  color: #FF7A7A;
-}
-.navbar a:hover::before { width: 100%; }
 
 /* -------------- DERECHA -------------- */
 .right-block {
@@ -305,29 +296,21 @@
     flex-direction: row;              /* sobreescribe column */
     justify-content: space-between;   /* separa logo y botón */
     align-items: center;
-    flex-wrap: wrap;                  /* permite que el nav baje cuando se abra */
+    flex-wrap: nowrap;
+    padding: 8px 12px;
   }
-  .hamburger { display: inline-flex; margin-left: auto;}
+  .hamburger { display: none; }
   .logo { margin-right: auto; }
-  .navbar,
-  .right-block { display: none; }
+  .navbar { display: none; } /* hide top nav on mobile */
+
+  /* Compactar logo */
+  .logoImg { height: 2.4rem; }
 
   /* cuando está abierto el menú */
-  .header.is-open .navbar,
-  .header.is-open .right-block {
-    display: flex;
-  }
+  .header.is-open .navbar { display: none; }
 
   /* Estética del panel móvil */
-  .header.is-open .navbar {
-    flex-direction: column;
-    gap: 10px;
-    margin-top: 10px;
-    background: linear-gradient(180deg, rgba(255,255,255,0.9), #ffffff);
-    border-radius: 18px;
-    padding: 14px 18px;
-    box-shadow: 0 10px 22px rgba(0,0,0,0.08);
-  }
+  .header.is-open .navbar { display: none; }
 
   .header.is-open .navbar {
     flex-direction: column;
@@ -352,14 +335,85 @@
     margin-top: 10px;
   }
 
-  /* Botones un poco más compactos en móvil */
-  .perfil,
-  .btn-logout,
-  .btn-header {
-    font-size: 14px;
-    padding: 8px 14px;
-  }
 
   /* limpio el subrayado animado para móvil (más sobrio) */
   .navbar a::before { display: none; }
+
+  /* Mostrar bloque derecho compacto (perfil + rol) */
+  .right-block {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+  }
+  .user-actions { gap: 8px; }
+  .notification-btn,
+  .btn-logout { display: none; }
+  .role-badge  { font-size: 11px; padding: 4px 8px; }
+  .profile-btn { width: 34px; height: 34px; }
+}
+
+/* ====== BOTTOM NAV (SIEMPRE VISIBLE) ====== */
+.bottom-nav {
+  display: none; /* hidden on desktop */
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  background: #ffffff;
+  border-top: 1px solid #eee8e1;
+  align-items: center;
+  justify-content: space-around;
+  padding: 8px 6px;
+  z-index: 30;
+}
+
+.bottom-nav-tutor {
+  background: linear-gradient(180deg, rgba(255,255,255,0.98), #ffffff);
+}
+
+/* Variante estudiante (igual a tutor para consistencia visual) */
+.bottom-nav-student {
+  background: linear-gradient(180deg, rgba(255,255,255,0.98), #ffffff);
+}
+
+.bottom-nav-student {
+  background: linear-gradient(180deg, rgba(255,255,255,0.98), #ffffff);
+}
+
+.bottom-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  text-decoration: none;
+  color: #262528; /* inactivo: negro, como la barra superior */
+  padding: 6px 8px;
+  border-radius: 10px;
+  min-width: 64px;
+  transition: background-color .2s, color .2s;
+  font: 600 11px "DM Sans", sans-serif;
+}
+
+.bottom-nav-item:hover {
+  background-color: rgba(0, 0, 0, 0.04); /* hover sutil cuando inactivo */
+}
+
+.bottom-nav-item.active {
+  color: #ff7a00; /* activo: naranja como la barra superior */
+  background-color: rgba(255, 149, 5, 0.15);
+}
+
+.bottom-nav-item.active .bottom-nav-icon {
+  color: #ff7a00; /* asegurar color de ícono en activo */
+}
+
+.bottom-nav-icon { line-height: 1; }
+.bottom-nav-label { font-size: 11px; }
+
+/* Mostrar bottom nav en móvil */
+@media (max-width: 950px) {
+  .bottom-nav { display: flex; }
 }

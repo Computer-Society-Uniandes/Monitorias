@@ -15,10 +15,13 @@ export default function Home() {
     setMounted(true);
   }, []);
 
-  // Redirigir automáticamente a tutores a su página de inicio
+  // Check role from localStorage to respect user's choice
   useEffect(() => {
     if (mounted && !loading && user.isLoggedIn && user.isTutor) {
-      router.push(routes.TUTOR_INICIO);
+      const currentRole = localStorage.getItem("rol") || "student";
+      if (currentRole === "tutor") {
+        router.push(routes.TUTOR_INICIO);
+      }
     }
   }, [mounted, loading, user.isLoggedIn, user.isTutor, router]);
 
