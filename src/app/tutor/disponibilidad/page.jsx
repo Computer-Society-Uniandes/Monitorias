@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-import Disponibilidad from "../../components/Disponibilidad/Disponibilidad";
+import UnifiedAvailability from "../../components/UnifiedAvailability/UnifiedAvailability";
 
 export default function DisponibilidadPage() {
-  return <Disponibilidad />;
+  return <UnifiedAvailability />;
 } 
