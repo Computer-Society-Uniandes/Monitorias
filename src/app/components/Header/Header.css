@@ -389,7 +389,7 @@
   justify-content: center;
   gap: 2px;
   text-decoration: none;
-  color: #ff9505; /* mismo color base que .nav-item */
+  color: #262528; /* inactivo: negro, como la barra superior */
   padding: 6px 8px;
   border-radius: 10px;
   min-width: 64px;
@@ -398,12 +398,11 @@
 }
 
 .bottom-nav-item:hover {
-  background-color: rgba(255, 149, 5, 0.1); /* igual a .nav-item:hover */
-  color: #ff7a00;
+  background-color: rgba(0, 0, 0, 0.04); /* hover sutil cuando inactivo */
 }
 
 .bottom-nav-item.active {
-  color: #ff7a00; /* igual a .nav-item.active */
+  color: #ff7a00; /* activo: naranja como la barra superior */
   background-color: rgba(255, 149, 5, 0.15);
 }
 
