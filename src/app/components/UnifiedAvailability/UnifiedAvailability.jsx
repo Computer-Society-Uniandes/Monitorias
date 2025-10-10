@@ -7,15 +7,19 @@ import { Calendar as CalendarIcon, Plus, Edit, Bell, ArrowRight, Clock, RefreshC
 import "./UnifiedAvailability.css";
 import { AvailabilityService } from "../../services/AvailabilityService";
 import { TutoringSessionService } from "../../services/TutoringSessionService";
+import { NotificationService } from "../../services/NotificationService";
 import { useAuth } from "../../context/SecureAuthContext";
 import GoogleCalendarButton from "../GoogleCalendarButton/GoogleCalendarButton";
 import TutoringDetailsModal from "../TutoringDetailsModal/TutoringDetailsModal";
+import TutorApprovalModal from "../TutorApprovalModal/TutorApprovalModal";
 
 export default function UnifiedAvailability() {
   const { user } = useAuth();
   const [date, setDate] = useState(new Date());
   const [availabilitySlots, setAvailabilitySlots] = useState([]);
   const [sessions, setSessions] = useState([]);
+  const [pendingSessions, setPendingSessions] = useState([]);
+  const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isConnected, setIsConnected] = useState(false);
   const [usingMockData, setUsingMockData] = useState(false);
@@ -25,6 +29,10 @@ export default function UnifiedAvailability() {
   const [activeTab, setActiveTab] = useState("upcoming");
   const [selectedSession, setSelectedSession] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  // Approval modal
+  const [selectedPendingSession, setSelectedPendingSession] = useState(null);
+  const [isApprovalModalOpen, setIsApprovalModalOpen] = useState(false);
   
   // Availability management
   const [showAddModal, setShowAddModal] = useState(false);
@@ -74,11 +82,18 @@ export default function UnifiedAvailability() {
       
       // Load sessions
       if (user.email) {
-        const fetchedSessions = await TutoringSessionService.getTutorSessions(user.email);
+        const [fetchedSessions, fetchedPendingSessions, fetchedNotifications] = await Promise.all([
+          TutoringSessionService.getTutorSessions(user.email),
+          TutoringSessionService.getPendingSessionsForTutor(user.email),
+          NotificationService.getTutorNotifications(user.email)
+        ]);
+        
         const sortedSessions = fetchedSessions.sort((a, b) => 
           new Date(b.scheduledDateTime) - new Date(a.scheduledDateTime)
         );
         setSessions(sortedSessions);
+        setPendingSessions(fetchedPendingSessions);
+        setNotifications(fetchedNotifications);
       }
       
       console.log('Unified data loaded successfully');
@@ -171,6 +186,26 @@ export default function UnifiedAvailability() {
     setIsModalOpen(true);
   };
 
+  const handlePendingSessionClick = (session) => {
+    setSelectedPendingSession(session);
+    setIsApprovalModalOpen(true);
+  };
+
+  const handleNotificationClick = (notification) => {
+    if (notification.type === 'pending_session_request') {
+      // Find the corresponding pending session
+      const pendingSession = pendingSessions.find(s => s.id === notification.sessionId);
+      if (pendingSession) {
+        handlePendingSessionClick(pendingSession);
+      }
+    }
+  };
+
+  const handleApprovalComplete = () => {
+    // Reload data after approval/decline
+    loadData();
+  };
+
   const handleSyncCalendar = async () => {
     if (!user.email || !isConnected) {
       alert('⚠️ Debes estar conectado a Google Calendar para sincronizar');
@@ -217,7 +252,14 @@ export default function UnifiedAvailability() {
     const now = new Date();
     return sessions.filter(session => 
       new Date(session.scheduledDateTime) > now && 
-      session.status !== 'cancelled'
+      session.status !== 'cancelled' &&
+      session.status !== 'pending' // Exclude pending sessions from upcoming
+    );
+  };
+
+  const getPendingSessionsForDisplay = () => {
+    return pendingSessions.filter(session => 
+      new Date(session.scheduledDateTime) > new Date()
     );
   };
 
@@ -345,6 +387,12 @@ export default function UnifiedAvailability() {
         <div className="sessions-section">
           <div className="session-tabs">
             <button 
+              className={`tab ${activeTab === "pending" ? "active" : ""}`}
+              onClick={() => setActiveTab("pending")}
+            >
+              Pending ({getPendingSessionsForDisplay().length})
+            </button>
+            <button 
               className={`tab ${activeTab === "upcoming" ? "active" : ""}`}
               onClick={() => setActiveTab("upcoming")}
             >
@@ -359,7 +407,30 @@ export default function UnifiedAvailability() {
           </div>
 
           <div className="sessions-content">
-            {activeTab === "upcoming" ? (
+            {activeTab === "pending" ? (
+              <div className="pending-sessions">
+                {getPendingSessionsForDisplay().length > 0 ? (
+                  getPendingSessionsForDisplay().map((session, index) => {
+                    const { date: sessionDate, time } = formatSessionDateTime(session.scheduledDateTime);
+                    return (
+                      <div key={index} className="session-item pending-item" onClick={() => handlePendingSessionClick(session)}>
+                        <Bell className="session-icon pending-icon" size={16} />
+                        <div className="session-info">
+                          <h4>{session.subject} - {session.studentName || session.studentEmail}</h4>
+                          <p>{sessionDate} - {time}</p>
+                          <span className="pending-badge">Pending Approval</span>
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="no-sessions">
+                    <Bell size={24} />
+                    <p>No pending session requests</p>
+                  </div>
+                )}
+              </div>
+            ) : activeTab === "upcoming" ? (
               <div className="upcoming-sessions">
                 {getUpcomingSessions().map((session, index) => {
                   const { date: sessionDate, time } = formatSessionDateTime(session.scheduledDateTime);
@@ -393,20 +464,28 @@ export default function UnifiedAvailability() {
 
             {/* Notifications */}
             <div className="notifications">
-              <div className="notification-item">
-                <Bell className="notification-icon" size={16} />
-                <div className="notification-content">
-                  <p>New session request from Ethan. Click to view details.</p>
+              <h4>Recent Notifications</h4>
+              {notifications.length > 0 ? (
+                notifications.slice(0, 5).map((notification, index) => (
+                  <div 
+                    key={index} 
+                    className={`notification-item ${!notification.isRead ? 'unread' : ''}`}
+                    onClick={() => handleNotificationClick(notification)}
+                  >
+                    <Bell className="notification-icon" size={16} />
+                    <div className="notification-content">
+                      <p>{notification.message}</p>
+                      <small>{new Date(notification.createdAt).toLocaleDateString()}</small>
+                    </div>
+                    <ArrowRight className="notification-arrow" size={16} />
+                  </div>
+                ))
+              ) : (
+                <div className="no-notifications">
+                  <Bell size={24} />
+                  <p>No notifications</p>
                 </div>
-                <ArrowRight className="notification-arrow" size={16} />
-              </div>
-              <div className="notification-item">
-                <Bell className="notification-icon" size={16} />
-                <div className="notification-content">
-                  <p>Session with Olivia starts in 15 minutes. Prepare materials.</p>
-                </div>
-                <ArrowRight className="notification-arrow" size={16} />
-              </div>
+              )}
             </div>
           </div>
         </div>
@@ -502,6 +581,19 @@ export default function UnifiedAvailability() {
             setSelectedSession(null);
           }}
           onSessionUpdate={loadData}
+        />
+      )}
+
+      {/* Tutor Approval Modal */}
+      {isApprovalModalOpen && selectedPendingSession && (
+        <TutorApprovalModal
+          session={selectedPendingSession}
+          isOpen={isApprovalModalOpen}
+          onClose={() => {
+            setIsApprovalModalOpen(false);
+            setSelectedPendingSession(null);
+          }}
+          onApprovalComplete={handleApprovalComplete}
         />
       )}
     </div>
