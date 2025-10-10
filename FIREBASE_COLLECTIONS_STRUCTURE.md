@@ -9,7 +9,9 @@ Este documento define la estructura exacta de las colecciones en Firebase Firest
 3. [**availabilities**](#3-colección-availabilities) - Disponibilidad de tutores
 4. [**major**](#4-colección-major) - Carreras universitarias
 5. [**tutoring_sessions**](#5-colección-tutoring_sessions) - Sesiones de tutoría agendadas
-6. [**payments**](#6-colección-payments) - Pagos y transacciones
+6. [**slot_bookings**](#6-colección-slot_bookings) - Reservas de slots específicos
+7. [**notifications**](#7-colección-notifications) - Notificaciones del sistema
+8. [**payments**](#8-colección-payments) - Pagos y transacciones
 
 ---
 
@@ -278,7 +280,7 @@ Este documento define la estructura exacta de las colecciones en Firebase Firest
 
 ---
 
-## 5. Colección `tutoring_sessions` (Futuras implementaciones)
+## 5. Colección `tutoring_sessions`
 
 **Propósito**: Almacena las sesiones de tutoría agendadas entre estudiantes y tutores
 
@@ -291,6 +293,7 @@ Este documento define la estructura exacta de las colecciones en Firebase Firest
   // Participantes
   "tutorEmail": "maria.rodriguez@uniandes.edu.co",
   "studentEmail": "carlos.mesa@uniandes.edu.co",
+  "studentName": "Carlos Mesa",
   
   // Información de la sesión
   "subject": "Cálculo Diferencial",
@@ -299,13 +302,21 @@ Este documento define la estructura exacta de las colecciones en Firebase Firest
   "location": "Biblioteca ML - Sala 101",
   
   // Estado y pagos
-  "status": "scheduled", // scheduled, completed, cancelled, no_show
+  "status": "pending", // pending, scheduled, completed, cancelled, declined, no_show
   "price": 25000,
   "paymentStatus": "pending", // pending, paid, refunded
   
-  // Integración
+  // Aprobación del tutor
+  "tutorApprovalStatus": "pending", // pending, accepted, declined
+  "requestedAt": "2025-01-20T10:00:00Z",
+  "acceptedAt": "2025-01-20T10:15:00Z", // Solo si fue aceptada
+  "declinedAt": "2025-01-20T10:15:00Z", // Solo si fue rechazada
+  
+  // Integración con slots
+  "parentAvailabilityId": "abc123def456ghi789",
+  "slotIndex": 2,
+  "slotId": "slot_abc123_2",
   "googleEventId": "xyz789abc123def456",
-  "availabilityId": "abc123def456ghi789", // ID de la disponibilidad original
   
   // Notas y calificación
   "notes": "Revisar ejercicios de derivadas",
@@ -323,7 +334,81 @@ Este documento define la estructura exacta de las colecciones en Firebase Firest
 
 ---
 
-## 6. Colección `payments` (Futuras implementaciones)
+## 6. Colección `slot_bookings`
+
+**Propósito**: Almacena las reservas específicas de slots de 1 hora para evitar conflictos
+
+**ID del Documento**: ID único generado automáticamente
+
+### Estructura del Documento:
+
+```javascript
+{
+  // Referencias
+  "parentAvailabilityId": "abc123def456ghi789", // ID de la disponibilidad padre
+  "slotIndex": 2, // Índice del slot dentro de la disponibilidad
+  "slotId": "slot_abc123_2", // ID único del slot
+  "sessionId": "session_xyz789", // ID de la sesión asociada
+  
+  // Participantes
+  "tutorEmail": "maria.rodriguez@uniandes.edu.co",
+  "studentEmail": "carlos.mesa@uniandes.edu.co",
+  
+  // Información del slot
+  "slotStartTime": "2025-01-22T14:00:00Z",
+  "slotEndTime": "2025-01-22T15:00:00Z",
+  "subject": "Cálculo Diferencial",
+  
+  // Control
+  "bookedAt": "2025-01-20T10:00:00Z",
+  "createdAt": "2025-01-20T10:00:00Z",
+  "updatedAt": "2025-01-20T10:00:00Z"
+}
+```
+
+---
+
+## 7. Colección `notifications`
+
+**Propósito**: Almacena las notificaciones del sistema para usuarios
+
+**ID del Documento**: ID único generado automáticamente
+
+### Estructura del Documento:
+
+```javascript
+{
+  // Destinatario
+  "tutorEmail": "maria.rodriguez@uniandes.edu.co", // Para notificaciones de tutores
+  "studentEmail": "carlos.mesa@uniandes.edu.co", // Para notificaciones de estudiantes
+  
+  // Referencias
+  "sessionId": "session_xyz789", // ID de la sesión relacionada
+  
+  // Contenido
+  "type": "pending_session_request", // pending_session_request, session_accepted, session_declined
+  "title": "New Session Request",
+  "message": "Carlos Mesa has requested a tutoring session for Cálculo Diferencial",
+  
+  // Información adicional
+  "studentName": "Carlos Mesa", // Para notificaciones de tutores
+  "tutorEmail": "maria.rodriguez@uniandes.edu.co", // Para notificaciones de estudiantes
+  "subject": "Cálculo Diferencial",
+  "scheduledDateTime": "2025-01-22T14:00:00Z",
+  
+  // Estado
+  "isRead": false,
+  "readAt": "2025-01-20T10:15:00Z", // Solo si fue leída
+  
+  // Control
+  "createdAt": "2025-01-20T10:00:00Z",
+  "updatedAt": "2025-01-20T10:00:00Z"
+}
+```
+
+---
+
+## 8. Colección `payments` (Futuras implementaciones)
 
 **Propósito**: Almacena información de pagos y transacciones
 
