@@ -21,6 +21,7 @@ import Image from "next/image";
 import CalicoLogo from "../../../../public/CalicoLogo.png";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "../../context/SecureAuthContext";
+import { NotificationService } from "../../services/NotificationService";
 import routes from "../../../routes";
 
 export default function Header() {
@@ -31,6 +32,7 @@ export default function Header() {
   const [mounted, setMounted] = useState(false);
   const [role, setRole] = useState("student"); // 'student' | 'tutor'
   const [menuOpen, setMenuOpen] = useState(false);   // ⟵ estado del menú
+  const [notificationCount, setNotificationCount] = useState(0);
 
   useEffect(() => { setMounted(true); }, []);
 
@@ -62,6 +64,29 @@ export default function Header() {
       window.removeEventListener("resize", onResize);
     };
   }, [mounted]);
+
+  // Load notification count for tutors
+  useEffect(() => {
+    const loadNotificationCount = async () => {
+      if (user.isLoggedIn && role === "tutor" && user.email) {
+        try {
+          const count = await NotificationService.getUnreadNotificationCount(user.email);
+          setNotificationCount(count);
+        } catch (error) {
+          console.error('Error loading notification count:', error);
+        }
+      } else {
+        setNotificationCount(0);
+      }
+    };
+
+    loadNotificationCount();
+    
+    // Refresh notification count every 30 seconds
+    const interval = setInterval(loadNotificationCount, 30000);
+    
+    return () => clearInterval(interval);
+  }, [user.isLoggedIn, user.email, role]);
 
   if (!mounted) return null;
 
@@ -159,6 +184,9 @@ export default function Header() {
           <div className="user-actions">
             <button className="notification-btn" aria-label="Notifications">
               <Bell size={20} />
+              {notificationCount > 0 && (
+                <span className="notification-badge">{notificationCount}</span>
+              )}
             </button>
             <button className="profile-btn" onClick={() => { setMenuOpen(false); router.push(routes.PROFILE); }}>
               <UserRound size={20} />
