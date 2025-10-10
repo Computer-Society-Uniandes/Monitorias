@@ -3,6 +3,10 @@
   margin: 0 auto;
   padding: 20px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  scroll-behavior: smooth;
 }
 
 .scheduler-header {
@@ -544,6 +548,9 @@
 @media (max-width: 768px) {
   .calendly-scheduler {
     padding: 16px;
+    /* Mantener scroll en móviles */
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
   
   .scheduler-header h3 {
@@ -590,6 +597,13 @@
 }
 
 @media (max-width: 480px) {
+  .calendly-scheduler {
+    /* Asegurar scroll en pantallas pequeñas */
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 12px;
+  }
+
   .scheduler-header {
     margin-bottom: 24px;
     padding-bottom: 16px;

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { deleteEvent } from '../../../services/GoogleCalendarService';
+import { findAvailabilityCalendar, deleteEventFromCalendar } from '../../../services/GoogleCalendarService';
 import { FirebaseAvailabilityService } from '../../../services/FirebaseAvailabilityService';
 
 export async function DELETE(request) {
@@ -29,8 +29,20 @@ export async function DELETE(request) {
       );
     }
 
-    // Eliminar el evento del Google Calendar
-    await deleteEvent(accessToken.value, eventId);
+    // Primero buscar el calendario "Disponibilidad"
+    const availabilityCalendar = await findAvailabilityCalendar(accessToken.value);
+    
+    if (!availabilityCalendar) {
+      return NextResponse.json({ 
+        error: 'No se encontró un calendario llamado "Disponibilidad". El evento puede estar en otro calendario.',
+        calendarFound: false
+      }, { status: 404 });
+    }
+
+    console.log(`Deleting event from calendar: "${availabilityCalendar.summary}" (ID: ${availabilityCalendar.id})`);
+
+    // Eliminar el evento del calendario "Disponibilidad" específico
+    await deleteEventFromCalendar(accessToken.value, availabilityCalendar.id, eventId);
     
     // Eliminar también de Firebase
     try {
