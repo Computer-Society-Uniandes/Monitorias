@@ -27,7 +27,7 @@ export async function GET(request) {
     console.log('Fetching availability events from Disponibilidad calendar...');
     console.log('Time range:', timeMin, 'to', timeMax);
 
-    // Primero buscar el calendario "Disponibilidad"
+    // Primero, buscar el calendario de "Disponibilidad"
     const availabilityCalendar = await findAvailabilityCalendar(accessToken.value);
     
     if (!availabilityCalendar) {
@@ -44,6 +44,7 @@ export async function GET(request) {
 
     console.log(`Using calendar: "${availabilityCalendar.summary}" (ID: ${availabilityCalendar.id})`);
 
+    // Obtener eventos del calendario específico de disponibilidad
     const events = await listEventsFromCalendar(
       accessToken.value, 
       availabilityCalendar.id, 
@@ -73,8 +74,8 @@ export async function GET(request) {
       };
     });
 
-    // Como todos los eventos vienen del calendario "Disponibilidad", 
-    // no necesitamos filtrar - todos son válidos
+    // Como ahora todos los eventos vienen del calendario "Disponibilidad", 
+    // no necesitamos filtrar por palabras clave - todos son válidos
     console.log(`Found ${events.length} events in Disponibilidad calendar`);
 
     return Response.json({
@@ -92,9 +93,19 @@ export async function GET(request) {
     });
 
   } catch (error) {
-    console.error('Error fetching availability from Google Calendar:', error);
+    console.error('Error fetching availability from specific calendar:', error);
+    
+    // Manejar errores específicos de autenticación
+    if (error.code === 401 || error.message.includes('authentication')) {
+      return Response.json({ 
+        error: 'Token de acceso expirado. Por favor, vuelve a conectar tu calendario.',
+        connected: false,
+        needsReconnection: true
+      }, { status: 401 });
+    }
+    
     return Response.json({ 
-      error: 'Failed to fetch availability', 
+      error: 'Failed to fetch availability from specific calendar', 
       message: error.message,
       connected: false 
     }, { status: 500 });
@@ -107,12 +118,12 @@ function getDayOfWeek(date) {
   return days[date.getDay()];
 }
 
-// Función auxiliar para formatear hora
+// Función auxiliar para formatear la hora
 function formatTime(date) {
-  return date.toLocaleTimeString('es-ES', { 
+  return date.toLocaleTimeString('es-CO', { 
     hour: '2-digit', 
     minute: '2-digit',
-    hour12: false
+    hour12: false 
   });
 }
 
@@ -143,4 +154,4 @@ function getRandomColor() {
   
   const randomIndex = Math.floor(Math.random() * colors.length);
   return colors[randomIndex];
-} 
+}
