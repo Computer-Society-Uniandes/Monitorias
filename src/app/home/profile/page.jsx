@@ -1,42 +1,70 @@
-// src/app/home/profile/Profile.jsx
-
 'use client';
 
-import React, { useEffect, useState } from 'react'
-import { auth, db } from '../../../firebaseConfig'
-import { doc, getDoc } from 'firebase/firestore'
-import Header from '../../components/Header/Header'
-import { useRouter } from 'next/navigation'
-import routes from 'app/routes'
-import './Profile.css'
-import { useAuth } from '../../context/SecureAuthContext'
+import React, { useEffect, useState } from 'react';
+import { db } from '../../../firebaseConfig';
+import { doc, getDoc } from 'firebase/firestore';
+import Header from '../../components/Header/Header';
+import { useRouter } from 'next/navigation';
+import routes from 'app/routes';
+import './Profile.css';
+import { useAuth } from '../../context/SecureAuthContext';
+
+const TUTOR_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSdxeOSt5jjjSVtXY9amQRiXeufm65-11N4FMvJ96fcxyiN58A/viewform?usp=sharing&ouid=102056237631790140503'; 
+
+// Modal de invitación (accesible y responsive)
+function TutorInviteModal({ open, onClose }) {
+  if (!open) return null;
+  return (
+    <div className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="inviteTitle">
+      <div className="modal-card">
+        <h3 id="inviteTitle" className="modal-title">¿Quieres ser tutor?</h3>
+        <p className="modal-text">
+          Aún no tienes habilitado el perfil de tutor. Completa el formulario para solicitar acceso.
+        </p>
+        <div className="modal-actions">
+          <a
+            href={TUTOR_FORM_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-header btn-header--primary"
+          >
+            Ir al formulario
+          </a>
+          <button className="btn-header" onClick={onClose}>Cerrar</button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 
 
 const Profile = () => {
-  const [userData, setUserData] = useState(null)
-  const [majorName, setMajorName] = useState('')
+  const [userData, setUserData] = useState(null);
+  const [majorName, setMajorName] = useState('');
+  const [activeRole, setActiveRole] = useState('student'); // 'student' | 'tutor'
+  const [inviteOpen, setInviteOpen] = useState(false);
+
   const router = useRouter();
   const { user, loading, logout } = useAuth();
 
   // Cargar datos de perfil
   useEffect(() => {
-    if (loading) return; 
-    // Si no está logueado, redirige
+    if (loading) return;
+
     if (!user.isLoggedIn) {
-      router.push(routes.LANDING)
-      return
+      router.push(routes.LANDING);
+      return;
     }
-    if (!user.email) return
+    if (!user.email) return;
 
     const fetchUserData = async () => {
       try {
-        // 1. Obtener doc del usuario
-        const userDocRef = doc(db, 'user', user.email)
-        const userSnap = await getDoc(userDocRef)
+        const userDocRef = doc(db, 'user', user.email);
+        const userSnap = await getDoc(userDocRef);
         if (userSnap.exists()) {
-          const data = userSnap.data()
-          setUserData(data)
+          const data = userSnap.data();
+          setUserData(data);
 
 
   //   const fetchUserData = async () => {
@@ -48,17 +76,46 @@ const Profile = () => {
   //         const data = userSnap.data()
   //         setUserData(data)
 
-    fetchUserData()
-  }, [loading, user.isLoggedIn, user.email, router])
+    const saved = typeof window !== 'undefined' ? localStorage.getItem('rol') : null;
+
+    if (user.isTutor && saved === 'tutor') {
+      setActiveRole('tutor');
+    } else {
+      // Por defecto estudiante
+      localStorage.setItem('rol', 'student');
+      setActiveRole('student');
+    }
+  }, [user.isLoggedIn, user.isTutor]);
 
   const handleLogout = async () => {
     try {
-      await logout()
-      router.push(routes.LANDING)
+      await logout();
     } catch (error) {
-      console.error('Error logging out:', error)
+      console.error('Error logging out:', error);
+    } finally {
+      localStorage.setItem('rol', 'student');
+      setActiveRole('student');
+      notifyRoleChange('student');
+      router.push(routes.LANDING);
     }
-  }
+  };
+
+  // Intentar cambiar a modo tutor desde el perfil
+  const handleChangeRole = () => {
+    if (!user.isTutor) {
+      setInviteOpen(true);
+      return;
+    }
+    localStorage.setItem('rol', 'tutor');
+    setActiveRole('tutor');
+    notifyRoleChange('tutor');
+  };
+
+  const handleBackToStudent = () => {
+    localStorage.setItem('rol', 'student');
+    setActiveRole('student');
+    notifyRoleChange('student');
+  };
 
 
   // const handleLogout = () => {
@@ -71,6 +128,13 @@ const Profile = () => {
   // if (!userData) {
   //   return <div className="p-6">Cargando perfil...</div>
   // }
+
+  const notifyRoleChange = (next) => {
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('role-change', { detail: next }));
+    }
+  };
+
 
   return (
     <div className='background-profile'>
@@ -112,9 +176,12 @@ const Profile = () => {
             </button>
         </div>
         </div>
-    </div>
-    
-  )
-}
+      </main>
 
-export default Profile
+      {/* Modal */}
+      <TutorInviteModal open={inviteOpen} onClose={() => setInviteOpen(false)} />
+    </div>
+  );
+};
+
+export default Profile;

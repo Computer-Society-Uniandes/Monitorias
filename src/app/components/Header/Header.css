@@ -20,48 +20,81 @@
   text-decoration: none;
 }
 
+.logoImg {
+  height: 4rem; /* h-8 */
+  width: auto;
+  transition: filter 0.3s ease;
+}
+
 /* -------------- NAVEGACIÓN -------------- */
 .navbar {
   display: flex;
-  flex: 1;
-  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
 }
-.navbar a {
-  position: relative;
-  margin-left: 40px;
-  font: 700 18px "DM Sans", sans-serif;
-  color: #ff7a7a;
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 16px;
+  border-radius: 8px;
   text-decoration: none;
   transition: all 0.3s ease;
+  color: #ff9505;
+  font: 600 14px "DM Sans", sans-serif;
+}
+
+.nav-item:hover {
+  background-color: rgba(255, 149, 5, 0.1);
+  color: #ff7a00;
+}
+
+.nav-item.active {
+  color: #ff7a00;
+  background-color: rgba(255, 149, 5, 0.15);
+}
+
+.nav-icon {
+  transition: all 0.3s ease;
+}
+
+.nav-item.active .nav-icon {
+  color: #ff7a00;
+}
+
+.nav-label {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
 }
 
 /* Diferenciación sutil para navbar de tutor */
 .navbar-tutor {
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.03) 0%, rgba(118, 75, 162, 0.03) 100%);
+  background: linear-gradient(180deg, rgba(102, 126, 234, 0.03) 0%, rgba(255, 244, 218, 0.7) 100%);
   border-radius: 20px;
-  padding: 8px 0;
+  padding: 20px 0;
   margin: 0 20px;
 }
 
 .navbar-tutor a {
-  color: #5a67d8;
+  color: inherit; /* usar los mismos colores que .nav-item */
   font-weight: 600;
 }
 
-.navbar-tutor a::before {
-  background: linear-gradient(90deg, #667eea, #764ba2);
+/* Estilos de estudiante igual que tutor */
+.navbar-student {
+  background: linear-gradient(180deg, rgba(102, 126, 234, 0.03) 0%, rgba(255, 244, 218, 0.7) 100%);
+  border-radius: 20px;
+  padding: 20px 0;
+  margin: 0 20px;
 }
 
-.navbar a::before {
-  content: "";
-  position: absolute;
-  inset: 100% 0 auto 0;
-  width: 0;
-  height: 2px;
-  background: #ff7a7a;
-  transition: width 0.2s;
+.navbar-student a {
+  color: inherit; /* usar los mismos colores que .nav-item */
+  font-weight: 600;
 }
-.navbar a:hover::before { width: 100%; }
 
 /* -------------- DERECHA -------------- */
 .right-block {
@@ -77,78 +110,102 @@
   padding: 0.4rem 1rem;
   font: 600 14px "DM Sans", sans-serif;
   border-radius: 9999px;
-  border: 2px solid #4f46e5;
+  border: 2px solid #ff9505;
   background: transparent;
-  color: #4f46e5;
+  color: #ff9505;
   cursor: pointer;
   transition: background 0.25s, color 0.25s;
 }
 .btn-header:hover    { background: #eef2ff; }
-.btn-header--primary { background: #4f46e5; color: #fff; }
-.btn-header--primary:hover { background: #4338ca; }
+.btn-header--primary { background: #262528; color: #fff; }
+.btn-header--primary:hover { background: #39383c; }
 
 /* --- Indicador de rol --- */
 .role-indicator {
   display: flex;
   align-items: center;
+  margin-right: 1rem;
 }
 
 .role-badge {
-  padding: 6px 12px;
-  font: 600 12px "DM Sans", sans-serif;
+  padding: 8px 16px;
+  font: 600 14px "DM Sans", sans-serif;
   border-radius: 20px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 700;
 }
 
 .role-badge.tutor {
   background: #dbeafe;
   color: #1e40af;
-  border: 1px solid #3b82f6;
 }
 
 .role-badge.student {
   background: #fef3c7;
   color: #92400e;
-  border: 1px solid #f59e0b;
+}
+
+.role-badge:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* --- Acciones de usuario --- */
 .user-actions {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 1rem;
 }
 
-/* --- Botón perfil --- */
-.perfil {
-  display: inline-flex;
+/* --- Botones de notificación y perfil --- */
+.notification-btn,
+.profile-btn {
+  display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  font: 600 15px "DM Sans", sans-serif;
-  color: #ff7a7a;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
   background: transparent;
-  border: 2px solid #ff7a7a;
-  border-radius: 25px;
+  color: #ff9505;
   cursor: pointer;
-  transition: background 0.3s, color 0.3s;
+  transition: all 0.3s ease;
 }
-.perfil:hover { background: #ff7a7a; color: #fff; }
+
+.notification-btn:hover,
+.profile-btn:hover {
+  background-color: rgba(255, 149, 5, 0.1);
+  color: #ff7a00;
+}
+
+.profile-btn {
+  background-color: #ff9505;
+  color: white;
+}
+
+.profile-btn:hover {
+  background-color: #ff7a00;
+  color: white;
+}
 
 /* --- Botón logout --- */
 .btn-logout {
   padding: 8px 16px;
   font: 600 14px "DM Sans", sans-serif;
-  color: #dc2626;
+  color: #262528;
   background: transparent;
-  border: 2px solid #dc2626;
+  border: 2px solid #262528;
   border-radius: 25px;
   cursor: pointer;
   transition: background 0.3s, color 0.3s;
 }
 .btn-logout:hover {
-  background: #dc2626;
+  background: #262528;
   color: #fff;
 }
 
@@ -196,8 +253,9 @@
 /* -------------- RESPONSIVE -------------- */
 @media (max-width: 950px) {
   .header      { flex-direction: column; padding: 15px 20px; }
-  .navbar      { flex-direction: column; margin-top: 10px; }
-  .navbar a    { font-size: 16px; margin: 6px 0 0 0; }
+  .navbar      { flex-direction: row; margin-top: 10px; gap: 1rem; }
+  .nav-item    { padding: 6px 12px; }
+  .nav-label   { font-size: 10px; }
   
   /* Estilos móviles para navbar de tutor */
   .navbar-tutor {
@@ -206,20 +264,156 @@
     border-radius: 15px;
   }
   
-  .navbar-tutor a {
-    font-size: 15px;
-    margin: 8px 0;
-    padding: 4px 8px;
-    border-radius: 8px;
-    text-align: center;
-  }
-  
-  .right-block { flex-direction: column; gap: 0.75rem; margin-top: 10px; }
+  .right-block { flex-direction: row; gap: 0.75rem; margin-top: 10px; justify-content: space-between; }
   .auth-buttons{ gap: 0.75rem; }
-  .user-actions{ flex-direction: column; gap: 0.5rem; }
+  .user-actions{ gap: 0.75rem; }
   .btn-header,
-  .role-btn,
-  .perfil,
   .btn-logout  { font-size: 13px; padding: 6px 14px; }
   .role-badge  { font-size: 11px; padding: 4px 8px; }
+  .notification-btn,
+  .profile-btn { width: 35px; height: 35px; }
+}
+
+/* Botón hamburguesa */
+.hamburger {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+  border-radius: 12px;
+  border: 2px solid #ff7a7a;
+  background: transparent;
+  color: #ff7a7a;
+  cursor: pointer;
+  transition: background .25s, color .25s, border-color .25s;
+}
+.hamburger:hover { background: #fff1f1; }
+
+/* ====== MÓVIL ====== */
+@media (max-width: 950px) {
+  /* layout base */
+  .header {
+    flex-direction: row;              /* sobreescribe column */
+    justify-content: space-between;   /* separa logo y botón */
+    align-items: center;
+    flex-wrap: nowrap;
+    padding: 8px 12px;
+  }
+  .hamburger { display: none; }
+  .logo { margin-right: auto; }
+  .navbar { display: none; } /* hide top nav on mobile */
+
+  /* Compactar logo */
+  .logoImg { height: 2.4rem; }
+
+  /* cuando está abierto el menú */
+  .header.is-open .navbar { display: none; }
+
+  /* Estética del panel móvil */
+  .header.is-open .navbar { display: none; }
+
+  .header.is-open .navbar {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .header.is-open .nav-item {
+    padding: 8px 16px;
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 12px;
+  }
+  
+  .header.is-open .nav-label {
+    font-size: 14px;
+  }
+
+  .header.is-open .right-block {
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+    margin-top: 10px;
+  }
+
+
+  /* limpio el subrayado animado para móvil (más sobrio) */
+  .navbar a::before { display: none; }
+
+  /* Mostrar bloque derecho compacto (perfil + rol) */
+  .right-block {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+  }
+  .user-actions { gap: 8px; }
+  .notification-btn,
+  .btn-logout { display: none; }
+  .role-badge  { font-size: 11px; padding: 4px 8px; }
+  .profile-btn { width: 34px; height: 34px; }
+}
+
+/* ====== BOTTOM NAV (SIEMPRE VISIBLE) ====== */
+.bottom-nav {
+  display: none; /* hidden on desktop */
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  background: #ffffff;
+  border-top: 1px solid #eee8e1;
+  align-items: center;
+  justify-content: space-around;
+  padding: 8px 6px;
+  z-index: 30;
+}
+
+.bottom-nav-tutor {
+  background: linear-gradient(180deg, rgba(255,255,255,0.98), #ffffff);
+}
+
+/* Variante estudiante (igual a tutor para consistencia visual) */
+.bottom-nav-student {
+  background: linear-gradient(180deg, rgba(255,255,255,0.98), #ffffff);
+}
+
+.bottom-nav-student {
+  background: linear-gradient(180deg, rgba(255,255,255,0.98), #ffffff);
+}
+
+.bottom-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  text-decoration: none;
+  color: #262528; /* inactivo: negro, como la barra superior */
+  padding: 6px 8px;
+  border-radius: 10px;
+  min-width: 64px;
+  transition: background-color .2s, color .2s;
+  font: 600 11px "DM Sans", sans-serif;
+}
+
+.bottom-nav-item:hover {
+  background-color: rgba(0, 0, 0, 0.04); /* hover sutil cuando inactivo */
+}
+
+.bottom-nav-item.active {
+  color: #ff7a00; /* activo: naranja como la barra superior */
+  background-color: rgba(255, 149, 5, 0.15);
+}
+
+.bottom-nav-item.active .bottom-nav-icon {
+  color: #ff7a00; /* asegurar color de ícono en activo */
+}
+
+.bottom-nav-icon { line-height: 1; }
+.bottom-nav-label { font-size: 11px; }
+
+/* Mostrar bottom nav en móvil */
+@media (max-width: 950px) {
+  .bottom-nav { display: flex; }
 }

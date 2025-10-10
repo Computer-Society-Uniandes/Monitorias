@@ -88,6 +88,16 @@ export class TutoringSessionService {
       });
 
       // Crear la sesión de tutoría con información del slot específico
+      // Usar la materia seleccionada por el estudiante si está disponible, sino usar la del slot
+      const sessionSubject = selectedSubject || slot.subject;
+      
+      console.log('🎯 Materia para la sesión:', {
+        selectedByStudent: selectedSubject,
+        fromSlot: slot.subject,
+        finalSubject: sessionSubject,
+        studentEmail: studentEmail
+      });
+      
       const sessionData = {
         tutorEmail: slot.tutorEmail,
         studentEmail: studentEmail,
@@ -152,7 +162,7 @@ export class TutoringSessionService {
         bookedAt: serverTimestamp(),
         slotStartTime: slot.startDateTime,
         slotEndTime: slot.endDateTime,
-        subject: slot.subject
+        subject: sessionSubject // Usar la misma materia que se usó para la sesión
       };
 
       await this.createSlotBooking(slotBookingData);

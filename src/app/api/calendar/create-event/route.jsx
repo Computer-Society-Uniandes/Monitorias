@@ -83,7 +83,7 @@ export async function POST(request) {
 
     // Guardar también en Firebase
     try {
-      const firebaseData = FirebaseAvailabilityService.googleEventToFirebaseFormat(
+      const firebaseData = await FirebaseAvailabilityService.googleEventToFirebaseFormat(
         createdEvent, 
         tutorId, 
         tutorEmail,

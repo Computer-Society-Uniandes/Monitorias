@@ -12,9 +12,16 @@ export default function TutorLayout({ children }) {
   const router = useRouter();
 
   useEffect(() => {
-    // Redirigir si no está logueado o no es tutor
+    // Redirigir si no está logueado o no es tutor en la base de datos
     if (!loading && (!user.isLoggedIn || !user.isTutor)) {
       router.push(routes.HOME);
+    }
+    // También verificar si el usuario está en modo estudiante
+    if (!loading && user.isLoggedIn && user.isTutor) {
+      const currentRole = localStorage.getItem("rol") || "student";
+      if (currentRole === "student") {
+        router.push(routes.HOME);
+      }
     }
   }, [user, loading, router]);
 
