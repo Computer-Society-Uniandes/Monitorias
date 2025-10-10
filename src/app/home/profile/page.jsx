@@ -50,12 +50,18 @@ const Profile = () => {
 
   // Cargar datos de perfil
   useEffect(() => {
+    // Don't run any client-only or user-dependent logic while auth is loading
     if (loading) return;
 
-    if (!user.isLoggedIn) {
-      router.push(routes.LANDING);
+    // user may be null during server prerender — guard access
+    if (!user || !user.isLoggedIn) {
+      // Only redirect on the client
+      if (typeof window !== 'undefined') {
+        router.push(routes.LANDING);
+      }
       return;
     }
+
     if (!user.email) return;
 
     const fetchUserData = async () => {
@@ -64,28 +70,28 @@ const Profile = () => {
         const userSnap = await getDoc(userDocRef);
         if (userSnap.exists()) {
           const data = userSnap.data();
-          setUserData(data);
+          setUserData(data || null);
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
 
+    fetchUserData();
 
-  //   const fetchUserData = async () => {
-  //     try {
-  //       // 1. Obtener doc del usuario
-  //       const userDocRef = doc(db, 'user', userEmail)
-  //       const userSnap = await getDoc(userDocRef)
-  //       if (userSnap.exists()) {
-  //         const data = userSnap.data()
-  //         setUserData(data)
-
+    // Only access localStorage on the client
     const saved = typeof window !== 'undefined' ? localStorage.getItem('rol') : null;
 
     if (user.isTutor && saved === 'tutor') {
       setActiveRole('tutor');
     } else {
       // Por defecto estudiante
-      localStorage.setItem('rol', 'student');
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('rol', 'student');
+      }
       setActiveRole('student');
     }
-  }, [user.isLoggedIn, user.isTutor]);
+  }, [loading, user, router]);
 
   const handleLogout = async () => {
     try {
@@ -157,9 +163,9 @@ const Profile = () => {
 
           
             {/* aqui se debe cambiar por los datos del usuario */}
-            <p className='text-info'><strong className='text-campos'>Nombre: </strong> {userData.name}</p>
-            <p className='text-info'><strong className='text-campos'>Teléfono: </strong>{userData.phone_number} </p>
-            <p className='text-info'><strong className='text-campos'>Correo: </strong>{user.email} </p>
+            <p className='text-info'><strong className='text-campos'>Nombre: </strong> {userData?.name || 'No definido'}</p>
+            <p className='text-info'><strong className='text-campos'>Teléfono: </strong>{userData?.phone_number || 'No definido'} </p>
+            <p className='text-info'><strong className='text-campos'>Correo: </strong>{user?.email || 'No definido'} </p>
             <p className='text-info'><strong className='text-campos'>Carrera:</strong> {majorName || 'No definida'}</p>
 
             <button
@@ -176,7 +182,6 @@ const Profile = () => {
             </button>
         </div>
         </div>
-      </main>
 
       {/* Modal */}
       <TutorInviteModal open={inviteOpen} onClose={() => setInviteOpen(false)} />
