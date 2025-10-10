@@ -1,204 +1,275 @@
 import { db } from '../../firebaseConfig';
-import { 
-  collection, 
-  getDocs, 
-  query, 
-  where, 
-  orderBy, 
-  limit 
+import {
+  collection,
+  getDocs,
+  getDoc,
+  query,
+  where,
+  doc,
 } from 'firebase/firestore';
 import { FirebaseAvailabilityService } from './FirebaseAvailabilityService';
+import pino from 'pino';
+
+const logger = pino({ name: 'TutorSearchService' });
 
 export class TutorSearchService {
-  
-  // Obtener todas las materias disponibles
+  // -------- Helpers --------
+
+  // Estandariza la forma del tutor que consumirá el Front (sin datos sensibles)
+  static sanitizeTutor(docOrObj, extra = {}) {
+    const isDoc = typeof docOrObj?.data === 'function';
+    const raw = isDoc ? docOrObj.data() : docOrObj;
+
+    return {
+      id: isDoc ? docOrObj.id : docOrObj.id,
+      name: raw?.name ?? '',
+      isTutor: !!raw?.isTutor,
+      rating:
+        typeof raw?.rating === 'number' ? raw.rating : null,
+      hourlyRate:
+        typeof raw?.hourlyRate === 'number'
+          ? raw.hourlyRate
+          : typeof raw?.hourly_rate === 'number'
+          ? raw.hourly_rate
+          : null,
+      bio: raw?.bio ?? '',
+      subjects: Array.isArray(raw?.subjects) ? raw.subjects : [],
+      profileImage: raw?.profileImage ?? null,
+      ...extra,
+    };
+  }
+
+  // Normaliza el subject ingresado a {code, name}
+  // code => p.ej. "FISI1018"; name => p.ej. "Física I"
+  static async normalizeSubject(input) {
+    if (!input) return { code: null, name: null };
+
+    const s = String(input).trim();
+    // ¿ya es código?
+    if (/^[A-Za-z]{4}\d{4}$/.test(s)) {
+      const code = s.toUpperCase();
+      // intentamos leer el nombre (opcional)
+      let name = null;
+      try {
+        const snap = await getDoc(doc(db, 'course', code));
+        if (snap.exists()) name = snap.data()?.name ?? null;
+      } catch (_) {}
+      return { code, name };
+    }
+
+    // si viene nombre, tratamos de mapear a código
+    const all = await getDocs(collection(db, 'course'));
+    let code = null;
+    all.forEach((d) => {
+      const n = (d.data()?.name || '').toLowerCase();
+      if (n === s.toLowerCase()) code = d.id;
+    });
+    return { code, name: s };
+  }
+
+  // -------- API pública --------
+
+  // Materias disponibles (colección "course")
   static async getMaterias() {
     try {
+      logger.info('Obteniendo todas las materias');
       const snapshot = await getDocs(collection(db, 'course'));
-      return snapshot.docs.map(docSnap => ({
+      const items = snapshot.docs.map((docSnap) => ({
         codigo: docSnap.id,
         nombre: docSnap.data().name,
+        base_price: docSnap.data().base_price || null,
       }));
+      return items.sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
     } catch (error) {
-      console.error('Error obteniendo materias:', error);
+      logger.error({ error }, 'Error obteniendo materias');
       throw new Error(`Error obteniendo materias: ${error.message}`);
     }
   }
 
-  // Obtener todos los tutores (usuarios con isTutor: true)
+  // Todos los tutores (sanitizados)
   static async getAllTutors() {
     try {
-      const q = query(
-        collection(db, 'user'),
-        where('isTutor', '==', true)
-      );
-      
-      const querySnapshot = await getDocs(q);
+      const qRef = query(collection(db, 'user'), where('isTutor', '==', true));
+      const qs = await getDocs(qRef);
       const tutors = [];
-
-      querySnapshot.forEach((doc) => {
-        tutors.push({
-          id: doc.id,
-          email: doc.id, // El email es el ID del documento
-          ...doc.data()
-        });
-      });
-
+      qs.forEach((d) => tutors.push(this.sanitizeTutor(d)));
+      // orden por rating desc
+      tutors.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
       return tutors;
     } catch (error) {
-      console.error('Error obteniendo tutores:', error);
+      logger.error({ error }, 'Error obteniendo tutores');
       throw new Error(`Error obteniendo tutores: ${error.message}`);
     }
   }
 
-  // Obtener tutores que enseñan una materia específica
-  static async getTutorsBySubject(subjectName) {
+  // Tutores que enseñan una materia específica (por código o nombre)
+  static async getTutorsBySubject(subjectInput) {
     try {
-      console.log('Buscando tutores para la materia:', subjectName);
-      
-      // Método 1: Buscar tutores que tienen esa materia en su array de subjects
-      const q = query(
-        collection(db, 'user'),
-        where('isTutor', '==', true),
-        where('subjects', 'array-contains', subjectName)
-      );
+      console.log('Buscando tutores para:', subjectInput);
+      const subj = await this.normalizeSubject(subjectInput);
 
-      const querySnapshot = await getDocs(q);
-      const tutors = [];
+      const foundMap = new Map(); // id -> tutor
 
-      querySnapshot.forEach((doc) => {
-        tutors.push({
-          id: doc.id,
-          email: doc.id,
-          ...doc.data()
-        });
-      });
-
-      console.log(`Encontrados ${tutors.length} tutores que enseñan ${subjectName}`);
-
-      // Si no se encuentran tutores con el método exacto, intentar búsqueda más flexible
-      if (tutors.length === 0) {
-        console.log('No se encontraron tutores con coincidencia exacta, buscando con disponibilidad...');
-        
-        // Buscar tutores que tienen disponibilidad para esa materia
-        const availabilities = await FirebaseAvailabilityService.getAvailabilitiesBySubject(subjectName);
-        const tutorIds = [...new Set(availabilities.map(avail => avail.tutorId || avail.tutorEmail))];
-        
-        console.log(`Encontrados ${tutorIds.length} tutores con disponibilidad en ${subjectName}`);
-
-        if (tutorIds.length === 0) {
-          return [];
-        }
-
-        // Obtener información de esos tutores
-        const allTutorsQuery = query(
+      // 1) Búsqueda por código (array-contains)
+      if (subj.code) {
+        const qCode = query(
           collection(db, 'user'),
-          where('isTutor', '==', true)
+          where('isTutor', '==', true),
+          where('subjects', 'array-contains', subj.code)
         );
-
-        const allTutorsSnapshot = await getDocs(allTutorsQuery);
-        
-        allTutorsSnapshot.forEach((doc) => {
-          if (tutorIds.includes(doc.id) || tutorIds.includes(doc.data().mail)) {
-            // Filtrar las disponibilidades de este tutor para esta materia
-            const tutorAvailabilities = availabilities.filter(avail => 
-              avail.tutorId === doc.id || 
-              avail.tutorEmail === doc.id || 
-              avail.tutorId === doc.data().mail || 
-              avail.tutorEmail === doc.data().mail
-            );
-
-            tutors.push({
-              id: doc.id,
-              email: doc.id,
-              ...doc.data(),
-              availabilities: tutorAvailabilities
-            });
-          }
+        const qsCode = await getDocs(qCode);
+        qsCode.forEach((d) => {
+          const t = this.sanitizeTutor(d);
+          foundMap.set(t.id, t);
         });
+      }
+
+      // 2) Búsqueda por nombre (por si almacenaron nombres en subjects)
+      if (subj.name) {
+        const qName = query(
+          collection(db, 'user'),
+          where('isTutor', '==', true),
+          where('subjects', 'array-contains', subj.name)
+        );
+        const qsName = await getDocs(qName);
+        qsName.forEach((d) => {
+          const t = this.sanitizeTutor(d);
+          foundMap.set(t.id, t);
+        });
+      }
+
+      let tutors = Array.from(foundMap.values());
+
+      // 3) Si no hay, fallback usando disponibilidades
+      if (tutors.length === 0) {
+        console.log('No hubo coincidencia directa, probando disponibilidad…');
+        const avails = await FirebaseAvailabilityService.getAvailabilitiesBySubject(
+          subj.code || subj.name
+        );
+        const ids = [...new Set(avails.map((a) => a.tutorId || a.tutorEmail))];
+
+        if (ids.length > 0) {
+          const qAll = query(collection(db, 'user'), where('isTutor', '==', true));
+          const qsAll = await getDocs(qAll);
+          qsAll.forEach((d) => {
+            if (ids.includes(d.id) || ids.includes(d.data()?.mail)) {
+              const t = this.sanitizeTutor(d, {
+                availabilities: avails.filter(
+                  (a) =>
+                    a.tutorId === d.id ||
+                    a.tutorEmail === d.id ||
+                    a.tutorId === d.data()?.mail ||
+                    a.tutorEmail === d.data()?.mail
+                ),
+              });
+              foundMap.set(t.id, t);
+            }
+          });
+          tutors = Array.from(foundMap.values());
+        }
       } else {
-        // Si encontramos tutores por el método exacto, obtener sus disponibilidades
-        for (const tutor of tutors) {
+        // 4) Añadimos disponibilidades (filtradas por la materia si viene)
+        for (const t of tutors) {
           try {
-            const tutorAvailabilities = await FirebaseAvailabilityService.getAvailabilitiesByTutor(tutor.id, 20);
-            tutor.availabilities = tutorAvailabilities.filter(avail => 
-              !subjectName || avail.subject === subjectName || !avail.subject
+            const list = await FirebaseAvailabilityService.getAvailabilitiesByTutor(
+              t.id,
+              20
             );
-          } catch (error) {
-            console.warn(`Error obteniendo disponibilidades para tutor ${tutor.id}:`, error);
-            tutor.availabilities = [];
+            t.availabilities = list.filter(
+              (a) =>
+                !subj.code ||
+                a.subject === subj.code ||
+                a.subject === subj.name ||
+                !a.subject
+            );
+          } catch (e) {
+            console.warn('No se pudieron leer disponibilidades de', t.id, e);
+            t.availabilities = [];
           }
         }
       }
 
-      console.log(`Retornando ${tutors.length} tutores para ${subjectName}`);
+      // Orden: rating desc, luego hourlyRate asc
+      tutors.sort((a, b) => {
+        const r = (b.rating ?? 0) - (a.rating ?? 0);
+        if (r !== 0) return r;
+        const ha = a.hourlyRate ?? Number.MAX_SAFE_INTEGER;
+        const hb = b.hourlyRate ?? Number.MAX_SAFE_INTEGER;
+        return ha - hb;
+      });
+
+      console.log(`Retornando ${tutors.length} tutores para`, subjectInput);
       return tutors;
     } catch (error) {
       console.error('Error obteniendo tutores por materia:', error);
-      throw new Error(`Error obteniendo tutores para ${subjectName}: ${error.message}`);
+      throw new Error(
+        `Error obteniendo tutores para ${subjectInput}: ${error.message}`
+      );
     }
   }
 
-  // Obtener disponibilidad completa de un tutor específico
+  // Disponibilidad completa de un tutor
   static async getTutorAvailability(tutorId, limitCount = 20) {
     try {
-      return await FirebaseAvailabilityService.getAvailabilitiesByTutor(tutorId, limitCount);
+      return await FirebaseAvailabilityService.getAvailabilitiesByTutor(
+        tutorId,
+        limitCount
+      );
     } catch (error) {
-      console.error('Error obteniendo disponibilidad del tutor:', error);
+      logger.error({ error, tutorId }, 'Error obteniendo disponibilidad del tutor');
       throw new Error(`Error obteniendo disponibilidad: ${error.message}`);
     }
   }
 
-  // Buscar tutores por nombre o email
+  // Búsqueda libre por nombre (sanitizada)
   static async searchTutors(searchTerm) {
     try {
-      const allTutors = await this.getAllTutors();
-      
-      if (!searchTerm || searchTerm.trim() === '') {
-        return allTutors;
-      }
+      const all = await this.getAllTutors();
+      if (!searchTerm || !searchTerm.trim()) return all;
 
-      const term = searchTerm.toLowerCase().trim();
-      
-      return allTutors.filter(tutor => 
-        tutor.name?.toLowerCase().includes(term) ||
-        tutor.email?.toLowerCase().includes(term) ||
-        tutor.mail?.toLowerCase().includes(term)
+      const q = searchTerm.toLowerCase().trim();
+      return all.filter(
+        (t) =>
+          t.name.toLowerCase().includes(q) ||
+          (Array.isArray(t.subjects) &&
+            t.subjects.join(' ').toLowerCase().includes(q))
       );
+
+      logger.info({ searchTerm, count: filtered.length }, 'Tutores filtrados exitosamente');
+      return filtered;
     } catch (error) {
-      console.error('Error buscando tutores:', error);
+      logger.error({ error, searchTerm }, 'Error buscando tutores');
       throw new Error(`Error en búsqueda: ${error.message}`);
     }
   }
 
-  // Obtener estadísticas de un tutor (número de tutorías, materias, etc.)
+  // Stats simples basadas en disponibilidades
   static async getTutorStats(tutorId) {
     try {
-      const availabilities = await this.getTutorAvailability(tutorId, 100);
-      
-      // Extraer materias únicas
-      const subjects = [...new Set(availabilities.map(avail => avail.subject).filter(Boolean))];
-      
-      // Contar próximas sesiones disponibles
+      const avs = await this.getTutorAvailability(tutorId, 100);
       const now = new Date();
-      const upcomingSessions = availabilities.filter(avail => 
-        avail.startDateTime && new Date(avail.startDateTime) > now
+      const subjects = [...new Set(avs.map((a) => a.subject).filter(Boolean))];
+      const upcoming = avs.filter(
+        (a) => a.startDateTime && new Date(a.startDateTime) > now
       );
 
       return {
-        totalAvailabilities: availabilities.length,
-        upcomingSessions: upcomingSessions.length,
-        subjects: subjects,
-        subjectCount: subjects.length
+        totalAvailabilities: avs.length,
+        upcomingSessions: upcoming.length,
+        subjects,
+        subjectCount: subjects.length,
       };
+
+      logger.info({ tutorId, stats }, 'Estadísticas obtenidas exitosamente');
+      return stats;
     } catch (error) {
-      console.error('Error obteniendo estadísticas del tutor:', error);
+      logger.error({ error, tutorId }, 'Error obteniendo estadísticas del tutor');
       return {
         totalAvailabilities: 0,
         upcomingSessions: 0,
         subjects: [],
-        subjectCount: 0
+        subjectCount: 0,
       };
     }
   }
-} 
+}
