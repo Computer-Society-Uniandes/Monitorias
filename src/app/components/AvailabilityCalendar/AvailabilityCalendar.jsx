@@ -104,12 +104,30 @@ const AvailabilityCalendar = ({
       const slotsWithBookings = SlotService.applySavedBookingsToSlots(generatedSlots, allBookings);
       const availableSlots = SlotService.getAvailableSlots(slotsWithBookings);
 
-      const selectedDateStr = date.toISOString().split('T')[0];
+      // Usar componentes de fecha local para evitar problemas con UTC
+      const selectedYear = date.getFullYear();
+      const selectedMonth = String(date.getMonth() + 1).padStart(2, '0');
+      const selectedDay = String(date.getDate()).padStart(2, '0');
+      const selectedDateStr = `${selectedYear}-${selectedMonth}-${selectedDay}`;
+
+      console.log('🗓️ Fecha seleccionada (local):', selectedDateStr);
+
       const daySlots = availableSlots.filter(slot => {
-        const slotDateStr = new Date(slot.startDateTime).toISOString().split('T')[0];
-        return slotDateStr === selectedDateStr;
+        const slotDate = new Date(slot.startDateTime);
+        const slotYear = slotDate.getFullYear();
+        const slotMonth = String(slotDate.getMonth() + 1).padStart(2, '0');
+        const slotDay = String(slotDate.getDate()).padStart(2, '0');
+        const slotDateStr = `${slotYear}-${slotMonth}-${slotDay}`;
+        
+        const matches = slotDateStr === selectedDateStr;
+        if (matches) {
+          console.log('✅ Slot coincide:', slotDateStr, slot.startDateTime);
+        }
+        
+        return matches;
       });
 
+      console.log(`📊 Slots encontrados para ${selectedDateStr}:`, daySlots.length);
       setSelectedDaySlots(daySlots);
     } catch (error) {
       console.error('Error generando slots:', error);
@@ -173,38 +191,65 @@ const AvailabilityCalendar = ({
       console.log('Email del estudiante:', studentEmail);
       console.log('Archivo de comprobante:', proofFile);
 
-      // 1. Subir comprobante de pago
-      console.log('📤 Subiendo comprobante de pago...');
-      const paymentProof = await PaymentService.uploadPaymentProof(proofFile);
-      console.log('✅ Comprobante subido:', paymentProof);
-
-      // 2. Crear la sesión de tutoría
+      // 1. Crear la sesión de tutoría primero (sin el comprobante aún)
       const sessionData = {
-        tutorId: tutorId,
         tutorEmail: selectedSlotForBooking.tutorEmail || tutorId,
-        tutorName: tutorName || selectedSlotForBooking.tutorName || 'Tutor',
         studentEmail: studentEmail,
         studentName: user.displayName || user.email,
         subject: subject || selectedSlotForBooking.subject || 'Tutoría',
         scheduledDateTime: selectedSlotForBooking.startDateTime,
         endDateTime: selectedSlotForBooking.endDateTime,
         location: selectedSlotForBooking.location || 'Virtual',
-        description: selectedSlotForBooking.description || '',
-        status: 'pending',
-        paymentProofUrl: paymentProof.url,
-        paymentProofPath: paymentProof.path,
+        notes: selectedSlotForBooking.description || '',
         price: selectedSlotForBooking.price || 25000,
-        availabilityId: selectedSlotForBooking.availabilityId || selectedSlotForBooking.id,
-        createdAt: new Date().toISOString(),
+        parentAvailabilityId: selectedSlotForBooking.parentAvailabilityId || selectedSlotForBooking.id,
+        slotIndex: selectedSlotForBooking.slotIndex || 0,
+        slotId: selectedSlotForBooking.id,
+        googleEventId: selectedSlotForBooking.googleEventId,
+        status: 'pending',
+        tutorApprovalStatus: 'pending',
+        paymentStatus: 'pending',
+        requestedAt: new Date()
       };
 
       console.log('📋 Datos de la sesión:', sessionData);
       console.log('💾 Creando sesión en Firestore...');
       
-      const createdSession = await TutoringSessionService.createSession(sessionData);
+      // Usar el método correcto que ya existe
+      const createdSession = await TutoringSessionService.bookSpecificSlot(
+        selectedSlotForBooking,
+        studentEmail,
+        user.displayName || user.email,
+        selectedSlotForBooking.description || '',
+        subject || selectedSlotForBooking.subject
+      );
+      
       console.log('✅ Sesión creada exitosamente:', createdSession);
 
-      // 3. Cerrar modal y mostrar mensaje de éxito
+      // 2. Subir comprobante de pago usando el sessionId
+      if (proofFile && createdSession.id) {
+        console.log('📤 Subiendo comprobante de pago...');
+        const paymentProofResult = await PaymentService.uploadPaymentProofFile(createdSession.id, proofFile);
+        
+        if (paymentProofResult.success) {
+          console.log('✅ Comprobante subido:', paymentProofResult);
+          
+          // 3. Actualizar la sesión con la URL del comprobante
+          await TutoringSessionService.updateTutoringSession(createdSession.id, {
+            paymentProofUrl: paymentProofResult.url,
+            paymentProofPath: paymentProofResult.path,
+            paymentProofFileName: paymentProofResult.fileName,
+            paymentStatus: 'en_verificación'
+          });
+          
+          console.log('✅ Sesión actualizada con comprobante de pago');
+        } else {
+          console.error('⚠️ Error subiendo comprobante:', paymentProofResult.error);
+          // No fallar la reserva si el comprobante no se sube
+        }
+      }
+
+      // 4. Cerrar modal y mostrar mensaje de éxito
       setShowConfirmationModal(false);
       setSelectedSlotForBooking(null);
       
@@ -218,7 +263,7 @@ Tu solicitud de tutoría ha sido enviada al tutor.
       
 El tutor revisará tu solicitud y recibirás el link de Google Meet una vez aprobada.`);
 
-      // 4. Recargar la disponibilidad
+      // 5. Recargar la disponibilidad
       await loadAvailabilityData();
       
     } catch (error) {
@@ -240,14 +285,32 @@ El tutor revisará tu solicitud y recibirás el link de Google Meet una vez apro
     if (view !== 'month') return '';
 
     const baseClass = 'calendar-tile';
-    const selectedDateStr = date.toISOString().split('T')[0];
-    const tileDateStr = tileDate instanceof Date && !isNaN(tileDate) ? tileDate.toISOString().split('T')[0] : null;
+    
+    // Usar componentes de fecha local para evitar problemas con UTC
+    const selectedYear = date.getFullYear();
+    const selectedMonth = String(date.getMonth() + 1).padStart(2, '0');
+    const selectedDay = String(date.getDate()).padStart(2, '0');
+    const selectedDateStr = `${selectedYear}-${selectedMonth}-${selectedDay}`;
+    
+    let tileDateStr = null;
+    if (tileDate instanceof Date && !isNaN(tileDate)) {
+      const tileYear = tileDate.getFullYear();
+      const tileMonth = String(tileDate.getMonth() + 1).padStart(2, '0');
+      const tileDay = String(tileDate.getDate()).padStart(2, '0');
+      tileDateStr = `${tileYear}-${tileMonth}-${tileDay}`;
+    }
 
     const isSelected = tileDateStr && selectedDateStr === tileDateStr;
     const isPast = tileDate < new Date().setHours(0, 0, 0, 0);
     const hasAvailability = Array.isArray(availabilityData) && availabilityData.some(slot => {
       const slotDate = slot.startDateTime ? new Date(slot.startDateTime) : null;
-      const slotDateStr = slotDate instanceof Date && !isNaN(slotDate) ? slotDate.toISOString().split('T')[0] : null;
+      if (!slotDate || !(slotDate instanceof Date) || isNaN(slotDate)) return false;
+      
+      const slotYear = slotDate.getFullYear();
+      const slotMonth = String(slotDate.getMonth() + 1).padStart(2, '0');
+      const slotDay = String(slotDate.getDate()).padStart(2, '0');
+      const slotDateStr = `${slotYear}-${slotMonth}-${slotDay}`;
+      
       return slotDateStr === tileDateStr;
     });
 
