@@ -170,11 +170,18 @@ export class SlotService {
     
     slots.forEach(slot => {
       const date = new Date(slot.startDateTime);
-      const dateKey = date.toISOString().split('T')[0]; // YYYY-MM-DD
-      
+      // Build a local date-key (YYYY-MM-DD) using local date components to avoid UTC shifts
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      const dateKey = `${y}-${m}-${d}`;
+
+      // Store a normalized local Date at midnight for the group's header
+      const localMidnight = new Date(y, date.getMonth(), date.getDate());
+
       if (!grouped[dateKey]) {
         grouped[dateKey] = {
-          date: date,
+          date: localMidnight,
           slots: []
         };
       }

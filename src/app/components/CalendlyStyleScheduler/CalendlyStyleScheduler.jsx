@@ -65,6 +65,21 @@ export default function CalendlyStyleScheduler({ tutor, availabilities, materia,
   const groupedSlots = SlotService.groupSlotsByDate(hourlySlots);
   const sortedDates = Object.keys(groupedSlots).sort();
 
+  // Debug: log grouping info whenever hourlySlots changes
+  React.useEffect(() => {
+    try {
+      console.log('🧭 Debug groupedSlots keys:', Object.keys(groupedSlots));
+      console.log('🧭 Debug sortedDates:', sortedDates);
+      // Print each group's date header and first slot for quick inspection
+      Object.keys(groupedSlots).forEach(key => {
+        const g = groupedSlots[key];
+        console.log(`Group ${key} -> header date:`, g.date, 'slots:', g.slots.length, g.slots.slice(0,2));
+      });
+    } catch (e) {
+      console.warn('Error logging groupedSlots debug info', e);
+    }
+  }, [hourlySlots]);
+
   const formatDate = (date) => {
     const options = { 
       weekday: 'long', 
