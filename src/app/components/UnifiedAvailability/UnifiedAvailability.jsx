@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import { Calendar as CalendarIcon, Plus, Edit, Bell, ArrowRight, Clock, RefreshCw } from "lucide-react";
@@ -181,7 +182,7 @@ export default function UnifiedAvailability() {
       setSyncing(true);
       
       // Obtener el tutorId del usuario (puedes ajustar esto según tu estructura)
-      const tutorId = user.uid || user.email; // Usar UID o email como ID
+      const tutorId = user.email; // Usar UID o email como ID
       
       const response = await fetch('/api/availability/sync', {
         method: 'POST',
@@ -492,8 +493,8 @@ export default function UnifiedAvailability() {
         </div>
       )}
 
-      {/* Session Details Modal */}
-      {isModalOpen && selectedSession && (
+      {/* Session Details Modal renderizado con Portal */}
+      {typeof window !== 'undefined' && isModalOpen && selectedSession && createPortal(
         <TutoringDetailsModal
           session={selectedSession}
           isOpen={isModalOpen}
@@ -502,7 +503,8 @@ export default function UnifiedAvailability() {
             setSelectedSession(null);
           }}
           onSessionUpdate={loadData}
-        />
+        />,
+        document.body
       )}
     </div>
   );

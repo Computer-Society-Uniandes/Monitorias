@@ -23,13 +23,15 @@ function BuscarTutoresContent() {
     const debouncedSearch = useDebounce(searchTerm, 300);
     const [results, setResults] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [searchType, setSearchType] = useState('tutors'); // 'tutors' or 'subjects'
+    // Por defecto mostrar materias en la búsqueda
+    const [searchType, setSearchType] = useState('subjects'); // 'tutors' or 'subjects'
     const [favoriteTutors, setFavoriteTutors] = useState([]);
     const [favoriteCourses, setFavoriteCourses] = useState([]);
     const [selectedSubject, setSelectedSubject] = useState(null);
     const [tutorsForSubject, setTutorsForSubject] = useState([]);
     const [loadingTutors, setLoadingTutors] = useState(false);
-    const [activeTab, setActiveTab] = useState('ambos'); // 'tutores', 'materias', 'ambos'
+    // Por defecto la pestaña activa será 'materias'
+    const [activeTab, setActiveTab] = useState('materias'); // 'tutores', 'materias', 'ambos'
     const currentSearchParams = searchParams.toString();
 
     // Cargar favoritos
@@ -159,8 +161,12 @@ function BuscarTutoresContent() {
     };
 
     const handleToggleFavoriteCourse = async (courseCode) => {
-        if (!userEmail) return;
+        if (!userEmail) {
+            console.warn('Usuario no autenticado, no se puede modificar favoritos.');
+            return;
+        }
         try {
+            console.log('Toggling favorite course:', courseCode);
             await FavoritesService.toggleFavoriteCourse(userEmail, courseCode);
             await loadFavorites();
         } catch (error) {
@@ -243,6 +249,7 @@ function BuscarTutoresContent() {
                             placeholder="Buscar tutores o materias"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
+                            onFocus={() => setActiveTab('materias')}
                             className="pl-12 py-6 text-base bg-[#FEF9F6] border-0 rounded-lg focus:ring-2 focus:ring-[#FF8C00]"
                         />
                     </div>
