@@ -55,8 +55,9 @@ export async function GET(request) {
     // Mapear eventos de Google Calendar al formato esperado por la aplicación
     const availabilitySlots = events.map(event => {
       const isAllDay = !!event.start.date;
-      const start = isAllDay ? new Date(event.start.date) : new Date(event.start.dateTime);
-      const end = isAllDay ? new Date(event.end.date) : new Date(event.end.dateTime);
+      // Parse dates from Google Calendar: if it's a date-only (all-day) use local date parsing
+      const start = isAllDay ? parseGoogleDate(event.start.date) : new Date(event.start.dateTime);
+      const end = isAllDay ? parseGoogleDate(event.end.date) : new Date(event.end.dateTime);
       const dayOfWeek = getDayOfWeek(start);
 
       return {
@@ -74,6 +75,14 @@ export async function GET(request) {
         googleEventId: event.id
       };
     });
+
+// Parse Google 'date' (YYYY-MM-DD) as a local Date (avoid Date("YYYY-MM-DD") which is treated as UTC)
+function parseGoogleDate(dateStr) {
+  if (!dateStr) return new Date(dateStr);
+  const parts = dateStr.split('-').map(Number);
+  // year, monthIndex (0-based), day
+  return new Date(parts[0], parts[1] - 1, parts[2]);
+}
 
     // Como todos los eventos vienen del calendario "Disponibilidad", 
     // no necesitamos filtrar - todos son válidos

@@ -52,11 +52,12 @@ const Profile = () => {
   useEffect(() => {
     if (loading) return;
 
-    if (!user.isLoggedIn) {
+    if (!user?.isLoggedIn) {
       router.push(routes.LANDING);
       return;
     }
-    if (!user.email) return;
+
+    if (!user?.email) return;
 
     const fetchUserData = async () => {
       try {
@@ -65,27 +66,25 @@ const Profile = () => {
         if (userSnap.exists()) {
           const data = userSnap.data();
           setUserData(data);
+          // try to set major name if present
+          setMajorName(data.career || data.major || '');
+        }
+      } catch (err) {
+        console.error('Error fetching user data:', err);
+      }
+    };
 
-
-  //   const fetchUserData = async () => {
-  //     try {
-  //       // 1. Obtener doc del usuario
-  //       const userDocRef = doc(db, 'user', userEmail)
-  //       const userSnap = await getDoc(userDocRef)
-  //       if (userSnap.exists()) {
-  //         const data = userSnap.data()
-  //         setUserData(data)
+    fetchUserData();
 
     const saved = typeof window !== 'undefined' ? localStorage.getItem('rol') : null;
-
     if (user.isTutor && saved === 'tutor') {
       setActiveRole('tutor');
-    } else {
+    } else if (!saved) {
       // Por defecto estudiante
       localStorage.setItem('rol', 'student');
       setActiveRole('student');
     }
-  }, [user.isLoggedIn, user.isTutor]);
+  }, [user?.isLoggedIn, user?.isTutor, loading]);
 
   const handleLogout = async () => {
     try {
@@ -176,7 +175,6 @@ const Profile = () => {
             </button>
         </div>
         </div>
-      </main>
 
       {/* Modal */}
       <TutorInviteModal open={inviteOpen} onClose={() => setInviteOpen(false)} />
