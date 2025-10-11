@@ -1,48 +1,23 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { google } from 'googleapis';
-
-const oauth2Client = new google.auth.OAuth2(
-  process.env.GOOGLE_CLIENT_ID,
-  process.env.GOOGLE_CLIENT_SECRET,
-  process.env.GOOGLE_REDIRECT_URI
-);
+import { refreshAccessTokenFromCookies } from '../../../services/CalendarAuthService';
 
 export async function POST() {
   try {
-    const cookieStore = await cookies();
-    const refreshToken = cookieStore.get('calendar_refresh_token');
+    const result = await refreshAccessTokenFromCookies();
 
-    if (!refreshToken) {
+    if (!result.success) {
       return NextResponse.json({ 
-        error: 'No refresh token found. Please reconnect your Google Calendar.',
-        needsReconnection: true
+        error: result.error || 'No refresh token found. Please reconnect your Google Calendar.',
+        needsReconnection: result.needsReconnection || true
       }, { status: 401 });
     }
 
-    console.log('Attempting to refresh Google Calendar token...');
+    const credentials = result.credentials;
 
-    // Set the refresh token
-    oauth2Client.setCredentials({
-      refresh_token: refreshToken.value
-    });
+    // Build response and set cookies similar to previous implementation
+    const response = NextResponse.json({ success: true, message: 'Token refreshed successfully' });
 
-    // Refresh the access token
-    const { credentials } = await oauth2Client.refreshAccessToken();
-    
-    if (!credentials.access_token) {
-      throw new Error('No access token received from refresh');
-    }
-
-    console.log('Token refreshed successfully');
-
-    // Create response
-    const response = NextResponse.json({
-      success: true,
-      message: 'Token refreshed successfully'
-    });
-
-    // Update the access token cookie
     const cookieOptions = {
       Path: '/',
       HttpOnly: true,
@@ -58,13 +33,8 @@ export async function POST() {
         .join('; ')}`
     );
 
-    // If we got a new refresh token, update it too
     if (credentials.refresh_token) {
-      const refreshCookieOptions = {
-        ...cookieOptions,
-        MaxAge: 30 * 24 * 3600 // 30 days
-      };
-      
+      const refreshCookieOptions = { ...cookieOptions, MaxAge: 30 * 24 * 3600 };
       response.headers.append(
         'Set-Cookie',
         `calendar_refresh_token=${credentials.refresh_token}; ${Object.entries(refreshCookieOptions)
@@ -74,22 +44,8 @@ export async function POST() {
     }
 
     return response;
-
   } catch (error) {
-    console.error('Error refreshing token:', error);
-    
-    // If refresh fails, user needs to reconnect
-    if (error.message.includes('invalid_grant') || error.message.includes('Token has been expired')) {
-      return NextResponse.json({ 
-        error: 'Refresh token expired. Please reconnect your Google Calendar.',
-        needsReconnection: true
-      }, { status: 401 });
-    }
-
-    return NextResponse.json({ 
-      error: 'Failed to refresh token',
-      details: error.message,
-      needsReconnection: true
-    }, { status: 500 });
+    console.error('Error refreshing token (route):', error);
+    return NextResponse.json({ error: 'Failed to refresh token', details: error.message, needsReconnection: true }, { status: 500 });
   }
-} 
+}

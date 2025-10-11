@@ -1,35 +1,12 @@
 import { google } from 'googleapis';
-import crypto from 'crypto';
+import { refreshAccessTokenFromCookies } from './CalendarAuthService';
+import { cookies } from 'next/headers';
 
 const SCOPES = [
   'https://www.googleapis.com/auth/calendar',
   'https://www.googleapis.com/auth/calendar.events',
   'https://www.googleapis.com/auth/calendar.readonly'
 ];
-
-// Función para generar state
-const generateState = () => {
-  return crypto.randomBytes(16).toString('hex');
-};
-
-// Función para generar code verifier
-const generateCodeVerifier = () => {
-  return crypto.randomBytes(32)
-    .toString('base64')
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=/g, '');
-};
-
-// Función para generar code challenge
-const generateCodeChallenge = (verifier) => {
-  return crypto.createHash('sha256')
-    .update(verifier)
-    .digest('base64')
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=/g, '');
-};
 
 const oauth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID,
@@ -64,38 +41,47 @@ export const getTokens = async (code) => {
 // Función auxiliar para manejar refresh de tokens automáticamente
 const handleTokenRefresh = async (accessToken) => {
   try {
-    // Intentar usar el token actual primero
-    oauth2Client.setCredentials({ access_token: accessToken });
+    // Intentar usar el token actual primero y adjuntar refresh_token si está en cookies
+    const cookieStore = await cookies();
+    const refreshToken = cookieStore.get('calendar_refresh_token')?.value;
+
+    const creds = { access_token: accessToken };
+    if (refreshToken) creds.refresh_token = refreshToken;
+
+    oauth2Client.setCredentials(creds);
     return { success: true, refreshed: false };
   } catch (error) {
     console.log('Token may be expired, attempting refresh...');
     
     try {
-      // Intentar refresh del token llamando al endpoint de refresh
-      const response = await fetch('/api/calendar/refresh-token', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-      });
-      
-      if (response.ok) {
-        console.log('Token refreshed successfully');
+      // Intentar refresh del token server-side usando cookies (sin fetch HTTP)
+      const refreshResult = await refreshAccessTokenFromCookies();
+
+      if (refreshResult.success) {
+        console.log('Token refreshed successfully (server-side)');
+        // Si el helper devolvió credenciales, aplícalas al oauth2Client
+        if (refreshResult.credentials) {
+          oauth2Client.setCredentials(refreshResult.credentials);
+        } else if (refreshResult.accessToken) {
+          // Asegurar que el refresh_token también esté presente si está en cookies
+          const cookieStore2 = await cookies();
+          const refreshToken2 = cookieStore2.get('calendar_refresh_token')?.value;
+          const newCreds = { access_token: refreshResult.accessToken };
+          if (refreshToken2) newCreds.refresh_token = refreshToken2;
+          oauth2Client.setCredentials(newCreds);
+        }
         return { success: true, refreshed: true };
       } else {
-        const errorData = await response.json();
-        console.error('Token refresh failed:', errorData);
-        return { 
-          success: false, 
-          error: errorData.error,
-          needsReconnection: errorData.needsReconnection 
+        console.error('Token refresh failed:', refreshResult.error);
+        return {
+          success: false,
+          error: refreshResult.error,
+          needsReconnection: refreshResult.needsReconnection
         };
       }
     } catch (refreshError) {
       console.error('Error during token refresh:', refreshError);
-      return { 
-        success: false, 
-        error: 'Failed to refresh token',
-        needsReconnection: true 
-      };
+      return { success: false, error: 'Failed to refresh token', needsReconnection: true };
     }
   }
 };
@@ -119,18 +105,13 @@ const executeWithRetry = async (operation, accessToken, operationName = 'Google 
       console.log(`${operationName} failed with auth error, attempting token refresh...`);
       
       try {
-        const refreshResponse = await fetch('/api/calendar/refresh-token', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' }
-        });
-        
-        if (refreshResponse.ok) {
+        const refreshResult = await refreshAccessTokenFromCookies();
+
+        if (refreshResult.success) {
           console.log(`Token refreshed, retrying ${operationName}...`);
-          // Retry la operación después del refresh exitoso
           return await operation();
         } else {
-          const errorData = await refreshResponse.json();
-          throw new Error(`Token refresh failed: ${errorData.error}. Please reconnect your Google Calendar.`);
+          throw new Error(`Token refresh failed: ${refreshResult.error}. Please reconnect your Google Calendar.`);
         }
       } catch (refreshError) {
         console.error('Token refresh attempt failed:', refreshError);
