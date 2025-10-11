@@ -4,6 +4,8 @@ import React, { useState, useEffect } from "react";
 import { TutoringSessionService } from "../../services/TutoringSessionService";
 import { SlotService } from "../../services/SlotService";
 import { useAuth } from "../../context/SecureAuthContext";
+import { PaymentService } from "../../services/PaymentService";
+import SessionConfirmationModal from "../SessionConfirmationModal/SessionConfirmationModal";
 import "./CalendlyStyleScheduler.css";
 
 export default function CalendlyStyleScheduler({ tutor, availabilities, materia, onBookingComplete }) {
@@ -65,6 +67,21 @@ export default function CalendlyStyleScheduler({ tutor, availabilities, materia,
   const groupedSlots = SlotService.groupSlotsByDate(hourlySlots);
   const sortedDates = Object.keys(groupedSlots).sort();
 
+  // Debug: log grouping info whenever hourlySlots changes
+  React.useEffect(() => {
+    try {
+      console.log('🧭 Debug groupedSlots keys:', Object.keys(groupedSlots));
+      console.log('🧭 Debug sortedDates:', sortedDates);
+      // Print each group's date header and first slot for quick inspection
+      Object.keys(groupedSlots).forEach(key => {
+        const g = groupedSlots[key];
+        console.log(`Group ${key} -> header date:`, g.date, 'slots:', g.slots.length, g.slots.slice(0,2));
+      });
+    } catch (e) {
+      console.warn('Error logging groupedSlots debug info', e);
+    }
+  }, [hourlySlots]);
+
   const formatDate = (date) => {
     const options = { 
       weekday: 'long', 
@@ -111,7 +128,7 @@ export default function CalendlyStyleScheduler({ tutor, availabilities, materia,
     setSuccess(null);
   };
 
-  const handleBooking = async () => {
+  const handleBooking = async ({ studentEmail, proofFile }) => {
     if (!user.isLoggedIn) {
       setError('Debes iniciar sesión para reservar una tutoría');
       return;
@@ -119,6 +136,11 @@ export default function CalendlyStyleScheduler({ tutor, availabilities, materia,
 
     if (!selectedSlot) {
       setError('Por favor selecciona un horario');
+      return;
+    }
+
+    if (!studentEmail || !proofFile) {
+      setError('Email y comprobante de pago son requeridos');
       return;
     }
 
@@ -145,13 +167,33 @@ export default function CalendlyStyleScheduler({ tutor, availabilities, materia,
       // Proceder con la reserva usando la materia seleccionada por el estudiante
       const result = await TutoringSessionService.bookSpecificSlot(
         selectedSlot,
-        user.email,
+        studentEmail, // Use provided email for Google Calendar invite
         user.name,
         bookingNotes,
         materia // Pasar la materia que seleccionó el estudiante en buscar-tutores
       );
 
       console.log('✅ Reserva exitosa:', result);
+
+      // Upload payment proof after successful booking
+      if (result.sessionId && proofFile) {
+        console.log('📤 Subiendo comprobante de pago...');
+        const uploadResult = await PaymentService.uploadPaymentProofFile(result.sessionId, proofFile);
+        
+        if (uploadResult.success) {
+          // Submit payment proof metadata to session
+          await TutoringSessionService.submitPaymentProof(result.sessionId, {
+            fileUrl: uploadResult.url,
+            fileName: uploadResult.fileName,
+            amountSent: null, // Can be added later by student/admin
+            senderName: user.name,
+            transactionNumber: null
+          });
+          console.log('✅ Comprobante de pago subido exitosamente');
+        } else {
+          console.warn('⚠️ Error subiendo comprobante:', uploadResult.error);
+        }
+      }
 
       setSuccess('¡Horario de 1 hora reservado exitosamente! 🎉');
       setShowBookingForm(false);
@@ -306,78 +348,22 @@ export default function CalendlyStyleScheduler({ tutor, availabilities, materia,
       </div>
 
       {showBookingForm && selectedSlot && (
-        <div className="booking-modal">
-          <div className="booking-form">
-            <div className="booking-header">
-              <h4>Confirmar reserva de 1 hora</h4>
-              <button className="close-btn" onClick={handleCancelBooking}>×</button>
-            </div>
-            
-            <div className="booking-details">
-              <div className="selected-slot-info">
-                <h5>Horario seleccionado:</h5>
-                <p className="slot-datetime">
-                  {formatDate(new Date(selectedSlot.startDateTime))}
-                </p>
-                <p className="slot-time-range">
-                  {formatTime(new Date(selectedSlot.startDateTime))} - {formatTime(new Date(selectedSlot.endDateTime))}
-                </p>
-                <p className="slot-duration">
-                  <strong>Duración: 1 hora exacta</strong>
-                </p>
-                {selectedSlot.location && (
-                  <p className="slot-location">📍 {selectedSlot.location}</p>
-                )}
-              </div>
-
-              <div className="tutor-info">
-                <h5>Tutor:</h5>
-                <p>{tutor.name}</p>
-                <p>{materia}</p>
-                <p className="session-price">Precio: $25,000 COP</p>
-              </div>
-
-              <div className="slot-details">
-                <h5>Detalles del bloque:</h5>
-                <p>Bloque #{selectedSlot.slotIndex + 1} de la disponibilidad original</p>
-                {selectedSlot.recurring && (
-                  <p>🔄 Este es un horario recurrente</p>
-                )}
-                <p className="availability-note">
-                  ⚡ Este horario será marcado como no disponible una vez confirmado
-                </p>
-              </div>
-
-              <div className="notes-section">
-                <label htmlFor="booking-notes">Notas para la sesión (opcional):</label>
-                <textarea
-                  id="booking-notes"
-                  value={bookingNotes}
-                  onChange={(e) => setBookingNotes(e.target.value)}
-                  placeholder="¿Hay algo específico que te gustaría trabajar en esta sesión de 1 hora?"
-                  rows="3"
-                />
-              </div>
-
-              <div className="booking-actions">
-                <button 
-                  className="cancel-btn" 
-                  onClick={handleCancelBooking}
-                  disabled={loading}
-                >
-                  Cancelar
-                </button>
-                <button 
-                  className="confirm-btn" 
-                  onClick={handleBooking}
-                  disabled={loading}
-                >
-                  {loading ? 'Verificando y reservando...' : 'Confirmar Reserva de 1h'}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <SessionConfirmationModal
+          isOpen={showBookingForm}
+          onClose={handleCancelBooking}
+          session={{
+            subject: materia,
+            subjectCode: selectedSlot.subjectCode || '',
+            scheduledDateTime: selectedSlot.startDateTime,
+            endDateTime: selectedSlot.endDateTime,
+            tutorEmail: tutor.email,
+            tutorName: tutor.name,
+            price: tutor.hourlyRate || 25000,
+            location: selectedSlot.location || 'Por definir'
+          }}
+          onConfirm={handleBooking}
+          confirmLoading={loading}
+        />
       )}
     </div>
   );

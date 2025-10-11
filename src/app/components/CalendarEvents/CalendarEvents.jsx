@@ -40,7 +40,7 @@ export default function CalendarEvents() {
             <div key={event.id} className="border p-4 rounded-lg shadow hover:shadow-md transition-shadow">
               <h3 className="font-semibold text-lg">{event.summary}</h3>
               <p className="text-gray-600">
-                {new Date(event.start.dateTime || event.start.date).toLocaleString()}
+                {event.start?.date ? parseGoogleDateToLocale(event.start.date) : new Date(event.start.dateTime).toLocaleString()}
               </p>
               {event.description && (
                 <p className="mt-2 text-gray-700">{event.description}</p>
@@ -57,3 +57,10 @@ export default function CalendarEvents() {
     </div>
   );
 } 
+
+function parseGoogleDateToLocale(dateStr) {
+  if (!dateStr) return '';
+  const parts = dateStr.split('-').map(Number);
+  const d = new Date(parts[0], parts[1] - 1, parts[2]);
+  return d.toLocaleString();
+}

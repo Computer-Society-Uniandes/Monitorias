@@ -55,17 +55,18 @@ export async function GET(request) {
 
     // Mapear eventos de Google Calendar al formato esperado por la aplicación
     const availabilitySlots = events.map(event => {
-      const start = new Date(event.start.dateTime || event.start.date);
-      const end = new Date(event.end.dateTime || event.end.date);
+      const isAllDay = !!event.start.date;
+      const start = isAllDay ? parseGoogleDate(event.start.date) : new Date(event.start.dateTime);
+      const end = isAllDay ? parseGoogleDate(event.end.date) : new Date(event.end.dateTime);
       const dayOfWeek = getDayOfWeek(start);
       
       return {
         id: event.id,
         title: event.summary || 'Disponible',
         day: dayOfWeek,
-        startTime: formatTime(start),
-        endTime: formatTime(end),
-        date: start.toISOString().split('T')[0],
+        startTime: isAllDay ? '' : formatTime(start),
+        endTime: isAllDay ? '' : formatTime(end),
+        date: formatDateLocal(start),
         recurring: event.recurrence && event.recurrence.length > 0,
         color: getRandomColor(),
         description: event.description || '',
@@ -73,6 +74,20 @@ export async function GET(request) {
         googleEventId: event.id
       };
     });
+
+// Parse Google 'date' (YYYY-MM-DD) as a local Date (avoid Date("YYYY-MM-DD") which is treated as UTC)
+function parseGoogleDate(dateStr) {
+  if (!dateStr) return new Date(dateStr);
+  const parts = dateStr.split('-').map(Number);
+  return new Date(parts[0], parts[1] - 1, parts[2]);
+}
+
+function formatDateLocal(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
 
     // Como ahora todos los eventos vienen del calendario "Disponibilidad", 
     // no necesitamos filtrar por palabras clave - todos son válidos

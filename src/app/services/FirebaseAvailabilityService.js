@@ -320,9 +320,9 @@ export class FirebaseAvailabilityService {
     try {
       // Extraer materia del título
       
-      // Convertir fechas
-      const startDateTime = new Date(googleEvent.start.dateTime || googleEvent.start.date);
-      const endDateTime = new Date(googleEvent.end.dateTime || googleEvent.end.date);
+  // Convert dates - handle date-only (all-day) as local date to avoid UTC shifts
+  const startDateTime = googleEvent.start.date ? parseGoogleDate(googleEvent.start.date) : new Date(googleEvent.start.dateTime);
+  const endDateTime = googleEvent.end.date ? parseGoogleDate(googleEvent.end.date) : new Date(googleEvent.end.dateTime);
 
       return {
         tutorId,
@@ -416,3 +416,10 @@ export class FirebaseAvailabilityService {
     }
   }
 } 
+
+// Helper para parsear fechas tipo 'YYYY-MM-DD' de Google Calendar como fechas locales
+function parseGoogleDate(dateStr) {
+  if (!dateStr) return new Date(dateStr);
+  const parts = dateStr.split('-').map(Number);
+  return new Date(parts[0], parts[1] - 1, parts[2]);
+}
