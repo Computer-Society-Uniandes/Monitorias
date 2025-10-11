@@ -161,8 +161,12 @@ function BuscarTutoresContent() {
     };
 
     const handleToggleFavoriteCourse = async (courseCode) => {
-        if (!userEmail) return;
+        if (!userEmail) {
+            console.warn('Usuario no autenticado, no se puede modificar favoritos.');
+            return;
+        }
         try {
+            console.log('Toggling favorite course:', courseCode);
             await FavoritesService.toggleFavoriteCourse(userEmail, courseCode);
             await loadFavorites();
         } catch (error) {
