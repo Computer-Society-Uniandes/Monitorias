@@ -272,4 +272,114 @@ export class TutorSearchService {
       };
     }
   }
+
+  /**
+   * Busca tutores específicamente por materia con información enriquecida
+   * @param {string} subject - Nombre de la materia
+   * @returns {Promise<Array>} Array de tutores con información completa
+   */
+  static async searchTutorsBySubject(subject) {
+    try {
+      logger.info({ subject }, 'Buscando tutores por materia específica');
+      
+      // Normalizar la materia
+      const normalized = await this.normalizeSubject(subject);
+      const searchTerm = normalized.name || subject;
+      
+      // Buscar en la colección de usuarios que son tutores
+      const usersCollection = collection(db, 'users');
+      const tutorsQuery = query(usersCollection, where('isTutor', '==', true));
+      const tutorsSnapshot = await getDocs(tutorsQuery);
+      
+      const tutorsWithSubject = [];
+      
+      for (const tutorDoc of tutorsSnapshot.docs) {
+        const tutorData = tutorDoc.data();
+        const tutorEmail = tutorDoc.id;
+        
+        // Verificar si el tutor enseña esta materia
+        if (tutorData.subjects && Array.isArray(tutorData.subjects)) {
+          const hasSubject = tutorData.subjects.some(sub => 
+            sub.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            searchTerm.toLowerCase().includes(sub.toLowerCase())
+          );
+          
+          if (hasSubject) {
+            // Obtener disponibilidad del tutor
+            const availability = await FirebaseAvailabilityService.getTutorAvailability(tutorEmail);
+            
+            // Crear objeto tutor enriquecido
+            const enrichedTutor = this.sanitizeTutor(tutorDoc, {
+              email: tutorEmail,
+              totalSessions: availability.length,
+              hasAvailability: availability.length > 0,
+              nextAvailableSlot: this.getNextAvailableSlot(availability),
+              description: this.generateTutorDescription(tutorData, searchTerm),
+              location: tutorData.location || 'Virtual',
+              subjects: tutorData.subjects || []
+            });
+            
+            tutorsWithSubject.push(enrichedTutor);
+          }
+        }
+      }
+      
+      // Ordenar por rating y disponibilidad
+      tutorsWithSubject.sort((a, b) => {
+        if (a.hasAvailability && !b.hasAvailability) return -1;
+        if (!a.hasAvailability && b.hasAvailability) return 1;
+        return (b.rating || 0) - (a.rating || 0);
+      });
+      
+      logger.info({ 
+        subject: searchTerm, 
+        tutorsFound: tutorsWithSubject.length 
+      }, 'Búsqueda de tutores por materia completada');
+      
+      return tutorsWithSubject;
+    } catch (error) {
+      logger.error({ error, subject }, 'Error buscando tutores por materia');
+      return [];
+    }
+  }
+
+  /**
+   * Genera una descripción automática para el tutor basada en su información
+   * @param {Object} tutorData - Datos del tutor
+   * @param {string} subject - Materia específica
+   * @returns {string} Descripción generada
+   */
+  static generateTutorDescription(tutorData, subject) {
+    if (tutorData.bio && tutorData.bio.trim()) {
+      return tutorData.bio;
+    }
+    
+    const subjectCount = tutorData.subjects ? tutorData.subjects.length : 0;
+    const rating = tutorData.rating || 4.5;
+    
+    const descriptions = [
+      `Experienced tutor specializing in ${subject}. Proven track record of helping students achieve academic success.`,
+      `Passionate educator with a focus on ${subject}. Dedicated to fostering a love for learning and writing.`,
+      `Certified tutor in ${subject}. Committed to making complex topics understandable and engaging for students.`,
+      `Expert tutor in ${subject} and ${subjectCount > 1 ? 'multiple subjects' : 'specialized topics'}. Skilled in creating interactive and informative learning experiences.`
+    ];
+    
+    return descriptions[Math.floor(Math.random() * descriptions.length)];
+  }
+
+  /**
+   * Obtiene el próximo slot disponible de un tutor
+   * @param {Array} availability - Array de disponibilidades
+   * @returns {Object|null} Próximo slot disponible o null
+   */
+  static getNextAvailableSlot(availability) {
+    if (!availability || availability.length === 0) return null;
+    
+    const now = new Date();
+    const futureSlots = availability
+      .filter(slot => new Date(slot.startDateTime) > now)
+      .sort((a, b) => new Date(a.startDateTime) - new Date(b.startDateTime));
+    
+    return futureSlots.length > 0 ? futureSlots[0] : null;
+  }
 }
