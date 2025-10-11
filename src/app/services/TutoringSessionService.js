@@ -521,7 +521,7 @@ export class TutoringSessionService {
       console.log('Payment proof submitted for session:', sessionId);
       return { success: true };
     } catch (error) {
-      console.error('Error submitting payment proof:', error);
+      console.error('Error enviando comprobante de pago:', error);
       throw new Error(`Error enviando comprobante de pago: ${error.message}`);
     }
   }
