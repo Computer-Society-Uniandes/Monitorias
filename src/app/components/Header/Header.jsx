@@ -23,6 +23,7 @@ import CalicoLogo from "../../../../public/CalicoLogo.png";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "../../context/SecureAuthContext";
 import { NotificationService } from "../../services/NotificationService";
+import { useFavorites } from "../../hooks/useFavorites";
 import routes from "../../../routes";
 
 export default function Header() {
@@ -34,6 +35,9 @@ export default function Header() {
   const [role, setRole] = useState("student"); // 'student' | 'tutor'
   const [menuOpen, setMenuOpen] = useState(false);   // ⟵ estado del menú
   const [notificationCount, setNotificationCount] = useState(0);
+  
+  // Hook de favoritos
+  const { getFavoritesCount } = useFavorites();
 
   useEffect(() => {
     setMounted(true);
@@ -99,10 +103,12 @@ export default function Header() {
   const tutorMode = user.isLoggedIn && role === "tutor";
 
   // Navigation items configuration
+  const favoritesCount = getFavoritesCount();
+  
   const studentNavItems = [
     { href: routes.HOME, label: "Home", icon: Home },
     { href: routes.SEARCH_TUTORS, label: "Search", icon: Search },
-    { href: routes.FAVORITES, label: "Favorites", icon: Heart },
+    { href: routes.FAVORITES, label: "Favorites", icon: Heart, count: favoritesCount },
     { href: routes.HISTORY, label: "History", icon: History }
   ];
 
@@ -159,17 +165,22 @@ export default function Header() {
         onClick={() => setMenuOpen(false)} // cerrar al elegir una opción
       >
         {(tutorMode ? tutorNavItems : studentNavItems).map(
-          ({ href, label, icon: IconComponent }) => (
+          ({ href, label, icon: IconComponent, count }) => (
             <Link
               key={href}
               href={href}
               className={`nav-item ${isActiveRoute(href) ? "active" : ""}`}
             >
-              <IconComponent
-                size={24}
-                fill={isActiveRoute(href) ? "currentColor" : "none"}
-                className="nav-icon"
-              />
+              <div className="nav-icon-container">
+                <IconComponent
+                  size={24}
+                  fill={isActiveRoute(href) ? "currentColor" : "none"}
+                  className="nav-icon"
+                />
+                {count > 0 && (
+                  <span className="nav-badge">{count}</span>
+                )}
+              </div>
               <span className="nav-label">{label}</span>
             </Link>
           )
@@ -238,17 +249,22 @@ export default function Header() {
       </div>
       {/* Bottom mobile nav */}
       <nav className={`bottom-nav ${tutorMode ? 'bottom-nav-tutor' : 'bottom-nav-student'}`} aria-label="Mobile bottom navigation">
-        {(tutorMode ? tutorNavItems : studentNavItems).map(({ href, label, icon: IconComponent }) => (
+        {(tutorMode ? tutorNavItems : studentNavItems).map(({ href, label, icon: IconComponent, count }) => (
           <Link 
             key={`bottom-${href}`}
             href={href}
             className={`bottom-nav-item ${isActiveRoute(href) ? 'active' : ''}`}
           >
-            <IconComponent 
-              size={22} 
-              className="bottom-nav-icon" 
-              fill={isActiveRoute(href) ? 'currentColor' : 'none'}
-            />
+            <div className="bottom-nav-icon-container">
+              <IconComponent 
+                size={22} 
+                className="bottom-nav-icon" 
+                fill={isActiveRoute(href) ? 'currentColor' : 'none'}
+              />
+              {count > 0 && (
+                <span className="bottom-nav-badge">{count}</span>
+              )}
+            </div>
             <span className="bottom-nav-label">{label}</span>
           </Link>
         ))}

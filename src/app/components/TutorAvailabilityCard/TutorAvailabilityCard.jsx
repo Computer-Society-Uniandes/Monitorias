@@ -1,8 +1,10 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from 'next/navigation';
 import { TutorSearchService } from "../../services/TutorSearchService";
 import CalendlyStyleScheduler from "../CalendlyStyleScheduler/CalendlyStyleScheduler";
+import routes from "../../../routes";
 import "./TutorAvailabilityCard.css";
 
 export default function TutorAvailabilityCard({ tutor, materia }) {
@@ -11,6 +13,7 @@ export default function TutorAvailabilityCard({ tutor, materia }) {
   const [loading, setLoading] = useState(true);
   const [showScheduler, setShowScheduler] = useState(false);
   const [error, setError] = useState(null);
+  const router = useRouter();
 
   useEffect(() => {
     loadTutorAvailability();
@@ -46,8 +49,19 @@ export default function TutorAvailabilityCard({ tutor, materia }) {
   };
 
   const handleScheduleClick = () => {
-    console.log(`🎯 Abriendo scheduler para ${tutor.name} con ${availabilities.length} disponibilidades`);
-    setShowScheduler(true);
+    console.log(`🎯 Navegando a disponibilidad individual para ${tutor.name}`);
+    
+    // Crear los parámetros de búsqueda para la nueva página
+    const params = new URLSearchParams({
+      tutorId: tutor.id || tutor.email,
+      tutorName: tutor.name || 'Tutor',
+      ...(materia && { subject: materia }),
+      ...(tutor.location && { location: tutor.location }),
+      ...(tutor.rating && { rating: tutor.rating.toString() })
+    });
+    
+    // Navegar a la nueva vista de disponibilidad individual
+    router.push(`${routes.INDIVIDUAL_AVAILABILITY}?${params.toString()}`);
   };
 
   const handleCloseScheduler = () => {
