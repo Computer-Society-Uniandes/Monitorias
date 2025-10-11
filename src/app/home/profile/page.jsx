@@ -156,9 +156,9 @@ const Profile = () => {
 
           
             {/* aqui se debe cambiar por los datos del usuario */}
-            <p className='text-info'><strong className='text-campos'>Nombre: </strong> {userData.name}</p>
-            <p className='text-info'><strong className='text-campos'>Teléfono: </strong>{userData.phone_number} </p>
-            <p className='text-info'><strong className='text-campos'>Correo: </strong>{user.email} </p>
+            <p className='text-info'><strong className='text-campos'>Nombre: </strong> {userData?.name || user?.name || '-'}</p>
+            <p className='text-info'><strong className='text-campos'>Teléfono: </strong>{userData?.phone_number || '-' } </p>
+            <p className='text-info'><strong className='text-campos'>Correo: </strong>{user?.email || userData?.email || '-' } </p>
             <p className='text-info'><strong className='text-campos'>Carrera:</strong> {majorName || 'No definida'}</p>
 
             <button
