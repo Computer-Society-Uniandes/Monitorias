@@ -1,5 +1,5 @@
 import { cookies } from 'next/headers';
-import { createEvent } from '../../../services/GoogleCalendarService.js';
+import { findAvailabilityCalendar, createEventInCalendar } from '../../../services/GoogleCalendarService.js';
 import { FirebaseAvailabilityService } from '../../../services/FirebaseAvailabilityService.js';
 
 export async function POST(request) {
@@ -64,18 +64,30 @@ export async function POST(request) {
       ];
     }
 
-    console.log('Creating event in Google Calendar:', event);
+    // Primero buscar el calendario "Disponibilidad"
+    const availabilityCalendar = await findAvailabilityCalendar(accessToken.value);
+    
+    if (!availabilityCalendar) {
+      return Response.json({ 
+        error: 'No se encontró un calendario llamado "Disponibilidad". Por favor, crea un calendario con ese nombre en tu cuenta de Google.',
+        calendarFound: false
+      }, { status: 404 });
+    }
 
-    const createdEvent = await createEvent(accessToken.value, event);
+    console.log(`Creating event in calendar: "${availabilityCalendar.summary}" (ID: ${availabilityCalendar.id})`);
+    console.log('Event details:', event);
 
-    console.log('Event created successfully:', createdEvent.id);
+    const createdEvent = await createEventInCalendar(accessToken.value, availabilityCalendar.id, event);
+
+    console.log('Event created successfully in Disponibilidad calendar:', createdEvent.id);
 
     // Guardar también en Firebase
     try {
       const firebaseData = await FirebaseAvailabilityService.googleEventToFirebaseFormat(
         createdEvent, 
         tutorId, 
-        tutorEmail
+        tutorEmail,
+        availabilityCalendar
       );
       
       await FirebaseAvailabilityService.saveAvailability(createdEvent.id, firebaseData);
