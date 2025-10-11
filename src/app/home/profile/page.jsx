@@ -37,6 +37,8 @@ function TutorInviteModal({ open, onClose }) {
   );
 }
 
+
+
 const Profile = () => {
   const [userData, setUserData] = useState(null);
   const [majorName, setMajorName] = useState('');
@@ -48,12 +50,18 @@ const Profile = () => {
 
   // Cargar datos de perfil
   useEffect(() => {
+    // Don't run any client-only or user-dependent logic while auth is loading
     if (loading) return;
 
-    if (!user.isLoggedIn) {
-      router.push(routes.LANDING);
+    // user may be null during server prerender — guard access
+    if (!user || !user.isLoggedIn) {
+      // Only redirect on the client
+      if (typeof window !== 'undefined') {
+        router.push(routes.LANDING);
+      }
       return;
     }
+
     if (!user.email) return;
 
     const fetchUserData = async () => {
@@ -62,39 +70,29 @@ const Profile = () => {
         const userSnap = await getDoc(userDocRef);
         if (userSnap.exists()) {
           const data = userSnap.data();
-          setUserData(data);
-
-          if (data.major) {
-            const majorSnap = await getDoc(data.major);
-            if (majorSnap.exists()) {
-              setMajorName(majorSnap.data().name);
-            }
-          }
-        } else {
-          console.log('Usuario no encontrado en Firestore');
+          setUserData(data || null);
         }
       } catch (error) {
-        console.error('Error al obtener datos del usuario:', error);
+        console.error('Error fetching user data:', error);
       }
     };
 
     fetchUserData();
-  }, [loading, user.isLoggedIn, user.email, router]);
 
-  // Sincronizar rol con localStorage (solo si el usuario realmente es tutor)
-  useEffect(() => {
-    if (!user.isLoggedIn) return;
-
+    // Only access localStorage on the client
     const saved = typeof window !== 'undefined' ? localStorage.getItem('rol') : null;
-
     if (user.isTutor && saved === 'tutor') {
       setActiveRole('tutor');
+    } else if (saved === 'student') {
+      setActiveRole('student');
     } else {
-      // Por defecto estudiante
-      localStorage.setItem('rol', 'student');
+      // Por defecto estudiante si el valor es inesperado o no existe
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('rol', 'student');
+      }
       setActiveRole('student');
     }
-  }, [user.isLoggedIn, user.isTutor]);
+  }, [loading, user, router]);
 
   const handleLogout = async () => {
     try {
@@ -126,9 +124,17 @@ const Profile = () => {
     notifyRoleChange('student');
   };
 
-  if (!userData) {
-    return <div className="p-6">Cargando perfil...</div>;
-  }
+
+  // const handleLogout = () => {
+  //   auth.signOut()
+  //   localStorage.removeItem('userEmail')
+  //   localStorage.removeItem('isLoggedIn')
+  //   router.push(routes.LANDING)
+  // }
+
+  // if (!userData) {
+  //   return <div className="p-6">Cargando perfil...</div>
+  // }
 
   const notifyRoleChange = (next) => {
     if (typeof window !== 'undefined') {
@@ -138,74 +144,45 @@ const Profile = () => {
 
 
   return (
-    <div className="background-profile">
+    <div className='background-profile'>
+         <div className="absolute bottom-0 left-0 w-full z-0">
+      <svg className="w-full h-auto" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
+      <path fill="#1A237E" fillOpacity="1" d="M0,192L40,181.3C80,171,160,149,240,117.3C320,85,400,43,480,69.3C560,96,640,192,720,197.3C800,203,880,117,960,74.7C1040,32,1120,32,1200,64C1280,96,1360,160,1400,192L1440,224L1440,320L1400,320C1360,320,1280,320,1200,320C1120,320,1040,320,960,320C880,320,800,320,720,320C640,320,560,320,480,320C400,320,320,320,240,320C160,320,80,320,40,320L0,320Z"></path>
 
-      <div className="absolute bottom-0 left-0 w-full z-0">
-        <svg className="w-full h-auto" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
-          <path fill="#1A237E" fillOpacity="1" d="M0,192L40,181.3C80,171,160,149,240,117.3C320,85,400,43,480,69.3C560,96,640,192,720,197.3C800,203,880,117,960,74.7C1040,32,1120,32,1200,64C1280,96,1360,160,1400,192L1440,224L1440,320L1400,320C1360,320,1280,320,1200,320C1120,320,1040,320,960,320C880,320,800,320,720,320C640,320,560,320,480,320C400,320,320,320,240,320C160,320,80,320,40,320L0,320Z"></path>
-        </svg>
-      </div>
-
-      <main className="relative z-10 max-w-4xl mx-auto bg-white rounded-xl shadow p-8 mt-10">
+      </svg>
+    </div>
+        <div className="relative z-10 max-w-4xl mx-auto bg-white rounded-xl shadow p-8 mt-10 justify-items-center">
         <h1 className="text-3xl font-bold mb-6 title">Perfil del Usuario</h1>
+        <div className="row-span-3"><img
 
-        <div className="profile-grid">
-          <div className="avatar-wrap">
-            <img
-              src="https://avatar.iran.liara.run/public/40"
-              alt="Foto de perfil"
-              className="w-32 h-32 rounded-full object-cover border border-gray-300"
-            />
-          </div>
+        //placeholder sacado de https://avatar-placeholder.iran.liara.run/
+            src='https://avatar.iran.liara.run/public/40' // Cambiar esto por la imagen del usuario
+            alt="Foto de perfil"
+            className="w-32 h-32 rounded-full object-cover border border-gray-300"
+          /></div>
+        <div className="bg-white p-10 rounded inset-shadow-sm w-full mx-auto mt-5 max-w-3xl">
 
-          <div className="bg-white p-6 rounded inset-shadow-sm w-full mx-auto mt-5">
-            <p className="text-info"><strong className="text-campos">Nombre: </strong> {userData.name}</p>
-            <p className="text-info"><strong className="text-campos">Teléfono: </strong>{userData.phone_number}</p>
-            <p className="text-info"><strong className="text-campos">Correo: </strong>{user.email}</p>
-            <p className="text-info"><strong className="text-campos">Carrera: </strong>{majorName || 'No definida'}</p>
+          
+            {/* aqui se debe cambiar por los datos del usuario */}
+            <p className='text-info'><strong className='text-campos'>Nombre: </strong> {userData?.name || 'No definido'}</p>
+            <p className='text-info'><strong className='text-campos'>Teléfono: </strong>{userData?.phone_number || 'No definido'} </p>
+            <p className='text-info'><strong className='text-campos'>Correo: </strong>{user?.email || 'No definido'} </p>
+            <p className='text-info'><strong className='text-campos'>Carrera:</strong> {majorName || 'No definida'}</p>
 
-            {/* ---- Tarjeta de Rol ---- */}
-            <div className="role-card">
-              <div className="role-head">
-                <span className={`role-chip ${activeRole === 'tutor' ? 'chip-tutor' : 'chip-student'}`}>
-                  {activeRole === 'tutor' ? 'Tutor' : 'Estudiante'}
-                </span>
-              </div>
+            <button
+            className="mt-4 btn-editar text-white py-2 px-4 rounded"
+            >
+            Editar Perfil
+            </button>
+            <button
+            onClick={handleLogout}
 
-              <p className="role-text">
-                Este es tu rol actual en la plataforma.
-                {activeRole === 'tutor'
-                  ? ' Puedes volver temporalmente a Estudiante si lo prefieres.'
-                  : ' Si deseas ofrecer tutorías, cambia a modo Tutor.'}
-              </p>
-
-              <div className="role-actions">
-                {activeRole === 'tutor' ? (
-                  <button className="btn-editar" onClick={handleBackToStudent}>
-                    Volver a Estudiante
-                  </button>
-                ) : (
-                  <button className="btn-editar" onClick={handleChangeRole}>
-                    Cambiar a Tutor
-                  </button>
-                )}
-              </div>
-            </div>
-
-            <div className="buttons-row">
-              <button className="mt-4 btn-editar text-white py-2 px-4 rounded">
-                Editar Perfil
-              </button>
-              <button
-                onClick={handleLogout}
-                className="mt-4 btn-logout text-white py-2 px-4 rounded mx-4"
-              >
-                Cerrar Sesión
-              </button>
-            </div>
-          </div>
+            className="mt-4 btn-logout text-white py-2 px-4 rounded mx-4"
+            >
+            Cerrar Sesión
+            </button>
         </div>
-      </main>
+        </div>
 
       {/* Modal */}
       <TutorInviteModal open={inviteOpen} onClose={() => setInviteOpen(false)} />

@@ -7,6 +7,7 @@ import "./TutorAvailabilityCard.css";
 
 export default function TutorAvailabilityCard({ tutor, materia }) {
   const [availabilities, setAvailabilities] = useState([]);
+  const [filtered, setFiltered] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showScheduler, setShowScheduler] = useState(false);
   const [error, setError] = useState(null);
@@ -23,6 +24,7 @@ export default function TutorAvailabilityCard({ tutor, materia }) {
       
       const availability = await TutorSearchService.getTutorAvailability(tutor.id, 50);
       console.log(`📋 Obtenidas ${availability.length} disponibilidades para ${tutor.name}`);
+      console.log(availability);
       
       // Filtrar solo las disponibilidades futuras y para la materia actual si se especifica
       const now = new Date();
@@ -61,12 +63,12 @@ export default function TutorAvailabilityCard({ tutor, materia }) {
   };
 
   const getAvailableHours = () => {
-    if (!availabilities.length) return 0;
-    return availabilities.filter(avail => !avail.isBooked).length;
+    if (!filtered.length) return 0;
+    return filtered.filter(avail => !avail.isBooked).length;
   };
 
   const getNextAvailableSlot = () => {
-    const availableSlots = availabilities.filter(avail => !avail.isBooked);
+    const availableSlots = filtered.filter(avail => !avail.isBooked);
     if (availableSlots.length === 0) return null;
     
     // Ordenar por fecha y tomar el primero

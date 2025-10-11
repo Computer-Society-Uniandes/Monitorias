@@ -316,17 +316,13 @@ export class FirebaseAvailabilityService {
   }
 
   // Convertir evento de Google Calendar a formato Firebase
-  static async googleEventToFirebaseFormat(googleEvent, tutorId, tutorEmail) {
+  static googleEventToFirebaseFormat(googleEvent, tutorId, tutorEmail, calendarInfo = null) {
     try {
-      // Obtener las materias del tutor desde la base de datos
-      const tutorSubjects = await this.getTutorSubjects(tutorEmail);
+      // Extraer materia del título
       
-      // Extraer materia del título (para compatibilidad)
-      const extractedSubject = this.extractSubjectFromTitle(googleEvent.summary || '');
-      
-      // Convertir fechas
-      const startDateTime = new Date(googleEvent.start.dateTime || googleEvent.start.date);
-      const endDateTime = new Date(googleEvent.end.dateTime || googleEvent.end.date);
+  // Convert dates - handle date-only (all-day) as local date to avoid UTC shifts
+  const startDateTime = googleEvent.start.date ? parseGoogleDate(googleEvent.start.date) : new Date(googleEvent.start.dateTime);
+  const endDateTime = googleEvent.end.date ? parseGoogleDate(googleEvent.end.date) : new Date(googleEvent.end.dateTime);
 
       return {
         tutorId,
@@ -338,13 +334,14 @@ export class FirebaseAvailabilityService {
         location: googleEvent.location || 'No especificado',
         recurring: !!(googleEvent.recurrence && googleEvent.recurrence.length > 0),
         recurrenceRule: googleEvent.recurrence ? googleEvent.recurrence.join(';') : '',
-        subject: extractedSubject, // Mantener para compatibilidad
-        subjects: tutorSubjects, // NUEVO: Array con todas las materias del tutor
-        isGeneralAvailability: tutorSubjects.length > 0, // NUEVO: Indicar si es disponibilidad general
-        color: this.getColorForSubject(extractedSubject),
+        color: this.getRandomColor(),
         googleEventId: googleEvent.id,
         htmlLink: googleEvent.htmlLink || '',
-        status: googleEvent.status || 'confirmed'
+        status: googleEvent.status || 'confirmed',
+        // Información del calendario específico
+        sourceCalendarId: calendarInfo?.id || 'unknown',
+        sourceCalendarName: calendarInfo?.summary || 'Calendario Disponibilidad',
+        fromAvailabilityCalendar: true // Marcador para identificar que viene del calendario específico
       };
     } catch (error) {
       console.error('Error converting Google event to Firebase format:', error);
@@ -352,68 +349,38 @@ export class FirebaseAvailabilityService {
     }
   }
 
-  // Obtener las materias que enseña un tutor
-  static async getTutorSubjects(tutorEmail) {
-    try {
-      const userDoc = await getDoc(doc(db, 'user', tutorEmail));
-      
-      if (!userDoc.exists()) {
-        console.warn(`Tutor ${tutorEmail} not found in database`);
-        return ['General']; // Fallback
-      }
-      
-      const userData = userDoc.data();
-      const subjects = userData.subjects || [];
-      
-      console.log(`Tutor ${tutorEmail} teaches subjects:`, subjects);
-      
-      // Si no tiene materias definidas, retornar General
-      return subjects.length > 0 ? subjects : ['General'];
-    } catch (error) {
-      console.error('Error getting tutor subjects:', error);
-      return ['General']; // Fallback en caso de error
-    }
-  }
 
-  // Extraer materia del título del evento
-  static extractSubjectFromTitle(title) {
-    const titleLower = title.toLowerCase();
+  // Obtener color aleatorio para los eventos
+  static getRandomColor() {
+    const colors = [
+      '#4CAF50', // Verde
+      '#2196F3', // Azul
+      '#FF9800', // Naranja
+      '#9C27B0', // Púrpura
+      '#F44336', // Rojo
+      '#795548', // Marrón
+      '#3F51B5', // Índigo
+      '#607D8B', // Azul gris
+      '#FFC107', // Ámbar
+      '#009688', // Verde azulado
+      '#E91E63', // Rosa
+      '#673AB7', // Púrpura profundo
+      '#FF5722', // Naranja profundo
+      '#8BC34A', // Verde claro
+      '#00BCD4', // Cian
+      '#CDDC39', // Lima
+      '#FF9E80', // Naranja claro
+      '#A1C4FD', // Azul claro
+      '#C2E9FB', // Azul muy claro
+      '#FFB74D'  // Naranja medio
+    ];
     
-    if (titleLower.includes('cálculo') || titleLower.includes('calculo')) return 'Cálculo';
-    if (titleLower.includes('física') || titleLower.includes('fisica')) return 'Física';
-    if (titleLower.includes('matemáticas') || titleLower.includes('matematicas')) return 'Matemáticas';
-    if (titleLower.includes('programación') || titleLower.includes('programacion')) return 'Programación';
-    if (titleLower.includes('química') || titleLower.includes('quimica')) return 'Química';
-    if (titleLower.includes('biología') || titleLower.includes('biologia')) return 'Biología';
-    if (titleLower.includes('historia')) return 'Historia';
-    if (titleLower.includes('inglés') || titleLower.includes('ingles')) return 'Inglés';
-    if (titleLower.includes('estadística') || titleLower.includes('estadistica')) return 'Estadística';
-    if (titleLower.includes('economía') || titleLower.includes('economia')) return 'Economía';
-    
-    return 'General';
-  }
-
-  // Obtener color para una materia
-  static getColorForSubject(subject) {
-    const colors = {
-      'Cálculo': '#4CAF50',
-      'Física': '#2196F3',
-      'Matemáticas': '#FF9800',
-      'Programación': '#9C27B0',
-      'Química': '#F44336',
-      'Biología': '#4CAF50',
-      'Historia': '#795548',
-      'Inglés': '#3F51B5',
-      'Estadística': '#607D8B',
-      'Economía': '#FFC107',
-      'General': '#9E9E9E'
-    };
-    
-    return colors[subject] || colors['General'];
+    const randomIndex = Math.floor(Math.random() * colors.length);
+    return colors[randomIndex];
   }
 
   // Sincronizar múltiples eventos de Google Calendar con Firebase
-  static async syncGoogleEventsToFirebase(googleEvents, tutorId, tutorEmail) {
+  static async syncGoogleEventsToFirebase(googleEvents, tutorId, tutorEmail, calendarInfo = null) {
     try {
       const results = {
         created: 0,
@@ -423,7 +390,7 @@ export class FirebaseAvailabilityService {
 
       for (const googleEvent of googleEvents) {
         try {
-          const firebaseData = this.googleEventToFirebaseFormat(googleEvent, tutorId, tutorEmail);
+          const firebaseData = this.googleEventToFirebaseFormat(googleEvent, tutorId, tutorEmail, calendarInfo);
           const exists = await this.availabilityExists(googleEvent.id);
           
           await this.saveAvailability(googleEvent.id, firebaseData);
@@ -449,3 +416,10 @@ export class FirebaseAvailabilityService {
     }
   }
 } 
+
+// Helper para parsear fechas tipo 'YYYY-MM-DD' de Google Calendar como fechas locales
+function parseGoogleDate(dateStr) {
+  if (!dateStr) return new Date(dateStr);
+  const parts = dateStr.split('-').map(Number);
+  return new Date(parts[0], parts[1] - 1, parts[2]);
+}

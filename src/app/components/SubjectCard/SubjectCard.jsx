@@ -55,7 +55,7 @@ export default function SubjectCard({ subject, isFavorite = false, onFindTutor, 
                 {/* Descripción */}
                 <p className="text-gray-600 text-sm mb-4 leading-relaxed">
                     {subject.description ||
-                     `Explora conceptos fundamentales y temas avanzados en ${subject.nombre?.toLowerCase() || 'esta materia'}, desde álgebra hasta cálculo.`}
+                     `No hay descripción disponible para ${subject.nombre || 'esta materia'}.`}
                 </p>
 
                 {/* Botones */}
