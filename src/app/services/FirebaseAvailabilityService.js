@@ -320,7 +320,7 @@ export class FirebaseAvailabilityService {
     try {
       // Extraer materia del título
       
-  // Convertir fechas - manejar date-only (all-day) como fecha local para evitar shifts por UTC
+  // Convert dates - handle date-only (all-day) as local date to avoid UTC shifts
   const startDateTime = googleEvent.start.date ? parseGoogleDate(googleEvent.start.date) : new Date(googleEvent.start.dateTime);
   const endDateTime = googleEvent.end.date ? parseGoogleDate(googleEvent.end.date) : new Date(googleEvent.end.dateTime);
 
