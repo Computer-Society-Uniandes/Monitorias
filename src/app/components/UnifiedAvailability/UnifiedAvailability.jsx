@@ -181,7 +181,7 @@ export default function UnifiedAvailability() {
       setSyncing(true);
       
       // Obtener el tutorId del usuario (puedes ajustar esto según tu estructura)
-      const tutorId = user.uid || user.email; // Usar UID o email como ID
+      const tutorId = user.email; // Usar UID o email como ID
       
       const response = await fetch('/api/availability/sync', {
         method: 'POST',
