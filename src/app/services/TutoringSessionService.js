@@ -15,6 +15,7 @@ import {
   Timestamp,
   addDoc
 } from 'firebase/firestore';
+import { NotificationService } from './NotificationService';
 
 export class TutoringSessionService {
   static COLLECTION_NAME = 'tutoring_sessions';
@@ -166,6 +167,16 @@ export class TutoringSessionService {
       };
 
       await this.createSlotBooking(slotBookingData);
+
+      // Create notification for the tutor about the pending session
+      await NotificationService.createPendingSessionNotification({
+        sessionId: sessionResult.id,
+        tutorEmail: slot.tutorEmail,
+        studentEmail: studentEmail,
+        studentName: studentName,
+        subject: sessionSubject,
+        scheduledDateTime: slot.startDateTime
+      });
 
       console.log(`Slot ${slot.id} reservado exitosamente para ${studentEmail}`);
       return sessionResult;
@@ -457,6 +468,150 @@ export class TutoringSessionService {
     
     const totalRating = ratedSessions.reduce((sum, s) => sum + s.rating.score, 0);
     return totalRating / ratedSessions.length;
+  }
+
+  // Accept a pending tutoring session
+  static async acceptTutoringSession(sessionId, tutorEmail) {
+    try {
+      const sessionRef = doc(db, this.COLLECTION_NAME, sessionId);
+      const sessionDoc = await getDoc(sessionRef);
+
+      if (!sessionDoc.exists()) {
+        throw new Error('Session not found');
+      }
+
+      const sessionData = sessionDoc.data();
+
+      // Verify the tutor is authorized to accept this session
+      if (sessionData.tutorEmail !== tutorEmail) {
+        throw new Error('Unauthorized to accept this session');
+      }
+
+      // Verify the session is still pending
+      if (sessionData.status !== 'pending') {
+        throw new Error('Session is no longer pending');
+      }
+
+      // Update session status to scheduled (confirmed)
+      await updateDoc(sessionRef, {
+        status: 'scheduled',
+        tutorApprovalStatus: 'accepted',
+        acceptedAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+
+      // Create notification for the student
+      await NotificationService.createSessionAcceptedNotification({
+        sessionId: sessionId,
+        studentEmail: sessionData.studentEmail,
+        tutorEmail: sessionData.tutorEmail,
+        subject: sessionData.subject,
+        scheduledDateTime: sessionData.scheduledDateTime
+      });
+
+      console.log('Session accepted:', sessionId);
+      return { success: true, message: 'Session accepted successfully' };
+    } catch (error) {
+      console.error('Error accepting session:', error);
+      throw new Error(`Error accepting session: ${error.message}`);
+    }
+  }
+
+  // Decline a pending tutoring session
+  static async declineTutoringSession(sessionId, tutorEmail) {
+    try {
+      const sessionRef = doc(db, this.COLLECTION_NAME, sessionId);
+      const sessionDoc = await getDoc(sessionRef);
+
+      if (!sessionDoc.exists()) {
+        throw new Error('Session not found');
+      }
+
+      const sessionData = sessionDoc.data();
+
+      // Verify the tutor is authorized to decline this session
+      if (sessionData.tutorEmail !== tutorEmail) {
+        throw new Error('Unauthorized to decline this session');
+      }
+
+      // Verify the session is still pending
+      if (sessionData.status !== 'pending') {
+        throw new Error('Session is no longer pending');
+      }
+
+      // Update session status to declined
+      await updateDoc(sessionRef, {
+        status: 'declined',
+        tutorApprovalStatus: 'declined',
+        declinedAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+
+      // Create notification for the student
+      await NotificationService.createSessionDeclinedNotification({
+        sessionId: sessionId,
+        studentEmail: sessionData.studentEmail,
+        tutorEmail: sessionData.tutorEmail,
+        subject: sessionData.subject,
+        scheduledDateTime: sessionData.scheduledDateTime
+      });
+
+      // Remove the slot booking to make the slot available again
+      if (sessionData.parentAvailabilityId && sessionData.slotIndex !== undefined) {
+        const slotBookingQuery = query(
+          collection(db, this.SLOT_BOOKINGS_COLLECTION),
+          where('parentAvailabilityId', '==', sessionData.parentAvailabilityId),
+          where('slotIndex', '==', sessionData.slotIndex),
+          where('sessionId', '==', sessionId)
+        );
+
+        const slotBookingSnapshot = await getDocs(slotBookingQuery);
+        
+        for (const doc of slotBookingSnapshot.docs) {
+          await deleteDoc(doc.ref);
+          console.log(`Slot booking ${doc.id} deleted after decline`);
+        }
+      }
+
+      console.log('Session declined:', sessionId);
+      return { success: true, message: 'Session declined successfully' };
+    } catch (error) {
+      console.error('Error declining session:', error);
+      throw new Error(`Error declining session: ${error.message}`);
+    }
+  }
+
+  // Get pending sessions for a tutor
+  static async getPendingSessionsForTutor(tutorEmail) {
+    try {
+      const q = query(
+        collection(db, this.COLLECTION_NAME),
+        where('tutorEmail', '==', tutorEmail),
+        where('status', '==', 'pending'),
+        where('tutorApprovalStatus', '==', 'pending'),
+        orderBy('requestedAt', 'desc')
+      );
+
+      const querySnapshot = await getDocs(q);
+      const sessions = [];
+
+      querySnapshot.forEach((doc) => {
+        sessions.push({
+          id: doc.id,
+          ...doc.data(),
+          createdAt: doc.data().createdAt?.toDate(),
+          updatedAt: doc.data().updatedAt?.toDate(),
+          scheduledDateTime: doc.data().scheduledDateTime?.toDate(),
+          endDateTime: doc.data().endDateTime?.toDate(),
+          requestedAt: doc.data().requestedAt?.toDate(),
+        });
+      });
+
+      return sessions;
+    } catch (error) {
+      console.error('Error getting pending sessions:', error);
+      throw new Error(`Error getting pending sessions: ${error.message}`);
+    }
   }
 
   // MÉTODO OBSOLETO - Mantener para compatibilidad

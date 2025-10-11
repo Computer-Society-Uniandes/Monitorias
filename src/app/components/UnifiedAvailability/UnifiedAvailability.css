@@ -471,6 +471,69 @@
   flex-shrink: 0;
 }
 
+.notification-item.unread {
+  border-left: 4px solid #3b82f6;
+  background: #f0f7ff;
+}
+
+.notification-content small {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin-top: 4px;
+  display: block;
+}
+
+.no-notifications {
+  text-align: center;
+  padding: 20px;
+  color: #9ca3af;
+}
+
+.no-notifications p {
+  margin: 8px 0 0 0;
+  font-size: 0.875rem;
+}
+
+/* Pending Sessions */
+.pending-sessions {
+  margin-bottom: 20px;
+}
+
+.pending-item {
+  border-left: 4px solid #f59e0b !important;
+  background: #fffbeb !important;
+}
+
+.pending-item:hover {
+  background: #fef3c7 !important;
+}
+
+.pending-icon {
+  color: #f59e0b !important;
+}
+
+.pending-badge {
+  display: inline-block;
+  background: #f59e0b;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-top: 4px;
+}
+
+.no-sessions {
+  text-align: center;
+  padding: 40px 20px;
+  color: #9ca3af;
+}
+
+.no-sessions p {
+  margin: 8px 0 0 0;
+  font-size: 0.875rem;
+}
+
 /* Modal Styles */
 .modal-overlay {
   position: fixed;
