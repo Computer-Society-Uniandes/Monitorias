@@ -33,8 +33,6 @@ export class AvailabilityService {
       throw error;
     }
   }
-
-
   
   // Obtener disponibilidad para la semana actual
   static async getWeeklyAvailability() {
@@ -72,7 +70,6 @@ export class AvailabilityService {
           throw new Error(`Token expirado. ${refreshResult.error}. Por favor, reconecta tu Google Calendar.`);
         }
       }
-      
       // Si no es un error de autenticación, relanzar el error original
       throw error;
     }
@@ -837,7 +834,7 @@ export class AvailabilityService {
 
       // Obtener información del usuario
       const tutorEmail = auth.currentUser?.email || '';
-      const tutorId = auth.currentUser?.uid || tutorEmail; // preferir UID, fallback a email
+      const tutorId = tutorEmail;
       if (!tutorEmail && !tutorId) {
         console.log('❌ No hay información del usuario, saltando sync automático');
         return { success: false, reason: 'no_user_info' };

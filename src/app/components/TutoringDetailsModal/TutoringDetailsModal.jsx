@@ -1,10 +1,71 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
+import { TutoringSessionService } from "../../services/TutoringSessionService";
+import { useAuth } from "../../context/SecureAuthContext";
 import "./TutoringDetailsModal.css";
 
-export default function TutoringDetailsModal({ isOpen, onClose, session }) {
+export default function TutoringDetailsModal({ isOpen, onClose, session, onSessionUpdate }) {
+  const { user } = useAuth();
+  const [cancelling, setCancelling] = useState(false);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [cancelReason, setCancelReason] = useState('');
+
   if (!isOpen || !session) return null;
+
+  const handleCancelSession = async () => {
+    if (!cancelReason.trim()) {
+      alert('Por favor proporciona un motivo para la cancelación');
+      return;
+    }
+
+    try {
+      setCancelling(true);
+      
+      await TutoringSessionService.cancelSession(
+        session.id, 
+        user.email, 
+        cancelReason
+      );
+      
+      alert('✅ Sesión cancelada exitosamente');
+      setShowCancelConfirm(false);
+      
+      // Llamar al callback de actualización si existe
+      if (onSessionUpdate) {
+        onSessionUpdate();
+      }
+      
+      onClose();
+    } catch (error) {
+      console.error('Error cancelling session:', error);
+      alert(`❌ ${error.message}`);
+    } finally {
+      setCancelling(false);
+    }
+  };
+
+  const canCancel = () => {
+    // No se puede cancelar si ya está cancelada
+    if (session.status === 'cancelled') return false;
+    
+    // No se puede cancelar si ya pasó
+    const now = new Date();
+    if (new Date(session.scheduledDateTime) <= now) return false;
+    
+    // Verificar si faltan más de 2 horas
+    return TutoringSessionService.canCancelSession(session.scheduledDateTime);
+  };
+
+  const getTimeUntilSession = () => {
+    const now = new Date();
+    const sessionDate = new Date(session.scheduledDateTime);
+    const hoursUntilSession = (sessionDate - now) / (1000 * 60 * 60);
+    
+    if (hoursUntilSession < 0) return 'La sesión ya pasó';
+    if (hoursUntilSession < 1) return `Faltan ${Math.round(hoursUntilSession * 60)} minutos`;
+    return `Faltan ${Math.round(hoursUntilSession)} horas`;
+  };
 
   const getPaymentStatusBadge = (paymentStatus) => {
     // Only show payment badge for meaningful states after booking
@@ -22,6 +83,7 @@ export default function TutoringDetailsModal({ isOpen, onClose, session }) {
       </span>
     );
   };
+  
   const formattedDate = new Date(session.scheduledDateTime).toLocaleDateString('es-ES', {
     weekday: 'long',
     month: 'long',
@@ -142,7 +204,84 @@ export default function TutoringDetailsModal({ isOpen, onClose, session }) {
         </div>
 
         {/* Footer Actions */}
-        <div className="px-6 pb-6">
+        <div className="px-6 pb-6 space-y-3">
+          {/* Mostrar estado de cancelación si aplica */}
+          {session.status === 'cancelled' && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-3">
+              <p className="text-sm font-semibold text-red-800 mb-1">
+                ⚠️ Sesión Cancelada
+              </p>
+              {session.cancelledBy && (
+                <p className="text-xs text-red-700">
+                  Cancelada por: {session.cancelledBy === user.email ? 'ti' : session.cancelledBy}
+                </p>
+              )}
+              {session.cancellationReason && (
+                <p className="text-xs text-red-600 mt-1">
+                  Motivo: {session.cancellationReason}
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Botón de cancelación si es posible cancelar */}
+          {!showCancelConfirm && canCancel() && (
+            <button
+              onClick={() => setShowCancelConfirm(true)}
+              className="w-full py-3 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 transition-colors"
+            >
+              Cancelar Tutoría
+            </button>
+          )}
+
+          {/* Mostrar mensaje si no se puede cancelar */}
+          {!canCancel() && session.status !== 'cancelled' && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-3">
+              <p className="text-sm text-yellow-800 text-center">
+                ⏰ {getTimeUntilSession()}
+              </p>
+              <p className="text-xs text-yellow-700 text-center mt-1">
+                No se puede cancelar con menos de 2 horas de anticipación
+              </p>
+            </div>
+          )}
+
+          {/* Confirmación de cancelación */}
+          {showCancelConfirm && (
+            <div className="bg-red-50 border-2 border-red-200 rounded-lg p-4 space-y-3">
+              <p className="text-sm font-semibold text-red-800">
+                ¿Estás seguro que deseas cancelar esta tutoría?
+              </p>
+              <textarea
+                value={cancelReason}
+                onChange={(e) => setCancelReason(e.target.value)}
+                placeholder="Por favor proporciona un motivo para la cancelación..."
+                className="w-full px-3 py-2 border border-red-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+                rows="3"
+              />
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    setShowCancelConfirm(false);
+                    setCancelReason('');
+                  }}
+                  className="flex-1 py-2 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300 transition-colors"
+                  disabled={cancelling}
+                >
+                  No, mantener
+                </button>
+                <button
+                  onClick={handleCancelSession}
+                  className="flex-1 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+                  disabled={cancelling || !cancelReason.trim()}
+                >
+                  {cancelling ? 'Cancelando...' : 'Sí, cancelar'}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Botón cerrar */}
           <button
             onClick={onClose}
             className="w-full py-3 bg-white text-gray-700 font-semibold rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"

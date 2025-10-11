@@ -234,9 +234,6 @@ export class TutorSearchService {
           (Array.isArray(t.subjects) &&
             t.subjects.join(' ').toLowerCase().includes(q))
       );
-
-      logger.info({ searchTerm, count: filtered.length }, 'Tutores filtrados exitosamente');
-      return filtered;
     } catch (error) {
       logger.error({ error, searchTerm }, 'Error buscando tutores');
       throw new Error(`Error en búsqueda: ${error.message}`);
@@ -259,9 +256,6 @@ export class TutorSearchService {
         subjects,
         subjectCount: subjects.length,
       };
-
-      logger.info({ tutorId, stats }, 'Estadísticas obtenidas exitosamente');
-      return stats;
     } catch (error) {
       logger.error({ error, tutorId }, 'Error obteniendo estadísticas del tutor');
       return {
@@ -285,11 +279,15 @@ export class TutorSearchService {
       // Normalizar la materia
       const normalized = await this.normalizeSubject(subject);
       const searchTerm = normalized.name || subject;
+
+      console.log('Normalized subject:', normalized);
       
       // Buscar en la colección de usuarios que son tutores
       const usersCollection = collection(db, 'users');
       const tutorsQuery = query(usersCollection, where('isTutor', '==', true));
       const tutorsSnapshot = await getDocs(tutorsQuery);
+
+      console.log('Tutors found:', tutorsSnapshot.docs.length);
       
       const tutorsWithSubject = [];
       
@@ -307,7 +305,9 @@ export class TutorSearchService {
           if (hasSubject) {
             // Obtener disponibilidad del tutor
             const availability = await FirebaseAvailabilityService.getTutorAvailability(tutorEmail);
-            
+
+            console.log('Tutor availability:', availability);
+
             // Crear objeto tutor enriquecido
             const enrichedTutor = this.sanitizeTutor(tutorDoc, {
               email: tutorEmail,
@@ -381,5 +381,15 @@ export class TutorSearchService {
       .sort((a, b) => new Date(a.startDateTime) - new Date(b.startDateTime));
     
     return futureSlots.length > 0 ? futureSlots[0] : null;
+  }
+
+  // Obtener disponibilidad conjunta para una materia
+  static async getJointAvailabilityBySubject(subject) {
+    try {
+      return await FirebaseAvailabilityService.getAvailabilitiesBySubject(subject);
+    } catch (error) {
+      logger.error({ error, subject }, 'Error obteniendo disponibilidad conjunta por materia');
+      throw new Error(`Error obteniendo disponibilidad conjunta: ${error.message}`);
+    }
   }
 }

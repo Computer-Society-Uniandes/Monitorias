@@ -52,13 +52,18 @@ export class SlotService {
   
   // Dividir múltiples disponibilidades en slots de 1 hora
   static generateHourlySlotsFromAvailabilities(availabilities) {
+    if (!Array.isArray(availabilities)) {
+      console.warn('generateHourlySlotsFromAvailabilities: availabilities no es un array válido');
+      return [];
+    }
+
     const allSlots = [];
-    
+
     availabilities.forEach(availability => {
       const slots = this.generateHourlySlots(availability);
       allSlots.push(...slots);
     });
-    
+
     return allSlots;
   }
   
@@ -367,4 +372,4 @@ export class SlotService {
     // Si no encuentra palabras clave específicas, usar el título como materia
     return title.length > 30 ? 'Tutoría General' : title;
   }
-} 
+}

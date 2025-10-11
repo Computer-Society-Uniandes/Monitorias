@@ -2,10 +2,12 @@
 
 import React, { useState, useEffect } from "react";
 import { AvailabilityService } from "../../services/AvailabilityService";
+import { SlotService } from "../../services/SlotService";
 import "./StudentAvailabilityViewer.css";
 
 export default function StudentAvailabilityViewer() {
   const [availabilities, setAvailabilities] = useState([]);
+  const [slots, setSlots] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedSubject, setSelectedSubject] = useState('');
   const [selectedDateRange, setSelectedDateRange] = useState('week');
@@ -25,9 +27,9 @@ export default function StudentAvailabilityViewer() {
     try {
       setLoading(true);
       setError(null);
-      
+
       let result;
-      
+
       if (selectedSubject) {
         // Buscar por materia
         result = await AvailabilityService.getAvailabilitiesBySubject(selectedSubject);
@@ -35,7 +37,7 @@ export default function StudentAvailabilityViewer() {
         // Buscar por rango de fechas
         const now = new Date();
         let endDate;
-        
+
         switch (selectedDateRange) {
           case 'week':
             endDate = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
@@ -46,34 +48,33 @@ export default function StudentAvailabilityViewer() {
           default:
             endDate = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
         }
-        
+
         result = await AvailabilityService.getAvailabilitiesInRange(
           now.toISOString().split('T')[0],
           endDate.toISOString().split('T')[0]
         );
       }
-      
-      setAvailabilities(result.availabilitySlots || []);
-      
+
+      const availabilitySlots = result.availabilitySlots || [];
+      setAvailabilities(availabilitySlots);
+
+      // Generar slots de 1 hora
+      const generatedSlots = SlotService.generateHourlySlotsFromAvailabilities(availabilitySlots);
+      const availableSlots = SlotService.getAvailableSlots(generatedSlots);
+      setSlots(availableSlots);
+
     } catch (error) {
       console.error('Error loading availabilities:', error);
       setError(error.message);
       setAvailabilities([]);
+      setSlots([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const groupAvailabilitiesByTutor = (availabilities) => {
-    const grouped = {};
-    availabilities.forEach(availability => {
-      const tutorEmail = availability.tutorEmail;
-      if (!grouped[tutorEmail]) {
-        grouped[tutorEmail] = [];
-      }
-      grouped[tutorEmail].push(availability);
-    });
-    return grouped;
+  const groupSlotsByDate = (slots) => {
+    return SlotService.groupSlotsByDate(slots);
   };
 
   const formatDateTime = (dateTime) => {
@@ -89,7 +90,7 @@ export default function StudentAvailabilityViewer() {
     });
   };
 
-  const groupedAvailabilities = groupAvailabilitiesByTutor(availabilities);
+  const groupedSlots = groupSlotsByDate(slots);
 
   return (
     <div className="student-availability-viewer">
@@ -144,7 +145,7 @@ export default function StudentAvailabilityViewer() {
         <p>
           {loading ? 
             'Cargando disponibilidades...' : 
-            `Se encontraron ${availabilities.length} horarios disponibles de ${Object.keys(groupedAvailabilities).length} tutores`
+            `Se encontraron ${slots.length} horarios disponibles en ${Object.keys(groupedSlots).length} días`
           }
         </p>
       </div>
@@ -160,64 +161,30 @@ export default function StudentAvailabilityViewer() {
           ))}
         </div>
       ) : (
-        <div className="tutors-grid">
-          {Object.keys(groupedAvailabilities).length === 0 ? (
+        <div className="slots-grid">
+          {Object.keys(groupedSlots).length === 0 ? (
             <div className="no-results">
-              <p>📭 No se encontraron disponibilidades</p>
+              <p>📭 No se encontraron horarios disponibles</p>
               <p>Intenta cambiar los filtros o vuelve más tarde</p>
             </div>
           ) : (
-            Object.entries(groupedAvailabilities).map(([tutorEmail, tutorAvailabilities]) => (
-              <div key={tutorEmail} className="tutor-card">
-                <div className="tutor-header">
-                  <h3>👨‍🏫 {tutorEmail}</h3>
-                  <span className="availability-count">
-                    {tutorAvailabilities.length} horarios disponibles
+            Object.entries(groupedSlots).map(([date, daySlots]) => (
+              <div key={date} className="date-section">
+                <div className="date-header">
+                  <h4>{date}</h4>
+                  <span className="slots-count">
+                    {daySlots.length} horario{daySlots.length !== 1 ? 's' : ''} disponible{daySlots.length !== 1 ? 's' : ''}
                   </span>
                 </div>
-                
-                <div className="availabilities-list">
-                  {tutorAvailabilities.map(availability => (
-                    <div key={availability.id} className="availability-item">
-                      <div className="availability-header">
-                        <span 
-                          className="subject-tag" 
-                          style={{ backgroundColor: availability.color }}
-                        >
-                          {availability.subject}
-                        </span>
-                        <span className="availability-title">
-                          {availability.title}
-                        </span>
+
+                <div className="time-slots">
+                  {daySlots.map(slot => (
+                    <div key={slot.id} className="time-slot">
+                      <div className="slot-time">
+                        {formatDateTime(slot.startDateTime)} - {formatDateTime(slot.endDateTime)}
                       </div>
-                      
-                      <div className="availability-details">
-                        <div className="availability-time">
-                          📅 {formatDateTime(availability.startDateTime)} - {availability.endTime}
-                        </div>
-                        
-                        {availability.location && (
-                          <div className="availability-location">
-                            📍 {availability.location}
-                          </div>
-                        )}
-                        
-                        {availability.description && (
-                          <div className="availability-description">
-                            {availability.description}
-                          </div>
-                        )}
-                        
-                        {availability.recurring && (
-                          <span className="recurring-badge">
-                            🔄 Semanal
-                          </span>
-                        )}
-                      </div>
-                      
-                      <button className="btn-contact-tutor">
-                        💬 Contactar Tutor
-                      </button>
+                      {slot.location && <div className="slot-location">📍 {slot.location}</div>}
+                      {slot.description && <div className="slot-description">{slot.description}</div>}
                     </div>
                   ))}
                 </div>
@@ -228,4 +195,4 @@ export default function StudentAvailabilityViewer() {
       )}
     </div>
   );
-} 
+}

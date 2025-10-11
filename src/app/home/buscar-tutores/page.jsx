@@ -147,9 +147,9 @@ function BuscarTutoresContent() {
         try {
             setLoadingTutors(true);
             setSelectedSubjectForTutors(subject);
-            
-            // Usar el nuevo método searchTutorsBySubject para obtener tutores con información enriquecida
-            const tutors = await TutorSearchService.searchTutorsBySubject(subject.nombre);
+
+            // Usar el nuevo método getTutorsBySubject para obtener tutores con información enriquecida
+            const tutors = await TutorSearchService.getTutorsBySubject(subject.nombre);
             setTutorsForSubject(tutors);
             setShowTutorView(true); // Cambiar a la vista de tutores con título "Disponibilidad conjunta"
         } catch (error) {
@@ -191,7 +191,7 @@ function BuscarTutoresContent() {
     const handleTutorBookNow = (tutor) => {
         // Navegar directamente a la disponibilidad individual del tutor
         const params = new URLSearchParams({
-            tutorId: tutor.id || tutor.email,
+            tutorId: tutor.email,
             tutorName: tutor.name || 'Tutor',
             ...(tutor.subjects && tutor.subjects.length > 0 && { subject: tutor.subjects[0] }),
             ...(tutor.location && { location: tutor.location }),
@@ -358,7 +358,7 @@ function BuscarTutoresContent() {
                                 <div className="tutors-list space-y-6">
                                     {tutorsForSubject.map((tutor, index) => (
                                         <ModernTutorCard
-                                            key={tutor.id || tutor.email || index}
+                                            key={`${tutor.email}-${index}`}
                                             tutor={tutor}
                                             subject={selectedSubjectForTutors?.nombre}
                                             onReservar={handleReservarTutor}
