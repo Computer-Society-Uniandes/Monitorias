@@ -7,8 +7,10 @@ import './AvailabilityCalendar.css';
 import { AvailabilityService } from 'app/app/services/AvailabilityService';
 import { SlotService } from 'app/app/services/SlotService';
 import { TutoringSessionService } from 'app/app/services/TutoringSessionService';
+import { PaymentService } from 'app/app/services/PaymentService';
 import { useAuth } from 'app/app/context/SecureAuthContext';
 import { TutorSearchService } from 'app/app/services/TutorSearchService';
+import SessionConfirmationModal from '../SessionConfirmationModal/SessionConfirmationModal';
 
 const AvailabilityCalendar = ({ 
   tutorId = null,        // Para modo individual
@@ -26,6 +28,11 @@ const AvailabilityCalendar = ({
   const [loadingData, setLoadingData] = useState(false);
   const [error, setError] = useState(null);
   const [availabilityDataReady, setAvailabilityDataReady] = useState(false);
+  
+  // Estados para el modal de confirmación
+  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+  const [selectedSlotForBooking, setSelectedSlotForBooking] = useState(null);
+  const [confirmLoading, setConfirmLoading] = useState(false);
 
   useEffect(() => {
     if (selectedDate) {
@@ -140,10 +147,93 @@ const AvailabilityCalendar = ({
       }
 
       console.log('Slot seleccionado:', slot);
+      
+      // Abrir modal de confirmación
+      setSelectedSlotForBooking(slot);
+      setShowConfirmationModal(true);
+      setError(null);
     } catch (error) {
       console.error('Error seleccionando slot:', error);
       setError('Error seleccionando el horario. Por favor intenta de nuevo.');
     }
+  };
+
+  const handleBookingConfirm = async ({ studentEmail, proofFile }) => {
+    if (!selectedSlotForBooking || !user) {
+      setError('Información de sesión incompleta');
+      return;
+    }
+
+    try {
+      setConfirmLoading(true);
+      setError(null);
+
+      console.log('📝 Iniciando proceso de reserva...');
+      console.log('Slot seleccionado:', selectedSlotForBooking);
+      console.log('Email del estudiante:', studentEmail);
+      console.log('Archivo de comprobante:', proofFile);
+
+      // 1. Subir comprobante de pago
+      console.log('📤 Subiendo comprobante de pago...');
+      const paymentProof = await PaymentService.uploadPaymentProof(proofFile);
+      console.log('✅ Comprobante subido:', paymentProof);
+
+      // 2. Crear la sesión de tutoría
+      const sessionData = {
+        tutorId: tutorId,
+        tutorEmail: selectedSlotForBooking.tutorEmail || tutorId,
+        tutorName: tutorName || selectedSlotForBooking.tutorName || 'Tutor',
+        studentEmail: studentEmail,
+        studentName: user.displayName || user.email,
+        subject: subject || selectedSlotForBooking.subject || 'Tutoría',
+        scheduledDateTime: selectedSlotForBooking.startDateTime,
+        endDateTime: selectedSlotForBooking.endDateTime,
+        location: selectedSlotForBooking.location || 'Virtual',
+        description: selectedSlotForBooking.description || '',
+        status: 'pending',
+        paymentProofUrl: paymentProof.url,
+        paymentProofPath: paymentProof.path,
+        price: selectedSlotForBooking.price || 25000,
+        availabilityId: selectedSlotForBooking.availabilityId || selectedSlotForBooking.id,
+        createdAt: new Date().toISOString(),
+      };
+
+      console.log('📋 Datos de la sesión:', sessionData);
+      console.log('💾 Creando sesión en Firestore...');
+      
+      const createdSession = await TutoringSessionService.createSession(sessionData);
+      console.log('✅ Sesión creada exitosamente:', createdSession);
+
+      // 3. Cerrar modal y mostrar mensaje de éxito
+      setShowConfirmationModal(false);
+      setSelectedSlotForBooking(null);
+      
+      alert(`✅ ¡Reserva exitosa!
+      
+Tu solicitud de tutoría ha sido enviada al tutor.
+      
+📧 Recibirás un correo de confirmación a: ${studentEmail}
+⏰ Fecha: ${new Date(sessionData.scheduledDateTime).toLocaleString('es-ES')}
+📚 Materia: ${sessionData.subject}
+      
+El tutor revisará tu solicitud y recibirás el link de Google Meet una vez aprobada.`);
+
+      // 4. Recargar la disponibilidad
+      await loadAvailabilityData();
+      
+    } catch (error) {
+      console.error('❌ Error creando la sesión:', error);
+      setError(`Error al crear la sesión: ${error.message}`);
+      alert(`❌ Error al reservar: ${error.message}\n\nPor favor intenta nuevamente.`);
+    } finally {
+      setConfirmLoading(false);
+    }
+  };
+
+  const handleCloseConfirmationModal = () => {
+    setShowConfirmationModal(false);
+    setSelectedSlotForBooking(null);
+    setError(null);
   };
 
   const getTileClassName = ({ date: tileDate, view }) => {
@@ -251,6 +341,26 @@ const AvailabilityCalendar = ({
           )}
         </div>
       </div>
+
+      {/* Modal de confirmación de reserva */}
+      {showConfirmationModal && selectedSlotForBooking && (
+        <SessionConfirmationModal
+          isOpen={showConfirmationModal}
+          onClose={handleCloseConfirmationModal}
+          session={{
+            tutorName: tutorName || selectedSlotForBooking.tutorName || 'Tutor',
+            tutorEmail: tutorId || selectedSlotForBooking.tutorEmail,
+            subject: subject || selectedSlotForBooking.subject || 'Tutoría',
+            scheduledDateTime: selectedSlotForBooking.startDateTime,
+            endDateTime: selectedSlotForBooking.endDateTime,
+            location: selectedSlotForBooking.location || 'Virtual',
+            price: selectedSlotForBooking.price || 25000,
+            studentEmail: user?.email || '',
+          }}
+          onConfirm={handleBookingConfirm}
+          confirmLoading={confirmLoading}
+        />
+      )}
     </div>
   );
 };
