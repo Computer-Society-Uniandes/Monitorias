@@ -653,6 +653,34 @@ export class TutoringSessionService {
     }
   }
 
+  // Enviar comprobante de pago y actualizar el estado a 'en_verificación'
+  static async submitPaymentProof(sessionId, proofData) {
+    try {
+      if (!sessionId) throw new Error('sessionId is required');
+
+      const updateData = {
+        paymentStatus: 'en_verificación',
+        paymentProof: {
+          url: proofData.fileUrl || null,
+          fileName: proofData.fileName || null,
+          amountSent: proofData.amountSent || null,
+          senderName: proofData.senderName || null,
+          transactionNumber: proofData.transactionNumber || null,
+          submittedAt: serverTimestamp()
+        },
+        updatedAt: serverTimestamp()
+      };
+
+      await this.updateTutoringSession(sessionId, updateData);
+
+      console.log('Payment proof submitted for session:', sessionId);
+      return { success: true };
+    } catch (error) {
+      console.error('Error enviando comprobante de pago:', error);
+      throw new Error(`Error enviando comprobante de pago: ${error.message}`);
+    }
+  }
+
   // Crear evento en el calendario central de Calico usando la API
   static async createCalicoCalendarEvent(eventData) {
     try {

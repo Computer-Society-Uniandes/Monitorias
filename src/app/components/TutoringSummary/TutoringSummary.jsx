@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { TutoringSessionService } from "../../services/TutoringSessionService";
 import { useAuth } from "../../context/SecureAuthContext";
@@ -199,13 +200,16 @@ export default function TutoringSummary({ userType, title, linkText, linkHref })
         </div>
       )}
 
-      {/* Modal de detalles */}
-      <TutoringDetailsModal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        session={selectedSession}
-        userType={userType}
-      />
+      {/* Modal de detalles renderizado con Portal */}
+      {typeof window !== 'undefined' && isModalOpen && createPortal(
+        <TutoringDetailsModal
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          session={selectedSession}
+          userType={userType}
+        />,
+        document.body
+      )}
     </div>
   );
 } 

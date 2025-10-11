@@ -110,15 +110,18 @@ export class CalicoCalendarService {
       // Validar y normalizar la lista de attendees
       let normalizedAttendees = [];
       if (Array.isArray(attendees)) {
-        normalizedAttendees = [...attendees];
+        normalizedAttendees = attendees.map(a => {
+          if (typeof a === 'string') return { email: a };
+          return a || {};
+        });
       } else if (attendees && typeof attendees === 'object') {
         // Si attendees es un objeto, convertirlo a array
-        normalizedAttendees = [attendees];
+        normalizedAttendees = [typeof attendees === 'string' ? { email: attendees } : attendees];
       }
 
       // Asegurar que el tutor esté en la lista de asistentes
-      const attendeeEmails = normalizedAttendees.map(a => a.email || a);
-      if (!attendeeEmails.includes(tutorEmail)) {
+      const hasTutor = normalizedAttendees.some(a => (a.email || a) === tutorEmail || a === tutorEmail);
+      if (!hasTutor) {
         normalizedAttendees.push({
           email: tutorEmail,
           displayName: tutorName || tutorEmail,
@@ -126,7 +129,35 @@ export class CalicoCalendarService {
         });
       }
 
-      console.log('👥 Normalized attendees:', normalizedAttendees);
+      // Dedupe attendees por email (preferir displayName no vacío y responseStatus 'accepted')
+      const attendeesByEmail = {};
+      normalizedAttendees.forEach(a => {
+        const email = (a && a.email) ? a.email : (typeof a === 'string' ? a : null);
+        if (!email) return;
+
+        const existing = attendeesByEmail[email];
+        if (!existing) {
+          attendeesByEmail[email] = { ...a, email };
+          return;
+        }
+
+        // Merge logic: prefer displayName if present
+        if (a.displayName && a.displayName !== existing.displayName) {
+          attendeesByEmail[email].displayName = a.displayName;
+        }
+
+        // Prefer 'accepted' responseStatus over others
+        const statusOrder = { accepted: 2, needsAction: 1, tentative: 1, declined: 0 };
+        const existingScore = statusOrder[existing.responseStatus] || 0;
+        const newScore = statusOrder[a.responseStatus] || 0;
+        if (newScore > existingScore) {
+          attendeesByEmail[email].responseStatus = a.responseStatus;
+        }
+      });
+
+      normalizedAttendees = Object.values(attendeesByEmail);
+
+      console.log('👥 Normalized (deduped) attendees:', normalizedAttendees);
 
       // Configurar fechas con zona horaria de Colombia
       const timeZone = 'America/Bogota';
@@ -180,6 +211,20 @@ export class CalicoCalendarService {
         attendeesInfo: `${normalizedAttendees.length} attendees (not included in event due to Service Account limitations)`,
         calendarId: this.calenderId
       });
+
+      // Si faltan credenciales o ID de calendario, no fallar: hacer fallback seguro
+      if (!process.env.GOOGLE_SERVICE_ACCOUNT_KEY || !process.env.CALICO_CALENDAR_ID) {
+        console.warn('⚠️ Google Calendar Service not configured. Skipping calendar creation.');
+        return {
+          success: true,
+          warning: 'Google Calendar not configured — event not created in external calendar',
+          eventId: null,
+          htmlLink: null,
+          hangoutLink: null,
+          event: event,
+          attendees: normalizedAttendees
+        };
+      }
 
       // Obtener el cliente de Calendar
       const calendar = await this.getCalendarClient();
