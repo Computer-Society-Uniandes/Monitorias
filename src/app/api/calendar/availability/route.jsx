@@ -54,17 +54,19 @@ export async function GET(request) {
 
     // Mapear eventos de Google Calendar al formato esperado por la aplicación
     const availabilitySlots = events.map(event => {
-      const start = new Date(event.start.dateTime || event.start.date);
-      const end = new Date(event.end.dateTime || event.end.date);
+      const isAllDay = !!event.start.date;
+      const start = isAllDay ? new Date(event.start.date) : new Date(event.start.dateTime);
+      const end = isAllDay ? new Date(event.end.date) : new Date(event.end.dateTime);
       const dayOfWeek = getDayOfWeek(start);
-      
+
       return {
         id: event.id,
         title: event.summary || 'Disponible',
         day: dayOfWeek,
-        startTime: formatTime(start),
-        endTime: formatTime(end),
-        date: start.toISOString().split('T')[0],
+        startTime: isAllDay ? '' : formatTime(start),
+        endTime: isAllDay ? '' : formatTime(end),
+        // Use local date components to avoid UTC conversion shifting the day
+        date: isAllDay ? event.start.date : formatDateLocal(start),
         recurring: event.recurrence && event.recurrence.length > 0,
         color: getRandomColor(),
         description: event.description || '',
@@ -99,6 +101,14 @@ export async function GET(request) {
       connected: false 
     }, { status: 500 });
   }
+}
+
+// Formatea la fecha usando componentes locales (YYYY-MM-DD)
+function formatDateLocal(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
 }
 
 // Función auxiliar para obtener el día de la semana
