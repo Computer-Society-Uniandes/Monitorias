@@ -3,235 +3,152 @@
 import React from "react";
 import "./TutoringDetailsModal.css";
 
-export default function TutoringDetailsModal({ isOpen, onClose, session, userType }) {
+export default function TutoringDetailsModal({ isOpen, onClose, session }) {
   if (!isOpen || !session) return null;
 
-  const formatDateTime = (dateTime) => {
-    if (!dateTime) return '';
-    
-    const date = new Date(dateTime);
-    const formattedDate = date.toLocaleDateString('es-ES', { 
-      weekday: 'long', 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    });
-    
-    const formattedTime = date.toLocaleTimeString('es-ES', { 
-      hour: '2-digit', 
-      minute: '2-digit' 
-    });
-
-    const endTime = new Date(date.getTime() + 60 * 60 * 1000);
-    const endTimeFormatted = endTime.toLocaleTimeString('es-ES', { 
-      hour: '2-digit', 
-      minute: '2-digit' 
-    });
-
-    return {
-      date: formattedDate,
-      time: `${formattedTime} - ${endTimeFormatted}`
-    };
-  };
-
-  const getStatusBadge = (status) => {
-    const statusConfig = {
-      scheduled: { text: 'Programada', bg: 'bg-blue-100', color: 'text-blue-800' },
-      completed: { text: 'Completada', bg: 'bg-green-100', color: 'text-green-800' },
-      cancelled: { text: 'Cancelada', bg: 'bg-red-100', color: 'text-red-800' },
-      pending: { text: 'Pendiente', bg: 'bg-yellow-100', color: 'text-yellow-800' }
-    };
-    
-    const config = statusConfig[status] || statusConfig.pending;
-    return (
-      <span className={`px-2 py-1 rounded-full text-xs font-medium ${config.bg} ${config.color} status-badge`}>
-        {config.text}
-      </span>
-    );
-  };
-
   const getPaymentStatusBadge = (paymentStatus) => {
+    // Only show payment badge for meaningful states after booking
     const paymentConfig = {
-      paid: { text: 'Pagado', bg: 'bg-green-100', color: 'text-green-800' },
-      pending: { text: 'Pendiente', bg: 'bg-yellow-100', color: 'text-yellow-800' },
-      refunded: { text: 'Reembolsado', bg: 'bg-gray-100', color: 'text-gray-800' }
+      en_verificación: { text: 'En verificación', className: 'AccentBackground PrimaryText' },
+      verificado: { text: 'Verificado', className: 'bg-green-100 text-green-800' },
+      rechazado: { text: 'Rechazado', className: 'bg-red-100 text-red-800' }
     };
-    
-    const config = paymentConfig[paymentStatus] || paymentConfig.pending;
+
+    if (!paymentStatus || !paymentConfig[paymentStatus]) return null;
+    const config = paymentConfig[paymentStatus];
     return (
-      <span className={`px-2 py-1 rounded-full text-xs font-medium ${config.bg} ${config.color}`}>
+      <span className={`px-2 py-1 rounded-full text-xs font-medium ${config.className}`}>
         {config.text}
       </span>
     );
   };
-
-  const dateTime = formatDateTime(session.scheduledDateTime);
+  const formattedDate = new Date(session.scheduledDateTime).toLocaleDateString('es-ES', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric'
+  });
+  const timeRange = `${new Date(session.scheduledDateTime).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })} - ${new Date(session.endDateTime).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 modal-overlay">
-      <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto modal-content">
+    <div 
+      className="fixed inset-0 flex items-center justify-center z-50 p-4"
+      style={{ 
+        backgroundColor: 'rgba(17, 24, 39, 0.4)', 
+        backdropFilter: 'blur(4px)',
+        WebkitBackdropFilter: 'blur(4px)' 
+      }}
+    >
+      <div className="bg-[#FEF9F6] rounded-2xl shadow-xl max-w-md w-full overflow-hidden">
         {/* Header */}
-        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 rounded-t-xl">
-          <div className="flex justify-between items-center">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-800">Detalles de la Tutoría</h2>
-              <p className="text-sm text-gray-600">{session.subject}</p>
-            </div>
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 transition-colors close-button"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
+        <div className="bg-white px-6 py-4 flex items-center border-b border-gray-100">
+          <button onClick={onClose} className="mr-3 text-gray-600 hover:text-gray-900">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <h2 className="text-lg font-semibold text-gray-900">Detalles de la Sesión</h2>
         </div>
 
         {/* Content */}
-        <div className="p-6">
-          {/* Status and Payment */}
-          <div className="flex gap-3 mb-6">
-            {getStatusBadge(session.status)}
-            {getPaymentStatusBadge(session.paymentStatus)}
-          </div>
-
-          {/* Main Information */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 info-grid">
-            {/* Date and Time */}
-            <div className="bg-blue-50 p-4 rounded-lg info-card">
-              <h3 className="font-semibold text-gray-800 mb-2 flex items-center">
-                📅 Fecha y Hora
-              </h3>
-              <p className="text-gray-700 font-medium">{dateTime.date}</p>
-              <p className="text-blue-600 font-semibold">{dateTime.time}</p>
+        <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
+          {/* Payment Status Badge */}
+          {session.paymentStatus && (
+            <div className="flex gap-2">
+              {getPaymentStatusBadge(session.paymentStatus)}
             </div>
+          )}
 
-            {/* Participants */}
-            <div className="bg-green-50 p-4 rounded-lg info-card">
-              <h3 className="font-semibold text-gray-800 mb-2 flex items-center">
-                👥 Participantes
-              </h3>
-              <div className="space-y-1">
-                <p className="text-sm text-gray-600">
-                  <span className="font-medium">Tutor:</span> {session.tutorEmail}
-                </p>
-                <p className="text-sm text-gray-600">
-                  <span className="font-medium">Estudiante:</span> {session.studentEmail}
-                </p>
+          {/* Course */}
+          <div>
+            <h3 className="text-sm font-semibold text-gray-900 mb-2">Materia</h3>
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm">
+                <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+              </div>
+              <div>
+                <p className="font-semibold text-gray-900">{session.subject}</p>
+                {session.subjectCode && <p className="text-sm text-gray-500">{session.subjectCode}</p>}
               </div>
             </div>
           </div>
 
-          {/* Location and Price */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            {session.location && (
-              <div className="bg-purple-50 p-4 rounded-lg">
-                <h3 className="font-semibold text-gray-800 mb-2 flex items-center">
-                  📍 Ubicación
-                </h3>
-                <p className="text-gray-700">{session.location}</p>
+          {/* Tutor */}
+          <div>
+            <h3 className="text-sm font-semibold text-gray-900 mb-2">Tutor</h3>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                <span className="text-lg">👨‍🏫</span>
               </div>
-            )}
-
-            {session.price && (
-              <div className="bg-yellow-50 p-4 rounded-lg">
-                <h3 className="font-semibold text-gray-800 mb-2 flex items-center">
-                  💰 Precio
-                </h3>
-                <p className="text-2xl font-bold text-green-600">
-                  ${session.price.toLocaleString()} COP
-                </p>
-              </div>
-            )}
+              <p className="font-medium text-gray-900">{session.tutorName || session.tutorEmail}</p>
+            </div>
           </div>
 
-          {/* Notes */}
-          {session.notes && (
-            <div className="bg-gray-50 p-4 rounded-lg mb-6">
-              <h3 className="font-semibold text-gray-800 mb-2 flex items-center">
-                📝 Notas
-              </h3>
-              <p className="text-gray-700">{session.notes}</p>
+          {/* Student */}
+          {session.studentName && (
+            <div>
+              <h3 className="text-sm font-semibold text-gray-900 mb-2">Estudiante</h3>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                  <span className="text-lg">👨‍🎓</span>
+                </div>
+                <p className="font-medium text-gray-900">{session.studentName}</p>
+              </div>
             </div>
           )}
 
           {/* Session Details */}
-          <div className="bg-indigo-50 p-4 rounded-lg mb-6">
-            <h3 className="font-semibold text-gray-800 mb-3 flex items-center">
-              ℹ️ Información de la Sesión
-            </h3>
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <span className="font-medium text-gray-600">ID de Sesión:</span>
-                <p className="text-gray-700 font-mono text-xs">{session.id}</p>
+          <div>
+            <h3 className="text-sm font-semibold text-gray-900 mb-2">Detalles de la Sesión</h3>
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm">
+                <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
               </div>
-              {session.slotId && (
-                <div>
-                  <span className="font-medium text-gray-600">ID de Slot:</span>
-                  <p className="text-gray-700 font-mono text-xs">{session.slotId}</p>
-                </div>
-              )}
-              {session.createdAt && (
-                <div>
-                  <span className="font-medium text-gray-600">Creada:</span>
-                  <p className="text-gray-700">
-                    {new Date(session.createdAt).toLocaleDateString('es-ES')}
-                  </p>
-                </div>
-              )}
-              {session.updatedAt && (
-                <div>
-                  <span className="font-medium text-gray-600">Actualizada:</span>
-                  <p className="text-gray-700">
-                    {new Date(session.updatedAt).toLocaleDateString('es-ES')}
-                  </p>
-                </div>
-              )}
+              <div>
+                <p className="font-semibold text-gray-900">{timeRange}</p>
+                <p className="text-sm text-[#FF8C00]">{formattedDate}</p>
+              </div>
             </div>
           </div>
 
-          {/* Rating */}
-          {session.rating && (
-            <div className="bg-orange-50 p-4 rounded-lg mb-6">
-              <h3 className="font-semibold text-gray-800 mb-2 flex items-center">
-                ⭐ Calificación
-              </h3>
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-2xl font-bold text-orange-500">{session.rating.score}/5</span>
-                <div className="flex">
-                  {[...Array(5)].map((_, i) => (
-                    <span 
-                      key={i} 
-                      className={`text-lg ${i < session.rating.score ? 'text-yellow-400' : 'text-gray-300'}`}
-                    >
-                      ★
-                    </span>
-                  ))}
-                </div>
-              </div>
-              {session.rating.comment && (
-                <p className="text-gray-700 italic">"{session.rating.comment}"</p>
-              )}
+          {/* Location */}
+          {session.location && session.location !== 'Por definir' && (
+            <div>
+              <h3 className="text-sm font-semibold text-gray-900 mb-2">Ubicación</h3>
+              <p className="text-sm text-gray-700">{session.location}</p>
+            </div>
+          )}
+
+          {/* Cost */}
+          <div>
+            <h3 className="text-sm font-semibold text-gray-900 mb-2">Costo</h3>
+            <div className="flex justify-between items-center">
+              <span className="text-lg font-bold text-gray-900">${session.price ? session.price.toLocaleString() : '25,000'} COP</span>
+              <span className="text-sm text-gray-500">Total</span>
+            </div>
+          </div>
+
+          {/* Notes */}
+          {session.notes && (
+            <div>
+              <h3 className="text-sm font-semibold text-gray-900 mb-2">Notas</h3>
+              <p className="text-sm text-gray-700">{session.notes}</p>
             </div>
           )}
         </div>
 
-        {/* Footer */}
-        <div className="sticky bottom-0 bg-gray-50 px-6 py-4 rounded-b-xl border-t border-gray-200">
-          <div className="flex justify-end gap-3">
-            <button
-              onClick={onClose}
-              className="px-4 py-2 text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              Cerrar
-            </button>
-            {userType === 'tutor' && session.status === 'scheduled' && (
-              <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                Gestionar Sesión
-              </button>
-            )}
-          </div>
+        {/* Footer Actions */}
+        <div className="px-6 pb-6">
+          <button
+            onClick={onClose}
+            className="w-full py-3 bg-white text-gray-700 font-semibold rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+          >
+            Cerrar
+          </button>
         </div>
       </div>
     </div>

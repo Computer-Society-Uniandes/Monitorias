@@ -101,6 +101,24 @@ export async function POST(request) {
       throw new Error('Failed to create event in Calico calendar');
     }
 
+    // Si el servicio devolvió una advertencia (p.ej. no configurado), incluirla en la respuesta
+    if (result.warning) {
+      console.warn('CalicoCalendarService warning:', result.warning);
+      return NextResponse.json({
+        success: true,
+        warning: result.warning,
+        message: 'Evento procesado localmente. Calendario externo no configurado.',
+        calendarEvent: {
+          id: result.eventId || null,
+          summary: sessionData.summary,
+          start: sessionData.startDateTime,
+          end: sessionData.endDateTime,
+          attendees: result.attendees || sessionData.attendees,
+          location: sessionData.location
+        }
+      });
+    }
+
     console.log('✅ Tutoring session event created successfully:', result.eventId);
 
     return NextResponse.json({

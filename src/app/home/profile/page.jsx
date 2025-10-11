@@ -81,11 +81,12 @@ const Profile = () => {
 
     // Only access localStorage on the client
     const saved = typeof window !== 'undefined' ? localStorage.getItem('rol') : null;
-
     if (user.isTutor && saved === 'tutor') {
       setActiveRole('tutor');
+    } else if (saved === 'student') {
+      setActiveRole('student');
     } else {
-      // Por defecto estudiante
+      // Por defecto estudiante si el valor es inesperado o no existe
       if (typeof window !== 'undefined') {
         localStorage.setItem('rol', 'student');
       }

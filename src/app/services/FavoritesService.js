@@ -66,6 +66,15 @@ export class FavoritesService {
     });
   }
 
+  // Backwards-compatible aliases: some callers use the older names
+  static async toggleFavoriteCourse(userEmail, courseId, active) {
+    return FavoritesService.toggleCourseFavorite(userEmail, courseId, active);
+  }
+
+  static async toggleFavoriteTutor(userEmail, tutorId, active) {
+    return FavoritesService.toggleTutorFavorite(userEmail, tutorId, active);
+  }
+
   static async #resolveMajorName(majorRefOrString) {
     try {
       if (!majorRefOrString) return "";
@@ -81,3 +90,5 @@ export class FavoritesService {
     }
   }
 }
+
+export default FavoritesService;

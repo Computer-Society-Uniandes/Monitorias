@@ -313,9 +313,9 @@ export class AvailabilityService {
   static async createAvailabilityEvent(eventData) {
     try {
       // Obtener información del usuario desde Firebase Auth
-      const currentUser = auth.currentUser;
-      const tutorId = currentUser?.email || 'unknown';
-      const tutorEmail = currentUser?.email || '';
+  const currentUser = auth.currentUser;
+  const tutorId = currentUser?.uid || currentUser?.email || 'unknown';
+  const tutorEmail = currentUser?.email || '';
       
       if (!tutorEmail) {
         throw new Error('No se encontró información del usuario. Por favor, inicia sesión nuevamente.');
@@ -837,13 +837,14 @@ export class AvailabilityService {
 
       // Obtener información del usuario
       const tutorEmail = auth.currentUser?.email || '';
-      if (!tutorEmail) {
+      const tutorId = auth.currentUser?.uid || tutorEmail; // preferir UID, fallback a email
+      if (!tutorEmail && !tutorId) {
         console.log('❌ No hay información del usuario, saltando sync automático');
         return { success: false, reason: 'no_user_info' };
       }
 
-      // Realizar sincronización inteligente
-      const result = await this.intelligentSync(tutorEmail, tutorEmail);
+      // Realizar sincronización inteligente (pasar tutorId correcto y tutorEmail)
+      const result = await this.intelligentSync(tutorId, tutorEmail);
       
       this.lastSyncTimestamp = now;
       console.log('✅ Sincronización automática completada:', result);
