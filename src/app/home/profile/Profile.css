@@ -105,7 +105,8 @@
 /* Modal */
 .modal-backdrop {
   position: fixed; inset: 0;
-  background: rgba(0,0,0,.45);
+  background: rgba(17, 24, 39, 0.4);
+  backdrop-filter: blur(4px);
   display: grid; place-items: center;
   z-index: 60;
   animation: fadeIn .15s ease-out;

@@ -28,9 +28,7 @@ export class SlotService {
         startDateTime: slotStart,
         endDateTime: slotEnd,
         location: availability.location,
-        subject: availability.subject, // Mantener para compatibilidad
-        subjects: availability.subjects || [availability.subject], // NUEVO: Array de materias
-        isGeneralAvailability: availability.isGeneralAvailability || false, // NUEVO: Indicador
+        subject: availability.subject || this.extractSubjectFromTitle(availability.title) || 'Tutoría General',
         color: availability.color,
         googleEventId: availability.googleEventId,
         htmlLink: availability.htmlLink,
@@ -172,11 +170,18 @@ export class SlotService {
     
     slots.forEach(slot => {
       const date = new Date(slot.startDateTime);
-      const dateKey = date.toISOString().split('T')[0]; // YYYY-MM-DD
-      
+      // Build a local date-key (YYYY-MM-DD) using local date components to avoid UTC shifts
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      const dateKey = `${y}-${m}-${d}`;
+
+      // Store a normalized local Date at midnight for the group's header
+      const localMidnight = new Date(y, date.getMonth(), date.getDate());
+
       if (!grouped[dateKey]) {
         grouped[dateKey] = {
-          date: date,
+          date: localMidnight,
           slots: []
         };
       }
@@ -331,5 +336,35 @@ export class SlotService {
         booking: null
       };
     }
+  }
+
+  // Método auxiliar para extraer materia del título del evento
+  static extractSubjectFromTitle(title) {
+    if (!title) return 'Tutoría General';
+    
+    const titleLower = title.toLowerCase();
+    
+    // Buscar palabras clave comunes de materias
+    if (titleLower.includes('cálculo') || titleLower.includes('calculo')) return 'Cálculo';
+    if (titleLower.includes('física') || titleLower.includes('fisica')) return 'Física';
+    if (titleLower.includes('matemáticas') || titleLower.includes('matematicas') || titleLower.includes('math')) return 'Matemáticas';
+    if (titleLower.includes('programación') || titleLower.includes('programacion') || titleLower.includes('programming')) return 'Programación';
+    if (titleLower.includes('química') || titleLower.includes('quimica')) return 'Química';
+    if (titleLower.includes('biología') || titleLower.includes('biologia')) return 'Biología';
+    if (titleLower.includes('historia')) return 'Historia';
+    if (titleLower.includes('inglés') || titleLower.includes('ingles') || titleLower.includes('english')) return 'Inglés';
+    if (titleLower.includes('estadística') || titleLower.includes('estadistica') || titleLower.includes('statistics')) return 'Estadística';
+    if (titleLower.includes('economía') || titleLower.includes('economia')) return 'Economía';
+    if (titleLower.includes('algebra') || titleLower.includes('álgebra')) return 'Álgebra';
+    if (titleLower.includes('geometría') || titleLower.includes('geometria')) return 'Geometría';
+    if (titleLower.includes('trigonometría') || titleLower.includes('trigonometria')) return 'Trigonometría';
+    
+    // Si contiene "tutoria" o "tutoría", usar el título completo como materia
+    if (titleLower.includes('tutoria') || titleLower.includes('tutoría')) {
+      return title.replace(/tutoria|tutoría/gi, '').trim() || 'Tutoría General';
+    }
+    
+    // Si no encuentra palabras clave específicas, usar el título como materia
+    return title.length > 30 ? 'Tutoría General' : title;
   }
 } 
