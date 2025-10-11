@@ -202,9 +202,21 @@ function BuscarTutoresContent() {
                         ← Volver a materias
                     </button>
 
-                    <h1 className="text-3xl font-bold text-gray-900 mb-8">
-                        Tutores para {selectedSubject.nombre}
-                    </h1>
+                    <div className="flex justify-between items-center mb-8">
+                        <h1 className="text-3xl font-bold text-gray-900">
+                            Tutores para {selectedSubject.nombre}
+                        </h1>
+                        
+                        <button
+                            onClick={() => router.push(`/joint-availability?subject=${encodeURIComponent(selectedSubject.nombre)}`)}
+                            className="bg-gradient-to-r from-[#FDAE1E] to-[#FF9505] text-white px-6 py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-300 transform hover:scale-105 flex items-center gap-2"
+                        >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Ver Disponibilidad Conjunta
+                        </button>
+                    </div>
 
                     {loadingTutors ? (
                         <div className="text-center py-12">

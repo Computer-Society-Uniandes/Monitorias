@@ -15,6 +15,7 @@ import {
   Calendar,
   GraduationCap,
   CreditCard,
+  History,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -76,7 +77,8 @@ export default function Header() {
   const studentNavItems = [
     { href: routes.HOME, label: "Home", icon: Home },
     { href: routes.SEARCH_TUTORS, label: "Search", icon: Search },
-    { href: routes.FAVORITES, label: "Favorites", icon: Heart }
+    { href: routes.FAVORITES, label: "Favorites", icon: Heart },
+    { href: routes.HISTORY, label: "History", icon: History }
   ];
 
   const tutorNavItems = [

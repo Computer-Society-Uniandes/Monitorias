@@ -7,6 +7,10 @@ const routes = {
     REGISTER:"/auth/register",
     PROFILE: "/home/profile",
     FAVORITES: "/home/favorites",
+    HISTORY: "/home/history",
+    
+    // Disponibilidad conjunta
+    JOINT_AVAILABILITY: "/joint-availability",
     
     // Rutas específicas para tutores
     TUTOR_INICIO: '/tutor/inicio',
