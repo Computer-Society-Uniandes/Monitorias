@@ -4,6 +4,11 @@ import React, { useState, useEffect } from 'react';
 import Calendar from 'react-calendar';
 import { Clock, User, Users, ChevronLeft, ChevronRight } from 'lucide-react';
 import './AvailabilityCalendar.css';
+import { AvailabilityService } from 'app/app/services/AvailabilityService';
+import { SlotService } from 'app/app/services/SlotService';
+import { TutoringSessionService } from 'app/app/services/TutoringSessionService';
+import { useAuth } from 'app/app/context/SecureAuthContext';
+import { TutorSearchService } from 'app/app/services/TutorSearchService';
 
 const AvailabilityCalendar = ({ 
   tutorId = null,        // Para modo individual
@@ -14,10 +19,13 @@ const AvailabilityCalendar = ({
   selectedDate, 
   loading = false 
 }) => {
+  const { user } = useAuth();
   const [date, setDate] = useState(selectedDate || new Date());
   const [selectedDaySlots, setSelectedDaySlots] = useState([]);
   const [availabilityData, setAvailabilityData] = useState([]);
   const [loadingData, setLoadingData] = useState(false);
+  const [error, setError] = useState(null);
+  const [availabilityDataReady, setAvailabilityDataReady] = useState(false);
 
   useEffect(() => {
     if (selectedDate) {
@@ -30,96 +38,76 @@ const AvailabilityCalendar = ({
   }, [tutorId, subject, mode]);
 
   useEffect(() => {
-    generateSlotsForSelectedDay();
-  }, [date, availabilityData]);
+    if (Array.isArray(availabilityData) && availabilityData.length > 0) {
+        console.log('availabilityData está listo y tiene datos:', availabilityData);
+        setAvailabilityDataReady(true);
+    } else {
+        console.log('availabilityData no está listo o está vacío:', availabilityData);
+        setAvailabilityDataReady(false);
+    }
+  }, [availabilityData]);
+
+  useEffect(() => {
+    if (availabilityDataReady) {
+        console.log('Generando slots con availabilityData actualizado:', availabilityData);
+        generateSlotsForSelectedDay();
+    } else {
+        console.log('availabilityData aún no está listo o está vacío:', availabilityData);
+    }
+  }, [availabilityDataReady, date]);
 
   const loadAvailabilityData = async () => {
     if (!tutorId && !subject) return;
-    
     try {
       setLoadingData(true);
-      let data = [];
-      
+      setError(null);
+
       if (mode === 'individual' && tutorId) {
-        // Cargar disponibilidad individual del tutor
-        // Aquí deberías usar tu servicio de Firebase
-        // data = await AvailabilityService.getTutorAvailability(tutorId);
-        console.log('Loading individual availability for tutor:', tutorId);
+        const tutorAvailability = await TutorSearchService.getTutorAvailability(tutorId, 100);
+        console.log('Tutor availability:', tutorAvailability);
+        setAvailabilityData(tutorAvailability);
       } else if (mode === 'joint' && subject) {
-        // Cargar disponibilidad conjunta por materia
-        // data = await AvailabilityService.getJointAvailability(subject);
-        console.log('Loading joint availability for subject:', subject);
+        const data = await AvailabilityService.getAvailabilitiesBySubject(subject);
+        console.log('Joint availability data:', data);
+        setAvailabilityData(data.availabilitySlots || []);
       }
-      
-      setAvailabilityData(data);
     } catch (error) {
       console.error('Error loading availability data:', error);
+      setError('Error cargando disponibilidad. Por favor intenta de nuevo.');
       setAvailabilityData([]);
     } finally {
       setLoadingData(false);
     }
   };
 
-  const generateSlotsForSelectedDay = () => {
-    if (!availabilityData || availabilityData.length === 0) {
-      setSelectedDaySlots([]);
-      return;
-    }
-
-    const selectedDateStr = date.toISOString().split('T')[0];
-    const daySlots = [];
-
-    // Filtrar slots para el día seleccionado
-    availabilityData.forEach(slot => {
-      let slotDate;
-      if (slot.date) {
-        slotDate = slot.date.toDate ? slot.date.toDate() : new Date(slot.date);
-      } else if (slot.startTime) {
-        slotDate = slot.startTime.toDate ? slot.startTime.toDate() : new Date(slot.startTime);
+  const generateSlotsForSelectedDay = async () => {
+    try {
+      console.log('Availability data:', availabilityData);
+      if (!Array.isArray(availabilityData) || availabilityData.length === 0) {
+        console.warn('generateSlotsForSelectedDay: availabilityData no es un array válido o está vacío');
+        setSelectedDaySlots([]);
+        return;
       }
 
-      if (slotDate) {
-        const slotDateStr = slotDate.toISOString().split('T')[0];
-        if (slotDateStr === selectedDateStr) {
-          daySlots.push({
-            id: slot.id || `slot-${Math.random()}`,
-            time: formatSlotTime(slotDate, slot.endTime),
-            startTime: slotDate,
-            endTime: slot.endTime?.toDate ? slot.endTime.toDate() : slot.endTime,
-            tutorEmail: slot.tutorEmail || slot.email,
-            tutorName: slot.tutorName || slot.name || tutorName,
-            tutors: slot.tutors || (slot.tutorName ? [{ name: slot.tutorName, email: slot.tutorEmail }] : []),
-            available: slot.available !== false
-          });
-        }
-      }
-    });
+      const generatedSlots = SlotService.generateHourlySlotsFromAvailabilities(availabilityData);
+      const allBookings = await SlotService.getAllBookingsForAvailabilities(
+        availabilityData,
+        TutoringSessionService
+      );
+      const slotsWithBookings = SlotService.applySavedBookingsToSlots(generatedSlots, allBookings);
+      const availableSlots = SlotService.getAvailableSlots(slotsWithBookings);
 
-    // Ordenar por hora
-    daySlots.sort((a, b) => a.startTime - b.startTime);
-    setSelectedDaySlots(daySlots);
-  };
-
-  const formatSlotTime = (startTime, endTime) => {
-    const start = startTime instanceof Date ? startTime : new Date(startTime);
-    const end = endTime ? (endTime.toDate ? endTime.toDate() : new Date(endTime)) : null;
-    
-    const startStr = start.toLocaleTimeString('es-ES', { 
-      hour: '2-digit', 
-      minute: '2-digit',
-      hour12: false 
-    });
-    
-    if (end) {
-      const endStr = end.toLocaleTimeString('es-ES', { 
-        hour: '2-digit', 
-        minute: '2-digit',
-        hour12: false 
+      const selectedDateStr = date.toISOString().split('T')[0];
+      const daySlots = availableSlots.filter(slot => {
+        const slotDateStr = new Date(slot.startDateTime).toISOString().split('T')[0];
+        return slotDateStr === selectedDateStr;
       });
-      return `${startStr} - ${endStr}`;
+
+      setSelectedDaySlots(daySlots);
+    } catch (error) {
+      console.error('Error generando slots:', error);
+      setError('Error generando horarios disponibles. Por favor intenta de nuevo.');
     }
-    
-    return startStr;
   };
 
   const handleDateChange = (newDate) => {
@@ -138,51 +126,52 @@ const AvailabilityCalendar = ({
     });
   };
 
-  const hasAvailabilityOnDate = (date) => {
-    if (!availabilityData || availabilityData.length === 0) return false;
-    
-    const dateStr = date.toISOString().split('T')[0];
-    return availabilityData.some(slot => {
-      let slotDate;
-      if (slot.date) {
-        slotDate = slot.date.toDate ? slot.date.toDate() : new Date(slot.date);
-      } else if (slot.startTime) {
-        slotDate = slot.startTime.toDate ? slot.startTime.toDate() : new Date(slot.startTime);
+  const handleSlotSelect = async (slot) => {
+    try {
+      const realTimeCheck = await SlotService.checkSlotAvailabilityRealTime(
+        slot,
+        TutoringSessionService
+      );
+
+      if (!realTimeCheck.available) {
+        setError('El horario seleccionado ya no está disponible. Por favor selecciona otro.');
+        await generateSlotsForSelectedDay();
+        return;
       }
-      
-      if (slotDate) {
-        const slotDateStr = slotDate.toISOString().split('T')[0];
-        return slotDateStr === dateStr && slot.available !== false;
-      }
-      return false;
-    });
+
+      console.log('Slot seleccionado:', slot);
+    } catch (error) {
+      console.error('Error seleccionando slot:', error);
+      setError('Error seleccionando el horario. Por favor intenta de nuevo.');
+    }
   };
 
   const getTileClassName = ({ date: tileDate, view }) => {
     if (view !== 'month') return '';
-    
+
     const baseClass = 'calendar-tile';
-    const hasAvailability = hasAvailabilityOnDate(tileDate);
-    const isSelected = date.toDateString() === tileDate.toDateString();
+    const selectedDateStr = date.toISOString().split('T')[0];
+    const tileDateStr = tileDate instanceof Date && !isNaN(tileDate) ? tileDate.toISOString().split('T')[0] : null;
+
+    const isSelected = tileDateStr && selectedDateStr === tileDateStr;
     const isPast = tileDate < new Date().setHours(0, 0, 0, 0);
-    
+    const hasAvailability = Array.isArray(availabilityData) && availabilityData.some(slot => {
+      const slotDate = slot.startDateTime ? new Date(slot.startDateTime) : null;
+      const slotDateStr = slotDate instanceof Date && !isNaN(slotDate) ? slotDate.toISOString().split('T')[0] : null;
+      return slotDateStr === tileDateStr;
+    });
+
     let classes = [baseClass];
-    
+
     if (isSelected) classes.push('selected');
     if (hasAvailability && !isPast) classes.push('has-availability');
     if (isPast) classes.push('past-date');
-    
-    return classes.join(' ');
-  };
 
-  const handleSlotSelect = (slot) => {
-    // Aquí se puede agregar lógica para seleccionar un slot específico
-    console.log('Slot seleccionado:', slot);
+    return classes.join(' ');
   };
 
   return (
     <div className="availability-calendar-container">
-      {/* Panel del calendario */}
       <div className="calendar-panel">
         <div className="calendar-header">
           <h3 className="calendar-title">
@@ -223,7 +212,6 @@ const AvailabilityCalendar = ({
         )}
       </div>
 
-      {/* Panel de horarios disponibles */}
       <div className="slots-panel">
         <div className="slots-header">
           <h3 className="slots-title">
@@ -249,27 +237,12 @@ const AvailabilityCalendar = ({
               >
                 <div className="slot-time">
                   <Clock size={16} />
-                  {slot.time}
+                  {`${new Date(slot.startDateTime).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })} - ${new Date(slot.endDateTime).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`}
                 </div>
-                
-                {isJointView && slot.tutors && slot.tutors.length > 0 ? (
-                  <div className="slot-tutors">
-                    <Users size={14} />
-                    <span>
-                      {slot.tutors.length} tutor{slot.tutors.length !== 1 ? 'es' : ''} disponible{slot.tutors.length !== 1 ? 's' : ''}
-                    </span>
-                    <div className="tutors-names">
-                      {slot.tutors.slice(0, 2).map(tutor => tutor.name).join(', ')}
-                      {slot.tutors.length > 2 && ` +${slot.tutors.length - 2} más`}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="slot-tutor">
-                    <User size={14} />
-                    <span>{slot.tutorName || 'Tutor disponible'}</span>
-                  </div>
-                )}
-
+                <div className="slot-tutor">
+                  <User size={14} />
+                  <span>{slot.tutorName || 'Tutor disponible'}</span>
+                </div>
                 <button className="book-slot-btn">
                   {mode === 'joint' ? 'Ver opciones' : 'Agendar'}
                 </button>

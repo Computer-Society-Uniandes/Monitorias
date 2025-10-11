@@ -894,6 +894,119 @@ export class TutoringSessionService {
     }
   }
 
+  // Obtener una sesión de tutoría por ID
+  static async getTutoringSessionById(sessionId) {
+    try {
+      const docRef = doc(db, this.COLLECTION_NAME, sessionId);
+      const docSnap = await getDoc(docRef);
+
+      if (!docSnap.exists()) {
+        return null;
+      }
+
+      return {
+        id: docSnap.id,
+        ...docSnap.data(),
+        createdAt: docSnap.data().createdAt?.toDate(),
+        updatedAt: docSnap.data().updatedAt?.toDate(),
+        scheduledDateTime: docSnap.data().scheduledDateTime?.toDate(),
+        endDateTime: docSnap.data().endDateTime?.toDate(),
+        cancelledAt: docSnap.data().cancelledAt?.toDate(),
+      };
+    } catch (error) {
+      console.error('Error getting tutoring session by ID:', error);
+      throw new Error(`Error obteniendo sesión: ${error.message}`);
+    }
+  }
+
+  // Verificar si una sesión puede ser cancelada (más de 2 horas antes)
+  static canCancelSession(scheduledDateTime) {
+    const now = new Date();
+    const sessionDate = new Date(scheduledDateTime);
+    const hoursUntilSession = (sessionDate - now) / (1000 * 60 * 60);
+    
+    return hoursUntilSession > 2;
+  }
+
+  // Cancelar una sesión de tutoría (con validación de tiempo)
+  static async cancelSession(sessionId, cancelledBy, reason = 'Sesión cancelada') {
+    try {
+      // Obtener la sesión
+      const session = await this.getTutoringSessionById(sessionId);
+      
+      if (!session) {
+        throw new Error('Sesión no encontrada');
+      }
+
+      // Verificar si la sesión ya fue cancelada
+      if (session.status === 'cancelled') {
+        throw new Error('Esta sesión ya fue cancelada');
+      }
+
+      // Verificar si la sesión puede ser cancelada (más de 2 horas antes)
+      if (!this.canCancelSession(session.scheduledDateTime)) {
+        throw new Error('No puedes cancelar esta sesión. Debe ser con al menos 2 horas de anticipación.');
+      }
+
+      // Cancelar evento en calendario central si existe
+      if (session.calicoCalendarEventId) {
+        await this.cancelCalicoCalendarEvent(session.calicoCalendarEventId, reason);
+      }
+
+      // Actualizar el estado de la sesión en Firebase
+      const sessionRef = doc(db, this.COLLECTION_NAME, sessionId);
+      await updateDoc(sessionRef, {
+        status: 'cancelled',
+        cancelledBy: cancelledBy,
+        cancelledAt: serverTimestamp(),
+        cancellationReason: reason,
+        updatedAt: serverTimestamp()
+      });
+
+      // Eliminar el slot booking si existe para liberar el horario
+      if (session.parentAvailabilityId && session.slotIndex !== undefined) {
+        const slotBookingQuery = query(
+          collection(db, this.SLOT_BOOKINGS_COLLECTION),
+          where('parentAvailabilityId', '==', session.parentAvailabilityId),
+          where('slotIndex', '==', session.slotIndex),
+          where('sessionId', '==', sessionId)
+        );
+
+        const slotBookingSnapshot = await getDocs(slotBookingQuery);
+        
+        for (const doc of slotBookingSnapshot.docs) {
+          await deleteDoc(doc.ref);
+          console.log(`Slot booking ${doc.id} deleted after cancellation`);
+        }
+      }
+
+      // Crear notificación para la otra parte
+      const otherPartyEmail = cancelledBy === session.tutorEmail ? session.studentEmail : session.tutorEmail;
+      const cancellerRole = cancelledBy === session.tutorEmail ? 'tutor' : 'estudiante';
+      
+      await NotificationService.createSessionCancelledNotification({
+        sessionId: sessionId,
+        recipientEmail: otherPartyEmail,
+        cancelledBy: cancelledBy,
+        cancellerRole: cancellerRole,
+        subject: session.subject,
+        scheduledDateTime: session.scheduledDateTime,
+        reason: reason
+      });
+
+      console.log('✅ Session cancelled successfully by', cancelledBy);
+      return { 
+        success: true, 
+        message: 'Sesión cancelada exitosamente',
+        id: sessionId 
+      };
+
+    } catch (error) {
+      console.error('Error cancelling session:', error);
+      throw new Error(error.message || 'Error cancelando la sesión');
+    }
+  }
+
   // Método auxiliar para extraer materia del título del evento
   static extractSubjectFromTitle(title) {
     if (!title) return 'Tutoría General';

@@ -53,7 +53,7 @@ export default function TutorAvailabilityCard({ tutor, materia }) {
     
     // Crear los parámetros de búsqueda para la nueva página
     const params = new URLSearchParams({
-      tutorId: tutor.id || tutor.email,
+      tutorId: tutor.email,
       tutorName: tutor.name || 'Tutor',
       ...(materia && { subject: materia }),
       ...(tutor.location && { location: tutor.location }),

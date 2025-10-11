@@ -109,6 +109,35 @@ export default function TutoringSummary({ userType, title, linkText, linkHref })
     setSelectedSession(null);
   };
 
+  const handleSessionUpdate = async () => {
+    // Recargar las sesiones cuando se actualice una
+    try {
+      if (!user.email) return;
+
+      let fetchedSessions = [];
+      if (userType === 'tutor') {
+        fetchedSessions = await TutoringSessionService.getTutorSessions(user.email);
+      } else {
+        fetchedSessions = await TutoringSessionService.getStudentSessions(user.email);
+      }
+
+      // Filtrar solo sesiones programadas y futuras
+      const now = new Date();
+      const upcomingSessions = fetchedSessions
+        .filter(session => 
+          session.status === 'scheduled' && 
+          session.scheduledDateTime && 
+          new Date(session.scheduledDateTime) > now
+        )
+        .sort((a, b) => new Date(a.scheduledDateTime) - new Date(b.scheduledDateTime))
+        .slice(0, 3);
+
+      setSessions(upcomingSessions);
+    } catch (err) {
+      console.error('Error updating sessions:', err);
+    }
+  };
+
   if (loading) {
     return (
       <div className="bg-white rounded-xl shadow-sm p-6 mb-8 tutoring-card">
@@ -207,6 +236,7 @@ export default function TutoringSummary({ userType, title, linkText, linkHref })
           onClose={handleCloseModal}
           session={selectedSession}
           userType={userType}
+          onSessionUpdate={handleSessionUpdate}
         />,
         document.body
       )}
