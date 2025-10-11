@@ -27,6 +27,7 @@ export default function Home() {
 
   // Mostrar loading mientras se carga el contexto o no está montado
   if (!mounted || loading) {
+
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">

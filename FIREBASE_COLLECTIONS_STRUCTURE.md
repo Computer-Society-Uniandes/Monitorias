@@ -180,14 +180,18 @@ Este documento define la estructura exacta de las colecciones en Firebase Firest
   "recurring": true,
   "recurrenceRule": "RRULE:FREQ=WEEKLY;BYDAY=MO",
   
-  // Materia y visualización
-  "subject": "Cálculo Diferencial",
-  "color": "#FF5722", // Color hexadecimal para mostrar
+  // Visualización
+  "color": "#FF5722", // Color hexadecimal asignado aleatoriamente
   
   // Integración con Google Calendar
   "googleEventId": "abc123def456ghi789",
   "htmlLink": "https://calendar.google.com/event?eid=...",
   "status": "confirmed", // confirmed, tentative, cancelled
+  
+  // Información del calendario específico (nuevo)
+  "sourceCalendarId": "calendar123@group.calendar.google.com",
+  "sourceCalendarName": "Disponibilidad",
+  "fromAvailabilityCalendar": true // Indica que viene del calendario específico
   
   // Campos de control
   "createdAt": "2025-01-15T10:30:00Z",
@@ -214,11 +218,13 @@ Este documento define la estructura exacta de las colecciones en Firebase Firest
   "location": "Biblioteca ML - Sala 101",
   "recurring": true,
   "recurrenceRule": "RRULE:FREQ=WEEKLY;BYDAY=TU",
-  "subject": "Cálculo Diferencial",
   "color": "#FF5722",
   "googleEventId": "abc123def456ghi789",
   "htmlLink": "https://calendar.google.com/calendar/event?eid=YWJjMTIz",
   "status": "confirmed",
+  "sourceCalendarId": "disponibilidad-maria@group.calendar.google.com",
+  "sourceCalendarName": "Disponibilidad",
+  "fromAvailabilityCalendar": true,
   "createdAt": "2025-01-15T10:30:00.000Z",
   "updatedAt": "2025-01-15T10:30:00.000Z",
   "syncedAt": "2025-01-15T10:30:00.000Z",
@@ -306,17 +312,11 @@ Este documento define la estructura exacta de las colecciones en Firebase Firest
   "price": 25000,
   "paymentStatus": "pending", // pending, paid, refunded
   
-  // Aprobación del tutor
-  "tutorApprovalStatus": "pending", // pending, accepted, declined
-  "requestedAt": "2025-01-20T10:00:00Z",
-  "acceptedAt": "2025-01-20T10:15:00Z", // Solo si fue aceptada
-  "declinedAt": "2025-01-20T10:15:00Z", // Solo si fue rechazada
-  
-  // Integración con slots
-  "parentAvailabilityId": "abc123def456ghi789",
-  "slotIndex": 2,
-  "slotId": "slot_abc123_2",
-  "googleEventId": "xyz789abc123def456",
+  // Integración con calendarios
+  "googleEventId": "xyz789abc123def456", // ID del evento original de disponibilidad
+  "availabilityId": "abc123def456ghi789", // ID de la disponibilidad original
+  "calicoCalendarEventId": "calico123abc456def789", // ID del evento en calendario central de Calico
+  "calicoCalendarHtmlLink": "https://calendar.google.com/calendar/event?eid=...", // Link al evento central
   
   // Notas y calificación
   "notes": "Revisar ejercicios de derivadas",
