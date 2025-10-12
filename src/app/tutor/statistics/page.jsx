@@ -1,177 +1,8 @@
 "use client";
 
-<<<<<<< HEAD
-import React, { useEffect, useMemo, useState } from 'react';
-import { useAuth } from '../../context/SecureAuthContext';
-import PaymentsService from '../../services/PaymentsService';
-
-const currency = (v) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(v || 0);
-
-export default function TutorStatisticsPage() {
-  const { user } = useAuth();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [payments, setPayments] = useState([]);
-  const [subject, setSubject] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
-
-  // cargar TODOS los pagos del tutor (filtrado por fecha se hace en cliente)
-  useEffect(() => {
-    const load = async () => {
-      if (!user?.email) return;
-      setLoading(true);
-      setError(null);
-      try {
-        const data = await PaymentsService.getPaymentsByTutor(user.email);
-        setPayments(data);
-      } catch (e) {
-        console.error(e);
-        setError('No fue posible cargar estadísticas');
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
-  }, [user?.email]);
-
-  // Filtrado por materia y por rango de fechas
-  const filtered = useMemo(() => {
-    const q = subject.trim().toLowerCase();
-    const s = startDate ? new Date(startDate) : null;
-    const e = endDate ? new Date(endDate) : null;
-    return payments.filter(p => {
-      if (q && !(p.subject || '').toLowerCase().includes(q)) return false;
-      const d = p.date_payment instanceof Date ? p.date_payment : null;
-      if (s && d && d < new Date(s.getFullYear(), s.getMonth(), s.getDate())) return false;
-      if (e && d && d > new Date(e.getFullYear(), e.getMonth(), e.getDate(), 23, 59, 59, 999)) return false;
-      return true;
-    });
-  }, [payments, subject, startDate, endDate]);
-
-  // Métricas
-  const metrics = useMemo(() => {
-    const totalSessions = filtered.length;
-    let totalEarned = 0;
-    let nextPayment = 0;
-    for (const p of filtered) {
-      if (p.pagado) totalEarned += p.amount || 0;
-      else nextPayment += p.amount || 0;
-    }
-    return { totalSessions, totalEarned, nextPayment };
-  }, [filtered]);
-
-  // Serie por mes (en función del rango y datos filtrados)
-  const chart = useMemo(() => {
-    const map = new Map(); // key 'YYYY-MM' -> count
-    let minD = null, maxD = null;
-    for (const p of filtered) {
-      if (!p.date_payment) continue;
-      const d = p.date_payment;
-      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-      map.set(key, (map.get(key) || 0) + 1);
-      if (!minD || d < minD) minD = d;
-      if (!maxD || d > maxD) maxD = d;
-    }
-
-    // Determinar rango mensual a mostrar
-    const start = startDate ? new Date(startDate) : (minD || new Date());
-    const end = endDate ? new Date(endDate) : (maxD || new Date());
-    const startMonth = new Date(start.getFullYear(), start.getMonth(), 1);
-    const endMonth = new Date(end.getFullYear(), end.getMonth(), 1);
-
-    const labels = [];
-    const values = [];
-    const iter = new Date(startMonth);
-    while (iter <= endMonth) {
-      const key = `${iter.getFullYear()}-${String(iter.getMonth() + 1).padStart(2, '0')}`;
-      labels.push(iter.toLocaleString('es', { month: 'short' }));
-      values.push(map.get(key) || 0);
-      iter.setMonth(iter.getMonth() + 1);
-    }
-    return { labels, values };
-  }, [filtered, startDate, endDate]);
-
-  const maxValue = Math.max(1, ...(chart.values || [0]));
-
-  return (
-    <main className="min-h-screen bg-white">
-      <div className="container mx-auto pt-6 px-6">
-        <h1 className="text-3xl font-bold mb-6">Estadísticas</h1>
-
-        {/* Filtros */}
-        <div className="flex flex-wrap gap-3 mb-6">
-          <input
-            type="text"
-            className="border rounded-lg px-4 py-2"
-            placeholder="Materia"
-            value={subject}
-            onChange={(e) => setSubject(e.target.value)}
-          />
-          <input
-            type="date"
-            className="border rounded-lg px-4 py-2"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-          />
-          <input
-            type="date"
-            className="border rounded-lg px-4 py-2"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-          />
-        </div>
-
-        {loading ? (
-          <p>Cargando…</p>
-        ) : error ? (
-          <p className="text-red-600">{error}</p>
-        ) : (
-          <>
-            {/* Tarjetas */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-              <div className="bg-amber-50 border border-amber-100 rounded-xl p-5">
-                <p className="text-gray-600">Total de tutorías</p>
-                <p className="text-3xl font-bold">{metrics.totalSessions}</p>
-              </div>
-              <div className="bg-amber-50 border border-amber-100 rounded-xl p-5">
-                <p className="text-gray-600">Siguiente pago</p>
-                <p className="text-3xl font-bold">{currency(metrics.nextPayment)}</p>
-              </div>
-              <div className="bg-amber-50 border border-amber-100 rounded-xl p-5">
-                <p className="text-gray-600">Total ganado</p>
-                <p className="text-3xl font-bold">{currency(metrics.totalEarned)}</p>
-              </div>
-            </div>
-
-            {/* Gráfico de barras full width */}
-            <div className="bg-white rounded-xl p-6 border border-gray-100 w-full">
-              <h2 className="text-lg font-semibold mb-4">Tutorías por mes</h2>
-              <div
-                className="grid items-end gap-3 w-full"
-                style={{ gridTemplateColumns: `repeat(${chart.labels.length || 1}, minmax(0, 1fr))`, height: '14rem' }}
-              >
-                {(chart.labels || []).map((label, idx) => {
-                  const v = chart.values[idx] || 0;
-                  const h = maxValue ? (v / maxValue) * 200 : 0; // hasta 200px
-                  return (
-                    <div key={label + idx} className="flex flex-col items-center justify-end gap-1">
-                      <span className="text-xs font-medium text-gray-700">{v}</span>
-                      <div className="w-full bg-orange-400 rounded" style={{ height: `${h}px` }} aria-label={`${v} sesiones`} />
-                      <span className="text-xs text-gray-600 mt-1">{label}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </>
-        )}
-      </div>
-    </main>
-=======
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../context/SecureAuthContext";
-import { TutoringSessionService } from "../../services/TutoringSessionService";
+import PaymentsService from "../../services/PaymentsService";
 import { 
   BarChart3, 
   TrendingUp, 
@@ -190,13 +21,15 @@ export default function TutorStatistics() {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     totalSessions: 0,
-    completedSessions: 0,
-    pendingSessions: 0,
-    totalEarnings: 0,
+    completedSessions: 0, // pagos pagados
+    pendingSessions: 0,   // pagos pendientes
+    totalEarnings: 0,     // suma de pagos pagados
+    nextPayment: 0,       // suma de pagos pendientes
     averageRating: 0,
-    monthlyEarnings: []
+    monthlyEarnings: [],
+    monthlyCounts: []
   });
-  const [sessions, setSessions] = useState([]);
+  const [payments, setPayments] = useState([]);
   const [transactions, setTransactions] = useState([]);
   
   // Filters
@@ -217,17 +50,17 @@ export default function TutorStatistics() {
     try {
       setLoading(true);
       
-      // Load sessions data
-      const sessionsData = await TutoringSessionService.getTutorSessions(user.email);
-      setSessions(sessionsData);
-      
-      // Calculate statistics
-      const filteredSessions = filterSessions(sessionsData);
-      const calculatedStats = calculateStatistics(filteredSessions);
+      // Cargar pagos del tutor desde Firebase (PaymentsService)
+      const paymentsData = await PaymentsService.getPaymentsByTutor(user.email);
+      setPayments(paymentsData);
+
+      // Filtrar pagos según materia/periodo
+      const filteredPayments = filterPayments(paymentsData);
+  const calculatedStats = calculateStatistics(filteredPayments);
       setStats(calculatedStats);
       
-      // Generate transaction history from completed sessions
-      const transactionHistory = generateTransactionHistory(filteredSessions);
+      // Generar historial de transacciones desde pagos
+      const transactionHistory = generateTransactionHistory(filteredPayments);
       setTransactions(transactionHistory);
       
     } catch (error) {
@@ -237,57 +70,61 @@ export default function TutorStatistics() {
     }
   };
 
-  const filterSessions = (sessionsData) => {
-    let filtered = sessionsData;
+  const filterPayments = (paymentsData) => {
+    let filtered = paymentsData;
     
     // Filter by subject
     if (selectedSubject !== "all") {
-      filtered = filtered.filter(session => 
-        session.subject?.toLowerCase().includes(selectedSubject.toLowerCase())
+      filtered = filtered.filter(p => 
+        (p.subject || '').toLowerCase().includes(selectedSubject.toLowerCase())
       );
     }
     
-    // Filter by timeframe
-    const now = new Date();
     const periodStart = new Date(selectedPeriod.start);
     const periodEnd = new Date(selectedPeriod.end);
     
-    filtered = filtered.filter(session => {
-      const sessionDate = new Date(session.scheduledDateTime);
-      return sessionDate >= periodStart && sessionDate <= periodEnd;
+    filtered = filtered.filter(p => {
+      const d = p.date_payment instanceof Date ? p.date_payment : (p.date_payment ? new Date(p.date_payment) : null);
+      if (!d) return false;
+      return d >= periodStart && d <= periodEnd;
     });
     
     return filtered;
   };
 
-  const calculateStatistics = (sessionsData) => {
-    const totalSessions = sessionsData.length;
-    const completedSessions = sessionsData.filter(s => s.status === 'completed').length;
-    const pendingSessions = sessionsData.filter(s => s.status === 'scheduled').length;
-    
-    const totalEarnings = sessionsData
-      .filter(s => s.status === 'completed' && s.paymentStatus === 'paid')
-      .reduce((sum, s) => sum + (s.price || 0), 0);
-    
-    const ratedSessions = sessionsData.filter(s => s.rating?.score);
-    const averageRating = ratedSessions.length > 0 
-      ? ratedSessions.reduce((sum, s) => sum + s.rating.score, 0) / ratedSessions.length
-      : 0;
-    
-    // Calculate monthly earnings for chart
-    const monthlyEarnings = calculateMonthlyEarnings(sessionsData);
-    
+  const calculateStatistics = (paymentsData) => {
+    const totalSessions = paymentsData.length; // número de pagos (una tutoría por pago)
+    const completedSessions = paymentsData.filter(p => p.pagado).length;
+    const pendingSessions = paymentsData.filter(p => !p.pagado).length;
+
+    const totalEarnings = paymentsData
+      .filter(p => p.pagado)
+      .reduce((sum, p) => sum + (p.amount || 0), 0);
+
+    const nextPayment = paymentsData
+      .filter(p => !p.pagado)
+      .reduce((sum, p) => sum + (p.amount || 0), 0);
+
+    const averageRating = 0; // no disponible en pagos
+
+    // Calcular ganancias mensuales para el gráfico
+    const monthlyEarnings = calculateMonthlyEarnings(paymentsData);
+    // Calcular conteo de tutorías por mes (pagadas)
+    const monthlyCounts = calculateMonthlyCounts(paymentsData);
+
     return {
       totalSessions,
       completedSessions,
       pendingSessions,
       totalEarnings,
+      nextPayment,
       averageRating,
-      monthlyEarnings
+      monthlyEarnings,
+      monthlyCounts
     };
   };
 
-  const calculateMonthlyEarnings = (sessionsData) => {
+  const calculateMonthlyEarnings = (paymentsData) => {
     const monthlyData = {};
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
                    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -300,14 +137,15 @@ export default function TutorStatistics() {
       monthlyData[monthKey] = 0;
     }
     
-    // Add earnings from completed sessions
-    sessionsData
-      .filter(s => s.status === 'completed' && s.paymentStatus === 'paid')
-      .forEach(session => {
-        const sessionDate = new Date(session.scheduledDateTime);
-        const monthKey = `${months[sessionDate.getMonth()]} ${sessionDate.getFullYear()}`;
-        if (monthlyData.hasOwnProperty(monthKey)) {
-          monthlyData[monthKey] += session.price || 0;
+    // Sumar ganancias de pagos pagados por mes
+    paymentsData
+      .filter(p => p.pagado)
+      .forEach(p => {
+        const d = p.date_payment instanceof Date ? p.date_payment : (p.date_payment ? new Date(p.date_payment) : null);
+        if (!d) return;
+        const monthKey = `${months[d.getMonth()]} ${d.getFullYear()}`;
+        if (Object.prototype.hasOwnProperty.call(monthlyData, monthKey)) {
+          monthlyData[monthKey] += p.amount || 0;
         }
       });
     
@@ -317,23 +155,45 @@ export default function TutorStatistics() {
     }));
   };
 
-  const generateTransactionHistory = (sessionsData) => {
-    return sessionsData
-      .filter(s => s.status === 'completed')
-      .map(session => ({
-        id: session.id,
-        date: session.scheduledDateTime,
-        concept: `Tutoría ${session.subject || 'General'}`,
-        student: session.studentName || session.studentEmail,
-        amount: session.price || 0,
-        status: session.paymentStatus === 'paid' ? 'completado' : 'pendiente',
-        method: session.paymentMethod || 'transferencia'
+  const calculateMonthlyCounts = (paymentsData) => {
+    const monthlyData = {};
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const now = new Date();
+    for (let i = 5; i >= 0; i--) {
+      const monthDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthKey = `${months[monthDate.getMonth()]} ${monthDate.getFullYear()}`;
+      monthlyData[monthKey] = 0;
+    }
+    paymentsData
+      .filter(p => p.pagado)
+      .forEach(p => {
+        const d = p.date_payment instanceof Date ? p.date_payment : (p.date_payment ? new Date(p.date_payment) : null);
+        if (!d) return;
+        const monthKey = `${months[d.getMonth()]} ${d.getFullYear()}`;
+        if (Object.prototype.hasOwnProperty.call(monthlyData, monthKey)) {
+          monthlyData[monthKey] += 1;
+        }
+      });
+    return Object.entries(monthlyData).map(([month, count]) => ({ month, count }));
+  };
+
+  const generateTransactionHistory = (paymentsData) => {
+    return paymentsData
+      .map(p => ({
+        id: p.id || `${p.transactionID || ''}-${p.date_payment?.toString() || ''}`,
+        date: p.date_payment instanceof Date ? p.date_payment : (p.date_payment ? new Date(p.date_payment) : new Date()),
+        concept: `Tutoría ${p.subject || 'General'}`,
+        student: p.studentName || p.studentEmail || 'Estudiante',
+        amount: p.amount || 0,
+        status: p.pagado ? 'completado' : 'pendiente',
+        method: p.method || 'transferencia'
       }))
       .sort((a, b) => new Date(b.date) - new Date(a.date));
   };
 
   const getUniqueSubjects = () => {
-    const subjects = [...new Set(sessions.map(s => s.subject).filter(Boolean))];
+    const subjects = [...new Set(payments.map(p => p.subject).filter(Boolean))];
     return subjects;
   };
 
@@ -452,8 +312,8 @@ export default function TutorStatistics() {
       {/* Summary Cards */}
       <div className="summary-cards">
         <div className="stat-card">
-          <div className="card-icon">
-            <Calendar size={24} />
+          <div className="card-icon sessions">
+            <BarChart3 size={24} />
           </div>
           <div className="card-content">
             <h3 className="card-title">Total Sesiones</h3>
@@ -462,14 +322,12 @@ export default function TutorStatistics() {
         </div>
 
         <div className="stat-card">
-          <div className="card-icon earnings">
+          <div className="card-icon pending">
             <DollarSign size={24} />
           </div>
           <div className="card-content">
             <h3 className="card-title">Próximo Pago</h3>
-            <p className="card-value">
-              ${stats.totalEarnings.toLocaleString()}
-            </p>
+            <p className="card-value">${stats.nextPayment.toLocaleString()}</p>
           </div>
         </div>
 
@@ -479,9 +337,7 @@ export default function TutorStatistics() {
           </div>
           <div className="card-content">
             <h3 className="card-title">Ganancias Totales</h3>
-            <p className="card-value">
-              ${stats.totalEarnings.toLocaleString()}
-            </p>
+            <p className="card-value">${stats.totalEarnings.toLocaleString()}</p>
           </div>
         </div>
 
@@ -491,9 +347,7 @@ export default function TutorStatistics() {
           </div>
           <div className="card-content">
             <h3 className="card-title">Calificación Promedio</h3>
-            <p className="card-value">
-              {stats.averageRating.toFixed(1)} ⭐
-            </p>
+            <p className="card-value">{stats.averageRating.toFixed(1)} ⭐</p>
           </div>
         </div>
       </div>
@@ -501,7 +355,7 @@ export default function TutorStatistics() {
       {/* Chart Section */}
       <div className="chart-section">
         <div className="chart-header">
-          <h2 className="chart-title">Sesiones por mes</h2>
+          <h2 className="chart-title">Tutorías por mes</h2>
           <button className="chart-action-btn">
             <Eye size={16} />
             Ver detalles
@@ -510,16 +364,16 @@ export default function TutorStatistics() {
         
         <div className="chart-container">
           <div className="chart-bars">
-            {stats.monthlyEarnings.map((item, index) => (
+            {stats.monthlyCounts.map((item, index) => (
               <div key={index} className="chart-bar-group">
                 <div 
                   className="chart-bar"
                   style={{ 
-                    height: `${Math.max(20, (item.earnings / Math.max(...stats.monthlyEarnings.map(m => m.earnings), 1)) * 100)}%` 
+                    height: `${Math.max(5, (item.count / Math.max(...stats.monthlyCounts.map(m => m.count), 1)) * 100)}%` 
                   }}
                 >
                   <div className="bar-value">
-                    ${item.earnings.toLocaleString()}
+                    {item.count}
                   </div>
                 </div>
                 <span className="bar-label">{item.month}</span>
@@ -557,7 +411,7 @@ export default function TutorStatistics() {
                 <div className="table-cell">
                   {transaction.concept}
                 </div>
-                <div className="table-cell">
+                <div className="table-cell student">
                   {transaction.student}
                 </div>
                 <div className="table-cell amount">
@@ -587,6 +441,5 @@ export default function TutorStatistics() {
         )}
       </div>
     </div>
->>>>>>> origin/develop
   );
 }

@@ -209,6 +209,12 @@ export class PaymentsService {
       }
 
       const results = [];
+      const normalizeBool = (val) => {
+        if (typeof val === 'boolean') return val;
+        if (typeof val === 'string') return val.toLowerCase() === 'true';
+        if (typeof val === 'number') return val === 1;
+        return Boolean(val);
+      };
       snapshot.forEach((docSnap) => {
         const data = docSnap.data();
         const storedEmail = (data.tutorEmail ? String(data.tutorEmail) : '').trim().toLowerCase();
@@ -234,7 +240,7 @@ export class PaymentsService {
           subject: data.subject || '',
           transactionID: data.transactionID || data.transactionId || '',
           tutorEmail: data.tutorEmail || '',
-          pagado: Boolean(data.pagado),
+          pagado: normalizeBool(data.pagado),
           raw: data
         });
       });
