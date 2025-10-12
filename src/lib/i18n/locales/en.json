@@ -374,5 +374,28 @@
   "boxSubject": {
     "tutors": "tutors",
     "tutor": "tutor"
+  },
+  "header": {
+    "navigation": {
+      "home": "Home",
+      "search": "Search",
+      "favorites": "Favorites",
+      "history": "History",
+      "availability": "Availability",
+      "statistics": "Statistics",
+      "subjects": "Subjects"
+    },
+    "roles": {
+      "student": "STUDENT",
+      "tutor": "TUTOR"
+    },
+    "auth": {
+      "login": "Log In",
+      "register": "Sign Up"
+    },
+    "menu": {
+      "open": "Open menu",
+      "close": "Close menu"
+    }
   }
 }

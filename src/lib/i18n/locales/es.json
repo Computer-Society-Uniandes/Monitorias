@@ -374,5 +374,28 @@
   "boxSubject": {
     "tutors": "tutores",
     "tutor": "tutor"
+  },
+  "header": {
+    "navigation": {
+      "home": "Inicio",
+      "search": "Buscar",
+      "favorites": "Favoritos",
+      "history": "Historial",
+      "availability": "Disponibilidad",
+      "statistics": "Estadísticas",
+      "subjects": "Materias"
+    },
+    "roles": {
+      "student": "ESTUDIANTE",
+      "tutor": "TUTOR"
+    },
+    "auth": {
+      "login": "Iniciar Sesión",
+      "register": "Regístrate"
+    },
+    "menu": {
+      "open": "Abrir menú",
+      "close": "Cerrar menú"
+    }
   }
 }
