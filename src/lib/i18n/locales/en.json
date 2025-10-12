@@ -479,5 +479,42 @@
     "connectionRenewed": "Connection renewed successfully",
     "sessionExpiredMessage": "Your Google Calendar session has expired.",
     "reconnectNow": "Do you want to reconnect now?"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "loading": "Loading notifications...",
+    "empty": "You have no notifications",
+    "emptyDescription": "All your notifications will appear here",
+    "markAllAsRead": "Mark all as read",
+    "close": "Close",
+    "viewAll": "View all notifications",
+    "defaultTutorName": "Tutor",
+    "common": {
+      "notification": "Notification"
+    },
+    "tutor": {
+      "pendingSessionRequest": "Tutoring Request",
+      "sessionReminder": "Session Reminder",
+      "message": "Message"
+    },
+    "student": {
+      "sessionAccepted": "Session Accepted",
+      "sessionRejected": "Session Rejected",
+      "sessionCancelled": "Session Cancelled",
+      "paymentReminder": "Payment Reminder",
+      "tutorMessage": "Tutor Message"
+    },
+    "timeAgo": {
+      "justNow": "Just now",
+      "minutesAgo": "{count} minute ago",
+      "minutesAgo_other": "{count} minutes ago",
+      "hoursAgo": "{count} hour ago",
+      "hoursAgo_other": "{count} hours ago",
+      "daysAgo": "{count} day ago",
+      "daysAgo_other": "{count} days ago",
+      "minutesAgoShort": "{count}m ago",
+      "hoursAgoShort": "{count}h ago",
+      "daysAgoShort": "{count}d ago"
+    }
   }
 }

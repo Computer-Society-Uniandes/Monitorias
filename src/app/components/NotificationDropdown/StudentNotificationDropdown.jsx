@@ -15,13 +15,15 @@ import {
 import { NotificationService } from "../../services/NotificationService";
 import { TutoringSessionService } from "../../services/TutoringSessionService";
 import { useAuth } from "../../context/SecureAuthContext";
+import { useI18n } from "../../../lib/i18n";
 import SessionBookedModal from "../SessionBookedModal/SessionBookedModal";
 import "./NotificationDropdown.css";
 import { useRouter } from "next/navigation";
 import routes from "../../../routes";
 
 export default function StudentNotificationDropdown() {
-  const { user } = useAuth();
+  const { user}  = useAuth();
+  const { t, locale } = useI18n();
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -158,17 +160,17 @@ export default function StudentNotificationDropdown() {
   const getNotificationTypeLabel = (type) => {
     switch (type) {
       case 'session_accepted':
-        return 'Sesión Aceptada';
+        return t('notifications.student.sessionAccepted');
       case 'session_rejected':
-        return 'Sesión Rechazada';
+        return t('notifications.student.sessionRejected');
       case 'session_cancelled':
-        return 'Sesión Cancelada';
+        return t('notifications.student.sessionCancelled');
       case 'payment_reminder':
-        return 'Recordatorio de Pago';
+        return t('notifications.student.paymentReminder');
       case 'tutor_message':
-        return 'Mensaje del Tutor';
+        return t('notifications.student.tutorMessage');
       default:
-        return 'Notificación';
+        return t('notifications.common.notification');
     }
   };
 
@@ -178,10 +180,10 @@ export default function StudentNotificationDropdown() {
     const notificationTime = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
     const diffInMinutes = Math.floor((now - notificationTime) / (1000 * 60));
     
-    if (diffInMinutes < 1) return 'Hace un momento';
-    if (diffInMinutes < 60) return `Hace ${diffInMinutes} min`;
-    if (diffInMinutes < 1440) return `Hace ${Math.floor(diffInMinutes / 60)} h`;
-    return `Hace ${Math.floor(diffInMinutes / 1440)} d`;
+    if (diffInMinutes < 1) return t('notifications.timeAgo.justNow');
+    if (diffInMinutes < 60) return t('notifications.timeAgo.minutesAgoShort', { count: diffInMinutes });
+    if (diffInMinutes < 1440) return t('notifications.timeAgo.hoursAgoShort', { count: Math.floor(diffInMinutes / 60) });
+    return t('notifications.timeAgo.daysAgoShort', { count: Math.floor(diffInMinutes / 1440) });
   };
 
   return (
@@ -199,13 +201,13 @@ export default function StudentNotificationDropdown() {
       {isOpen && (
         <div className="notification-dropdown">
           <div className="notification-header">
-            <h3>Notificaciones</h3>
+            <h3>{t('notifications.title')}</h3>
             <div className="notification-actions">
               {unreadCount > 0 && (
                 <button
                   className="mark-all-read-btn"
                   onClick={handleMarkAllAsRead}
-                  title="Marcar todas como leídas"
+                  title={t('notifications.markAllAsRead')}
                 >
                   ✓
                 </button>
@@ -223,12 +225,12 @@ export default function StudentNotificationDropdown() {
             {loading ? (
               <div className="loading-notifications">
                 <div className="loading-spinner"></div>
-                <span>Cargando notificaciones...</span>
+                <span>{t('notifications.loading')}</span>
               </div>
             ) : notifications.length === 0 ? (
               <div className="no-notifications">
                 <Bell size={32} className="text-gray-400" />
-                <p>No tienes notificaciones</p>
+                <p>{t('notifications.empty')}</p>
               </div>
             ) : (
               notifications.map((notification) => (
@@ -268,7 +270,7 @@ export default function StudentNotificationDropdown() {
                   setIsOpen(false);
                 }}
               >
-                Ver todas las notificaciones
+{t('notifications.viewAll')}
               </button>
             </div>
           )}
@@ -284,7 +286,7 @@ export default function StudentNotificationDropdown() {
             setSelectedSession(null);
           }}
           sessionData={{
-            tutorName: selectedSession.tutorName || 'Tutor',
+            tutorName: selectedSession.tutorName || t('notifications.defaultTutorName'),
             studentName: selectedSession.studentName || selectedSession.studentEmail,
             studentEmail: selectedSession.studentEmail,
             subject: selectedSession.subject,

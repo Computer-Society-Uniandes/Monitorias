@@ -40,9 +40,82 @@ jest.mock('./lib/i18n', () => {
 				return template;
 			},
 			formatCurrency: (n) => new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(n ?? 0),
+			locale: 'en'
 		}),
 	};
 });
+
+// Mock Firebase services
+jest.mock('./firebaseConfig', () => ({
+	db: 'mock-db'
+}));
+
+// Mock services
+jest.mock('./app/services/TutoringSessionService', () => ({
+	TutoringSessionService: {
+		getTutorSessions: jest.fn(),
+		createTutoringSession: jest.fn(),
+		acceptTutoringSession: jest.fn(),
+		rejectTutoringSession: jest.fn(),
+		declineTutoringSession: jest.fn(),
+		getSessionDetails: jest.fn(),
+		calculateAverageRating: jest.fn()
+	}
+}));
+
+jest.mock('./app/services/NotificationService', () => ({
+	NotificationService: {
+		getTutorNotifications: jest.fn(),
+		getStudentNotifications: jest.fn(),
+		markAsRead: jest.fn(),
+		markAllAsRead: jest.fn(),
+		deleteNotification: jest.fn(),
+		createPendingSessionNotification: jest.fn(),
+		createSessionAcceptedNotification: jest.fn(),
+		createSessionRejectedNotification: jest.fn(),
+		createPaymentReminderNotification: jest.fn()
+	}
+}));
+
+jest.mock('./app/services/CalicoCalendarService', () => ({
+	CalicoCalendarService: {
+		getTutorAvailability: jest.fn(),
+		syncWithGoogleCalendar: jest.fn(),
+		createAvailabilitySlot: jest.fn(),
+		updateAvailabilitySlot: jest.fn(),
+		deleteAvailabilitySlot: jest.fn()
+	}
+}));
+
+// Mock authentication context
+jest.mock('./app/context/SecureAuthContext', () => ({
+	useAuth: () => ({
+		user: {
+			isLoggedIn: true,
+			user: {
+				email: 'test@example.com',
+				name: 'Test User'
+			}
+		}
+	})
+}));
+
+// Mock global fetch
+global.fetch = jest.fn();
+
+// Mock IntersectionObserver
+global.IntersectionObserver = jest.fn().mockImplementation(() => ({
+	observe: jest.fn(),
+	unobserve: jest.fn(),
+	disconnect: jest.fn(),
+}));
+
+// Mock ResizeObserver
+global.ResizeObserver = jest.fn().mockImplementation(() => ({
+	observe: jest.fn(),
+	unobserve: jest.fn(),
+	disconnect: jest.fn(),
+}));
 
 // Silence console errors from React 19 act warnings in CI noise
 const originalError = console.error;

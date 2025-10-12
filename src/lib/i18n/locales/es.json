@@ -479,5 +479,42 @@
     "connectionRenewed": "Conexión renovada exitosamente",
     "sessionExpiredMessage": "Tu sesión de Google Calendar ha expirado.",
     "reconnectNow": "¿Quieres reconectar ahora?"
+  },
+  "notifications": {
+    "title": "Notificaciones",
+    "loading": "Cargando notificaciones...",
+    "empty": "No tienes notificaciones",
+    "emptyDescription": "Todas tus notificaciones aparecerán aquí",
+    "markAllAsRead": "Marcar todas como leídas",
+    "close": "Cerrar",
+    "viewAll": "Ver todas las notificaciones",
+    "defaultTutorName": "Tutor",
+    "common": {
+      "notification": "Notificación"
+    },
+    "tutor": {
+      "pendingSessionRequest": "Solicitud de Tutoría",
+      "sessionReminder": "Recordatorio de Sesión",
+      "message": "Mensaje"
+    },
+    "student": {
+      "sessionAccepted": "Sesión Aceptada",
+      "sessionRejected": "Sesión Rechazada",
+      "sessionCancelled": "Sesión Cancelada",
+      "paymentReminder": "Recordatorio de Pago",
+      "tutorMessage": "Mensaje del Tutor"
+    },
+    "timeAgo": {
+      "justNow": "Hace un momento",
+      "minutesAgo": "Hace {count} minuto",
+      "minutesAgo_other": "Hace {count} minutos",
+      "hoursAgo": "Hace {count} hora",
+      "hoursAgo_other": "Hace {count} horas",
+      "daysAgo": "Hace {count} día",
+      "daysAgo_other": "Hace {count} días",
+      "minutesAgoShort": "Hace {count} min",
+      "hoursAgoShort": "Hace {count} h",
+      "daysAgoShort": "Hace {count} d"
+    }
   }
 }

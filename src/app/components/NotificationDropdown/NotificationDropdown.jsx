@@ -16,6 +16,7 @@ import {
 import { NotificationService } from "../../services/NotificationService";
 import { TutoringSessionService } from "../../services/TutoringSessionService";
 import { useAuth } from "../../context/SecureAuthContext";
+import { useI18n } from "../../../lib/i18n";
 import TutorApprovalModal from "../TutorApprovalModal/TutorApprovalModal";
 import "./NotificationDropdown.css";
 import { useRouter } from "next/navigation";
@@ -23,6 +24,7 @@ import routes from "../../../routes";
 
 export default function NotificationDropdown() {
   const { user } = useAuth();
+  const { t, locale } = useI18n();
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -164,16 +166,16 @@ export default function NotificationDropdown() {
     switch (type) {
       // Tutor notifications
       case 'pending_session_request':
-        return 'Solicitud de Tutoría';
+        return t('notifications.tutor.pendingSessionRequest');
       case 'session_reminder':
-        return 'Recordatorio de Sesión';
+        return t('notifications.tutor.sessionReminder');
       case 'message':
       case 'tutor_message':
-        return 'Mensaje';
+        return t('notifications.tutor.message');
       
       // Common notifications
       default:
-        return 'Notificación';
+        return t('notifications.common.notification');
     }
   };
 
@@ -183,18 +185,19 @@ export default function NotificationDropdown() {
     const diffInSeconds = Math.floor((now - notificationDate) / 1000);
 
     if (diffInSeconds < 60) {
-      return 'Hace un momento';
+      return t('notifications.timeAgo.justNow');
     } else if (diffInSeconds < 3600) {
       const minutes = Math.floor(diffInSeconds / 60);
-      return `Hace ${minutes} minuto${minutes > 1 ? 's' : ''}`;
+      return t('notifications.timeAgo.minutesAgo', { count: minutes });
     } else if (diffInSeconds < 86400) {
       const hours = Math.floor(diffInSeconds / 3600);
-      return `Hace ${hours} hora${hours > 1 ? 's' : ''}`;
+      return t('notifications.timeAgo.hoursAgo', { count: hours });
     } else if (diffInSeconds < 604800) {
       const days = Math.floor(diffInSeconds / 86400);
-      return `Hace ${days} día${days > 1 ? 's' : ''}`;
+      return t('notifications.timeAgo.daysAgo', { count: days });
     } else {
-      return notificationDate.toLocaleDateString('es-ES');
+      const localeStr = locale === 'en' ? 'en-US' : 'es-ES';
+      return notificationDate.toLocaleDateString(localeStr);
     }
   };
 
@@ -253,14 +256,14 @@ export default function NotificationDropdown() {
           <div className="notification-header">
             <h3 className="notification-title">
               <Bell size={18} />
-              Notificaciones
+              {t('notifications.title')}
             </h3>
             <div className="notification-actions">
               {unreadCount > 0 && (
                 <button
                   className="mark-all-read-btn"
                   onClick={handleMarkAllAsRead}
-                  title="Marcar todas como leídas"
+                  title={t('notifications.markAllAsRead')}
                 >
                   ✓
                 </button>
@@ -268,7 +271,7 @@ export default function NotificationDropdown() {
               <button 
                 className="close-dropdown-btn"
                 onClick={() => setIsOpen(false)}
-                title="Cerrar"
+                title={t('notifications.close')}
               >
                 <X size={16} />
               </button>
@@ -279,7 +282,7 @@ export default function NotificationDropdown() {
           {loading && (
             <div className="notification-loading">
               <div className="loading-spinner"></div>
-              <p>Cargando notificaciones...</p>
+              <p>{t('notifications.loading')}</p>
             </div>
           )}
 
@@ -289,8 +292,8 @@ export default function NotificationDropdown() {
               {notifications.length === 0 ? (
                 <div className="notification-empty">
                   <Bell size={32} />
-                  <p>No tienes notificaciones</p>
-                  <span>Todas tus notificaciones aparecerán aquí</span>
+                  <p>{t('notifications.empty')}</p>
+                  <span>{t('notifications.emptyDescription')}</span>
                 </div>
               ) : (
                 notifications.map((notification) => (
@@ -345,7 +348,7 @@ export default function NotificationDropdown() {
                   setIsOpen(false); // Close dropdown after navigation
                 }}
               >
-                Ver todas las notificaciones
+{t('notifications.viewAll')}
               </button>
             </div>
           )}
