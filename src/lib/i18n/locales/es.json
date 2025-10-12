@@ -86,7 +86,7 @@
       "endDate": "Fecha fin"
     },
     "table": {
-      "title": "Historial de tutorías",
+      "title": "Historial de tutorías (Elige una tutoría completada para dejar tu reseña)",
       "date": "Fecha",
       "subject": "Materia",
       "tutor": "Tutor",

@@ -86,7 +86,7 @@
       "endDate": "End date"
     },
     "table": {
-      "title": "Tutoring history",
+      "title": "Tutoring History (Select a completed session to review)",
       "date": "Date",
       "subject": "Subject",
       "tutor": "Tutor",
