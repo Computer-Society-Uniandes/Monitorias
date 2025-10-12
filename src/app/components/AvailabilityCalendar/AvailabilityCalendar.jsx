@@ -218,7 +218,7 @@ const AvailabilityCalendar = ({
 
   const handleBookingConfirm = async ({ studentEmail, proofFile }) => {
     if (!selectedSlotForBooking || !user) {
-      setError('Información de sesión incompleta');
+      setError(t('availability.calendar.errors.incompleteSessionInfo'));
       return;
     }
 
@@ -236,7 +236,7 @@ const AvailabilityCalendar = ({
         tutorEmail: selectedSlotForBooking.tutorEmail || tutorId,
         studentEmail: studentEmail,
         studentName: user.displayName || user.email,
-        subject: subject || selectedSlotForBooking.subject || 'Tutoría',
+        subject: subject || selectedSlotForBooking.subject || t('availability.calendar.defaultSubject'),
         scheduledDateTime: selectedSlotForBooking.startDateTime,
         endDateTime: selectedSlotForBooking.endDateTime,
         location: selectedSlotForBooking.location || 'Virtual',
@@ -297,7 +297,7 @@ const AvailabilityCalendar = ({
       
       // Mostrar modal de confirmación con datos de la sesión
       setBookedSessionData({
-        tutorName: sessionData.tutorName || selectedSlotForBooking.tutorName || 'Tutor',
+        tutorName: sessionData.tutorName || selectedSlotForBooking.tutorName || t('availability.calendar.defaultTutorName'),
         subject: sessionData.subject,
         scheduledDateTime: sessionData.scheduledDateTime,
         endDateTime: sessionData.endDateTime,
@@ -456,9 +456,9 @@ const AvailabilityCalendar = ({
           isOpen={showConfirmationModal}
           onClose={handleCloseConfirmationModal}
           session={{
-            tutorName: tutorName || selectedSlotForBooking.tutorName || 'Tutor',
+            tutorName: tutorName || selectedSlotForBooking.tutorName || t('availability.calendar.defaultTutorName'),
             tutorEmail: tutorId || selectedSlotForBooking.tutorEmail,
-            subject: subject || selectedSlotForBooking.subject || 'Tutoría',
+            subject: subject || selectedSlotForBooking.subject || t('availability.calendar.defaultSubject'),
             scheduledDateTime: selectedSlotForBooking.startDateTime,
             endDateTime: selectedSlotForBooking.endDateTime,
             location: selectedSlotForBooking.location || 'Virtual',

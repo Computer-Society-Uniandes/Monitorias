@@ -160,11 +160,14 @@
         "slotNotAvailable": "El horario seleccionado ya no está disponible. Por favor selecciona otro.",
         "selecting": "Error seleccionando el horario. Por favor intenta de nuevo.",
         "createSession": "Error al crear la sesión: {message}",
-        "reserveError": "❌ Error al reservar: {message}\n\nPor favor intenta nuevamente."
+        "reserveError": "❌ Error al reservar: {message}\n\nPor favor intenta nuevamente.",
+        "incompleteSessionInfo": "Información de sesión incompleta"
       },
       "alerts": {
         "proofUploadProblem": "⚠️ La reserva se creó pero hubo un problema al subir el comprobante: {error}\n\nPuedes enviar el comprobante después."
-      }
+      },
+      "defaultSubject": "Tutoría",
+      "defaultTutorName": "Tutor"
     },
     "joint": {
       "errorTitle": "Error de Datos",
@@ -419,5 +422,62 @@
       "success": "✅ Sesión reprogramada exitosamente",
       "error": "Error al reprogramar"
     }
+  },
+  "tutorAvailability": {
+    "title": "Disponibilidad",
+    "loading": "Cargando disponibilidad y sesiones...",
+    "availableSlots": "Horarios disponibles",
+    "addSlot": "Agregar horario",
+    "editSlots": "Editar horarios",
+    "syncCalendar": "Sincronizar calendario",
+    "syncing": "Sincronizando...",
+    "connectCalendarFirst": "Conecta tu Google Calendar primero",
+    "syncCalendarTitle": "Sincronizar eventos de Google Calendar",
+    "availabilityFor": "Disponibilidad para {date}",
+    "selectDay": "Selecciona un día",
+    "booked": "Reservado",
+    "available": "Disponible",
+    "noSlotsForDay": "No hay horarios disponibles para este día",
+    "useAddSlotHint": "Usa 'Agregar horario' para agregar disponibilidad",
+    "pending": "Pendientes",
+    "upcoming": "Próximas",
+    "past": "Pasadas",
+    "pendingApproval": "Pendiente de aprobación",
+    "noPendingRequests": "No hay solicitudes pendientes",
+    "defaultSessionTitle": "Introducción a la programación con estudiante",
+    "addAvailabilitySlot": "Agregar horario de disponibilidad",
+    "titleLabel": "Título",
+    "titlePlaceholder": "Horario de disponibilidad",
+    "dateLabel": "Fecha",
+    "startTimeLabel": "Hora inicio",
+    "endTimeLabel": "Hora fin",
+    "descriptionLabel": "Descripción",
+    "descriptionPlaceholder": "Descripción opcional",
+    "cancel": "Cancelar",
+    "creating": "Creando...",
+    "save": "Guardar",
+    "connectCalendarRequired": "Debes conectar tu Google Calendar para crear eventos",
+    "errorCreatingEvent": "Error al crear el evento",
+    "mustBeConnectedToSync": "Debes estar conectado a Google Calendar para sincronizar",
+    "syncSuccess": "¡Sincronización exitosa!",
+    "eventsProcessed": "Eventos procesados",
+    "newEvents": "Nuevos eventos",
+    "updatedEvents": "Actualizados",
+    "syncError": "Error en la sincronización",
+    "syncFailed": "Error al sincronizar"
+  },
+  "googleCalendar": {
+    "loading": "Cargando...",
+    "checking": "Verificando...",
+    "connected": "Conectado",
+    "sessionExpired": "Sesión Expirada",
+    "connect": "Conectar Google Calendar",
+    "connectedTooltip": "Conectado a Google Calendar (verificado: {time})",
+    "expiredTooltip": "Sesión expirada - Haz click para renovar",
+    "connectTooltip": "Conectar con Google Calendar",
+    "sessionExpiredNotice": "Tu sesión ha expirado. Haz click para renovar la conexión.",
+    "connectionRenewed": "Conexión renovada exitosamente",
+    "sessionExpiredMessage": "Tu sesión de Google Calendar ha expirado.",
+    "reconnectNow": "¿Quieres reconectar ahora?"
   }
 }

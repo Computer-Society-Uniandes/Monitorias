@@ -160,11 +160,14 @@
         "slotNotAvailable": "The selected time is no longer available. Please choose another.",
         "selecting": "Error selecting the time. Please try again.",
         "createSession": "Error creating the session: {message}",
-        "reserveError": "❌ Error booking: {message}\n\nPlease try again."
+        "reserveError": "❌ Error booking: {message}\n\nPlease try again.",
+        "incompleteSessionInfo": "Incomplete session information"
       },
       "alerts": {
         "proofUploadProblem": "⚠️ The booking was created but there was a problem uploading the proof: {error}\n\nYou can send the proof later."
-      }
+      },
+      "defaultSubject": "Tutoring",
+      "defaultTutorName": "Tutor"
     },
     "joint": {
       "errorTitle": "Data Error",
@@ -419,5 +422,62 @@
       "success": "✅ Session successfully rescheduled",
       "error": "Error rescheduling"
     }
+  },
+  "tutorAvailability": {
+    "title": "Availability",
+    "loading": "Loading availability and sessions...",
+    "availableSlots": "Available Time Slots",
+    "addSlot": "Add Time Slot",
+    "editSlots": "Edit Time Slots",
+    "syncCalendar": "Sync Calendar",
+    "syncing": "Syncing...",
+    "connectCalendarFirst": "Connect your Google Calendar first",
+    "syncCalendarTitle": "Sync Google Calendar events",
+    "availabilityFor": "Availability for {date}",
+    "selectDay": "Select a day",
+    "booked": "Booked",
+    "available": "Available",
+    "noSlotsForDay": "No time slots available for this day",
+    "useAddSlotHint": "Use 'Add Time Slot' to add availability",
+    "pending": "Pending",
+    "upcoming": "Upcoming",
+    "past": "Past",
+    "pendingApproval": "Pending approval",
+    "noPendingRequests": "No pending requests",
+    "defaultSessionTitle": "Programming introduction with student",
+    "addAvailabilitySlot": "Add Availability Time Slot",
+    "titleLabel": "Title",
+    "titlePlaceholder": "Availability time slot",
+    "dateLabel": "Date",
+    "startTimeLabel": "Start Time",
+    "endTimeLabel": "End Time",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "Optional description",
+    "cancel": "Cancel",
+    "creating": "Creating...",
+    "save": "Save",
+    "connectCalendarRequired": "You must connect your Google Calendar to create events",
+    "errorCreatingEvent": "Error creating event",
+    "mustBeConnectedToSync": "You must be connected to Google Calendar to sync",
+    "syncSuccess": "Sync successful!",
+    "eventsProcessed": "Events processed",
+    "newEvents": "New events",
+    "updatedEvents": "Updated",
+    "syncError": "Sync error",
+    "syncFailed": "Error syncing"
+  },
+  "googleCalendar": {
+    "loading": "Loading...",
+    "checking": "Checking...",
+    "connected": "Connected",
+    "sessionExpired": "Session Expired",
+    "connect": "Connect Google Calendar",
+    "connectedTooltip": "Connected to Google Calendar (verified: {time})",
+    "expiredTooltip": "Session expired - Click to renew",
+    "connectTooltip": "Connect with Google Calendar",
+    "sessionExpiredNotice": "Your session has expired. Click to renew the connection.",
+    "connectionRenewed": "Connection renewed successfully",
+    "sessionExpiredMessage": "Your Google Calendar session has expired.",
+    "reconnectNow": "Do you want to reconnect now?"
   }
 }
