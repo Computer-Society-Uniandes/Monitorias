@@ -492,6 +492,53 @@
     "common": {
       "notification": "Notificación"
     },
+    "pendingSessionRequest": {
+      "title": "Nueva Solicitud de Tutoría",
+      "message": "{studentName} ha solicitado una sesión de tutoría para {subject}"
+    },
+    "sessionAccepted": {
+      "title": "Sesión Aprobada",
+      "message": "Tu sesión de tutoría para {subject} ha sido aprobada"
+    },
+    "sessionDeclined": {
+      "title": "Sesión Rechazada",
+      "message": "Tu sesión de tutoría para {subject} ha sido rechazada"
+    },
+    "sessionCancelled": {
+      "title": "Sesión Cancelada",
+      "message": "Tu tutoría de {subject} ha sido cancelada por {cancellerRole}. Motivo: {reason}",
+      "tutor": "el tutor",
+      "student": "el estudiante",
+      "noReason": "Sin razón especificada"
+    },
+    "sessionRescheduled": {
+      "title": "Sesión Reprogramada",
+      "message": "{studentName} ha reprogramado la tutoría de {subject}. Anterior: {oldDate}. Nueva: {newDate}. Motivo: {reason}",
+      "noReason": "Sin razón especificada"
+    },
+    "sessionRejected": {
+      "title": "Sesión Rechazada",
+      "message": "Tu solicitud de tutoría ha sido rechazada{reason}"
+    },
+    "sessionReminder": {
+      "title": "Recordatorio de Sesión",
+      "message": "Tu sesión de {subject} con {tutorName} es en 1 hora"
+    },
+    "paymentReminder": {
+      "title": "Recordatorio de Pago",
+      "message": "Recuerda realizar el pago para tu sesión de {subject}"
+    },
+    "markAllAsRead": {
+      "success": "Marcadas {count} notificaciones como leídas",
+      "noUnread": "No se encontraron notificaciones sin leer"
+    },
+    "errors": {
+      "creationFailed": "Error creando notificación: {error}",
+      "retrievalFailed": "Error obteniendo notificaciones: {error}",
+      "markAsReadFailed": "Error marcando notificación como leída: {error}",
+      "deletionFailed": "Error eliminando notificación: {error}",
+      "markAllAsReadFailed": "Error marcando notificaciones como leídas: {error}"
+    },
     "tutor": {
       "pendingSessionRequest": "Solicitud de Tutoría",
       "sessionReminder": "Recordatorio de Sesión",

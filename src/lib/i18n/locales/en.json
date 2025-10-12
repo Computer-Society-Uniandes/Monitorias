@@ -492,6 +492,53 @@
     "common": {
       "notification": "Notification"
     },
+    "pendingSessionRequest": {
+      "title": "New Session Request",
+      "message": "{studentName} has requested a tutoring session for {subject}"
+    },
+    "sessionAccepted": {
+      "title": "Session Accepted",
+      "message": "Your tutoring session for {subject} has been accepted"
+    },
+    "sessionDeclined": {
+      "title": "Session Declined",
+      "message": "Your tutoring session for {subject} has been declined"
+    },
+    "sessionCancelled": {
+      "title": "Session Cancelled",
+      "message": "Your tutoring session for {subject} has been cancelled by {cancellerRole}. Reason: {reason}",
+      "tutor": "the tutor",
+      "student": "the student",
+      "noReason": "No reason specified"
+    },
+    "sessionRescheduled": {
+      "title": "Session Rescheduled",
+      "message": "{studentName} has rescheduled the tutoring session for {subject}. Previous: {oldDate}. New: {newDate}. Reason: {reason}",
+      "noReason": "No reason specified"
+    },
+    "sessionRejected": {
+      "title": "Session Rejected",
+      "message": "Your tutoring session request has been rejected{reason}"
+    },
+    "sessionReminder": {
+      "title": "Session Reminder",
+      "message": "Your session of {subject} with {tutorName} is in 1 hour"
+    },
+    "paymentReminder": {
+      "title": "Payment Reminder",
+      "message": "Remember to make payment for your {subject} session"
+    },
+    "markAllAsRead": {
+      "success": "Marked {count} notifications as read",
+      "noUnread": "No unread notifications found"
+    },
+    "errors": {
+      "creationFailed": "Error creating notification: {error}",
+      "retrievalFailed": "Error getting notifications: {error}",
+      "markAsReadFailed": "Error marking notification as read: {error}",
+      "deletionFailed": "Error deleting notification: {error}",
+      "markAllAsReadFailed": "Error marking notifications as read: {error}"
+    },
     "tutor": {
       "pendingSessionRequest": "Tutoring Request",
       "sessionReminder": "Session Reminder",

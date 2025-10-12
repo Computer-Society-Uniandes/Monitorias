@@ -16,6 +16,7 @@ import {
   addDoc,
   writeBatch
 } from 'firebase/firestore';
+import { t } from '../../lib/i18n';
 
 export class NotificationService {
   static COLLECTION_NAME = 'notifications';
@@ -31,8 +32,11 @@ export class NotificationService {
         subject: sessionData.subject,
         scheduledDateTime: sessionData.scheduledDateTime,
         type: 'pending_session_request',
-        title: 'New Session Request',
-        message: `${sessionData.studentName} has requested a tutoring session for ${sessionData.subject}`,
+        title: t('notifications.pendingSessionRequest.title'),
+        message: t('notifications.pendingSessionRequest.message', {
+          studentName: sessionData.studentName,
+          subject: sessionData.subject
+        }),
         isRead: false,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
@@ -43,7 +47,7 @@ export class NotificationService {
       return { success: true, id: docRef.id };
     } catch (error) {
       console.error('Error creating pending session notification:', error);
-      throw new Error(`Error creating notification: ${error.message}`);
+      throw new Error(t('notifications.errors.creationFailed', { error: error.message }));
     }
   }
 
@@ -73,7 +77,7 @@ export class NotificationService {
       return notifications;
     } catch (error) {
       console.error('Error getting tutor notifications:', error);
-      throw new Error(`Error getting notifications: ${error.message}`);
+      throw new Error(t('notifications.errors.retrievalFailed', { error: error.message }));
     }
   }
 
@@ -91,7 +95,7 @@ export class NotificationService {
       return { success: true };
     } catch (error) {
       console.error('Error marking notification as read:', error);
-      throw new Error(`Error marking notification as read: ${error.message}`);
+      throw new Error(t('notifications.errors.markAsReadFailed', { error: error.message }));
     }
   }
 
@@ -105,7 +109,7 @@ export class NotificationService {
       return { success: true };
     } catch (error) {
       console.error('Error deleting notification:', error);
-      throw new Error(`Error deleting notification: ${error.message}`);
+      throw new Error(t('notifications.errors.deletionFailed', { error: error.message }));
     }
   }
 
@@ -136,8 +140,10 @@ export class NotificationService {
         subject: sessionData.subject,
         scheduledDateTime: sessionData.scheduledDateTime,
         type: 'session_accepted',
-        title: 'Session Accepted',
-        message: `Your tutoring session for ${sessionData.subject} has been accepted`,
+        title: t('notifications.sessionAccepted.title'),
+        message: t('notifications.sessionAccepted.message', {
+          subject: sessionData.subject
+        }),
         isRead: false,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
@@ -148,7 +154,7 @@ export class NotificationService {
       return { success: true, id: docRef.id };
     } catch (error) {
       console.error('Error creating session accepted notification:', error);
-      throw new Error(`Error creating notification: ${error.message}`);
+      throw new Error(t('notifications.errors.creationFailed', { error: error.message }));
     }
   }
 
@@ -162,8 +168,10 @@ export class NotificationService {
         subject: sessionData.subject,
         scheduledDateTime: sessionData.scheduledDateTime,
         type: 'session_declined',
-        title: 'Session Declined',
-        message: `Your tutoring session for ${sessionData.subject} has been declined`,
+        title: t('notifications.sessionDeclined.title'),
+        message: t('notifications.sessionDeclined.message', {
+          subject: sessionData.subject
+        }),
         isRead: false,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
@@ -174,14 +182,17 @@ export class NotificationService {
       return { success: true, id: docRef.id };
     } catch (error) {
       console.error('Error creating session declined notification:', error);
-      throw new Error(`Error creating notification: ${error.message}`);
+      throw new Error(t('notifications.errors.creationFailed', { error: error.message }));
     }
   }
 
   // Create notification when session is cancelled
   static async createSessionCancelledNotification(sessionData) {
     try {
-      const cancellerName = sessionData.cancellerRole === 'tutor' ? 'el tutor' : 'el estudiante';
+      const cancellerRole = sessionData.cancellerRole === 'tutor' ? 
+        t('notifications.sessionCancelled.tutor') : 
+        t('notifications.sessionCancelled.student');
+      
       const notificationData = {
         recipientEmail: sessionData.recipientEmail,
         cancelledBy: sessionData.cancelledBy,
@@ -189,10 +200,14 @@ export class NotificationService {
         sessionId: sessionData.sessionId,
         subject: sessionData.subject,
         scheduledDateTime: sessionData.scheduledDateTime,
-        reason: sessionData.reason || 'Sin razón especificada',
+        reason: sessionData.reason || t('notifications.sessionCancelled.noReason'),
         type: 'session_cancelled',
-        title: 'Sesión Cancelada',
-        message: `Tu tutoría de ${sessionData.subject} ha sido cancelada por ${cancellerName}. Motivo: ${sessionData.reason || 'Sin razón especificada'}`,
+        title: t('notifications.sessionCancelled.title'),
+        message: t('notifications.sessionCancelled.message', {
+          subject: sessionData.subject,
+          cancellerRole: cancellerRole,
+          reason: sessionData.reason || t('notifications.sessionCancelled.noReason')
+        }),
         isRead: false,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
@@ -203,7 +218,7 @@ export class NotificationService {
       return { success: true, id: docRef.id };
     } catch (error) {
       console.error('Error creating session cancelled notification:', error);
-      throw new Error(`Error creating notification: ${error.message}`);
+      throw new Error(t('notifications.errors.creationFailed', { error: error.message }));
     }
   }
 
@@ -233,10 +248,16 @@ export class NotificationService {
         subject: sessionData.subject,
         oldDateTime: sessionData.oldDateTime,
         newDateTime: sessionData.newDateTime,
-        reason: sessionData.reason || 'Sin razón especificada',
+        reason: sessionData.reason || t('notifications.sessionRescheduled.noReason'),
         type: 'session_rescheduled',
-        title: 'Sesión Reprogramada',
-        message: `${sessionData.studentName} ha reprogramado la tutoría de ${sessionData.subject}. Anterior: ${oldDate}. Nueva: ${newDate}. Motivo: ${sessionData.reason || 'Sin razón especificada'}`,
+        title: t('notifications.sessionRescheduled.title'),
+        message: t('notifications.sessionRescheduled.message', {
+          studentName: sessionData.studentName,
+          subject: sessionData.subject,
+          oldDate: oldDate,
+          newDate: newDate,
+          reason: sessionData.reason || t('notifications.sessionRescheduled.noReason')
+        }),
         isRead: false,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
@@ -247,7 +268,7 @@ export class NotificationService {
       return { success: true, id: docRef.id };
     } catch (error) {
       console.error('Error creating session rescheduled notification:', error);
-      throw new Error(`Error creating notification: ${error.message}`);
+      throw new Error(t('notifications.errors.creationFailed', { error: error.message }));
     }
   }
 
@@ -277,30 +298,7 @@ export class NotificationService {
       return notifications;
     } catch (error) {
       console.error('Error getting student notifications:', error);
-      throw new Error(`Error getting notifications: ${error.message}`);
-    }
-  }
-
-  // Create a notification when a session is accepted
-  static async createSessionAcceptedNotification(sessionData) {
-    try {
-      const notificationData = {
-        studentEmail: sessionData.studentEmail,
-        sessionId: sessionData.sessionId,
-        type: 'session_accepted',
-        title: 'Sesión Aprobada',
-        message: 'Tu solicitud de tutoría ha sido aprobada por el tutor',
-        isRead: false,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
-      };
-
-      const docRef = await addDoc(collection(db, this.COLLECTION_NAME), notificationData);
-      console.log('Session accepted notification created with ID:', docRef.id);
-      return { success: true, id: docRef.id };
-    } catch (error) {
-      console.error('Error creating session accepted notification:', error);
-      throw new Error(`Error creating notification: ${error.message}`);
+      throw new Error(t('notifications.errors.retrievalFailed', { error: error.message }));
     }
   }
 
@@ -311,8 +309,10 @@ export class NotificationService {
         studentEmail: sessionData.studentEmail,
         sessionId: sessionData.sessionId,
         type: 'session_rejected',
-        title: 'Sesión Rechazada',
-        message: `Tu solicitud de tutoría ha sido rechazada${sessionData.reason ? ': ' + sessionData.reason : ''}`,
+        title: t('notifications.sessionRejected.title'),
+        message: t('notifications.sessionRejected.message', {
+          reason: sessionData.reason ? `: ${sessionData.reason}` : ''
+        }),
         isRead: false,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
@@ -323,37 +323,7 @@ export class NotificationService {
       return { success: true, id: docRef.id };
     } catch (error) {
       console.error('Error creating session rejected notification:', error);
-      throw new Error(`Error creating notification: ${error.message}`);
-    }
-  }
-
-  // Get notifications for a student
-  static async getStudentNotifications(studentEmail, limitCount = 50) {
-    try {
-      const q = query(
-        collection(db, this.COLLECTION_NAME),
-        where('studentEmail', '==', studentEmail),
-        orderBy('createdAt', 'desc'),
-        limit(limitCount)
-      );
-
-      const querySnapshot = await getDocs(q);
-      const notifications = [];
-
-      querySnapshot.forEach((doc) => {
-        notifications.push({
-          id: doc.id,
-          ...doc.data(),
-          createdAt: doc.data().createdAt?.toDate(),
-          updatedAt: doc.data().updatedAt?.toDate(),
-          scheduledDateTime: doc.data().scheduledDateTime?.toDate(),
-        });
-      });
-
-      return notifications;
-    } catch (error) {
-      console.error('Error getting student notifications:', error);
-      throw new Error(`Error getting notifications: ${error.message}`);
+      throw new Error(t('notifications.errors.creationFailed', { error: error.message }));
     }
   }
 
@@ -364,8 +334,11 @@ export class NotificationService {
         studentEmail: sessionData.studentEmail,
         sessionId: sessionData.sessionId,
         type: 'session_reminder',
-        title: 'Recordatorio de Sesión',
-        message: `Tu sesión de ${sessionData.subject} con ${sessionData.tutorName} es en 1 hora`,
+        title: t('notifications.sessionReminder.title'),
+        message: t('notifications.sessionReminder.message', {
+          subject: sessionData.subject,
+          tutorName: sessionData.tutorName
+        }),
         isRead: false,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
@@ -376,7 +349,7 @@ export class NotificationService {
       return { success: true, id: docRef.id };
     } catch (error) {
       console.error('Error creating session reminder notification:', error);
-      throw new Error(`Error creating notification: ${error.message}`);
+      throw new Error(t('notifications.errors.creationFailed', { error: error.message }));
     }
   }
 
@@ -387,8 +360,10 @@ export class NotificationService {
         studentEmail: sessionData.studentEmail,
         sessionId: sessionData.sessionId,
         type: 'payment_reminder',
-        title: 'Recordatorio de Pago',
-        message: `Recuerda realizar el pago para tu sesión de ${sessionData.subject}`,
+        title: t('notifications.paymentReminder.title'),
+        message: t('notifications.paymentReminder.message', {
+          subject: sessionData.subject
+        }),
         isRead: false,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
@@ -399,7 +374,7 @@ export class NotificationService {
       return { success: true, id: docRef.id };
     } catch (error) {
       console.error('Error creating payment reminder notification:', error);
-      throw new Error(`Error creating notification: ${error.message}`);
+      throw new Error(t('notifications.errors.creationFailed', { error: error.message }));
     }
   }
 
@@ -425,7 +400,7 @@ export class NotificationService {
       const snapshot = await getDocs(queryRef);
       
       if (snapshot.empty) {
-        return { success: true, message: 'No unread notifications found' };
+        return { success: true, message: t('notifications.markAllAsRead.noUnread') };
       }
 
       // Batch update all unread notifications
@@ -442,12 +417,12 @@ export class NotificationService {
       console.log(`Marked ${snapshot.docs.length} notifications as read for ${userType}: ${userEmail}`);
       return { 
         success: true, 
-        message: `Marked ${snapshot.docs.length} notifications as read`,
+        message: t('notifications.markAllAsRead.success', { count: snapshot.docs.length }),
         count: snapshot.docs.length
       };
     } catch (error) {
       console.error('Error marking all notifications as read:', error);
-      throw new Error(`Error marking notifications as read: ${error.message}`);
+      throw new Error(t('notifications.errors.markAllAsReadFailed', { error: error.message }));
     }
   }
 }
