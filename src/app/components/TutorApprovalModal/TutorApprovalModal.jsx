@@ -3,16 +3,18 @@
 import React, { useState } from "react";
 import { X, Calendar, Clock, MapPin, User, BookOpen, MessageSquare, AlertTriangle, CheckCircle } from "lucide-react";
 import { TutoringSessionService } from "../../services/TutoringSessionService";
+import SessionBookedModal from "../SessionBookedModal/SessionBookedModal";
 import "./TutorApprovalModal.css";
 
 export default function TutorApprovalModal({ 
   session, 
   isOpen, 
   onClose, 
-  onApprovalComplete 
+  onApprovalComplete
 }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
 
   if (!isOpen || !session) return null;
 
@@ -40,11 +42,12 @@ export default function TutorApprovalModal({
 
       await TutoringSessionService.acceptTutoringSession(session.id, session.tutorEmail);
       
+      // Show confirmation modal instead of closing
+      setShowConfirmationModal(true);
+      
       if (onApprovalComplete) {
         onApprovalComplete();
       }
-      
-      onClose();
     } catch (error) {
       console.error('Error accepting session:', error);
       setError(error.message || 'Error accepting session');
@@ -79,9 +82,7 @@ export default function TutorApprovalModal({
     <div className="tutor-approval-modal-overlay">
       <div className="tutor-approval-modal">
         <div className="modal-header">
-          <div className="header-content">
-            <h2>Solicitud de Tutoría</h2>
-          </div>
+          <h2>Solicitud de Tutoría</h2>
           <button 
             className="close-btn" 
             onClick={onClose}
@@ -187,6 +188,27 @@ export default function TutorApprovalModal({
           </div>
         </div>
       </div>
+
+      {/* Session Confirmation Modal */}
+      {showConfirmationModal && (
+        <SessionBookedModal
+          isOpen={showConfirmationModal}
+          onClose={() => {
+            setShowConfirmationModal(false);
+            onClose(); // Close the main approval modal after confirmation
+          }}
+          sessionData={{
+            tutorName: session.tutorName || 'Tutor',
+            studentName: session.studentName || session.studentEmail,
+            studentEmail: session.studentEmail,
+            subject: session.subject,
+            scheduledDateTime: session.scheduledDateTime,
+            endDateTime: session.endDateTime,
+            location: session.location
+          }}
+          userType="tutor"
+        />
+      )}
     </div>
   );
 }

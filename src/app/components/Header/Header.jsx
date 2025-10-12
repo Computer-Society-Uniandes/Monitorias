@@ -25,6 +25,7 @@ import { useAuth } from "../../context/SecureAuthContext";
 import { NotificationService } from "../../services/NotificationService";
 import { useFavorites } from "../../hooks/useFavorites";
 import NotificationDropdown from "../NotificationDropdown/NotificationDropdown";
+import StudentNotificationDropdown from "../NotificationDropdown/StudentNotificationDropdown";
 import routes from "../../../routes";
 
 export default function Header() {
@@ -196,7 +197,11 @@ export default function Header() {
 
         {user.isLoggedIn ? (
           <div className="user-actions">
-            <NotificationDropdown userType={tutorMode ? 'tutor' : 'student'} />
+            {tutorMode ? (
+              <NotificationDropdown />
+            ) : (
+              <StudentNotificationDropdown />
+            )}
             <button
               className="profile-btn"
               onClick={() => {

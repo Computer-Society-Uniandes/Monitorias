@@ -13,7 +13,8 @@ import {
   limit,
   serverTimestamp,
   Timestamp,
-  addDoc
+  addDoc,
+  writeBatch
 } from 'firebase/firestore';
 
 export class NotificationService {
@@ -355,6 +356,54 @@ export class NotificationService {
     } catch (error) {
       console.error('Error creating payment reminder notification:', error);
       throw new Error(`Error creating notification: ${error.message}`);
+    }
+  }
+
+  // Mark all notifications as read for a specific user
+  static async markAllAsRead(userEmail, userType = 'tutor') {
+    try {
+      let queryRef;
+      
+      if (userType === 'tutor') {
+        queryRef = query(
+          collection(db, this.COLLECTION_NAME),
+          where('tutorEmail', '==', userEmail),
+          where('isRead', '==', false)
+        );
+      } else {
+        queryRef = query(
+          collection(db, this.COLLECTION_NAME),
+          where('studentEmail', '==', userEmail),
+          where('isRead', '==', false)
+        );
+      }
+
+      const snapshot = await getDocs(queryRef);
+      
+      if (snapshot.empty) {
+        return { success: true, message: 'No unread notifications found' };
+      }
+
+      // Batch update all unread notifications
+      const batch = writeBatch(db);
+      snapshot.docs.forEach((doc) => {
+        batch.update(doc.ref, {
+          isRead: true,
+          updatedAt: serverTimestamp()
+        });
+      });
+
+      await batch.commit();
+      
+      console.log(`Marked ${snapshot.docs.length} notifications as read for ${userType}: ${userEmail}`);
+      return { 
+        success: true, 
+        message: `Marked ${snapshot.docs.length} notifications as read`,
+        count: snapshot.docs.length
+      };
+    } catch (error) {
+      console.error('Error marking all notifications as read:', error);
+      throw new Error(`Error marking notifications as read: ${error.message}`);
     }
   }
 }

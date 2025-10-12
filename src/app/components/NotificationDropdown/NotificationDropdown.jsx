@@ -21,7 +21,7 @@ import "./NotificationDropdown.css";
 import { useRouter } from "next/navigation";
 import routes from "../../../routes";
 
-export default function NotificationDropdown({ userType = 'tutor' }) {
+export default function NotificationDropdown() {
   const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
@@ -32,14 +32,11 @@ export default function NotificationDropdown({ userType = 'tutor' }) {
   const dropdownRef = useRef(null);
   const router = useRouter();
 
-  // Determine if user is tutor or student
-  const isTutor = userType === 'tutor' || (user.isLoggedIn && user.isTutor);
-
   useEffect(() => {
-    if (user.isLoggedIn && user.email) {
+    if (user.isLoggedIn && user.email && user.isTutor) {
       loadNotifications();
     }
-  }, [user.isLoggedIn, user.email, isTutor]);
+  }, [user.isLoggedIn, user.email, user.isTutor]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -59,10 +56,8 @@ export default function NotificationDropdown({ userType = 'tutor' }) {
     try {
       setLoading(true);
       
-      // Load notifications based on user type
-      const notificationList = isTutor 
-        ? await NotificationService.getTutorNotifications(user.email)
-        : await NotificationService.getStudentNotifications(user.email);
+      // Load tutor notifications only
+      const notificationList = await NotificationService.getTutorNotifications(user.email);
       
       setNotifications(notificationList);
       
@@ -138,9 +133,19 @@ export default function NotificationDropdown({ userType = 'tutor' }) {
     setSelectedPendingSession(null);
   };
 
+  const handleMarkAllAsRead = async () => {
+    try {
+      await NotificationService.markAllAsRead(user.email, 'tutor');
+      // Reload notifications to update the UI
+      loadNotifications();
+    } catch (error) {
+      console.error('Error marking all notifications as read:', error);
+    }
+  };
+
   const getNotificationIcon = (type) => {
     switch (type) {
-      // Tutor notifications
+      // Tutor notifications only
       case 'pending_session_request':
         return <Clock className="notification-icon pending" />;
       case 'session_reminder':
@@ -148,15 +153,6 @@ export default function NotificationDropdown({ userType = 'tutor' }) {
       case 'message':
       case 'tutor_message':
         return <MessageSquare className="notification-icon message" />;
-      
-      // Student notifications
-      case 'session_accepted':
-        return <CheckCircle className="notification-icon accepted" />;
-      case 'session_rejected':
-      case 'session_cancelled':
-        return <XCircle className="notification-icon rejected" />;
-      case 'payment_reminder':
-        return <Clock className="notification-icon pending" />;
       
       // Common notifications
       default:
@@ -174,16 +170,6 @@ export default function NotificationDropdown({ userType = 'tutor' }) {
       case 'message':
       case 'tutor_message':
         return 'Mensaje';
-      
-      // Student notifications
-      case 'session_accepted':
-        return 'Sesión Aprobada';
-      case 'session_rejected':
-        return 'Sesión Rechazada';
-      case 'session_cancelled':
-        return 'Sesión Cancelada';
-      case 'payment_reminder':
-        return 'Recordatorio de Pago';
       
       // Common notifications
       default:
@@ -218,53 +204,31 @@ export default function NotificationDropdown({ userType = 'tutor' }) {
       markAsRead(notification.id);
     }
 
-    // Handle notification-specific actions based on user type
-    if (isTutor) {
-      // Tutor actions
-      switch (notification.type) {
-        case 'pending_session_request':
-          // Get session data and open approval modal
-          const sessionData = await getPendingSessionData(notification.sessionId);
-          if (sessionData) {
-            setSelectedPendingSession(sessionData);
-            setIsApprovalModalOpen(true);
-            setIsOpen(false); // Close notification dropdown
-          }
-          break;
-        case 'session_reminder':
-          // Navigate to upcoming sessions
-          console.log('Navigate to upcoming session:', notification.sessionId);
-          break;
-        case 'message':
-        case 'tutor_message':
-          // Navigate to messages or chat
-          console.log('Navigate to messages');
-          break;
-      }
-    } else {
-      // Student actions
-      switch (notification.type) {
-        case 'session_accepted':
-          // Navigate to confirmed sessions
-          console.log('Navigate to confirmed session:', notification.sessionId);
-          break;
-        case 'session_rejected':
-          // Navigate to available slots or show alternative options
-          console.log('Session rejected, show alternatives');
-          break;
-        case 'session_cancelled':
-          // Navigate to available slots
-          console.log('Session cancelled, show available slots');
-          break;
-        case 'payment_reminder':
-          // Navigate to payment page
-          console.log('Navigate to payment page');
-          break;
-        case 'tutor_message':
-          // Navigate to messages or chat
-          console.log('Navigate to tutor messages');
-          break;
-      }
+    // Handle tutor notification actions
+    switch (notification.type) {
+      case 'pending_session_request':
+        // Get session data and open approval modal
+        const sessionData = await getPendingSessionData(notification.sessionId);
+        if (sessionData) {
+          setSelectedPendingSession(sessionData);
+          setIsApprovalModalOpen(true);
+          setIsOpen(false); // Close notification dropdown
+        }
+        break;
+      case 'session_reminder':
+        // Navigate to availability page
+        router.push(routes.TUTOR_DISPONIBILIDAD);
+        setIsOpen(false);
+        break;
+      case 'message':
+      case 'tutor_message':
+        // Navigate to messages or show message details
+        router.push(routes.TUTOR_DISPONIBILIDAD);
+        setIsOpen(false);
+        break;
+      default:
+        // Default action - close dropdown
+        setIsOpen(false);
     }
   };
 
@@ -293,12 +257,12 @@ export default function NotificationDropdown({ userType = 'tutor' }) {
             </h3>
             <div className="notification-actions">
               {unreadCount > 0 && (
-                <button 
+                <button
                   className="mark-all-read-btn"
-                  onClick={markAllAsRead}
+                  onClick={handleMarkAllAsRead}
                   title="Marcar todas como leídas"
                 >
-                  <Check size={16} />
+                  ✓
                 </button>
               )}
               <button 
@@ -376,12 +340,8 @@ export default function NotificationDropdown({ userType = 'tutor' }) {
               <button 
                 className="view-all-btn" 
                 onClick={() => {
-                  // Navigate based on user type
-                  if (isTutor) {
-                    router.push(routes.TUTOR_DISPONIBILIDAD);
-                  } else {
-                    router.push(routes.AVAILABILITY);
-                  }
+                  // Navigate to tutor availability
+                  router.push(routes.TUTOR_DISPONIBILIDAD);
                   setIsOpen(false); // Close dropdown after navigation
                 }}
               >
