@@ -66,7 +66,7 @@ export default function StudentNotificationDropdown() {
 
   const markAsRead = async (notificationId) => {
     try {
-      await NotificationService.markAsRead(notificationId);
+      await NotificationService.markNotificationAsRead(notificationId);
       setNotifications(prev => 
         prev.map(n => n.id === notificationId ? { ...n, isRead: true } : n)
       );

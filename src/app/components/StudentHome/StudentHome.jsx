@@ -6,9 +6,11 @@ import WelcomeBanner from "../Welcome/Welcome";
 import BoxSubject from "../BoxSubject/BoxSubject";
 import TutoringSummary from "../TutoringSummary/TutoringSummary";
 import { getMaterias } from "../../services/HomeService.service";
+import { useI18n } from "../../../lib/i18n";
 import routes from "../../../routes";
 
 export default function StudentHome({ userName }) {
+  const { t } = useI18n();
   const [materias, setMaterias] = useState([]);
 
   useEffect(() => {
@@ -23,8 +25,8 @@ export default function StudentHome({ userName }) {
         {/* Sección de tutorías programadas */}
         <TutoringSummary 
           userType="student"
-          title="Mis Tutorías Programadas 📚"
-          linkText="Ver historial"
+          title={t('studentHome.scheduledSessions')}
+          linkText={t('studentHome.viewHistory')}
           linkHref={routes.SEARCH_TUTORS}
         />
 
@@ -33,10 +35,10 @@ export default function StudentHome({ userName }) {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
             <div>
               <h2 className="text-3xl font-bold text-gray-800 mb-2">
-                ¿Necesitas ayuda académica? 🎯
+                {t('studentHome.needHelpTitle')}
               </h2>
               <p className="text-gray-600 mb-4">
-                Encuentra tutores expertos para mejorar en cualquier materia.
+                {t('studentHome.needHelpText')}
               </p>
             </div>
             
@@ -45,13 +47,13 @@ export default function StudentHome({ userName }) {
                  href={routes.SEARCH_TUTORS}
                  className="bg-[#FF7A7A] hover:bg-[#FF6B6B] text-white px-6 py-2 rounded-lg font-medium transition-colors text-center"
                >
-                 🔍 Buscar Tutores
+                 {t('studentHome.searchTutors')}
                </Link>
                <Link 
                  href={routes.EXPLORE}
                  className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg font-medium transition-colors text-center"
                >
-                 🌟 Explorar Materias
+                 {t('studentHome.exploreSubjects')}
                </Link>
              </div>
           </div>
@@ -60,7 +62,7 @@ export default function StudentHome({ userName }) {
         {/* Materias del semestre */}
         <div className="bg-white rounded-xl shadow-sm p-6">
           <h2 className="text-4xl font-bold mb-2 text-[#FF7A7A] pb-4">
-            Tus materias este semestre
+            {t('studentHome.yourSubjects')}
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-4">

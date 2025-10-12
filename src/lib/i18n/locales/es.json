@@ -259,5 +259,120 @@
       "tutor": "Tutor",
       "subjectFallback": "Materia"
     }
+  },
+  "findTutor": {
+    "title": "Buscar un tutor",
+    "autoAssign": "Auto-Asignar",
+    "searchPlaceholder": "Buscar tutores o materias",
+    "loading": "Cargando tutores...",
+    "emptyStates": {
+      "noTutorsFound": "No se encontraron tutores",
+      "noMatch": "Ningún tutor coincide con \"{term}\"",
+      "noSubject": "No hay tutores disponibles para {subject}",
+      "noAvailable": "No hay tutores disponibles en este momento"
+    }
+  },
+  "sessionDetails": {
+    "title": "Detalles de la Sesión",
+    "subject": "Materia",
+    "tutor": "Tutor",
+    "student": "Estudiante",
+    "sessionDetailsLabel": "Detalles de la Sesión",
+    "location": "Ubicación",
+    "cost": "Costo",
+    "total": "Total",
+    "notes": "Notas",
+    "close": "Cerrar",
+    "reschedule": "Reprogramar",
+    "cancelSession": "Cancelar Tutoría",
+    "cancelConfirmTitle": "¿Estás seguro que deseas cancelar esta tutoría?",
+    "cancelReasonPlaceholder": "Por favor proporciona un motivo para la cancelación...",
+    "cancelKeep": "No, mantener",
+    "cancelConfirm": "Sí, cancelar",
+    "cancelling": "Cancelando...",
+    "statusCancelled": "⚠️ Sesión Cancelada",
+    "cancelledBy": "Cancelada por: {by}",
+    "cancelledByYou": "ti",
+    "cancelReason": "Motivo: {reason}",
+    "timeUntil": "⏰ {time}",
+    "cannotCancelWarning": "No se puede cancelar con menos de 2 horas de anticipación",
+    "sessionPassed": "La sesión ya pasó",
+    "hoursRemaining": "Faltan {hours} horas",
+    "minutesRemaining": "Faltan {minutes} minutos",
+    "paymentStatus": {
+      "en_verificación": "En verificación",
+      "verificado": "Verificado",
+      "rechazado": "Rechazado"
+    }
+  },
+  "home": {
+    "loading": "Cargando...",
+    "accessRestricted": "Acceso Restringido",
+    "loginRequired": "Debes iniciar sesión para acceder a esta página."
+  },
+  "explore": {
+    "bannerTitle": "¿Necesitas ayuda en tus clases?",
+    "subjectsTitle": "Tus materias este semestre"
+  },
+  "favorites": {
+    "loading": "Cargando…",
+    "searchPlaceholder": "Busca materias o tutores",
+    "coursesTitle": "Cursos favoritos",
+    "tutorsTitle": "Tutores favoritos",
+    "emptyCourses": "Aún no tienes cursos favoritos.",
+    "emptyTutors": "Aún no tienes tutores favoritos.",
+    "program": "Programa:",
+    "findTutor": "Buscar un tutor",
+    "reserve": "Reservar",
+    "user": "Usuario",
+    "tutor": "Tutor"
+  },
+  "profile": {
+    "title": "Perfil del Usuario",
+    "name": "Nombre:",
+    "phone": "Teléfono:",
+    "email": "Correo:",
+    "major": "Carrera:",
+    "notDefined": "No definido",
+    "editProfile": "Editar Perfil",
+    "logout": "Cerrar Sesión",
+    "becomeTutorTitle": "¿Quieres ser tutor?",
+    "becomeTutorText": "Aún no tienes habilitado el perfil de tutor. Completa el formulario para solicitar acceso.",
+    "goToForm": "Ir al formulario",
+    "close": "Cerrar",
+    "loadingProfile": "Cargando perfil..."
+  },
+  "welcome": {
+    "greeting": "Bienvenido",
+    "greetingWithName": "Bienvenidx, {name}",
+    "findTutor": "Encuentra el tutor para ti"
+  },
+  "studentHome": {
+    "scheduledSessions": "Mis Tutorías Programadas 📚",
+    "viewHistory": "Ver historial",
+    "needHelpTitle": "¿Necesitas ayuda académica? 🎯",
+    "needHelpText": "Encuentra tutores expertos para mejorar en cualquier materia.",
+    "searchTutors": "🔍 Buscar Tutores",
+    "exploreSubjects": "🌟 Explorar Materias",
+    "yourSubjects": "Tus materias este semestre"
+  },
+  "tutoringSummary": {
+    "loading": "Cargando...",
+    "error": "Error cargando las tutorías",
+    "noSessions": "No tienes tutorías programadas",
+    "noSessionsStudent": "Cuando reserves una tutoría, la verás aquí",
+    "noSessionsTutor": "Las tutorías que tengas agendadas aparecerán aquí",
+    "viewDetails": "Ver detalles",
+    "today": "Hoy",
+    "tomorrow": "Mañana",
+    "student": "Estudiante:",
+    "tutor": "Tutor:",
+    "pendingApproval": "⏳ Pendiente de aprobación",
+    "statusScheduled": "Programada",
+    "statusPending": "Pendiente"
+  },
+  "boxSubject": {
+    "tutors": "tutores",
+    "tutor": "tutor"
   }
 }

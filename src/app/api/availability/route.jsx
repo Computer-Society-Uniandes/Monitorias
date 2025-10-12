@@ -5,6 +5,7 @@ export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     const tutorId = searchParams.get('tutorId');
+    const tutorEmail = searchParams.get('tutorEmail');
     const subject = searchParams.get('subject');
     const startDate = searchParams.get('startDate');
     const endDate = searchParams.get('endDate');
@@ -12,9 +13,23 @@ export async function GET(request) {
 
     let availabilities = [];
 
-    if (tutorId) {
+    // Manejar tutorId o tutorEmail como sinónimos
+    const tutorIdentifier = tutorId || tutorEmail;
+
+    if (tutorIdentifier && startDate && endDate) {
+      // Obtener disponibilidades de un tutor específico en un rango de fechas
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      const allTutorAvailabilities = await FirebaseAvailabilityService.getAvailabilitiesByTutor(tutorIdentifier, 200);
+      
+      // Filtrar por rango de fechas
+      availabilities = allTutorAvailabilities.filter(availability => {
+        const availStart = availability.startDateTime;
+        return availStart >= start && availStart <= end;
+      });
+    } else if (tutorIdentifier) {
       // Obtener disponibilidades de un tutor específico
-      availabilities = await FirebaseAvailabilityService.getAvailabilitiesByTutor(tutorId, limit);
+      availabilities = await FirebaseAvailabilityService.getAvailabilitiesByTutor(tutorIdentifier, limit);
     } else if (subject) {
       // Obtener disponibilidades por materia
       availabilities = await FirebaseAvailabilityService.getAvailabilitiesBySubject(subject, limit);

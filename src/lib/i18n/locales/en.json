@@ -259,5 +259,120 @@
       "tutor": "Tutor",
       "subjectFallback": "Subject"
     }
+  },
+  "findTutor": {
+    "title": "Find a tutor",
+    "autoAssign": "Auto-Assign",
+    "searchPlaceholder": "Search for tutors or subjects",
+    "loading": "Loading tutors...",
+    "emptyStates": {
+      "noTutorsFound": "No tutors found",
+      "noMatch": "No tutors match \"{term}\"",
+      "noSubject": "No tutors available for {subject}",
+      "noAvailable": "No tutors available at the moment"
+    }
+  },
+  "sessionDetails": {
+    "title": "Session Details",
+    "subject": "Subject",
+    "tutor": "Tutor",
+    "student": "Student",
+    "sessionDetailsLabel": "Session Details",
+    "location": "Location",
+    "cost": "Cost",
+    "total": "Total",
+    "notes": "Notes",
+    "close": "Close",
+    "reschedule": "Reschedule",
+    "cancelSession": "Cancel Session",
+    "cancelConfirmTitle": "Are you sure you want to cancel this tutoring session?",
+    "cancelReasonPlaceholder": "Please provide a reason for the cancellation...",
+    "cancelKeep": "No, keep it",
+    "cancelConfirm": "Yes, cancel",
+    "cancelling": "Cancelling...",
+    "statusCancelled": "⚠️ Session Cancelled",
+    "cancelledBy": "Cancelled by: {by}",
+    "cancelledByYou": "you",
+    "cancelReason": "Reason: {reason}",
+    "timeUntil": "⏰ {time}",
+    "cannotCancelWarning": "Cannot cancel with less than 2 hours notice",
+    "sessionPassed": "The session has already passed",
+    "hoursRemaining": "{hours} hours remaining",
+    "minutesRemaining": "{minutes} minutes remaining",
+    "paymentStatus": {
+      "en_verificación": "Under Verification",
+      "verificado": "Verified",
+      "rechazado": "Rejected"
+    }
+  },
+  "home": {
+    "loading": "Loading...",
+    "accessRestricted": "Restricted Access",
+    "loginRequired": "You must log in to access this page."
+  },
+  "explore": {
+    "bannerTitle": "Need help with your classes?",
+    "subjectsTitle": "Your subjects this semester"
+  },
+  "favorites": {
+    "loading": "Loading…",
+    "searchPlaceholder": "Search subjects or tutors",
+    "coursesTitle": "Favorite Courses",
+    "tutorsTitle": "Favorite Tutors",
+    "emptyCourses": "You don't have any favorite courses yet.",
+    "emptyTutors": "You don't have any favorite tutors yet.",
+    "program": "Program:",
+    "findTutor": "Find a tutor",
+    "reserve": "Book",
+    "user": "User",
+    "tutor": "Tutor"
+  },
+  "profile": {
+    "title": "User Profile",
+    "name": "Name:",
+    "phone": "Phone:",
+    "email": "Email:",
+    "major": "Major:",
+    "notDefined": "Not defined",
+    "editProfile": "Edit Profile",
+    "logout": "Log Out",
+    "becomeTutorTitle": "Want to be a tutor?",
+    "becomeTutorText": "You don't have a tutor profile enabled yet. Complete the form to request access.",
+    "goToForm": "Go to form",
+    "close": "Close",
+    "loadingProfile": "Loading profile..."
+  },
+  "welcome": {
+    "greeting": "Welcome",
+    "greetingWithName": "Welcome, {name}",
+    "findTutor": "Find the right tutor for you"
+  },
+  "studentHome": {
+    "scheduledSessions": "My Scheduled Tutoring Sessions 📚",
+    "viewHistory": "View history",
+    "needHelpTitle": "Need academic help? 🎯",
+    "needHelpText": "Find expert tutors to improve in any subject.",
+    "searchTutors": "🔍 Search Tutors",
+    "exploreSubjects": "🌟 Explore Subjects",
+    "yourSubjects": "Your subjects this semester"
+  },
+  "tutoringSummary": {
+    "loading": "Loading...",
+    "error": "Error loading tutoring sessions",
+    "noSessions": "No scheduled tutoring sessions",
+    "noSessionsStudent": "When you book a tutoring session, you'll see it here",
+    "noSessionsTutor": "The tutoring sessions you have scheduled will appear here",
+    "viewDetails": "View details",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "student": "Student:",
+    "tutor": "Tutor:",
+    "pendingApproval": "⏳ Pending approval",
+    "statusScheduled": "Scheduled",
+    "statusPending": "Pending"
+  },
+  "boxSubject": {
+    "tutors": "tutors",
+    "tutor": "tutor"
   }
 }

@@ -320,7 +320,7 @@ export default function NotificationDropdown() {
                       {(notification.studentName || notification.tutorName) && (
                         <div className="notification-student">
                           <User size={14} />
-                          <span>{isTutor ? notification.studentName : notification.tutorName}</span>
+                          <span>{user.isTutor ? notification.studentName : notification.tutorName}</span>
                         </div>
                       )}
                     </div>

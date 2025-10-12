@@ -1,7 +1,10 @@
 "use client";
 
+import { useI18n } from "../../../lib/i18n";
+
 const WelcomeBanner = ({ usuario }) => {
-  const saludo = usuario ? `Bienvenidx, ${usuario}` : "Bienvenido";
+  const { t } = useI18n();
+  const saludo = usuario ? t('welcome.greetingWithName', { name: usuario }) : t('welcome.greeting');
 
   return (
     <div className="relative w-full overflow-hidden bg-gradient-to-b from-indigo-500 to-indigo-900 h-[270px]">
@@ -22,7 +25,7 @@ const WelcomeBanner = ({ usuario }) => {
       <div className="relative z-10 flex flex-col md:flex-row items-center px-12 text-white text-left py-8">
         <div className="flex flex-col justify-center w-full">
           <h1 className="text-4xl md:text-5xl font-bold mb-2">{saludo}</h1>
-          <p className="text-lg md:text-xl">Encuentra el tutor para ti</p>
+          <p className="text-lg md:text-xl">{t('welcome.findTutor')}</p>
         </div>
       </div>
     </div>

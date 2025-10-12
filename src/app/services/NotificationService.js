@@ -207,6 +207,50 @@ export class NotificationService {
     }
   }
 
+  // Create notification when session is rescheduled
+  static async createSessionRescheduledNotification(sessionData) {
+    try {
+      const oldDate = new Date(sessionData.oldDateTime).toLocaleString('es-ES', {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      const newDate = new Date(sessionData.newDateTime).toLocaleString('es-ES', {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      
+      const notificationData = {
+        tutorEmail: sessionData.tutorEmail,
+        studentEmail: sessionData.studentEmail,
+        studentName: sessionData.studentName,
+        sessionId: sessionData.sessionId,
+        subject: sessionData.subject,
+        oldDateTime: sessionData.oldDateTime,
+        newDateTime: sessionData.newDateTime,
+        reason: sessionData.reason || 'Sin razón especificada',
+        type: 'session_rescheduled',
+        title: 'Sesión Reprogramada',
+        message: `${sessionData.studentName} ha reprogramado la tutoría de ${sessionData.subject}. Anterior: ${oldDate}. Nueva: ${newDate}. Motivo: ${sessionData.reason || 'Sin razón especificada'}`,
+        isRead: false,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      };
+
+      const docRef = await addDoc(collection(db, this.COLLECTION_NAME), notificationData);
+      console.log('Session rescheduled notification created with ID:', docRef.id);
+      return { success: true, id: docRef.id };
+    } catch (error) {
+      console.error('Error creating session rescheduled notification:', error);
+      throw new Error(`Error creating notification: ${error.message}`);
+    }
+  }
+
   // Get notifications for a student
   static async getStudentNotifications(studentEmail, limitCount = 50) {
     try {

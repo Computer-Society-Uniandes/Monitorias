@@ -5,11 +5,13 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, Search } from 'lucide-react';
 import { TutorSearchService } from '../../services/TutorSearchService';
 import ModernTutorCard from '../../components/ModernTutorCard/ModernTutorCard';
+import { useI18n } from '../../../lib/i18n';
 import './FindTutorView.css';
 
 export default function FindTutorView() {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const { t } = useI18n();
     const [tutors, setTutors] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
@@ -87,12 +89,12 @@ export default function FindTutorView() {
                         <ArrowLeft size={24} />
                     </button>
                     
-                    <h1 className="page-title">Find a tutor</h1>
+                    <h1 className="page-title">{t('findTutor.title')}</h1>
                 </div>
                 
                 {/* Auto-Assign Section */}
                 <div className="auto-assign-section">
-                    <span className="auto-assign-label">Auto-Assign</span>
+                    <span className="auto-assign-label">{t('findTutor.autoAssign')}</span>
                     <button 
                         className="auto-assign-button"
                         onClick={handleAutoAssign}
@@ -108,7 +110,7 @@ export default function FindTutorView() {
                     <Search className="search-icon" size={20} />
                     <input
                         type="text"
-                        placeholder="Search for tutors or subjects"
+                        placeholder={t('findTutor.searchPlaceholder')}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="search-input"
@@ -121,18 +123,18 @@ export default function FindTutorView() {
                 {loading ? (
                     <div className="loading-state">
                         <div className="loading-spinner"></div>
-                        <p>Loading tutors...</p>
+                        <p>{t('findTutor.loading')}</p>
                     </div>
                 ) : filteredTutors.length === 0 ? (
                     <div className="empty-state">
                         <div className="empty-icon">🔍</div>
-                        <h3>No tutors found</h3>
+                        <h3>{t('findTutor.emptyStates.noTutorsFound')}</h3>
                         <p>
                             {searchTerm 
-                                ? `No tutors match "${searchTerm}"`
+                                ? t('findTutor.emptyStates.noMatch', { term: searchTerm })
                                 : subject 
-                                    ? `No tutors available for ${subject}`
-                                    : 'No tutors available at the moment'
+                                    ? t('findTutor.emptyStates.noSubject', { subject })
+                                    : t('findTutor.emptyStates.noAvailable')
                             }
                         </p>
                     </div>
