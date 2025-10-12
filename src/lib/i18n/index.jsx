@@ -49,6 +49,12 @@ export function I18nProvider({ children, initialLocale = "es" }) {
     }
   };
 
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      try { document.documentElement.lang = locale === "en" ? "en" : "es"; } catch {}
+    }
+  }, [locale]);
+
   const t = useMemo(() => {
     const get = (obj, path) => path.split(".").reduce((o, p) => (o && o[p] != null ? o[p] : undefined), obj);
     const interpolate = (str, vars) =>
