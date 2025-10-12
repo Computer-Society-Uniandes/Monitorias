@@ -31,6 +31,7 @@ export default function NotificationDropdown() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isApprovalModalOpen, setIsApprovalModalOpen] = useState(false);
   const [selectedPendingSession, setSelectedPendingSession] = useState(null);
+  const [error, setError] = useState(null);
   const dropdownRef = useRef(null);
   const router = useRouter();
 
@@ -57,6 +58,7 @@ export default function NotificationDropdown() {
   const loadNotifications = async () => {
     try {
       setLoading(true);
+      setError(null);
       
       // Load tutor notifications only
       const notificationList = await NotificationService.getTutorNotifications(user.email);
@@ -68,6 +70,7 @@ export default function NotificationDropdown() {
       setUnreadCount(unread);
     } catch (error) {
       console.error('Error loading notifications:', error);
+      setError('Error loading notifications');
       setNotifications([]);
       setUnreadCount(0);
     } finally {
@@ -289,7 +292,12 @@ export default function NotificationDropdown() {
           {/* Notifications List */}
           {!loading && (
             <div className="notification-list">
-              {notifications.length === 0 ? (
+              {error ? (
+                <div className="notification-error">
+                  <Bell size={32} />
+                  <p>{error}</p>
+                </div>
+              ) : notifications.length === 0 ? (
                 <div className="notification-empty">
                   <Bell size={32} />
                   <p>{t('notifications.empty')}</p>

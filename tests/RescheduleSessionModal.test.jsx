@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import RescheduleSessionModal from '../src/app/components/RescheduleSessionModal/RescheduleSessionModal';
 
 // Mock services
@@ -199,7 +199,9 @@ describe('RescheduleSessionModal', () => {
 
     // Find the slot button by its content
     const slotButton = screen.getByRole('button', { name: /09:00.*10:00/i });
-    fireEvent.click(slotButton);
+    await act(async () => {
+      fireEvent.click(slotButton);
+    });
 
     // Slot should be selected (visual change)
     expect(slotButton).toHaveClass('border-[#FF8C00]');
@@ -238,14 +240,18 @@ describe('RescheduleSessionModal', () => {
 
     // Select slot
     const slotButton = screen.getByRole('button', { name: /09:00.*10:00/i });
-    fireEvent.click(slotButton);
+    await act(async () => {
+      fireEvent.click(slotButton);
+    });
 
     // Try to confirm without reason - button should be disabled
     const confirmButton = screen.getByRole('button', { name: /Confirm Reschedule/i });
     expect(confirmButton).toBeDisabled();
 
     // Alert won't be called because button is disabled, but we can verify the disabled state
-    fireEvent.click(confirmButton);
+    await act(async () => {
+      fireEvent.click(confirmButton);
+    });
     expect(global.alert).not.toHaveBeenCalled();
   });
 
@@ -287,15 +293,21 @@ describe('RescheduleSessionModal', () => {
 
     // Select slot
     const slotButton = screen.getByRole('button', { name: /09:00.*10:00/i });
-    fireEvent.click(slotButton);
+    await act(async () => {
+      fireEvent.click(slotButton);
+    });
 
     // Enter reason
     const reasonInput = screen.getByPlaceholderText(/E.g.: I have another commitment/i);
-    fireEvent.change(reasonInput, { target: { value: 'Need to change time' } });
+    await act(async () => {
+      fireEvent.change(reasonInput, { target: { value: 'Need to change time' } });
+    });
 
     // Confirm reschedule
     const confirmButton = screen.getByRole('button', { name: /Confirm Reschedule/i });
-    fireEvent.click(confirmButton);
+    await act(async () => {
+      fireEvent.click(confirmButton);
+    });
 
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledWith(
@@ -350,21 +362,27 @@ describe('RescheduleSessionModal', () => {
 
     // Select slot and enter reason
     const slotButton = screen.getByRole('button', { name: /09:00.*10:00/i });
-    fireEvent.click(slotButton);
+    await act(async () => {
+      fireEvent.click(slotButton);
+    });
 
     const reasonInput = screen.getByPlaceholderText(/E.g.: I have another commitment/i);
-    fireEvent.change(reasonInput, { target: { value: 'Need to change time' } });
+    await act(async () => {
+      fireEvent.change(reasonInput, { target: { value: 'Need to change time' } });
+    });
 
     // Confirm reschedule
     const confirmButton = screen.getByRole('button', { name: /Confirm Reschedule/i });
-    fireEvent.click(confirmButton);
+    await act(async () => {
+      fireEvent.click(confirmButton);
+    });
 
     await waitFor(() => {
       expect(screen.getByText(/Slot no longer available/i)).toBeInTheDocument();
     });
   });
 
-  test('closes modal when close button is clicked', () => {
+  test('closes modal when close button is clicked', async () => {
     AvailabilityService.getAvailabilitiesByTutorAndRange.mockResolvedValue({
       availabilitySlots: [],
     });
@@ -381,7 +399,9 @@ describe('RescheduleSessionModal', () => {
     );
 
     const backButton = screen.getAllByRole('button')[0]; // First button is back button
-    fireEvent.click(backButton);
+    await act(async () => {
+      fireEvent.click(backButton);
+    });
 
     expect(mockOnClose).toHaveBeenCalled();
   });
@@ -423,13 +443,19 @@ describe('RescheduleSessionModal', () => {
 
     // Select slot and enter reason
     const slotButton = screen.getByRole('button', { name: /09:00.*10:00/i });
-    fireEvent.click(slotButton);
+    await act(async () => {
+      fireEvent.click(slotButton);
+    });
 
     const reasonInput = screen.getByPlaceholderText(/E.g.: I have another commitment/i);
-    fireEvent.change(reasonInput, { target: { value: 'Need to change' } });
+    await act(async () => {
+      fireEvent.change(reasonInput, { target: { value: 'Need to change' } });
+    });
 
     const confirmButton = screen.getByRole('button', { name: /Confirm Reschedule/i });
-    fireEvent.click(confirmButton);
+    await act(async () => {
+      fireEvent.click(confirmButton);
+    });
 
     // Button should show loading state
     expect(screen.getByText('Rescheduling...')).toBeInTheDocument();

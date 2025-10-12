@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import NotificationDropdown from '../src/app/components/NotificationDropdown/NotificationDropdown';
 import StudentNotificationDropdown from '../src/app/components/NotificationDropdown/StudentNotificationDropdown';
@@ -142,11 +142,12 @@ describe('NotificationDropdown Components', () => {
   ];
 
   beforeEach(() => {
-    // Mock service methods
+    // Mock service methods - ensure all methods are properly defined
     NotificationService.getTutorNotifications = jest.fn().mockResolvedValue(mockTutorNotifications);
     NotificationService.getStudentNotifications = jest.fn().mockResolvedValue(mockStudentNotifications);
     NotificationService.markNotificationAsRead = jest.fn().mockResolvedValue({ success: true });
     NotificationService.markAllAsRead = jest.fn().mockResolvedValue({ success: true, count: 2 });
+    
     TutoringSessionService.getPendingSessionsForTutor = jest.fn().mockResolvedValue([
       {
         id: 'session1',
@@ -198,7 +199,9 @@ describe('NotificationDropdown Components', () => {
       render(<NotificationDropdown />);
       
       const bellButton = screen.getByRole('button');
-      fireEvent.click(bellButton);
+      await act(async () => {
+        fireEvent.click(bellButton);
+      });
       
       await waitFor(() => {
         expect(screen.getByText('Tutoring Request')).toBeInTheDocument();
@@ -211,7 +214,9 @@ describe('NotificationDropdown Components', () => {
       render(<NotificationDropdown />);
       
       const bellButton = screen.getByRole('button');
-      fireEvent.click(bellButton);
+      await act(async () => {
+        fireEvent.click(bellButton);
+      });
       
       await waitFor(() => {
         expect(screen.getByText('Tutoring Request')).toBeInTheDocument();
@@ -225,7 +230,9 @@ describe('NotificationDropdown Components', () => {
       render(<NotificationDropdown />);
       
       const bellButton = screen.getByRole('button');
-      fireEvent.click(bellButton);
+      await act(async () => {
+        fireEvent.click(bellButton);
+      });
       
       await waitFor(() => {
         expect(screen.getByText('Tutoring Request')).toBeInTheDocument();
@@ -238,14 +245,18 @@ describe('NotificationDropdown Components', () => {
       render(<NotificationDropdown />);
       
       const bellButton = screen.getByRole('button');
-      fireEvent.click(bellButton);
+      await act(async () => {
+        fireEvent.click(bellButton);
+      });
       
       await waitFor(() => {
         expect(screen.getByText('Tutoring Request')).toBeInTheDocument();
       });
       
       const notification = screen.getByText('Tutoring Request');
-      fireEvent.click(notification);
+      await act(async () => {
+        fireEvent.click(notification);
+      });
       
       await waitFor(() => {
         expect(NotificationService.markNotificationAsRead).toHaveBeenCalledWith('notif1');
@@ -263,14 +274,18 @@ describe('NotificationDropdown Components', () => {
       );
       
       const bellButton = screen.getByRole('button');
-      fireEvent.click(bellButton);
+      await act(async () => {
+        fireEvent.click(bellButton);
+      });
       
       await waitFor(() => {
         expect(screen.getByText('Tutoring Request')).toBeInTheDocument();
       });
       
       const outsideElement = screen.getByTestId('outside-element');
-      fireEvent.mouseDown(outsideElement);
+      await act(async () => {
+        fireEvent.mouseDown(outsideElement);
+      });
       
       await waitFor(() => {
         expect(screen.queryByText('Tutoring Request')).not.toBeInTheDocument();
@@ -283,7 +298,9 @@ describe('NotificationDropdown Components', () => {
       render(<NotificationDropdown />);
       
       const bellButton = screen.getByRole('button');
-      fireEvent.click(bellButton);
+      await act(async () => {
+        fireEvent.click(bellButton);
+      });
       
       await waitFor(() => {
         expect(screen.getByTitle('Mark all as read')).toBeInTheDocument();
@@ -296,14 +313,18 @@ describe('NotificationDropdown Components', () => {
       render(<NotificationDropdown />);
       
       const bellButton = screen.getByRole('button');
-      fireEvent.click(bellButton);
+      await act(async () => {
+        fireEvent.click(bellButton);
+      });
       
       await waitFor(() => {
         expect(screen.getByTitle('Mark all as read')).toBeInTheDocument();
       });
       
       const markAllButton = screen.getByTitle('Mark all as read');
-      fireEvent.click(markAllButton);
+      await act(async () => {
+        fireEvent.click(markAllButton);
+      });
       
       await waitFor(() => {
         expect(NotificationService.markAllAsRead).toHaveBeenCalledWith(mockUser.email, 'tutor');
@@ -317,10 +338,12 @@ describe('NotificationDropdown Components', () => {
       render(<NotificationDropdown />);
       
       const bellButton = screen.getByRole('button');
-      fireEvent.click(bellButton);
+      await act(async () => {
+        fireEvent.click(bellButton);
+      });
       
       await waitFor(() => {
-        expect(screen.getByText('You have no notifications')).toBeInTheDocument();
+        expect(screen.getByText('Error loading notifications')).toBeInTheDocument();
       });
     });
 
@@ -331,7 +354,9 @@ describe('NotificationDropdown Components', () => {
       render(<NotificationDropdown />);
       
       const bellButton = screen.getByRole('button');
-      fireEvent.click(bellButton);
+      await act(async () => {
+        fireEvent.click(bellButton);
+      });
       
       await waitFor(() => {
         expect(screen.getByText('You have no notifications')).toBeInTheDocument();
@@ -344,14 +369,18 @@ describe('NotificationDropdown Components', () => {
       render(<NotificationDropdown />);
       
       const bellButton = screen.getByRole('button');
-      fireEvent.click(bellButton);
+      await act(async () => {
+        fireEvent.click(bellButton);
+      });
       
       await waitFor(() => {
         expect(screen.getByText('Tutoring Request')).toBeInTheDocument();
       });
       
       const notification = screen.getByText('Tutoring Request');
-      fireEvent.click(notification);
+      await act(async () => {
+        fireEvent.click(notification);
+      });
       
       await waitFor(() => {
         expect(screen.getByTestId('tutor-approval-modal')).toBeInTheDocument();
@@ -384,7 +413,9 @@ describe('NotificationDropdown Components', () => {
       render(<StudentNotificationDropdown />);
       
       const bellButton = screen.getByRole('button');
-      fireEvent.click(bellButton);
+      await act(async () => {
+        fireEvent.click(bellButton);
+      });
       
       await waitFor(() => {
         expect(screen.getByText('Session Accepted')).toBeInTheDocument();
@@ -398,14 +429,18 @@ describe('NotificationDropdown Components', () => {
       render(<StudentNotificationDropdown />);
       
       const bellButton = screen.getByRole('button');
-      fireEvent.click(bellButton);
+      await act(async () => {
+        fireEvent.click(bellButton);
+      });
       
       await waitFor(() => {
         expect(screen.getByText('Session Accepted')).toBeInTheDocument();
       });
       
       const notification = screen.getByText('Session Accepted');
-      fireEvent.click(notification);
+      await act(async () => {
+        fireEvent.click(notification);
+      });
       
       await waitFor(() => {
         expect(screen.getByTestId('session-booked-modal')).toBeInTheDocument();
@@ -418,7 +453,9 @@ describe('NotificationDropdown Components', () => {
       render(<StudentNotificationDropdown />);
       
       const bellButton = screen.getByRole('button');
-      fireEvent.click(bellButton);
+      await act(async () => {
+        fireEvent.click(bellButton);
+      });
       
       await waitFor(() => {
         expect(screen.getByText('Session Rejected')).toBeInTheDocument();
@@ -429,7 +466,9 @@ describe('NotificationDropdown Components', () => {
       expect(notification).toBeInTheDocument();
       
       // Click the notification (this should trigger navigation in real app and close dropdown)
-      fireEvent.click(notification);
+      await act(async () => {
+        fireEvent.click(notification);
+      });
       
       // After clicking, the dropdown should close, so we verify the notification is no longer visible
       await waitFor(() => {
@@ -443,7 +482,9 @@ describe('NotificationDropdown Components', () => {
       render(<StudentNotificationDropdown />);
       
       const bellButton = screen.getByRole('button');
-      fireEvent.click(bellButton);
+      await act(async () => {
+        fireEvent.click(bellButton);
+      });
       
       await waitFor(() => {
         expect(screen.getByText('Session Accepted')).toBeInTheDocument();
@@ -471,7 +512,9 @@ describe('NotificationDropdown Components', () => {
       render(<StudentNotificationDropdown />);
       
       const bellButton = screen.getByRole('button');
-      fireEvent.click(bellButton);
+      await act(async () => {
+        fireEvent.click(bellButton);
+      });
       
       await waitFor(() => {
         expect(screen.getByText('Payment Reminder')).toBeInTheDocument();
@@ -499,7 +542,9 @@ describe('NotificationDropdown Components', () => {
       render(<StudentNotificationDropdown />);
       
       const bellButton = screen.getByRole('button');
-      fireEvent.click(bellButton);
+      await act(async () => {
+        fireEvent.click(bellButton);
+      });
       
       await waitFor(() => {
         expect(screen.getByText('Message from Tutor')).toBeInTheDocument();
@@ -512,14 +557,18 @@ describe('NotificationDropdown Components', () => {
       render(<StudentNotificationDropdown />);
       
       const bellButton = screen.getByRole('button');
-      fireEvent.click(bellButton);
+      await act(async () => {
+        fireEvent.click(bellButton);
+      });
       
       await waitFor(() => {
         expect(screen.getByText('Session Accepted')).toBeInTheDocument();
       });
       
       const notification = screen.getByText('Session Accepted');
-      fireEvent.click(notification);
+      await act(async () => {
+        fireEvent.click(notification);
+      });
       
       await waitFor(() => {
         expect(NotificationService.markNotificationAsRead).toHaveBeenCalledWith('notif1');
@@ -533,7 +582,9 @@ describe('NotificationDropdown Components', () => {
       render(<StudentNotificationDropdown />);
       
       const bellButton = screen.getByRole('button');
-      fireEvent.click(bellButton);
+      await act(async () => {
+        fireEvent.click(bellButton);
+      });
       
       await waitFor(() => {
         expect(screen.getByText('You have no notifications')).toBeInTheDocument();
@@ -547,10 +598,12 @@ describe('NotificationDropdown Components', () => {
       render(<StudentNotificationDropdown />);
       
       const bellButton = screen.getByRole('button');
-      fireEvent.click(bellButton);
+      await act(async () => {
+        fireEvent.click(bellButton);
+      });
       
       await waitFor(() => {
-        expect(screen.getByText('You have no notifications')).toBeInTheDocument();
+        expect(screen.getByText('Error loading notifications')).toBeInTheDocument();
       });
     });
   });
@@ -562,7 +615,9 @@ describe('NotificationDropdown Components', () => {
       render(<NotificationDropdown />);
       
       const bellButton = screen.getByRole('button');
-      fireEvent.click(bellButton);
+      await act(async () => {
+        fireEvent.click(bellButton);
+      });
       
       await waitFor(() => {
         expect(screen.getByText('Notifications')).toBeInTheDocument();
@@ -575,7 +630,9 @@ describe('NotificationDropdown Components', () => {
       render(<NotificationDropdown />);
       
       const bellButton = screen.getByRole('button');
-      fireEvent.click(bellButton);
+      await act(async () => {
+        fireEvent.click(bellButton);
+      });
       
       await waitFor(() => {
         expect(screen.getByText('Tutoring Request')).toBeInTheDocument();
@@ -584,14 +641,16 @@ describe('NotificationDropdown Components', () => {
   });
 
   describe('Loading States', () => {
-    test('shows loading state while fetching notifications', () => {
+    test('shows loading state while fetching notifications', async () => {
       NotificationService.getTutorNotifications.mockImplementation(() => new Promise(resolve => setTimeout(resolve, 100)));
       useAuth.mockReturnValue({ user: mockUser });
       
       render(<NotificationDropdown />);
       
       const bellButton = screen.getByRole('button');
-      fireEvent.click(bellButton);
+      await act(async () => {
+        fireEvent.click(bellButton);
+      });
       
       expect(screen.getByText('Loading notifications...')).toBeInTheDocument();
     });

@@ -11,6 +11,9 @@ jest.mock('../src/app/context/SecureAuthContext');
 jest.mock('../src/app/services/TutoringSessionService');
 jest.mock('../src/app/services/AvailabilityService');
 jest.mock('../src/app/services/NotificationService');
+
+// Mock window.alert
+global.alert = jest.fn();
 jest.mock('../src/lib/i18n', () => ({
   useI18n: () => ({
     t: (key, params = {}) => {
@@ -185,6 +188,7 @@ describe('UnifiedAvailability Component', () => {
   beforeEach(() => {
     // Clear all mocks
     jest.clearAllMocks();
+    global.alert.mockClear();
     
     // Mock useAuth
     useAuth.mockReturnValue({
