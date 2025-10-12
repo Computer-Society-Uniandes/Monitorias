@@ -4,6 +4,7 @@ import React from "react";
 import Image from "next/image";
 import { CheckCircle, Calendar, Clock, User, BookOpen, MapPin } from "lucide-react";
 import "./SessionBookedModal.css";
+import { useI18n } from "app/lib/i18n";
 
 export default function SessionBookedModal({ 
   isOpen, 
@@ -11,6 +12,7 @@ export default function SessionBookedModal({
   sessionData,
   userType = 'student' // 'student' or 'tutor'
 }) {
+  const { t, locale } = useI18n();
   
 
   if (!isOpen || !sessionData) return null;
@@ -18,13 +20,13 @@ export default function SessionBookedModal({
   const formatDate = (dateTime) => {
     const date = new Date(dateTime);
     return {
-      date: date.toLocaleDateString('es-ES', { 
+      date: date.toLocaleDateString(locale === 'en' ? 'en-US' : 'es-ES', { 
         weekday: 'long',
         year: 'numeric', 
         month: 'long', 
         day: 'numeric' 
       }),
-      time: date.toLocaleTimeString('es-ES', { 
+      time: date.toLocaleTimeString(locale === 'en' ? 'en-US' : 'es-ES', { 
         hour: '2-digit', 
         minute: '2-digit' 
       })
@@ -35,13 +37,13 @@ export default function SessionBookedModal({
 
   // Determine content based on user type
   const isTutor = userType === 'tutor';
-  const title = isTutor ? '¡Sesión Aprobada!' : '¡Sesión Reservada!';
+  const title = isTutor ? t('availability.bookedModal.approvedTitle') : t('availability.bookedModal.reservedTitle');
   const thankYouText = isTutor 
-    ? 'Gracias por aprobar la sesión de tutoría.'
-    : 'Gracias por reservar con Calico.';
+    ? t('availability.bookedModal.thanksTutor')
+    : t('availability.bookedModal.thanksStudent');
   const statusText = isTutor
-    ? 'Has aprobado esta sesión de tutoría. El estudiante recibirá una notificación y el link de Google Meet para la sesión.'
-    : 'Tu solicitud ha sido enviada al tutor. Recibirás un correo de confirmación cuando la acepte y el link de Google Meet una vez que sea aprobada.';
+    ? t('availability.bookedModal.statusTutor')
+    : t('availability.bookedModal.statusStudent');
 
   return (
     <div className="session-booked-overlay" onClick={onClose}>
@@ -72,53 +74,51 @@ export default function SessionBookedModal({
           {/* Thank you message */}
           <div className="thank-you-message">
             <p className="thank-you-text">
-              {isTutor ? thankYouText : (
-                <>
-                  Gracias por reservar con <strong>Calico</strong>.
-                </>
-              )}
+              {thankYouText}
             </p>
             <p className="session-details">
-              {isTutor ? `Sesión programada para el ${date} a las ${time}` : `Te vemos el ${date} a las ${time}`}
+              {isTutor 
+                ? t('availability.bookedModal.scheduled', { date, time })
+                : t('availability.bookedModal.seeYou', { date, time })}
             </p>
           </div>
 
           {/* Session details */}
           <div className="session-info-card">
             <h3 className="session-info-title">
-              {isTutor ? 'Detalles de la sesión aprobada:' : 'Detalles de tu sesión:'}
+              {isTutor ? t('availability.bookedModal.detailsApproved') : t('availability.bookedModal.detailsYour')}
             </h3>
             <div className="session-details-list">
               <div className="session-detail-item">
                 <User className="detail-icon" size={16} />
-                <span className="detail-label">{isTutor ? 'Estudiante:' : 'Tutor:'}</span>
+                <span className="detail-label">{isTutor ? t('availability.bookedModal.labels.student') : t('availability.bookedModal.labels.tutor')}</span>
                 <span className="detail-value">
-                  {isTutor ? (sessionData.studentName || sessionData.studentEmail || 'Estudiante') : (sessionData.tutorName || 'Tutor')}
+                  {isTutor ? (sessionData.studentName || sessionData.studentEmail || t('common.student')) : (sessionData.tutorName || t('common.tutor'))}
                 </span>
               </div>
               
               <div className="session-detail-item">
                 <BookOpen className="detail-icon" size={16} />
-                <span className="detail-label">Materia:</span>
+                <span className="detail-label">{t('availability.bookedModal.labels.subject')}</span>
                 <span className="detail-value">{sessionData.subject}</span>
               </div>
               
               <div className="session-detail-item">
                 <Calendar className="detail-icon" size={16} />
-                <span className="detail-label">Fecha:</span>
+                <span className="detail-label">{t('availability.bookedModal.labels.date')}</span>
                 <span className="detail-value">{date}</span>
               </div>
               
               <div className="session-detail-item">
                 <Clock className="detail-icon" size={16} />
-                <span className="detail-label">Hora:</span>
+                <span className="detail-label">{t('availability.bookedModal.labels.time')}</span>
                 <span className="detail-value">{time}</span>
               </div>
               
               {sessionData.location && (
                 <div className="session-detail-item">
                   <MapPin className="detail-icon" size={16} />
-                  <span className="detail-label">Ubicación:</span>
+                  <span className="detail-label">{t('availability.bookedModal.labels.location')}</span>
                   <span className="detail-value">{sessionData.location}</span>
                 </div>
               )}
@@ -133,7 +133,7 @@ export default function SessionBookedModal({
               className="close-modal-btn"
               onClick={onClose}
             >
-              ¡Perfecto!
+              {t('availability.bookedModal.ok')}
             </button>
           </div>
         </div>

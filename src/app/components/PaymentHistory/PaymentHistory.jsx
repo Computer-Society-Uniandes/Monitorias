@@ -4,9 +4,11 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../../context/SecureAuthContext';
 import PaymentsService from '../../services/PaymentsService';
 import PaymentCard from '../PaymentCard/PaymentCard';
+import { useI18n } from '../../../lib/i18n';
 
 export default function PaymentHistory({ subjectQuery = '', startDate = null, endDate = null, onCountChange, showEmpty = false }) {
   const { user } = useAuth();
+  const { t } = useI18n();
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -56,7 +58,7 @@ export default function PaymentHistory({ subjectQuery = '', startDate = null, en
         if (mounted) setPayments(list);
       } catch (e) {
         console.error('[PaymentHistory] Error:', e);
-        if (mounted) setError('Error cargando pagos');
+        if (mounted) setError(t('payments.error'));
       } finally {
         if (mounted) setLoading(false);
       }
@@ -88,7 +90,7 @@ export default function PaymentHistory({ subjectQuery = '', startDate = null, en
     return (
       <div className="payment-history-loading">
         <div className="loading-spinner" />
-        <p>Cargando pagos...</p>
+        <p>{t('payments.loading')}</p>
       </div>
     );
   }
@@ -106,7 +108,7 @@ export default function PaymentHistory({ subjectQuery = '', startDate = null, en
     const fallbackEmail = (typeof window !== 'undefined' ? (window.localStorage?.getItem?.('userEmail') || window.localStorage?.getItem?.('email') || window.localStorage?.getItem?.('mail')) : '');
     return (
       <div className="payment-history-empty">
-        <p>No hay pagos registrados para <strong>{user?.email || fallbackEmail}</strong>.</p>
+        <p>{t('payments.emptyFor', { email: user?.email || fallbackEmail })}</p>
       </div>
     );
   }

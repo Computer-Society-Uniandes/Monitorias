@@ -16,12 +16,14 @@ import ModernTutorCard from '../../components/ModernTutorCard/ModernTutorCard';
 import AvailabilityCalendar from '../../components/AvailabilityCalendar/AvailabilityCalendar';
 import routes from '../../../routes';
 import './BuscarTutores.css';
+import { useI18n } from '../../../lib/i18n';
 
 function BuscarTutoresContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const pathname = usePathname();
     const { email: userEmail } = useUser();
+    const { t } = useI18n();
     
     // Hook de favoritos
     const { isTutorFavorite, isCourseFavorite } = useFavorites();
@@ -210,12 +212,12 @@ function BuscarTutoresContent() {
                         onClick={handleBackToSubjects}
                         className="text-gray-600 hover:text-gray-900 mb-6 flex items-center gap-2"
                     >
-                        ← Volver a materias
+                        ← {t('search.back.toSubjects')}
                     </button>
 
                     <div className="flex justify-between items-center mb-8">
                         <h1 className="text-3xl font-bold text-gray-900">
-                            Tutores para {selectedSubject.nombre}
+                            {t('search.subjects.tutorsFor', { subject: selectedSubject.nombre })}
                         </h1>
                         
                         <button
@@ -225,18 +227,18 @@ function BuscarTutoresContent() {
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            Ver Disponibilidad Conjunta
+                            {t('search.cta.viewJointAvailability')}
                         </button>
                     </div>
 
                     {loadingTutors ? (
                         <div className="text-center py-12">
                             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF8C00] mx-auto"></div>
-                            <p className="mt-4 text-gray-600">Cargando tutores...</p>
+                            <p className="mt-4 text-gray-600">{t('search.subjects.loadingTutors')}</p>
                         </div>
                     ) : tutorsForSubject.length === 0 ? (
                         <div className="text-center py-12">
-                            <p className="text-gray-600">No hay tutores disponibles para esta materia.</p>
+                            <p className="text-gray-600">{t('search.subjects.noTutors')}</p>
                         </div>
                     ) : (
                         <div className="space-y-4">
@@ -270,7 +272,7 @@ function BuscarTutoresContent() {
                                     ←
                                 </button>
                                 <div>
-                                    <h1 className="text-3xl font-bold text-[#101F24]">Disponibilidad de {selectedTutorForCalendar?.name}</h1>
+                                    <h1 className="text-3xl font-bold text-[#101F24]">{t('search.calendar.individualTitle', { tutor: selectedTutorForCalendar?.name })}</h1>
                                     <p className="text-[#6B7280] mt-1">{selectedSubjectForTutors?.nombre}</p>
                                 </div>
                             </div>
@@ -296,8 +298,8 @@ function BuscarTutoresContent() {
                                     ←
                                 </button>
                                 <div>
-                                    <h1 className="text-3xl font-bold text-[#101F24]">Disponibilidad Conjunta</h1>
-                                    <p className="text-[#6B7280] mt-1">{selectedSubjectForTutors?.nombre} - Todos los tutores</p>
+                                    <h1 className="text-3xl font-bold text-[#101F24]">{t('search.calendar.jointTitle')}</h1>
+                                    <p className="text-[#6B7280] mt-1">{selectedSubjectForTutors?.nombre} - {t('common.allTutors')}</p>
                                 </div>
                             </div>
                         </div>
@@ -320,20 +322,20 @@ function BuscarTutoresContent() {
                                     >
                                         ←
                                     </button>
-                                    <h1 className="text-3xl font-bold text-[#101F24]">Disponibilidad Conjunta</h1>
+                                    <h1 className="text-3xl font-bold text-[#101F24]">{t('search.calendar.jointTitle')}</h1>
                                 </div>
                                 
                                 {/* Botón de disponibilidad conjunta */}
                                 <div className="flex justify-between items-center bg-[#FFF8F0] p-4 rounded-lg border-2 border-[#FDAE1E]/20">
                                     <div>
-                                        <h3 className="text-lg font-semibold text-[#101F24]">Ver horarios combinados</h3>
-                                        <p className="text-[#6B7280]">Disponibilidad de todos los tutores de {selectedSubjectForTutors?.nombre}</p>
+                                        <h3 className="text-lg font-semibold text-[#101F24]">{t('search.cta.seeCombinedSchedules')}</h3>
+                                        <p className="text-[#6B7280]">{t('search.cta.availabilityOfAllTutors', { subject: selectedSubjectForTutors?.nombre })}</p>
                                     </div>
                                     <button 
                                         className="bg-gradient-to-r from-[#FDAE1E] to-[#FF9505] text-white px-6 py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-300 transform hover:scale-105"
                                         onClick={handleDisponibilidadConjunta}
                                     >
-                                        Ver Disponibilidad Conjunta
+                                        {t('search.cta.viewJointAvailability')}
                                     </button>
                                 </div>
                             </div>
@@ -344,14 +346,14 @@ function BuscarTutoresContent() {
                             {loadingTutors ? (
                                 <div className="loading-state flex flex-col items-center justify-center py-16">
                                     <div className="w-12 h-12 border-4 border-[#FFF8F0] border-t-[#FDAE1E] rounded-full animate-spin mb-4"></div>
-                                    <p className="text-[#101F24] text-lg">Cargando tutores...</p>
+                                    <p className="text-[#101F24] text-lg">{t('search.subjects.loadingTutors')}</p>
                                 </div>
                             ) : tutorsForSubject.length === 0 ? (
                                 <div className="empty-state flex flex-col items-center justify-center py-16 bg-white rounded-xl border-2 border-[#FDAE1E]/10">
                                     <div className="text-6xl mb-6">🔍</div>
-                                    <h3 className="text-2xl font-bold text-[#101F24] mb-4">No hay tutores disponibles</h3>
+                                    <h3 className="text-2xl font-bold text-[#101F24] mb-4">{t('search.subjects.noTutorsShort')}</h3>
                                     <p className="text-[#6B7280] text-lg max-w-md text-center">
-                                        No hay tutores disponibles para {selectedSubjectForTutors?.nombre} en este momento.
+                                        {t('search.subjects.noTutors')}
                                     </p>
                                 </div>
                             ) : (
@@ -377,7 +379,7 @@ function BuscarTutoresContent() {
                                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                                 <Input
                                     type="text"
-                                    placeholder="Buscar tutores o materias"
+                                    placeholder={t('search.placeholders.search')}
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                     onFocus={() => setActiveTab('materias')}
@@ -389,9 +391,9 @@ function BuscarTutoresContent() {
                         {/* Tabs */}
                         <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
                             <TabsList className="grid w-full max-w-md grid-cols-3">
-                                <TabsTrigger value="tutores">Tutores</TabsTrigger>
-                                <TabsTrigger value="materias">Materias</TabsTrigger>
-                                <TabsTrigger value="ambos">Ambos</TabsTrigger>
+                                <TabsTrigger value="tutores">{t('search.tabs.tutors')}</TabsTrigger>
+                                <TabsTrigger value="materias">{t('search.tabs.subjects')}</TabsTrigger>
+                                <TabsTrigger value="ambos">{t('search.tabs.both')}</TabsTrigger>
                             </TabsList>
                         </Tabs>
 
@@ -399,13 +401,11 @@ function BuscarTutoresContent() {
                         {loading ? (
                             <div className="text-center py-12">
                                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF8C00] mx-auto"></div>
-                                <p className="mt-4 text-gray-600">Buscando...</p>
+                                <p className="mt-4 text-gray-600">{t('search.states.searching')}</p>
                             </div>
                         ) : results.length === 0 ? (
                             <div className="text-center py-12">
-                                <p className="text-gray-600">
-                                    {searchTerm ? 'No se encontraron resultados.' : 'Comienza buscando tutores o materias.'}
-                                </p>
+                                <p className="text-gray-600">{searchTerm ? t('search.states.noResults') : t('search.states.start')}</p>
                             </div>
                         ) : (
                             <div className="space-y-4">

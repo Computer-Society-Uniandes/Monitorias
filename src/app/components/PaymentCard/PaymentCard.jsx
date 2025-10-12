@@ -2,44 +2,32 @@
 
 import React from 'react';
 import './PaymentCard.css';
-
-const formatCurrency = (value) =>
-  new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(value || 0);
-
-const formatDate = (date) => {
-  if (!date) return '—';
-  try {
-    return date.toLocaleString('es-CO', {
-      year: 'numeric', month: 'short', day: '2-digit',
-      hour: '2-digit', minute: '2-digit'
-    });
-  } catch {
-    return '—';
-  }
-};
+import { useI18n } from '../../../lib/i18n';
 
 export default function PaymentCard({ payment }) {
+  const { t, formatCurrency, formatDateTime } = useI18n();
+
   return (
     <div className="payment-card">
       <div className="payment-card__header">
-        <span className="payment-card__subject">{payment.subject || 'Materia'}</span>
+        <span className="payment-card__subject">{payment.subject || t('payments.card.subjectFallback')}</span>
         <span className="payment-card__amount">{formatCurrency(payment.amount)}</span>
       </div>
       <div className="payment-card__body">
         <div className="payment-card__row">
-          <span className="label">Método</span>
+          <span className="label">{t('payments.card.method')}</span>
           <span className="value">{payment.method || '—'}</span>
         </div>
         <div className="payment-card__row">
-          <span className="label">Fecha</span>
-          <span className="value">{formatDate(payment.date_payment)}</span>
+          <span className="label">{t('payments.card.date')}</span>
+          <span className="value">{formatDateTime(payment.date_payment)}</span>
         </div>
         <div className="payment-card__row">
-          <span className="label">Transacción</span>
+          <span className="label">{t('payments.card.transaction')}</span>
           <span className="value mono">{payment.transactionID || '—'}</span>
         </div>
         <div className="payment-card__row">
-          <span className="label">Tutor</span>
+          <span className="label">{t('payments.card.tutor')}</span>
           <span className="value mono">{payment.tutorEmail || '—'}</span>
         </div>
       </div>

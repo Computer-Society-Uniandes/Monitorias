@@ -5,10 +5,12 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { Users, BookOpen, ArrowLeft, AlertCircle } from 'lucide-react';
 import AvailabilityCalendar from '../../components/AvailabilityCalendar/AvailabilityCalendar';
 import './JointAvailability.css';
+import { useI18n } from '../../../lib/i18n';
 
 function JointAvailabilityContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
+    const { t } = useI18n();
     
     const subject = searchParams.get('subject');
     
@@ -17,15 +19,15 @@ function JointAvailabilityContent() {
             <div className="joint-availability-container">
                 <div className="error-state">
                     <AlertCircle className="error-icon" />
-                    <h3>Error de Datos</h3>
-                    <p>No se especificó la materia para buscar disponibilidad conjunta.</p>
+                    <h3>{t('availability.joint.errorTitle')}</h3>
+                    <p>{t('availability.joint.errorText')}</p>
                     <div className="error-actions">
                         <button 
                             className="back-btn"
                             onClick={() => router.push('/home/buscar-tutores')}
                         >
                             <ArrowLeft size={20} />
-                            Volver a Buscar
+                            {t('availability.joint.back')}
                         </button>
                     </div>
                 </div>
@@ -45,7 +47,7 @@ function JointAvailabilityContent() {
                             onClick={() => router.back()}
                         >
                             <ArrowLeft size={20} />
-                            Regresar
+                            {t('common.back')}
                         </button>
                     </div>
                     
@@ -55,7 +57,7 @@ function JointAvailabilityContent() {
                             <Users size={32} />
                         </div>
                         <div className="subject-details">
-                            <h1 className="subject-name">Disponibilidad Conjunta</h1>
+                            <h1 className="subject-name">{t('availability.joint.title')}</h1>
                             <div className="subject-metadata">
                                 <div className="metadata-item">
                                     <BookOpen size={18} />
@@ -63,7 +65,7 @@ function JointAvailabilityContent() {
                                 </div>
                                 <div className="metadata-item">
                                     <Users size={18} />
-                                    <span>Todos los tutores disponibles</span>
+                                    <span>{t('availability.joint.allTutors')}</span>
                                 </div>
                             </div>
                         </div>
@@ -83,11 +85,12 @@ function JointAvailabilityContent() {
 }
 
 function LoadingFallback() {
+    const { t } = useI18n();
     return (
         <div className="joint-availability-container">
             <div className="loading-state">
                 <div className="loading-spinner"></div>
-                <p>Cargando disponibilidad conjunta...</p>
+                <p>{t('availability.joint.loading')}</p>
             </div>
         </div>
     );

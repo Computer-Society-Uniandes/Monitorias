@@ -1,0 +1,263 @@
+{
+  "common": {
+    "back": "Back",
+    "goBack": "Go back",
+    "loading": "Loading...",
+    "error": "Error",
+    "retry": "Try again",
+    "noResults": "No results found.",
+    "startSearching": "Start by searching tutors or subjects.",
+    "searchPlaceholder": "Search tutors or subjects",
+    "allTutors": "All tutors",
+    "allTutorsAvailable": "All available tutors",
+    "noTransactions": "No transactions",
+    "transactionsAppearAfter": "Transactions will appear here after you complete tutoring sessions.",
+    "applyFilters": "Apply filters",
+    "clearFilters": "Clear filters",
+    "filters": "Search filters",
+    "subject": "Subject",
+    "tutor": "Tutor",
+    "date": "Date",
+    "concept": "Concept",
+    "student": "Student",
+    "amount": "Amount",
+    "status": "Status",
+    "method": "Method",
+    "from": "From",
+    "to": "To",
+    "period": "Period",
+    "custom": "Custom",
+    "week": "This week",
+    "month": "This month",
+    "quarter": "This quarter",
+    "year": "This year",
+    "allSubjects": "All subjects"
+  },
+  "tutorStats": {
+    "title": "Statistics",
+    "subtitle": "Analyze your performance and earnings as a tutor",
+    "filters": {
+      "subject": "Subject",
+      "period": "Period",
+      "from": "From",
+      "to": "To"
+    },
+    "cards": {
+      "totalSessions": "Total Sessions",
+      "nextPayment": "Next Payment",
+      "totalEarnings": "Total Earnings",
+      "averageRating": "Average Rating"
+    },
+    "charts": {
+      "sessionsByMonth": "Sessions per month",
+      "viewDetails": "View details"
+    },
+    "transactions": {
+      "title": "Payment History",
+      "subtitle": "Record of received transfers",
+      "emptyTitle": "No transactions",
+      "emptyText": "Transactions will appear here after you complete tutoring sessions.",
+      "columns": {
+        "date": "Date",
+        "concept": "Concept",
+        "student": "Student",
+        "amount": "Amount",
+        "status": "Status",
+        "method": "Method"
+      },
+      "status": {
+        "completed": "completed",
+        "pending": "pending",
+        "failed": "failed"
+      },
+      "conceptPrefix": "Tutoring {subject}",
+      "studentFallback": "Student",
+      "methodDefault": "transfer"
+    },
+    "loading": "Loading statistics..."
+  },
+  "studentHistory": {
+    "title": "Statistics and history",
+    "filters": {
+      "title": "Search filters",
+      "searchSubject": "Search Subject",
+      "selectDate": "Select date",
+      "startDate": "Start date",
+      "endDate": "End date"
+    },
+    "table": {
+      "title": "Tutoring history",
+      "date": "Date",
+      "subject": "Subject",
+      "tutor": "Tutor",
+      "performance": "Performance",
+      "performanceValues": {
+        "excellent": "Excellent",
+        "pending": "Pending",
+        "regular": "Regular"
+      },
+      "empty": "No tutoring sessions found"
+    },
+    "errors": {
+      "loading": "Error loading tutoring history",
+      "title": "Error loading history"
+    },
+    "loading": "Loading tutoring history..."
+  },
+  "search": {
+    "tabs": {
+      "tutors": "Tutors",
+      "subjects": "Subjects",
+      "both": "Both"
+    },
+    "cta": {
+      "viewJointAvailability": "View Joint Availability",
+      "seeCombinedSchedules": "See combined schedules",
+      "availabilityOfAllTutors": "Availability of all {subject} tutors"
+    },
+    "subjects": {
+      "tutorsFor": "Tutors for {subject}",
+      "noTutors": "No tutors available for this subject.",
+      "loadingTutors": "Loading tutors...",
+      "noTutorsShort": "No tutors available"
+    },
+    "placeholders": {
+      "search": "Search tutors or subjects"
+    },
+    "states": {
+      "searching": "Searching...",
+      "noResults": "No results found.",
+      "start": "Start by searching tutors or subjects.",
+      "loading": "Loading..."
+    },
+    "calendar": {
+      "individualTitle": "Availability of {tutor}",
+      "jointTitle": "Joint Availability"
+    },
+    "back": {
+      "toSubjects": "Back to subjects"
+    }
+  },
+  "availability": {
+    "calendar": {
+      "header": {
+        "jointTitle": "Joint Availability",
+        "individualTitle": "Availability of {tutor}",
+        "individualFallback": "Individual Availability"
+      },
+      "loading": "Loading availability...",
+      "slots": {
+        "title": "Available Slots",
+        "noneTitle": "No slots available",
+        "noneHint": "Select another day on the calendar",
+        "tutorAvailable": "Tutor available",
+        "viewOptions": "View options",
+        "book": "Book"
+      },
+      "errors": {
+        "load": "Error loading availability. Please try again.",
+        "generate": "Error generating available slots. Please try again.",
+        "slotNotAvailable": "The selected time is no longer available. Please choose another.",
+        "selecting": "Error selecting the time. Please try again.",
+        "createSession": "Error creating the session: {message}",
+        "reserveError": "❌ Error booking: {message}\n\nPlease try again."
+      },
+      "alerts": {
+        "proofUploadProblem": "⚠️ The booking was created but there was a problem uploading the proof: {error}\n\nYou can send the proof later."
+      }
+    },
+    "joint": {
+      "errorTitle": "Data Error",
+      "errorText": "No subject specified to search joint availability.",
+      "back": "Back to Search",
+      "title": "Joint Availability",
+      "allTutors": "All available tutors",
+      "loading": "Loading joint availability..."
+    },
+    "individual": {
+      "errorTitle": "Data Error",
+      "errorText": "Tutor data could not be loaded. Please go back and try again.",
+      "back": "Back to Search",
+      "backShort": "Back",
+      "loading": "Loading availability..."
+    },
+    "tutorCard": {
+      "bookWith": "Book with {name}",
+      "tutorFallback": "Tutor",
+      "subjects": "Subjects:",
+      "more": "more",
+      "sessions": "sessions",
+      "perHour": "/hour",
+      "availability": "Availability",
+      "retry": "Retry",
+      "noAvailability": "No upcoming availability for this subject",
+      "availableSlots": "available slots",
+      "nextSlot": "Next slot",
+      "at": "at",
+      "viewAll": "View all schedules",
+      "bookNow": "Book now",
+      "noAvailabilityShort": "No availability",
+      "contact": "Contact",
+      "errors": {
+        "load": "Error loading tutor availability"
+      }
+    },
+    "confirmationModal": {
+      "title": "Session Confirmation",
+      "subject": "Subject",
+      "tutor": "Tutor",
+      "sessionDetails": "Session Details",
+      "emailForMeet": "Email for Google Meet",
+      "emailHint": "The session link will arrive at this email",
+      "emailPlaceholder": "your-email@example.com",
+      "paymentProof": "Payment Proof",
+      "paymentProofHint": "Upload a photo or PDF of your transfer receipt",
+      "selectFile": "Select file...",
+      "fileSelected": "File selected: {name}",
+      "cost": "Cost",
+      "total": "Total",
+      "confirming": "Confirming...",
+      "confirmAndSend": "Confirm Booking and Send Invite",
+      "cancel": "Cancel",
+      "errors": {
+        "invalidType": "Please upload an image (JPG, PNG) or PDF",
+        "tooLarge": "File must not exceed 5MB",
+        "missingProof": "You must upload the payment proof",
+        "invalidEmail": "Enter a valid email"
+      }
+    },
+    "bookedModal": {
+      "approvedTitle": "Session Approved!",
+      "reservedTitle": "Session Booked!",
+      "thanksTutor": "Thanks for approving the tutoring session.",
+      "thanksStudent": "Thanks for booking with Calico.",
+      "statusTutor": "You have approved this tutoring session. The student will receive a notification and the Google Meet link for the session.",
+      "statusStudent": "Your request has been sent to the tutor. You will receive a confirmation email when it's accepted and the Google Meet link once approved.",
+      "scheduled": "Session scheduled for {date} at {time}",
+      "seeYou": "See you on {date} at {time}",
+      "detailsApproved": "Details of the approved session:",
+      "detailsYour": "Details of your session:",
+      "labels": {
+        "student": "Student:",
+        "tutor": "Tutor:",
+        "subject": "Subject:",
+        "date": "Date:",
+        "time": "Time:",
+        "location": "Location:"
+      },
+      "ok": "Great!"
+    }
+  },
+  "payments": {
+    "loading": "Loading payments...",
+    "error": "Error loading payments",
+    "emptyFor": "No payments registered for {email}.",
+    "card": {
+      "method": "Method",
+      "date": "Date",
+      "transaction": "Transaction",
+      "tutor": "Tutor",
+      "subjectFallback": "Subject"
+    }
+  }
+}

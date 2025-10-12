@@ -17,9 +17,11 @@ import {
   Eye
 } from "lucide-react";
 import "./Statistics.css";
+import { useI18n } from "../../../lib/i18n";
 
 export default function TutorStatistics() {
   const { user } = useAuth();
+  const { t, formatCurrency } = useI18n();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     totalSessions: 0,
@@ -216,13 +218,24 @@ export default function TutorStatistics() {
       .map(p => ({
         id: p.id || `${p.transactionID || ''}-${p.date_payment?.toString() || ''}`,
         date: p.date_payment instanceof Date ? p.date_payment : (p.date_payment ? new Date(p.date_payment) : new Date()),
-        concept: `Tutoría ${p.subject || 'General'}`,
-        student: p.studentName || p.studentEmail || 'Estudiante',
+        concept: t('tutorStats.transactions.conceptPrefix', { subject: p.subject || 'General' }),
+        student: p.studentName || p.studentEmail || t('tutorStats.transactions.studentFallback'),
         amount: p.amount || 0,
-        status: p.pagado ? 'completado' : 'pendiente',
-        method: p.method || 'transferencia'
+        statusCode: p.pagado ? 'completed' : 'pending',
+        status: p.pagado ? t('tutorStats.transactions.status.completed') : t('tutorStats.transactions.status.pending'),
+        methodCode: normalizeMethod(p.method),
+        method: p.method || t('tutorStats.transactions.methodDefault')
       }))
       .sort((a, b) => new Date(b.date) - new Date(a.date));
+  };
+
+  const normalizeMethod = (m) => {
+    const s = (m || '').toString().toLowerCase();
+    if (s.includes('tarj')) return 'card';
+    if (s.includes('card')) return 'card';
+    if (s.includes('efect') || s.includes('cash')) return 'cash';
+    if (s.includes('transfer')) return 'transfer';
+    return 'other';
   };
 
   const getUniqueSubjects = () => {
@@ -230,21 +243,28 @@ export default function TutorStatistics() {
     return subjects;
   };
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "completado": return "status-completed";
-      case "pendiente": return "status-pending";
-      case "fallido": return "status-failed";
-      default: return "status-default";
+  const getStatusColor = (statusOrCode) => {
+    const code = ['completed','pending','failed'].includes(statusOrCode)
+      ? statusOrCode
+      : (statusOrCode?.toString().toLowerCase().startsWith('comp') ? 'completed'
+        : statusOrCode?.toString().toLowerCase().startsWith('pend') ? 'pending'
+        : statusOrCode?.toString().toLowerCase().startsWith('fall') || statusOrCode?.toString().toLowerCase().startsWith('fail') ? 'failed'
+        : 'default');
+    switch (code) {
+      case 'completed': return 'status-completed';
+      case 'pending': return 'status-pending';
+      case 'failed': return 'status-failed';
+      default: return 'status-default';
     }
   };
 
-  const getMethodIcon = (method) => {
-    switch (method) {
-      case "transferencia": return "🏦";
-      case "efectivo": return "💵";
-      case "tarjeta": return "💳";
-      default: return "💰";
+  const getMethodIcon = (methodOrCode) => {
+    const code = normalizeMethod(methodOrCode);
+    switch (code) {
+      case 'transfer': return '🏦';
+      case 'cash': return '💵';
+      case 'card': return '💳';
+      default: return '💰';
     }
   };
 
@@ -253,7 +273,7 @@ export default function TutorStatistics() {
       <div className="statistics-container">
         <div className="loading-state">
           <div className="loading-spinner"></div>
-          <p>Cargando estadísticas...</p>
+          <p>{t('tutorStats.loading')}</p>
         </div>
       </div>
     );
@@ -266,24 +286,22 @@ export default function TutorStatistics() {
         <div className="header-content">
           <h1 className="page-title">
             <BarChart3 className="title-icon" />
-            Estadísticas
+            {t('tutorStats.title')}
           </h1>
-          <p className="page-subtitle">
-            Analiza tu rendimiento y ganancias como tutor
-          </p>
+          <p className="page-subtitle">{t('tutorStats.subtitle')}</p>
         </div>
       </div>
 
       {/* Filters */}
       <div className="filters-section">
         <div className="filter-group">
-          <label className="filter-label">Materia</label>
+          <label className="filter-label">{t('tutorStats.filters.subject')}</label>
           <div className="filter-select">
             <select 
               value={selectedSubject} 
               onChange={(e) => setSelectedSubject(e.target.value)}
             >
-              <option value="all">Todas las materias</option>
+              <option value="all">{t('common.allSubjects')}</option>
               {getUniqueSubjects().map(subject => (
                 <option key={subject} value={subject}>{subject}</option>
               ))}
@@ -293,17 +311,17 @@ export default function TutorStatistics() {
         </div>
 
         <div className="filter-group">
-          <label className="filter-label">Período</label>
+          <label className="filter-label">{t('common.period')}</label>
           <div className="filter-select">
             <select 
               value={selectedTimeframe} 
               onChange={(e) => setSelectedTimeframe(e.target.value)}
             >
-              <option value="week">Esta semana</option>
-              <option value="month">Este mes</option>
-              <option value="quarter">Este trimestre</option>
-              <option value="year">Este año</option>
-              <option value="custom">Personalizado</option>
+              <option value="week">{t('common.week')}</option>
+              <option value="month">{t('common.month')}</option>
+              <option value="quarter">{t('common.quarter')}</option>
+              <option value="year">{t('common.year')}</option>
+              <option value="custom">{t('common.custom')}</option>
             </select>
             <ChevronDown className="select-icon" />
           </div>
@@ -311,7 +329,7 @@ export default function TutorStatistics() {
 
         {selectedTimeframe === 'custom' && (
           <div className="filter-group">
-            <label className="filter-label">Desde</label>
+            <label className="filter-label">{t('common.from')}</label>
             <input
               type="date"
               value={selectedPeriod.start}
@@ -323,7 +341,7 @@ export default function TutorStatistics() {
 
         {selectedTimeframe === 'custom' && (
           <div className="filter-group">
-            <label className="filter-label">Hasta</label>
+            <label className="filter-label">{t('common.to')}</label>
             <input
               type="date"
               value={selectedPeriod.end}
@@ -349,7 +367,7 @@ export default function TutorStatistics() {
             <BarChart3 size={24} />
           </div>
           <div className="card-content">
-            <h3 className="card-title">Total Sesiones</h3>
+            <h3 className="card-title">{t('tutorStats.cards.totalSessions')}</h3>
             <p className="card-value">{stats.totalSessions}</p>
           </div>
         </div>
@@ -359,8 +377,8 @@ export default function TutorStatistics() {
             <DollarSign size={24} />
           </div>
           <div className="card-content">
-            <h3 className="card-title">Próximo Pago</h3>
-            <p className="card-value">${stats.nextPayment.toLocaleString()}</p>
+            <h3 className="card-title">{t('tutorStats.cards.nextPayment')}</h3>
+            <p className="card-value">{formatCurrency(stats.nextPayment)}</p>
           </div>
         </div>
 
@@ -369,8 +387,8 @@ export default function TutorStatistics() {
             <TrendingUp size={24} />
           </div>
           <div className="card-content">
-            <h3 className="card-title">Ganancias Totales</h3>
-            <p className="card-value">${stats.totalEarnings.toLocaleString()}</p>
+            <h3 className="card-title">{t('tutorStats.cards.totalEarnings')}</h3>
+            <p className="card-value">{formatCurrency(stats.totalEarnings)}</p>
           </div>
         </div>
 
@@ -379,7 +397,7 @@ export default function TutorStatistics() {
             <Users size={24} />
           </div>
           <div className="card-content">
-            <h3 className="card-title">Calificación Promedio</h3>
+            <h3 className="card-title">{t('tutorStats.cards.averageRating')}</h3>
             <p className="card-value">{stats.averageRating.toFixed(1)} ⭐</p>
           </div>
         </div>
@@ -388,10 +406,10 @@ export default function TutorStatistics() {
       {/* Chart Section */}
       <div className="chart-section">
         <div className="chart-header">
-          <h2 className="chart-title">Tutorías por mes</h2>
+          <h2 className="chart-title">{t('tutorStats.charts.sessionsByMonth')}</h2>
           <button className="chart-action-btn">
             <Eye size={16} />
-            Ver detalles
+            {t('tutorStats.charts.viewDetails')}
           </button>
         </div>
         
@@ -419,27 +437,25 @@ export default function TutorStatistics() {
       {/* Transaction History */}
       <div className="transactions-section">
         <div className="section-header">
-          <h2 className="section-title">Historial de Pagos</h2>
-          <p className="section-subtitle">
-            Registro de transferencias recibidas
-          </p>
+          <h2 className="section-title">{t('tutorStats.transactions.title')}</h2>
+          <p className="section-subtitle">{t('tutorStats.transactions.subtitle')}</p>
         </div>
 
         <div className="transactions-table">
           <div className="table-header">
-            <div className="table-cell">Fecha</div>
-            <div className="table-cell">Concepto</div>
-            <div className="table-cell">Estudiante</div>
-            <div className="table-cell">Monto</div>
-            <div className="table-cell">Estado</div>
-            <div className="table-cell">Método</div>
+            <div className="table-cell">{t('tutorStats.transactions.columns.date')}</div>
+            <div className="table-cell">{t('tutorStats.transactions.columns.concept')}</div>
+            <div className="table-cell">{t('tutorStats.transactions.columns.student')}</div>
+            <div className="table-cell">{t('tutorStats.transactions.columns.amount')}</div>
+            <div className="table-cell">{t('tutorStats.transactions.columns.status')}</div>
+            <div className="table-cell">{t('tutorStats.transactions.columns.method')}</div>
           </div>
           
           <div className="table-body">
             {transactions.map((transaction) => (
               <div key={transaction.id} className="table-row">
                 <div className="table-cell">
-                  {new Date(transaction.date).toLocaleDateString('es-ES')}
+                  {new Date(transaction.date).toLocaleDateString()}
                 </div>
                 <div className="table-cell">
                   {transaction.concept}
@@ -448,16 +464,16 @@ export default function TutorStatistics() {
                   {transaction.student}
                 </div>
                 <div className="table-cell amount">
-                  ${transaction.amount.toLocaleString()}
+                  {formatCurrency(transaction.amount)}
                 </div>
                 <div className="table-cell">
-                  <span className={`status-badge ${getStatusColor(transaction.status)}`}>
+                  <span className={`status-badge ${getStatusColor(transaction.statusCode || transaction.status)}`}>
                     {transaction.status}
                   </span>
                 </div>
                 <div className="table-cell">
                   <span className="method-badge">
-                    {getMethodIcon(transaction.method)} {transaction.method}
+                    {getMethodIcon(transaction.methodCode || transaction.method)} {transaction.method}
                   </span>
                 </div>
               </div>
@@ -468,8 +484,8 @@ export default function TutorStatistics() {
         {transactions.length === 0 && (
           <div className="empty-state">
             <Calendar size={48} />
-            <h3>No hay transacciones</h3>
-            <p>Las transacciones aparecerán aquí una vez que completes sesiones de tutoría.</p>
+            <h3>{t('common.noTransactions')}</h3>
+            <p>{t('common.transactionsAppearAfter')}</p>
           </div>
         )}
       </div>

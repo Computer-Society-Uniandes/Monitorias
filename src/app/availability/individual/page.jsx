@@ -5,10 +5,12 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { User, MapPin, Calendar, Star, ArrowLeft, AlertCircle } from 'lucide-react';
 import AvailabilityCalendar from '../../components/AvailabilityCalendar/AvailabilityCalendar';
 import './IndividualAvailability.css';
+import { useI18n } from '../../../lib/i18n';
 
 function IndividualAvailabilityContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
+    const { t } = useI18n();
     
     const tutorId = searchParams.get('tutorId');
     const tutorName = searchParams.get('tutorName');
@@ -21,15 +23,15 @@ function IndividualAvailabilityContent() {
             <div className="individual-availability-container">
                 <div className="error-state">
                     <AlertCircle className="error-icon" />
-                    <h3>Error de Datos</h3>
-                    <p>No se pudieron cargar los datos del tutor. Por favor, regresa e intenta nuevamente.</p>
+                    <h3>{t('availability.individual.errorTitle')}</h3>
+                    <p>{t('availability.individual.errorText')}</p>
                     <div className="error-actions">
                         <button 
                             className="back-btn"
                             onClick={() => router.push('/home/buscar-tutores')}
                         >
                             <ArrowLeft size={20} />
-                            Volver a Buscar
+                            {t('availability.individual.back')}
                         </button>
                     </div>
                 </div>
@@ -49,7 +51,7 @@ function IndividualAvailabilityContent() {
                             onClick={() => router.back()}
                         >
                             <ArrowLeft size={20} />
-                            Regresar
+                            {t('availability.individual.backShort')}
                         </button>
                     </div>
                     
@@ -99,11 +101,12 @@ function IndividualAvailabilityContent() {
 }
 
 function LoadingFallback() {
+    const { t } = useI18n();
     return (
         <div className="individual-availability-container">
             <div className="loading-state">
                 <div className="loading-spinner"></div>
-                <p>Cargando disponibilidad...</p>
+                <p>{t('availability.individual.loading')}</p>
             </div>
         </div>
     );

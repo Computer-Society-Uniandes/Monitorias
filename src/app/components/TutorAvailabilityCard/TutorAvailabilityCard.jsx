@@ -6,14 +6,17 @@ import { TutorSearchService } from "../../services/TutorSearchService";
 import CalendlyStyleScheduler from "../CalendlyStyleScheduler/CalendlyStyleScheduler";
 import routes from "../../../routes";
 import "./TutorAvailabilityCard.css";
+import { useI18n } from "app/lib/i18n";
 
 export default function TutorAvailabilityCard({ tutor, materia }) {
+  const { t, locale, formatCurrency } = useI18n();
   const [availabilities, setAvailabilities] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showScheduler, setShowScheduler] = useState(false);
   const [error, setError] = useState(null);
   const router = useRouter();
+  const localeStr = locale === 'en' ? 'en-US' : 'es-ES';
 
   useEffect(() => {
     loadTutorAvailability();
@@ -41,7 +44,7 @@ export default function TutorAvailabilityCard({ tutor, materia }) {
       setAvailabilities(filtered);
     } catch (error) {
       console.error(`❌ Error cargando disponibilidad para ${tutor.name}:`, error);
-      setError("Error cargando disponibilidad del tutor");
+      setError(t('availability.tutorCard.errors.load'));
       setAvailabilities([]);
     } finally {
       setLoading(false);
@@ -94,12 +97,12 @@ export default function TutorAvailabilityCard({ tutor, materia }) {
     if (!slot) return null;
     const date = new Date(slot.startDateTime);
     return {
-      date: date.toLocaleDateString('es-ES', { 
+      date: date.toLocaleDateString(localeStr, { 
         weekday: 'short', 
         month: 'short', 
         day: 'numeric' 
       }),
-      time: date.toLocaleTimeString('es-ES', { 
+      time: date.toLocaleTimeString(localeStr, { 
         hour: '2-digit', 
         minute: '2-digit' 
       })
@@ -114,7 +117,7 @@ export default function TutorAvailabilityCard({ tutor, materia }) {
       <div className="scheduler-overlay">
         <div className="scheduler-container">
           <div className="scheduler-header-bar">
-            <h3>Reservar con {tutor.name}</h3>
+            <h3>{t('availability.tutorCard.bookWith', { name: tutor.name })}</h3>
             <button 
               className="close-scheduler-btn"
               onClick={handleCloseScheduler}
@@ -140,11 +143,11 @@ export default function TutorAvailabilityCard({ tutor, materia }) {
           <span className="avatar-icon">👨‍🏫</span>
         </div>
         <div className="tutor-info">
-          <h3 className="tutor-name">{tutor.name || 'Tutor'}</h3>
+          <h3 className="tutor-name">{tutor.name || t('availability.tutorCard.tutorFallback')}</h3>
           <p className="tutor-email">{tutor.email}</p>
           {tutor.subjects && tutor.subjects.length > 0 && (
             <div className="tutor-subjects">
-              <span className="subjects-label">Materias:</span>
+              <span className="subjects-label">{t('availability.tutorCard.subjects')}</span>
               <div className="subjects-list">
                 {tutor.subjects.slice(0, 3).map((subject, index) => (
                   <span key={index} className="subject-tag">
@@ -152,7 +155,7 @@ export default function TutorAvailabilityCard({ tutor, materia }) {
                   </span>
                 ))}
                 {tutor.subjects.length > 3 && (
-                  <span className="more-subjects">+{tutor.subjects.length - 3} más</span>
+                  <span className="more-subjects">+{tutor.subjects.length - 3} {t('availability.tutorCard.more')}</span>
                 )}
               </div>
             </div>
@@ -163,13 +166,13 @@ export default function TutorAvailabilityCard({ tutor, materia }) {
                 {'⭐'.repeat(Math.floor(tutor.rating))}
               </span>
               <span className="rating-number">
-                {tutor.rating.toFixed(1)} ({tutor.totalSessions || 0} sesiones)
+                {tutor.rating.toFixed(1)} ({tutor.totalSessions || 0} {t('availability.tutorCard.sessions')})
               </span>
             </div>
           )}
           {tutor.hourlyRate && (
             <div className="tutor-rate">
-              <span className="rate-amount">${tutor.hourlyRate.toLocaleString()} COP/hora</span>
+              <span className="rate-amount">{formatCurrency(tutor.hourlyRate)} {t('availability.tutorCard.perHour')}</span>
             </div>
           )}
         </div>
@@ -177,7 +180,7 @@ export default function TutorAvailabilityCard({ tutor, materia }) {
 
       <div className="availability-section">
         <h4 className="availability-title">
-          Disponibilidad
+          {t('availability.tutorCard.availability')}
           {loading && <span className="loading-spinner">🔄</span>}
         </h4>
 
@@ -189,7 +192,7 @@ export default function TutorAvailabilityCard({ tutor, materia }) {
               className="retry-btn"
               onClick={loadTutorAvailability}
             >
-              Reintentar
+              {t('availability.tutorCard.retry')}
             </button>
           </div>
         )}
@@ -203,21 +206,21 @@ export default function TutorAvailabilityCard({ tutor, materia }) {
         ) : availabilities.length === 0 ? (
           <div className="no-availability">
             <div className="no-availability-icon">📅</div>
-            <p>No hay disponibilidad próxima para esta materia</p>
+            <p>{t('availability.tutorCard.noAvailability')}</p>
           </div>
         ) : (
           <>
             <div className="availability-summary">
               <div className="summary-item">
                 <span className="summary-number">{getAvailableHours()}</span>
-                <span className="summary-label">horarios disponibles</span>
+                <span className="summary-label">{t('availability.tutorCard.availableSlots')}</span>
               </div>
               
               {nextSlotFormatted && (
                 <div className="next-slot">
-                  <span className="next-slot-label">Próximo horario:</span>
+                  <span className="next-slot-label">{t('availability.tutorCard.nextSlot')}:</span>
                   <span className="next-slot-info">
-                    {nextSlotFormatted.date} a las {nextSlotFormatted.time}
+                    {nextSlotFormatted.date} {t('availability.tutorCard.at')} {nextSlotFormatted.time}
                   </span>
                 </div>
               )}
@@ -228,7 +231,7 @@ export default function TutorAvailabilityCard({ tutor, materia }) {
                 className="schedule-btn"
                 onClick={handleScheduleClick}
               >
-                📅 Ver todos los horarios
+                📅 {t('availability.tutorCard.viewAll')}
               </button>
             </div>
           </>
@@ -241,10 +244,10 @@ export default function TutorAvailabilityCard({ tutor, materia }) {
           onClick={handleScheduleClick}
           disabled={loading || availabilities.length === 0}
         >
-          {availabilities.length > 0 ? '🚀 Reservar ahora' : '❌ Sin disponibilidad'}
+          {availabilities.length > 0 ? `🚀 ${t('availability.tutorCard.bookNow')}` : `❌ ${t('availability.tutorCard.noAvailabilityShort')}`}
         </button>
         <button className="contact-btn">
-          💬 Contactar
+          💬 {t('availability.tutorCard.contact')}
         </button>
       </div>
     </div>

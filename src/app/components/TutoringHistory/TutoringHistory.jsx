@@ -5,9 +5,11 @@ import { useAuth } from '../../context/SecureAuthContext';
 import TutoringHistoryService from '../../services/TutoringHistoryService';
 import './TutoringHistory.css';
 import PaymentHistory from '../PaymentHistory/PaymentHistory';
+import { useI18n } from '../../../lib/i18n';
 
 const TutoringHistory = () => {
   const { user } = useAuth();
+  const { t } = useI18n();
   const [sessions, setSessions] = useState([]);
   const [filteredSessions, setFilteredSessions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -38,7 +40,7 @@ const TutoringHistory = () => {
       setLoading(true);
       setError(null);
 
-      console.log('📚 Cargando historial para:', user.email);
+  console.log('📚 Cargando historial para:', user.email);
       const history = await TutoringHistoryService.getStudentTutoringHistory(user.email);
       
       setSessions(history);
@@ -50,7 +52,7 @@ const TutoringHistory = () => {
       console.log('✅ Historial cargado:', history.length, 'tutorías');
     } catch (err) {
       console.error('❌ Error cargando historial:', err);
-      setError('Error al cargar el historial de tutorías');
+      setError(t('studentHistory.errors.loading'));
     } finally {
       setLoading(false);
     }
@@ -112,7 +114,7 @@ const TutoringHistory = () => {
         <div className="tutoring-history-content">
           <div className="loading-state">
             <div className="loading-spinner"></div>
-            <p>Cargando historial de tutorías...</p>
+            <p>{t('studentHistory.loading')}</p>
           </div>
         </div>
       </div>
@@ -125,10 +127,10 @@ const TutoringHistory = () => {
         <div className="tutoring-history-content">
           <div className="error-state">
             <div className="error-icon">⚠️</div>
-            <h3>Error al cargar historial</h3>
+            <h3>{t('studentHistory.errors.title')}</h3>
             <p>{error}</p>
             <button onClick={loadTutoringHistory} className="retry-btn">
-              Intentar de nuevo
+              {t('common.retry')}
             </button>
           </div>
         </div>
@@ -142,7 +144,7 @@ const TutoringHistory = () => {
       <div className="page-header">
         <div className="header-content">
           <div className="header-text">
-            <h1 className="page-title">Estadísticas e historial</h1>
+            <h1 className="page-title">{t('studentHistory.title')}</h1>
           </div>
         </div>
       </div>
@@ -150,10 +152,10 @@ const TutoringHistory = () => {
       <div className="tutoring-history-content">
         {/* Panel de filtros en sidebar */}
         <div className="filters-sidebar">
-          <h3 className="filters-title">Filtros de búsqueda</h3>
+          <h3 className="filters-title">{t('studentHistory.filters.title')}</h3>
           
           <div className="filter-group">
-            <label className="filter-label">Buscar Materia</label>
+            <label className="filter-label">{t('studentHistory.filters.searchSubject')}</label>
             <div className="subject-input-container">
               <input
                 type="text"
@@ -162,7 +164,7 @@ const TutoringHistory = () => {
                 onFocus={() => setShowSuggestions(subjectFilter.trim().length > 0)}
                 onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
                 className="subject-input"
-                placeholder="Escribe el nombre de la materia..."
+                placeholder={t('studentHistory.filters.searchSubject') + '...'}
               />
               
               {showSuggestions && getSubjectSuggestions().length > 0 && (
@@ -182,40 +184,40 @@ const TutoringHistory = () => {
           </div>
 
           <div className="filter-group">
-            <label className="filter-label">Seleccionar fecha</label>
+            <label className="filter-label">{t('studentHistory.filters.selectDate')}</label>
             <div className="date-inputs">
               <input
                 type="date"
                 value={dateFilter.startDate}
                 onChange={(e) => setDateFilter(prev => ({ ...prev, startDate: e.target.value }))}
                 className="date-input"
-                placeholder="Fecha inicio"
+                placeholder={t('studentHistory.filters.startDate')}
               />
               <input
                 type="date"
                 value={dateFilter.endDate}
                 onChange={(e) => setDateFilter(prev => ({ ...prev, endDate: e.target.value }))}
                 className="date-input"
-                placeholder="Fecha fin"
+                placeholder={t('studentHistory.filters.endDate')}
               />
             </div>
           </div>
 
           <button onClick={clearFilters} className="apply-filters-btn">
-            Aplicar filtros
+            {t('common.applyFilters')}
           </button>
         </div>
 
         {/* Tabla de resultados */}
         <div className="results-section">
-          <h2 className="section-title">Historial de tutorías</h2>
+          <h2 className="section-title">{t('studentHistory.table.title')}</h2>
           
           {filteredSessions.length === 0 && paymentsCount === 0 ? (
             <div className="empty-results">
-              <p>No se encontraron tutorías</p>
+              <p>{t('studentHistory.table.empty')}</p>
               {hasActiveFilters() && (
                 <button onClick={clearFilters} className="clear-filters-link">
-                  Limpiar filtros
+                  {t('common.clearFilters')}
                 </button>
               )}
             </div>
@@ -224,26 +226,26 @@ const TutoringHistory = () => {
           {filteredSessions.length > 0 && (
             <div className="results-table">
               <div className="table-header">
-                <div className="table-cell">Fecha</div>
-                <div className="table-cell">Materia</div>
-                <div className="table-cell">Tutor</div>
-                <div className="table-cell">Rendimiento</div>
+                <div className="table-cell">{t('studentHistory.table.date')}</div>
+                <div className="table-cell">{t('studentHistory.table.subject')}</div>
+                <div className="table-cell">{t('studentHistory.table.tutor')}</div>
+                <div className="table-cell">{t('studentHistory.table.performance')}</div>
               </div>
               {filteredSessions.map((session) => (
                 <div key={session.id} className="table-row">
-                  <div className="table-cell" data-label="Fecha">
+                  <div className="table-cell" data-label={t('studentHistory.table.date')}>
                     {TutoringHistoryService.formatDate(session.scheduledDateTime)}
                   </div>
-                  <div className="table-cell" data-label="Materia">
+                  <div className="table-cell" data-label={t('studentHistory.table.subject')}>
                     <span className="subject-tag">{session.subject}</span>
                   </div>
-                  <div className="table-cell" data-label="Tutor">
+                  <div className="table-cell" data-label={t('studentHistory.table.tutor')}>
                     {session.tutorName}
                   </div>
-                  <div className="table-cell" data-label="Rendimiento">
+                  <div className="table-cell" data-label={t('studentHistory.table.performance')}>
                     <span className={`performance-badge ${session.paymentStatus === 'paid' ? 'excellent' : 'pending'}`}>
-                      {session.paymentStatus === 'paid' ? 'Excelente' : 
-                       session.paymentStatus === 'pending' ? 'Pendiente' : 'Regular'}
+                      {session.paymentStatus === 'paid' ? t('studentHistory.table.performanceValues.excellent') : 
+                       session.paymentStatus === 'pending' ? t('studentHistory.table.performanceValues.pending') : t('studentHistory.table.performanceValues.regular')}
                     </span>
                   </div>
                 </div>

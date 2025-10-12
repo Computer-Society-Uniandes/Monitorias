@@ -10,6 +10,7 @@ import { TutoringSessionService } from 'app/app/services/TutoringSessionService'
 import { GoogleDriveService } from 'app/app/services/GoogleDriveService';
 import { useAuth } from 'app/app/context/SecureAuthContext';
 import { TutorSearchService } from 'app/app/services/TutorSearchService';
+import { useI18n } from 'app/lib/i18n';
 import SessionConfirmationModal from '../SessionConfirmationModal/SessionConfirmationModal';
 import SessionBookedModal from '../SessionBookedModal/SessionBookedModal';
 
@@ -23,12 +24,14 @@ const AvailabilityCalendar = ({
   loading = false 
 }) => {
   const { user } = useAuth();
+  const { t, locale } = useI18n();
   const [date, setDate] = useState(selectedDate || new Date());
   const [selectedDaySlots, setSelectedDaySlots] = useState([]);
   const [availabilityData, setAvailabilityData] = useState([]);
   const [loadingData, setLoadingData] = useState(false);
   const [error, setError] = useState(null);
   const [availabilityDataReady, setAvailabilityDataReady] = useState(false);
+  const localeStr = locale === 'en' ? 'en-US' : 'es-ES';
   
   // Estados para el modal de confirmación
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
@@ -83,7 +86,7 @@ const AvailabilityCalendar = ({
         const response = await fetch(`/api/joint-availability?subject=${encodeURIComponent(subject)}`);
         const data = await response.json();
         if (!response.ok || !data.success) {
-          throw new Error(data.error || 'Error al obtener disponibilidad conjunta');
+          throw new Error(data.error || t('availability.calendar.errors.load'));
         }
 
         // Flatten tutor slots into availability items expected by SlotService
@@ -101,7 +104,7 @@ const AvailabilityCalendar = ({
             tutorId: email,
             tutorEmail: email,
             tutorName: name,
-            title: slot.title || 'Disponible',
+            title: slot.title || t('availability.calendar.slots.tutorAvailable'),
             description: slot.description || '',
             startDateTime: slot.start,
             endDateTime: slot.end,
@@ -117,7 +120,7 @@ const AvailabilityCalendar = ({
       }
     } catch (error) {
       console.error('Error loading availability data:', error);
-      setError('Error cargando disponibilidad. Por favor intenta de nuevo.');
+      setError(t('availability.calendar.errors.load'));
       setAvailabilityData([]);
     } finally {
       setLoadingData(false);
@@ -168,7 +171,7 @@ const AvailabilityCalendar = ({
       setSelectedDaySlots(daySlots);
     } catch (error) {
       console.error('Error generando slots:', error);
-      setError('Error generando horarios disponibles. Por favor intenta de nuevo.');
+      setError(t('availability.calendar.errors.generate'));
     }
   };
 
@@ -180,7 +183,7 @@ const AvailabilityCalendar = ({
   };
 
   const formatSelectedDate = (date) => {
-    return date.toLocaleDateString('es-ES', {
+    return date.toLocaleDateString(localeStr, {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
@@ -196,7 +199,7 @@ const AvailabilityCalendar = ({
       );
 
       if (!realTimeCheck.available) {
-        setError('El horario seleccionado ya no está disponible. Por favor selecciona otro.');
+        setError(t('availability.calendar.errors.slotNotAvailable'));
         await generateSlotsForSelectedDay();
         return;
       }
@@ -209,7 +212,7 @@ const AvailabilityCalendar = ({
       setError(null);
     } catch (error) {
       console.error('Error seleccionando slot:', error);
-      setError('Error seleccionando el horario. Por favor intenta de nuevo.');
+      setError(t('availability.calendar.errors.selecting'));
     }
   };
 
@@ -223,7 +226,7 @@ const AvailabilityCalendar = ({
       setConfirmLoading(true);
       setError(null);
 
-      console.log('📝 Iniciando proceso de reserva...');
+  console.log('📝 Iniciando proceso de reserva...');
       console.log('Slot seleccionado:', selectedSlotForBooking);
       console.log('Email del estudiante:', studentEmail);
       console.log('Archivo de comprobante:', proofFile);
@@ -284,7 +287,7 @@ const AvailabilityCalendar = ({
         } else {
           console.error('⚠️ Error subiendo comprobante:', paymentProofResult.error);
           // No fallar la reserva si el comprobante no se sube
-          alert(`⚠️ La reserva se creó pero hubo un problema al subir el comprobante: ${paymentProofResult.error}\n\nPuedes enviar el comprobante después.`);
+          alert(t('availability.calendar.alerts.proofUploadProblem', { error: paymentProofResult.error }));
         }
       }
 
@@ -308,8 +311,8 @@ const AvailabilityCalendar = ({
       
     } catch (error) {
       console.error('❌ Error creando la sesión:', error);
-      setError(`Error al crear la sesión: ${error.message}`);
-      alert(`❌ Error al reservar: ${error.message}\n\nPor favor intenta nuevamente.`);
+      setError(t('availability.calendar.errors.createSession', { message: error.message }));
+      alert(t('availability.calendar.errors.reserveError', { message: error.message }));
     } finally {
       setConfirmLoading(false);
     }
@@ -371,12 +374,14 @@ const AvailabilityCalendar = ({
             {mode === 'joint' ? (
               <>
                 <Users size={24} />
-                Disponibilidad Conjunta
+                {t('availability.calendar.header.jointTitle')}
               </>
             ) : (
               <>
                 <User size={24} />
-                {tutorName ? `Disponibilidad de ${tutorName}` : 'Disponibilidad Individual'}
+                {tutorName 
+                  ? t('availability.calendar.header.individualTitle', { tutor: tutorName })
+                  : t('availability.calendar.header.individualFallback')}
               </>
             )}
           </h3>
@@ -385,17 +390,17 @@ const AvailabilityCalendar = ({
         {loadingData || loading ? (
           <div className="calendar-loading">
             <div className="loading-spinner"></div>
-            <p>Cargando disponibilidad...</p>
+            <p>{t('availability.calendar.loading')}</p>
           </div>
         ) : (
           <Calendar
             onChange={handleDateChange}
             value={date}
-            locale="es-ES"
+            locale={localeStr}
             minDate={new Date()}
             tileClassName={getTileClassName}
             navigationLabel={({ date }) => (
-              `${date.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}`
+              `${date.toLocaleDateString(localeStr, { month: 'long', year: 'numeric' })}`
             )}
             nextLabel={<ChevronRight size={16} />}
             prevLabel={<ChevronLeft size={16} />}
@@ -409,7 +414,7 @@ const AvailabilityCalendar = ({
         <div className="slots-header">
           <h3 className="slots-title">
             <Clock size={20} />
-            Horarios Disponibles
+            {t('availability.calendar.slots.title')}
           </h3>
           <p className="selected-date">{formatSelectedDate(date)}</p>
         </div>
@@ -418,8 +423,8 @@ const AvailabilityCalendar = ({
           {selectedDaySlots.length === 0 ? (
             <div className="no-slots">
               <div className="no-slots-icon">📅</div>
-              <h4>No hay horarios disponibles</h4>
-              <p>Selecciona otro día en el calendario</p>
+              <h4>{t('availability.calendar.slots.noneTitle')}</h4>
+              <p>{t('availability.calendar.slots.noneHint')}</p>
             </div>
           ) : (
             selectedDaySlots.map((slot) => (
@@ -430,14 +435,14 @@ const AvailabilityCalendar = ({
               >
                 <div className="slot-time">
                   <Clock size={16} />
-                  {`${new Date(slot.startDateTime).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })} - ${new Date(slot.endDateTime).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`}
+                  {`${new Date(slot.startDateTime).toLocaleTimeString(localeStr, { hour: '2-digit', minute: '2-digit' })} - ${new Date(slot.endDateTime).toLocaleTimeString(localeStr, { hour: '2-digit', minute: '2-digit' })}`}
                 </div>
                 <div className="slot-tutor">
                   <User size={14} />
-                  <span>{slot.tutorName || 'Tutor disponible'}</span>
+                  <span>{slot.tutorName || t('availability.calendar.slots.tutorAvailable')}</span>
                 </div>
                 <button className="book-slot-btn">
-                  {mode === 'joint' ? 'Ver opciones' : 'Agendar'}
+                  {mode === 'joint' ? t('availability.calendar.slots.viewOptions') : t('availability.calendar.slots.book')}
                 </button>
               </div>
             ))
