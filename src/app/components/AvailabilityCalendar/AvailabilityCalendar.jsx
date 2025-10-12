@@ -11,6 +11,7 @@ import { GoogleDriveService } from 'app/app/services/GoogleDriveService';
 import { useAuth } from 'app/app/context/SecureAuthContext';
 import { TutorSearchService } from 'app/app/services/TutorSearchService';
 import SessionConfirmationModal from '../SessionConfirmationModal/SessionConfirmationModal';
+import SessionBookedModal from '../SessionBookedModal/SessionBookedModal';
 
 const AvailabilityCalendar = ({ 
   tutorId = null,        // Para modo individual
@@ -33,6 +34,10 @@ const AvailabilityCalendar = ({
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [selectedSlotForBooking, setSelectedSlotForBooking] = useState(null);
   const [confirmLoading, setConfirmLoading] = useState(false);
+  
+  // Estados para el modal de sesión reservada
+  const [showBookedModal, setShowBookedModal] = useState(false);
+  const [bookedSessionData, setBookedSessionData] = useState(null);
 
   useEffect(() => {
     if (selectedDate) {
@@ -287,15 +292,16 @@ const AvailabilityCalendar = ({
       setShowConfirmationModal(false);
       setSelectedSlotForBooking(null);
       
-      alert(`✅ ¡Reserva exitosa!
-      
-Tu solicitud de tutoría ha sido enviada al tutor.
-      
-📧 Recibirás un correo de confirmación a: ${studentEmail}
-⏰ Fecha: ${new Date(sessionData.scheduledDateTime).toLocaleString('es-ES')}
-📚 Materia: ${sessionData.subject}
-      
-El tutor revisará tu solicitud y recibirás el link de Google Meet una vez aprobada.`);
+      // Mostrar modal de confirmación con datos de la sesión
+      setBookedSessionData({
+        tutorName: sessionData.tutorName || selectedSlotForBooking.tutorName || 'Tutor',
+        subject: sessionData.subject,
+        scheduledDateTime: sessionData.scheduledDateTime,
+        endDateTime: sessionData.endDateTime,
+        location: sessionData.location,
+        studentEmail: studentEmail
+      });
+      setShowBookedModal(true);
 
       // 5. Recargar la disponibilidad
       await loadAvailabilityData();
@@ -456,6 +462,18 @@ El tutor revisará tu solicitud y recibirás el link de Google Meet una vez apro
           }}
           onConfirm={handleBookingConfirm}
           confirmLoading={confirmLoading}
+        />
+      )}
+
+      {/* Modal de sesión reservada */}
+      {showBookedModal && bookedSessionData && (
+        <SessionBookedModal
+          isOpen={showBookedModal}
+          onClose={() => {
+            setShowBookedModal(false);
+            setBookedSessionData(null);
+          }}
+          sessionData={bookedSessionData}
         />
       )}
     </div>

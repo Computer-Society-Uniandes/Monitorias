@@ -2,7 +2,9 @@
 
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../context/SecureAuthContext";
-import { TutoringSessionService } from "../../services/TutoringSessionService";
+import PaymentsService from "../../services/PaymentsService";
+import { db } from "../../../firebaseConfig";
+import { doc, getDoc, collection, query, where, getDocs, limit } from "firebase/firestore";
 import { 
   BarChart3, 
   TrendingUp, 
@@ -21,13 +23,15 @@ export default function TutorStatistics() {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     totalSessions: 0,
-    completedSessions: 0,
-    pendingSessions: 0,
-    totalEarnings: 0,
+    completedSessions: 0, // pagos pagados
+    pendingSessions: 0,   // pagos pendientes
+    totalEarnings: 0,     // suma de pagos pagados
+    nextPayment: 0,       // suma de pagos pendientes
     averageRating: 0,
-    monthlyEarnings: []
+    monthlyEarnings: [],
+    monthlyCounts: []
   });
-  const [sessions, setSessions] = useState([]);
+  const [payments, setPayments] = useState([]);
   const [transactions, setTransactions] = useState([]);
   
   // Filters
@@ -48,17 +52,19 @@ export default function TutorStatistics() {
     try {
       setLoading(true);
       
-      // Load sessions data
-      const sessionsData = await TutoringSessionService.getTutorSessions(user.email);
-      setSessions(sessionsData);
+      // Cargar pagos del tutor desde Firebase (PaymentsService)
+      const paymentsData = await PaymentsService.getPaymentsByTutor(user.email);
+      setPayments(paymentsData);
+
+      // Filtrar pagos según materia/periodo
+      const filteredPayments = filterPayments(paymentsData);
+      const calculatedStats = calculateStatistics(filteredPayments);
+      // Cargar calificación promedio desde colección user
+      const rating = await fetchTutorRating(user.email);
+      setStats({ ...calculatedStats, averageRating: Number(rating || 0) });
       
-      // Calculate statistics
-      const filteredSessions = filterSessions(sessionsData);
-      const calculatedStats = calculateStatistics(filteredSessions);
-      setStats(calculatedStats);
-      
-      // Generate transaction history from completed sessions
-      const transactionHistory = generateTransactionHistory(filteredSessions);
+      // Generar historial de transacciones desde pagos
+      const transactionHistory = generateTransactionHistory(filteredPayments);
       setTransactions(transactionHistory);
       
     } catch (error) {
@@ -68,57 +74,90 @@ export default function TutorStatistics() {
     }
   };
 
-  const filterSessions = (sessionsData) => {
-    let filtered = sessionsData;
+  const fetchTutorRating = async (email) => {
+    try {
+      const norm = (email || "").trim().toLowerCase();
+      if (!norm) return 0;
+      // Intento 1: doc ID = email
+      const ref = doc(db, "user", norm);
+      const snap = await getDoc(ref);
+      if (snap.exists()) {
+        const data = snap.data() || {};
+        const r = data.rating;
+        const n = typeof r === "string" ? parseFloat(r) : r;
+        return Number.isFinite(n) ? n : 0;
+      }
+      // Intento 2: buscar por campo 'mail'
+      const q = query(collection(db, "user"), where("mail", "==", norm), limit(1));
+      const qs = await getDocs(q);
+      if (!qs.empty) {
+        const data = qs.docs[0].data() || {};
+        const r = data.rating;
+        const n = typeof r === "string" ? parseFloat(r) : r;
+        return Number.isFinite(n) ? n : 0;
+      }
+      return 0;
+    } catch (e) {
+      console.warn("[statistics] fetchTutorRating error:", e);
+      return 0;
+    }
+  };
+
+  const filterPayments = (paymentsData) => {
+    let filtered = paymentsData;
     
     // Filter by subject
     if (selectedSubject !== "all") {
-      filtered = filtered.filter(session => 
-        session.subject?.toLowerCase().includes(selectedSubject.toLowerCase())
+      filtered = filtered.filter(p => 
+        (p.subject || '').toLowerCase().includes(selectedSubject.toLowerCase())
       );
     }
     
-    // Filter by timeframe
-    const now = new Date();
     const periodStart = new Date(selectedPeriod.start);
     const periodEnd = new Date(selectedPeriod.end);
     
-    filtered = filtered.filter(session => {
-      const sessionDate = new Date(session.scheduledDateTime);
-      return sessionDate >= periodStart && sessionDate <= periodEnd;
+    filtered = filtered.filter(p => {
+      const d = p.date_payment instanceof Date ? p.date_payment : (p.date_payment ? new Date(p.date_payment) : null);
+      if (!d) return false;
+      return d >= periodStart && d <= periodEnd;
     });
     
     return filtered;
   };
 
-  const calculateStatistics = (sessionsData) => {
-    const totalSessions = sessionsData.length;
-    const completedSessions = sessionsData.filter(s => s.status === 'completed').length;
-    const pendingSessions = sessionsData.filter(s => s.status === 'scheduled').length;
-    
-    const totalEarnings = sessionsData
-      .filter(s => s.status === 'completed' && s.paymentStatus === 'paid')
-      .reduce((sum, s) => sum + (s.price || 0), 0);
-    
-    const ratedSessions = sessionsData.filter(s => s.rating?.score);
-    const averageRating = ratedSessions.length > 0 
-      ? ratedSessions.reduce((sum, s) => sum + s.rating.score, 0) / ratedSessions.length
-      : 0;
-    
-    // Calculate monthly earnings for chart
-    const monthlyEarnings = calculateMonthlyEarnings(sessionsData);
-    
+  const calculateStatistics = (paymentsData) => {
+    const totalSessions = paymentsData.length; // número de pagos (una tutoría por pago)
+    const completedSessions = paymentsData.filter(p => p.pagado).length;
+    const pendingSessions = paymentsData.filter(p => !p.pagado).length;
+
+    const totalEarnings = paymentsData
+      .filter(p => p.pagado)
+      .reduce((sum, p) => sum + (p.amount || 0), 0);
+
+    const nextPayment = paymentsData
+      .filter(p => !p.pagado)
+      .reduce((sum, p) => sum + (p.amount || 0), 0);
+
+    const averageRating = 0; // no disponible en pagos
+
+    // Calcular ganancias mensuales para el gráfico
+    const monthlyEarnings = calculateMonthlyEarnings(paymentsData);
+    // Calcular conteo de tutorías por mes (pagadas)
+    const monthlyCounts = calculateMonthlyCounts(paymentsData);
+
     return {
       totalSessions,
       completedSessions,
       pendingSessions,
       totalEarnings,
+      nextPayment,
       averageRating,
-      monthlyEarnings
+      monthlyEarnings,
+      monthlyCounts
     };
   };
 
-  const calculateMonthlyEarnings = (sessionsData) => {
+  const calculateMonthlyEarnings = (paymentsData) => {
     const monthlyData = {};
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
                    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -131,14 +170,15 @@ export default function TutorStatistics() {
       monthlyData[monthKey] = 0;
     }
     
-    // Add earnings from completed sessions
-    sessionsData
-      .filter(s => s.status === 'completed' && s.paymentStatus === 'paid')
-      .forEach(session => {
-        const sessionDate = new Date(session.scheduledDateTime);
-        const monthKey = `${months[sessionDate.getMonth()]} ${sessionDate.getFullYear()}`;
-        if (monthlyData.hasOwnProperty(monthKey)) {
-          monthlyData[monthKey] += session.price || 0;
+    // Sumar ganancias de pagos pagados por mes
+    paymentsData
+      .filter(p => p.pagado)
+      .forEach(p => {
+        const d = p.date_payment instanceof Date ? p.date_payment : (p.date_payment ? new Date(p.date_payment) : null);
+        if (!d) return;
+        const monthKey = `${months[d.getMonth()]} ${d.getFullYear()}`;
+        if (Object.prototype.hasOwnProperty.call(monthlyData, monthKey)) {
+          monthlyData[monthKey] += p.amount || 0;
         }
       });
     
@@ -148,23 +188,45 @@ export default function TutorStatistics() {
     }));
   };
 
-  const generateTransactionHistory = (sessionsData) => {
-    return sessionsData
-      .filter(s => s.status === 'completed')
-      .map(session => ({
-        id: session.id,
-        date: session.scheduledDateTime,
-        concept: `Tutoría ${session.subject || 'General'}`,
-        student: session.studentName || session.studentEmail,
-        amount: session.price || 0,
-        status: session.paymentStatus === 'paid' ? 'completado' : 'pendiente',
-        method: session.paymentMethod || 'transferencia'
+  const calculateMonthlyCounts = (paymentsData) => {
+    const monthlyData = {};
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const now = new Date();
+    for (let i = 5; i >= 0; i--) {
+      const monthDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthKey = `${months[monthDate.getMonth()]} ${monthDate.getFullYear()}`;
+      monthlyData[monthKey] = 0;
+    }
+    paymentsData
+      .filter(p => p.pagado)
+      .forEach(p => {
+        const d = p.date_payment instanceof Date ? p.date_payment : (p.date_payment ? new Date(p.date_payment) : null);
+        if (!d) return;
+        const monthKey = `${months[d.getMonth()]} ${d.getFullYear()}`;
+        if (Object.prototype.hasOwnProperty.call(monthlyData, monthKey)) {
+          monthlyData[monthKey] += 1;
+        }
+      });
+    return Object.entries(monthlyData).map(([month, count]) => ({ month, count }));
+  };
+
+  const generateTransactionHistory = (paymentsData) => {
+    return paymentsData
+      .map(p => ({
+        id: p.id || `${p.transactionID || ''}-${p.date_payment?.toString() || ''}`,
+        date: p.date_payment instanceof Date ? p.date_payment : (p.date_payment ? new Date(p.date_payment) : new Date()),
+        concept: `Tutoría ${p.subject || 'General'}`,
+        student: p.studentName || p.studentEmail || 'Estudiante',
+        amount: p.amount || 0,
+        status: p.pagado ? 'completado' : 'pendiente',
+        method: p.method || 'transferencia'
       }))
       .sort((a, b) => new Date(b.date) - new Date(a.date));
   };
 
   const getUniqueSubjects = () => {
-    const subjects = [...new Set(sessions.map(s => s.subject).filter(Boolean))];
+    const subjects = [...new Set(payments.map(p => p.subject).filter(Boolean))];
     return subjects;
   };
 
@@ -283,8 +345,8 @@ export default function TutorStatistics() {
       {/* Summary Cards */}
       <div className="summary-cards">
         <div className="stat-card">
-          <div className="card-icon">
-            <Calendar size={24} />
+          <div className="card-icon sessions">
+            <BarChart3 size={24} />
           </div>
           <div className="card-content">
             <h3 className="card-title">Total Sesiones</h3>
@@ -293,14 +355,12 @@ export default function TutorStatistics() {
         </div>
 
         <div className="stat-card">
-          <div className="card-icon earnings">
+          <div className="card-icon pending">
             <DollarSign size={24} />
           </div>
           <div className="card-content">
             <h3 className="card-title">Próximo Pago</h3>
-            <p className="card-value">
-              ${stats.totalEarnings.toLocaleString()}
-            </p>
+            <p className="card-value">${stats.nextPayment.toLocaleString()}</p>
           </div>
         </div>
 
@@ -310,9 +370,7 @@ export default function TutorStatistics() {
           </div>
           <div className="card-content">
             <h3 className="card-title">Ganancias Totales</h3>
-            <p className="card-value">
-              ${stats.totalEarnings.toLocaleString()}
-            </p>
+            <p className="card-value">${stats.totalEarnings.toLocaleString()}</p>
           </div>
         </div>
 
@@ -322,9 +380,7 @@ export default function TutorStatistics() {
           </div>
           <div className="card-content">
             <h3 className="card-title">Calificación Promedio</h3>
-            <p className="card-value">
-              {stats.averageRating.toFixed(1)} ⭐
-            </p>
+            <p className="card-value">{stats.averageRating.toFixed(1)} ⭐</p>
           </div>
         </div>
       </div>
@@ -332,7 +388,7 @@ export default function TutorStatistics() {
       {/* Chart Section */}
       <div className="chart-section">
         <div className="chart-header">
-          <h2 className="chart-title">Sesiones por mes</h2>
+          <h2 className="chart-title">Tutorías por mes</h2>
           <button className="chart-action-btn">
             <Eye size={16} />
             Ver detalles
@@ -341,16 +397,16 @@ export default function TutorStatistics() {
         
         <div className="chart-container">
           <div className="chart-bars">
-            {stats.monthlyEarnings.map((item, index) => (
+            {stats.monthlyCounts.map((item, index) => (
               <div key={index} className="chart-bar-group">
                 <div 
                   className="chart-bar"
                   style={{ 
-                    height: `${Math.max(20, (item.earnings / Math.max(...stats.monthlyEarnings.map(m => m.earnings), 1)) * 100)}%` 
+                    height: `${Math.max(5, (item.count / Math.max(...stats.monthlyCounts.map(m => m.count), 1)) * 100)}%` 
                   }}
                 >
                   <div className="bar-value">
-                    ${item.earnings.toLocaleString()}
+                    {item.count}
                   </div>
                 </div>
                 <span className="bar-label">{item.month}</span>
@@ -388,7 +444,7 @@ export default function TutorStatistics() {
                 <div className="table-cell">
                   {transaction.concept}
                 </div>
-                <div className="table-cell">
+                <div className="table-cell student">
                   {transaction.student}
                 </div>
                 <div className="table-cell amount">

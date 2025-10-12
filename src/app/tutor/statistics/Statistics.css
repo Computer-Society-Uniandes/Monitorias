@@ -300,6 +300,7 @@
   align-items: center;
   flex: 1;
   height: 100%;
+  justify-content: flex-end; /* place bars at the bottom so they grow upward */
 }
 
 .chart-bar {
@@ -308,7 +309,7 @@
   width: 100%;
   min-height: 20px;
   display: flex;
-  align-items: flex-start;
+  align-items: flex-start; /* keep value at the top inside the bar */
   justify-content: center;
   padding-top: 8px;
   position: relative;
@@ -324,14 +325,9 @@
 .bar-value {
   color: white;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   text-align: center;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
-
-.chart-bar:hover .bar-value {
-  opacity: 1;
+  opacity: 1; /* always visible */
 }
 
 .bar-label {
@@ -414,11 +410,20 @@
   color: #374151;
   display: flex;
   align-items: center;
+  min-width: 0; /* allow content to shrink within grid cell */
 }
 
 .table-cell.amount {
   font-weight: 600;
   color: #059669;
+  white-space: nowrap; /* prevent amount wrapping */
+}
+
+/* Prevent overlap for long student emails/names */
+.table-cell.student {
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
 .status-badge {

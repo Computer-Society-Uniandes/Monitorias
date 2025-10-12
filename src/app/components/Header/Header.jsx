@@ -24,6 +24,8 @@ import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "../../context/SecureAuthContext";
 import { NotificationService } from "../../services/NotificationService";
 import { useFavorites } from "../../hooks/useFavorites";
+import NotificationDropdown from "../NotificationDropdown/NotificationDropdown";
+import StudentNotificationDropdown from "../NotificationDropdown/StudentNotificationDropdown";
 import routes from "../../../routes";
 
 export default function Header() {
@@ -34,7 +36,6 @@ export default function Header() {
   const [mounted, setMounted] = useState(false);
   const [role, setRole] = useState("student"); // 'student' | 'tutor'
   const [menuOpen, setMenuOpen] = useState(false);   // ⟵ estado del menú
-  const [notificationCount, setNotificationCount] = useState(0);
   
   // Hook de favoritos
   const { getFavoritesCount } = useFavorites();
@@ -75,28 +76,6 @@ export default function Header() {
     };
   }, [mounted]);
 
-  // Load notification count for tutors
-  useEffect(() => {
-    const loadNotificationCount = async () => {
-      if (user.isLoggedIn && role === "tutor" && user.email) {
-        try {
-          const count = await NotificationService.getUnreadNotificationCount(user.email);
-          setNotificationCount(count);
-        } catch (error) {
-          console.error('Error loading notification count:', error);
-        }
-      } else {
-        setNotificationCount(0);
-      }
-    };
-
-    loadNotificationCount();
-    
-    // Refresh notification count every 30 seconds
-    const interval = setInterval(loadNotificationCount, 30000);
-    
-    return () => clearInterval(interval);
-  }, [user.isLoggedIn, user.email, role]);
 
   if (!mounted) return null;
 
@@ -106,17 +85,17 @@ export default function Header() {
   const favoritesCount = getFavoritesCount();
   
   const studentNavItems = [
-    { href: routes.HOME, label: "Home", icon: Home },
-    { href: routes.SEARCH_TUTORS, label: "Search", icon: Search },
-    { href: routes.FAVORITES, label: "Favorites", icon: Heart, count: favoritesCount },
-    { href: routes.HISTORY, label: "History", icon: History }
+    { href: routes.HOME, label: "Inicio", icon: Home },
+    { href: routes.SEARCH_TUTORS, label: "Buscar", icon: Search },
+    { href: routes.FAVORITES, label: "Favoritos", icon: Heart, count: favoritesCount },
+    { href: routes.HISTORY, label: "Historial", icon: History }
   ];
 
   const tutorNavItems = [
-    { href: routes.TUTOR_INICIO, label: "Home", icon: Home },
-    { href: routes.TUTOR_DISPONIBILIDAD, label: "Availability", icon: Calendar },
-    { href: routes.TUTOR_STATISTICS, label: "Statistics", icon: BarChart3 },
-    { href: routes.TUTOR_MATERIAS, label: "Subjects", icon: BookOpen },
+    { href: routes.TUTOR_INICIO, label: "Inicio", icon: Home },
+    { href: routes.TUTOR_DISPONIBILIDAD, label: "Disponibilidad", icon: Calendar },
+    { href: routes.TUTOR_STATISTICS, label: "Estadísticas", icon: BarChart3 },
+    { href: routes.TUTOR_MATERIAS, label: "Materias", icon: BookOpen },
   ];
 
   // Check if current path matches navigation item
@@ -218,12 +197,11 @@ export default function Header() {
 
         {user.isLoggedIn ? (
           <div className="user-actions">
-            <button className="notification-btn" aria-label="Notifications">
-              <Bell size={20} />
-              {notificationCount > 0 && (
-                <span className="notification-badge">{notificationCount}</span>
-              )}
-            </button>
+            {tutorMode ? (
+              <NotificationDropdown />
+            ) : (
+              <StudentNotificationDropdown />
+            )}
             <button
               className="profile-btn"
               onClick={() => {

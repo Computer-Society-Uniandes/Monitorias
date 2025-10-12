@@ -324,12 +324,12 @@ export default function UnifiedAvailability() {
   return (
     <div className="unified-availability">
       <div className="unified-header">
-        <h1 className="unified-title">Availability</h1>
+  <h1 className="unified-title">Disponibilidad</h1>
         <GoogleCalendarButton />
       </div>
 
       <div className="unified-content">
-        {/* Left Section - Calendar and Availability */}
+  {/* Sección izquierda - Calendario y disponibilidad */}
         <div className="calendar-section">
           <div className="calendar-container">
             <Calendar
@@ -340,16 +340,16 @@ export default function UnifiedAvailability() {
           </div>
 
           <div className="availability-slots">
-            <h3>Availability Slots</h3>
+            <h3>Horarios disponibles</h3>
             <div className="slot-actions">
               <button 
                 className="add-slot-btn"
                 onClick={() => setShowAddModal(true)}
               >
-                Add Slot
+                Agregar horario
               </button>
               <button className="edit-slots-btn">
-                Edit Slots
+                Editar horarios
               </button>
               <button 
                 className="sync-calendar-btn"
@@ -358,7 +358,7 @@ export default function UnifiedAvailability() {
                 title={!isConnected ? "Conecta tu Google Calendar primero" : "Sincronizar eventos de Google Calendar"}
               >
                 <RefreshCw size={16} className={syncing ? "spinning" : ""} />
-                {syncing ? "Syncing..." : "Sync Calendar"}
+                {syncing ? "Sincronizando..." : "Sincronizar calendario"}
               </button>
             </div>
 
@@ -402,7 +402,7 @@ export default function UnifiedAvailability() {
                 <div className="no-slots">
                   <CalendarIcon size={24} />
                   <p>No hay horarios disponibles para este día</p>
-                  <small>Usa "Add Slot" para agregar disponibilidad</small>
+                  <small>Usa "Agregar horario" para agregar disponibilidad</small>
                 </div>
               )}
             </div>
@@ -416,19 +416,19 @@ export default function UnifiedAvailability() {
               className={`tab ${activeTab === "pending" ? "active" : ""}`}
               onClick={() => setActiveTab("pending")}
             >
-              Pending ({getPendingSessionsForDisplay().length})
+              Pendientes ({getPendingSessionsForDisplay().length})
             </button>
             <button 
               className={`tab ${activeTab === "upcoming" ? "active" : ""}`}
               onClick={() => setActiveTab("upcoming")}
             >
-              Upcoming Sessions
+              Próximas
             </button>
             <button 
               className={`tab ${activeTab === "past" ? "active" : ""}`}
               onClick={() => setActiveTab("past")}
             >
-              Past Sessions
+              Pasadas
             </button>
           </div>
 
@@ -444,15 +444,15 @@ export default function UnifiedAvailability() {
                         <div className="session-info">
                           <h4>{session.subject} - {session.studentName || session.studentEmail}</h4>
                           <p>{sessionDate} - {time}</p>
-                          <span className="pending-badge">Pending Approval</span>
+                          <span className="pending-badge">Pendiente de aprobación</span>
                         </div>
                       </div>
                     );
                   })
                 ) : (
-                  <div className="no-sessions">
+                    <div className="no-sessions">
                     <Bell size={24} />
-                    <p>No pending session requests</p>
+                    <p>No hay solicitudes pendientes</p>
                   </div>
                 )}
               </div>
@@ -464,7 +464,7 @@ export default function UnifiedAvailability() {
                     <div key={index} className="session-item" onClick={() => handleSessionClick(session)}>
                       <CalendarIcon className="session-icon" size={16} />
                       <div className="session-info">
-                        <h4>{session.subject || "Introduction to Programming with Student"}</h4>
+                        <h4>{session.subject || "Introducción a la programación con estudiante"}</h4>
                         <p>{sessionDate} - {time}</p>
                       </div>
                     </div>
@@ -479,49 +479,23 @@ export default function UnifiedAvailability() {
                     <div key={index} className="session-item" onClick={() => handleSessionClick(session)}>
                       <CalendarIcon className="session-icon" size={16} />
                       <div className="session-info">
-                        <h4>{session.subject || "Introduction to Programming with Student"}</h4>
+                        <h4>{session.subject || "Introducción a la programación con estudiante"}</h4>
                         <p>{sessionDate} - {time}</p>
                       </div>
                     </div>
                   );
                 })}
               </div>
-            )}
-
-            {/* Notifications */}
-            <div className="notifications">
-              <h4>Recent Notifications</h4>
-              {notifications.length > 0 ? (
-                notifications.slice(0, 5).map((notification, index) => (
-                  <div 
-                    key={index} 
-                    className={`notification-item ${!notification.isRead ? 'unread' : ''}`}
-                    onClick={() => handleNotificationClick(notification)}
-                  >
-                    <Bell className="notification-icon" size={16} />
-                    <div className="notification-content">
-                      <p>{notification.message}</p>
-                      <small>{new Date(notification.createdAt).toLocaleDateString()}</small>
-                    </div>
-                    <ArrowRight className="notification-arrow" size={16} />
-                  </div>
-                ))
-              ) : (
-                <div className="no-notifications">
-                  <Bell size={24} />
-                  <p>No notifications</p>
-                </div>
-              )}
-            </div>
+            )}            
           </div>
         </div>
       </div>
 
-      {/* Add Slot Modal */}
+  {/* Modal para agregar horario */}
       {showAddModal && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <h3>Add Availability Slot</h3>
+            <h3>Agregar horario de disponibilidad</h3>
             
             {validationErrors.length > 0 && (
               <div className="validation-errors">
@@ -532,17 +506,17 @@ export default function UnifiedAvailability() {
             )}
             
             <div className="form-group">
-              <label>Title</label>
+              <label>Título</label>
               <input
                 type="text"
                 value={newSlot.title}
                 onChange={(e) => setNewSlot({...newSlot, title: e.target.value})}
-                placeholder="Availability Slot"
+                placeholder="Horario de disponibilidad"
               />
             </div>
             
             <div className="form-group">
-              <label>Date</label>
+              <label>Fecha</label>
               <input
                 type="date"
                 value={newSlot.date}
@@ -552,7 +526,7 @@ export default function UnifiedAvailability() {
             
             <div className="form-row">
               <div className="form-group">
-                <label>Start Time</label>
+                <label>Hora inicio</label>
                 <input
                   type="time"
                   value={newSlot.startTime}
@@ -560,7 +534,7 @@ export default function UnifiedAvailability() {
                 />
               </div>
               <div className="form-group">
-                <label>End Time</label>
+                <label>Hora fin</label>
                 <input
                   type="time"
                   value={newSlot.endTime}
@@ -570,11 +544,11 @@ export default function UnifiedAvailability() {
             </div>
             
             <div className="form-group">
-              <label>Description</label>
+              <label>Descripción</label>
               <textarea
                 value={newSlot.description}
                 onChange={(e) => setNewSlot({...newSlot, description: e.target.value})}
-                placeholder="Optional description"
+                placeholder="Descripción opcional"
               />
             </div>
             
@@ -583,14 +557,14 @@ export default function UnifiedAvailability() {
                 className="cancel-btn"
                 onClick={() => setShowAddModal(false)}
               >
-                Cancel
+                Cancelar
               </button>
               <button 
                 className="save-btn"
                 onClick={handleAddSlot}
                 disabled={creatingEvent}
               >
-                {creatingEvent ? "Creating..." : "Save Slot"}
+                {creatingEvent ? "Creando..." : "Guardar"}
               </button>
             </div>
           </div>

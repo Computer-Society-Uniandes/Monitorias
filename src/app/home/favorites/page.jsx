@@ -54,17 +54,17 @@ export default function FavoritesPage() {
       <main className="fav-container">
         <div className="cal-search">
           <span className="cal-search__icon" aria-hidden>🔎</span>
-          <input className="cal-search__input" placeholder="Search for subjects or tutors"
+          <input className="cal-search__input" placeholder="Busca materias o tutores"
                  value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
 
         {/* COURSES */}
         <section className="cal-section">
-          <h2 className="cal-section__title">Favorite Courses</h2>
+          <h2 className="cal-section__title">Cursos favoritos</h2>
           {loadingFavs ? (
             <div className="fav-skeleton-list" aria-busy="true"><SkeletonCard /><SkeletonCard /></div>
           ) : filteredCourses.length === 0 ? (
-            <EmptyState text="No favorite courses yet." />
+            <EmptyState text="Aún no tienes cursos favoritos." />
           ) : (
             <ul className="cal-list">
               {filteredCourses.map((c) => (
@@ -74,7 +74,7 @@ export default function FavoritesPage() {
                       <h3 className="cal-title">{c.name}</h3>
                       <span className="cal-price">{COP(c.base_price)}</span>
                     </div>
-                    <p className="cal-sub">Major: {c.majorName || "—"}</p>
+                    <p className="cal-sub">Programa: {c.majorName || "—"}</p>
                     <div className="cal-actions">
                     <button
                       className="btn-cta"
@@ -82,7 +82,7 @@ export default function FavoritesPage() {
                         router.push(`${routes.SEARCH_TUTORS}?course=${encodeURIComponent(c.id)}`)
                       }
                     >
-                      Find a Tutor
+                      Buscar un tutor
                     </button>
                       <FavoriteButton 
                         isFavorite={true} 
@@ -100,11 +100,11 @@ export default function FavoritesPage() {
 
         {/* TUTORS */}
         <section className="cal-section">
-          <h2 className="cal-section__title">Favorite Tutors</h2>
+          <h2 className="cal-section__title">Tutores favoritos</h2>
           {loadingFavs ? (
             <div className="fav-skeleton-list" aria-busy="true"><SkeletonCard /><SkeletonCard /></div>
           ) : filteredTutors.length === 0 ? (
-            <EmptyState text="No favorite tutors yet." />
+            <EmptyState text="Aún no tienes tutores favoritos." />
           ) : (
             <ul className="cal-list">
               {filteredTutors.map((t) => (
@@ -117,14 +117,14 @@ export default function FavoritesPage() {
                           {t.rating.toFixed(1)} <span className="cal-star" aria-hidden>★</span>
                         </span>
                       ) : null}
-                      <span className={`cal-chip ${t.isTutor ? "ok" : ""}`}>{t.isTutor ? "Tutor" : "User"}</span>
+                      <span className={`cal-chip ${t.isTutor ? "ok" : ""}`}>{t.isTutor ? "Tutor" : "Usuario"}</span>
                     </div>
 
                     {t.bio ? <p className="cal-sub">{t.bio}</p> : null}
 
                     <div className="cal-actions">
                       <button className="btn-cta" onClick={() => {/* aquí puedes abrir perfil o booking */}}>
-                        Book Now
+                        Reservar
                       </button>
                       <FavoriteButton 
                         isFavorite={true} 
