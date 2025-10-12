@@ -120,6 +120,9 @@ export async function POST(request) {
     }
 
     console.log('✅ Tutoring session event created successfully:', result.eventId);
+    if (result.meetLink) {
+      console.log('🎥 Google Meet link:', result.meetLink);
+    }
 
     return NextResponse.json({
       success: true,
@@ -127,13 +130,15 @@ export async function POST(request) {
       eventId: result.eventId,
       htmlLink: result.htmlLink,
       hangoutLink: result.hangoutLink,
+      meetLink: result.meetLink, // Link de Google Meet
       calendarEvent: {
         id: result.eventId,
         summary: sessionData.summary,
         start: sessionData.startDateTime,
         end: sessionData.endDateTime,
         attendees: sessionData.attendees,
-        location: sessionData.location
+        location: sessionData.location,
+        meetLink: result.meetLink // Incluir también aquí
       }
     });
 

@@ -137,16 +137,25 @@ export class TutoringSessionService {
           notes: notes
         });
 
-        // Actualizar la sesión con el ID del evento de Google Calendar
-        if (calendarEventResult.success) {
-          await this.updateTutoringSession(sessionResult.id, {
+        // Actualizar la sesión con el ID del evento de Google Calendar y link de Meet
+        if (calendarEventResult.success && calendarEventResult.eventId) {
+          const updateData = {
             calicoCalendarEventId: calendarEventResult.eventId,
             calicoCalendarHtmlLink: calendarEventResult.htmlLink,
             updatedAt: serverTimestamp()
-          });
-        }
+          };
 
-        console.log('✅ Evento creado en calendario central de Calico:', calendarEventResult.eventId);
+          // Agregar link de Meet si existe
+          if (calendarEventResult.meetLink) {
+            updateData.meetLink = calendarEventResult.meetLink;
+            console.log('🎥 Google Meet link agregado a la sesión:', calendarEventResult.meetLink);
+          }
+
+          await this.updateTutoringSession(sessionResult.id, updateData);
+          console.log('✅ Evento creado en calendario central de Calico:', calendarEventResult.eventId);
+        } else if (calendarEventResult.warning) {
+          console.warn('⚠️ Calendario externo:', calendarEventResult.warning);
+        }
       } catch (calendarError) {
         console.error('⚠️ Error creando evento en calendario central (pero sesión de Firebase creada):', calendarError);
         // No fallar la reserva si el calendario falla, pero registrar el error
@@ -639,9 +648,14 @@ export class TutoringSessionService {
   // Método para actualizar una sesión de tutoría existente
   static async updateTutoringSession(sessionId, updateData) {
     try {
+      // Eliminar campos con valores undefined o null para evitar errores de Firestore
+      const cleanedData = Object.fromEntries(
+        Object.entries(updateData).filter(([_, value]) => value !== undefined && value !== null)
+      );
+
       const docRef = doc(db, this.COLLECTION_NAME, sessionId);
       await updateDoc(docRef, {
-        ...updateData,
+        ...cleanedData,
         updatedAt: serverTimestamp()
       });
 
@@ -756,13 +770,20 @@ export class TutoringSessionService {
         throw new Error(result.message || 'Failed to create calendar event');
       }
 
-      console.log('✅ Calico Calendar event created successfully:', result.eventId);
+      // Extraer el eventId del objeto calendarEvent si existe
+      const eventId = result.calendarEvent?.id || result.eventId || null;
+      const htmlLink = result.calendarEvent?.htmlLink || result.htmlLink || null;
 
+      console.log('✅ Calico Calendar event created successfully:', eventId);
+
+      // Si el evento no se creó realmente (Google Calendar no configurado), 
+      // devolver success pero sin eventId para evitar guardar undefined/null
       return {
         success: true,
-        eventId: result.eventId,
-        htmlLink: result.htmlLink,
-        hangoutLink: result.hangoutLink
+        eventId: eventId,
+        htmlLink: htmlLink,
+        hangoutLink: result.hangoutLink || null,
+        warning: result.warning // Incluir advertencia si existe
       };
 
     } catch (error) {
