@@ -167,13 +167,13 @@ describe('RescheduleSessionModal', () => {
     const mockSlots = [
       {
         id: 'slot-1',
-        startDateTime: '2025-10-20T14:00:00Z',
-        endDateTime: '2025-10-20T15:00:00Z',
+        startDateTime: '2025-10-20T09:00:00Z',
+        endDateTime: '2025-10-20T10:00:00Z',
       },
     ];
 
     AvailabilityService.getAvailabilitiesByTutorAndRange.mockResolvedValue({
-      availabilitySlots: [{ date: '2025-10-20', startTime: '14:00', endTime: '15:00' }],
+      availabilitySlots: [{ date: '2025-10-20', startTime: '09:00', endTime: '10:00' }],
     });
     SlotService.generateHourlySlotsFromAvailabilities.mockReturnValue(mockSlots);
     SlotService.getAvailableSlots.mockReturnValue(mockSlots);
@@ -197,8 +197,8 @@ describe('RescheduleSessionModal', () => {
       expect(screen.getByText(/time slot available/i)).toBeInTheDocument();
     });
 
-    // Find the slot button by its content
-    const slotButton = screen.getByRole('button', { name: /09:00.*10:00/i });
+    // Find the slot button by its content (component converts UTC to local time)
+    const slotButton = screen.getByRole('button', { name: /04:00 AM.*05:00 AM/i });
     await act(async () => {
       fireEvent.click(slotButton);
     });
@@ -211,13 +211,13 @@ describe('RescheduleSessionModal', () => {
     const mockSlots = [
       {
         id: 'slot-1',
-        startDateTime: '2025-10-20T14:00:00Z',
-        endDateTime: '2025-10-20T15:00:00Z',
+        startDateTime: '2025-10-20T09:00:00Z',
+        endDateTime: '2025-10-20T10:00:00Z',
       },
     ];
 
     AvailabilityService.getAvailabilitiesByTutorAndRange.mockResolvedValue({
-      availabilitySlots: [{ date: '2025-10-20' }],
+      availabilitySlots: [{ date: '2025-10-20', startTime: '09:00', endTime: '10:00' }],
     });
     SlotService.generateHourlySlotsFromAvailabilities.mockReturnValue(mockSlots);
     SlotService.getAvailableSlots.mockReturnValue(mockSlots);
@@ -238,8 +238,8 @@ describe('RescheduleSessionModal', () => {
       expect(screen.getByText(/time slot available/i)).toBeInTheDocument();
     });
 
-    // Select slot
-    const slotButton = screen.getByRole('button', { name: /09:00.*10:00/i });
+    // Select slot (component converts UTC to local time)
+    const slotButton = screen.getByRole('button', { name: /04:00 AM.*05:00 AM/i });
     await act(async () => {
       fireEvent.click(slotButton);
     });
@@ -259,13 +259,13 @@ describe('RescheduleSessionModal', () => {
     const mockSlots = [
       {
         id: 'slot-1',
-        startDateTime: '2025-10-20T14:00:00Z',
-        endDateTime: '2025-10-20T15:00:00Z',
+        startDateTime: '2025-10-20T09:00:00Z',
+        endDateTime: '2025-10-20T10:00:00Z',
       },
     ];
 
     AvailabilityService.getAvailabilitiesByTutorAndRange.mockResolvedValue({
-      availabilitySlots: [{ date: '2025-10-20' }],
+      availabilitySlots: [{ date: '2025-10-20', startTime: '09:00', endTime: '10:00' }],
     });
     SlotService.generateHourlySlotsFromAvailabilities.mockReturnValue(mockSlots);
     SlotService.getAvailableSlots.mockReturnValue(mockSlots);
@@ -291,8 +291,8 @@ describe('RescheduleSessionModal', () => {
       expect(screen.getByText(/time slot available/i)).toBeInTheDocument();
     });
 
-    // Select slot
-    const slotButton = screen.getByRole('button', { name: /09:00.*10:00/i });
+    // Select slot (component converts UTC to local time)
+    const slotButton = screen.getByRole('button', { name: /04:00 AM.*05:00 AM/i });
     await act(async () => {
       fireEvent.click(slotButton);
     });
@@ -328,13 +328,13 @@ describe('RescheduleSessionModal', () => {
     const mockSlots = [
       {
         id: 'slot-1',
-        startDateTime: '2025-10-20T14:00:00Z',
-        endDateTime: '2025-10-20T15:00:00Z',
+        startDateTime: '2025-10-20T09:00:00Z',
+        endDateTime: '2025-10-20T10:00:00Z',
       },
     ];
 
     AvailabilityService.getAvailabilitiesByTutorAndRange.mockResolvedValue({
-      availabilitySlots: [{ date: '2025-10-20' }],
+      availabilitySlots: [{ date: '2025-10-20', startTime: '09:00', endTime: '10:00' }],
     });
     SlotService.generateHourlySlotsFromAvailabilities.mockReturnValue(mockSlots);
     SlotService.getAvailableSlots.mockReturnValue(mockSlots);
@@ -360,8 +360,8 @@ describe('RescheduleSessionModal', () => {
       expect(screen.getByText(/time slot available/i)).toBeInTheDocument();
     });
 
-    // Select slot and enter reason
-    const slotButton = screen.getByRole('button', { name: /09:00.*10:00/i });
+    // Select slot and enter reason (component converts UTC to local time)
+    const slotButton = screen.getByRole('button', { name: /04:00 AM.*05:00 AM/i });
     await act(async () => {
       fireEvent.click(slotButton);
     });
@@ -410,13 +410,13 @@ describe('RescheduleSessionModal', () => {
     const mockSlots = [
       {
         id: 'slot-1',
-        startDateTime: '2025-10-20T14:00:00Z',
-        endDateTime: '2025-10-20T15:00:00Z',
+        startDateTime: '2025-10-20T09:00:00Z',
+        endDateTime: '2025-10-20T10:00:00Z',
       },
     ];
 
     AvailabilityService.getAvailabilitiesByTutorAndRange.mockResolvedValue({
-      availabilitySlots: [{ date: '2025-10-20' }],
+      availabilitySlots: [{ date: '2025-10-20', startTime: '09:00', endTime: '10:00' }],
     });
     SlotService.generateHourlySlotsFromAvailabilities.mockReturnValue(mockSlots);
     SlotService.getAvailableSlots.mockReturnValue(mockSlots);
@@ -441,8 +441,8 @@ describe('RescheduleSessionModal', () => {
       expect(screen.getByText(/time slot available/i)).toBeInTheDocument();
     });
 
-    // Select slot and enter reason
-    const slotButton = screen.getByRole('button', { name: /09:00.*10:00/i });
+    // Select slot and enter reason (component converts UTC to local time)
+    const slotButton = screen.getByRole('button', { name: /04:00 AM.*05:00 AM/i });
     await act(async () => {
       fireEvent.click(slotButton);
     });
