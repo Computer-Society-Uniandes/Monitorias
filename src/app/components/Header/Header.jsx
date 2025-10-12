@@ -142,6 +142,20 @@ export default function Header() {
     }
   };
 
+  // Función para cambiar rol con refresh y redirección
+  const handleRoleChange = (newRole) => {
+    localStorage.setItem("rol", newRole);
+    window.dispatchEvent(
+      new CustomEvent("role-change", { detail: newRole })
+    );
+    
+    // Determinar la ruta de home según el rol
+    const homeRoute = newRole === "tutor" ? routes.TUTOR_INICIO : routes.HOME;
+    
+    // Refrescar la página y redirigir al home correspondiente
+    window.location.href = homeRoute;
+  };
+
   return (
     <header className={`header ${menuOpen ? 'is-open' : ''}`}>
       <Link href="/" className="logo">
@@ -194,11 +208,7 @@ export default function Header() {
               className={`role-badge ${tutorMode ? "tutor" : "student"}`}
               onClick={() => {
                 const newRole = role === "student" ? "tutor" : "student";
-                setRole(newRole);
-                localStorage.setItem("rol", newRole);
-                window.dispatchEvent(
-                  new CustomEvent("role-change", { detail: newRole })
-                );
+                handleRoleChange(newRole);
               }}
             >
               {tutorMode ? "TUTOR" : "ESTUDIANTE"}

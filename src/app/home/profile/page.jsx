@@ -107,21 +107,30 @@ const Profile = () => {
     }
   };
 
+                                                    // Función para cambiar rol con refresh y redirección
+  const handleRoleChangeWithRefresh = (newRole) => {
+    localStorage.setItem('rol', newRole);
+    setActiveRole(newRole);
+    notifyRoleChange(newRole);
+    
+    // Determinar la ruta de home según el rol
+    const homeRoute = newRole === 'tutor' ? routes.TUTOR_INICIO : routes.HOME;
+    
+    // Refrescar la página y redirigir al home correspondiente
+    window.location.href = homeRoute;
+  };
+
   // Intentar cambiar a modo tutor desde el perfil
   const handleChangeRole = () => {
     if (!user.isTutor) {
       setInviteOpen(true);
       return;
     }
-    localStorage.setItem('rol', 'tutor');
-    setActiveRole('tutor');
-    notifyRoleChange('tutor');
+    handleRoleChangeWithRefresh('tutor');
   };
 
   const handleBackToStudent = () => {
-    localStorage.setItem('rol', 'student');
-    setActiveRole('student');
-    notifyRoleChange('student');
+    handleRoleChangeWithRefresh('student');
   };
 
 
