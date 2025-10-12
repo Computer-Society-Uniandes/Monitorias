@@ -7,7 +7,7 @@ import './AvailabilityCalendar.css';
 import { AvailabilityService } from 'app/app/services/AvailabilityService';
 import { SlotService } from 'app/app/services/SlotService';
 import { TutoringSessionService } from 'app/app/services/TutoringSessionService';
-import { PaymentService } from 'app/app/services/PaymentService';
+import { GoogleDriveService } from 'app/app/services/GoogleDriveService';
 import { useAuth } from 'app/app/context/SecureAuthContext';
 import { TutorSearchService } from 'app/app/services/TutorSearchService';
 import SessionConfirmationModal from '../SessionConfirmationModal/SessionConfirmationModal';
@@ -226,26 +226,28 @@ const AvailabilityCalendar = ({
       
       console.log('✅ Sesión creada exitosamente:', createdSession);
 
-      // 2. Subir comprobante de pago usando el sessionId
+      // 2. Subir comprobante de pago a Google Drive usando el sessionId
       if (proofFile && createdSession.id) {
-        console.log('📤 Subiendo comprobante de pago...');
-        const paymentProofResult = await PaymentService.uploadPaymentProofFile(createdSession.id, proofFile);
+        console.log('📤 Subiendo comprobante de pago a Google Drive...');
+        const paymentProofResult = await GoogleDriveService.uploadPaymentProofFile(createdSession.id, proofFile);
         
         if (paymentProofResult.success) {
-          console.log('✅ Comprobante subido:', paymentProofResult);
+          console.log('✅ Comprobante subido a Google Drive:', paymentProofResult);
           
           // 3. Actualizar la sesión con la URL del comprobante
           await TutoringSessionService.updateTutoringSession(createdSession.id, {
             paymentProofUrl: paymentProofResult.url,
-            paymentProofPath: paymentProofResult.path,
+            paymentProofFileId: paymentProofResult.fileId,
             paymentProofFileName: paymentProofResult.fileName,
+            paymentProofThumbnail: paymentProofResult.thumbnailLink,
             paymentStatus: 'en_verificación'
           });
           
-          console.log('✅ Sesión actualizada con comprobante de pago');
+          console.log('✅ Sesión actualizada con comprobante de pago de Google Drive');
         } else {
           console.error('⚠️ Error subiendo comprobante:', paymentProofResult.error);
           // No fallar la reserva si el comprobante no se sube
+          alert(`⚠️ La reserva se creó pero hubo un problema al subir el comprobante: ${paymentProofResult.error}\n\nPuedes enviar el comprobante después.`);
         }
       }
 
