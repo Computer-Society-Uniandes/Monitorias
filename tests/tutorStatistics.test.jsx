@@ -50,7 +50,7 @@ describe('TutorStatistics page', () => {
     expect(PaymentsService.getPaymentsByTutor).toHaveBeenCalledWith('tutor@example.com');
 
     // Basic sections should render
-    expect(await screen.findByText(/statistics/i)).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: /statistics/i })).toBeInTheDocument();
     expect(await screen.findByText(/sessions per month/i)).toBeInTheDocument();
     // Transactions header present (render validation)
     expect(await screen.findByText(/date|fecha/i)).toBeInTheDocument();
@@ -95,8 +95,9 @@ describe('TutorStatistics page', () => {
     // Wait until filters render
     await screen.findByText(/payment history|historial de pagos/i);
 
-    // Subject select contains both subjects from payments
-    const subjectLabel = screen.getByText(/subject/i);
+    // Subject select contains both subjects from payments - find all labels and get the one in filters
+    const subjectLabels = screen.getAllByText(/subject/i);
+    const subjectLabel = subjectLabels.find(el => el.tagName === 'LABEL');
     const subjectGroup = subjectLabel.closest('.filter-group');
     const subjectSelect = subjectGroup.querySelector('select');
     expect(within(subjectSelect).getByRole('option', { name: 'Cálculo' })).toBeInTheDocument();
@@ -123,44 +124,51 @@ describe('TutorStatistics page', () => {
     const periodLabel = screen.getByText(/period/i);
     const periodGroup = periodLabel.closest('.filter-group');
     const periodSelect = periodGroup.querySelector('select');
-  await userEvent.selectOptions(periodSelect, 'custom');
+    await userEvent.selectOptions(periodSelect, 'custom');
 
-  // Wait for custom inputs to appear
-  const fromLabel = await screen.findByText(/from|desde/i);
+    // Wait for custom inputs to appear - find all labels at once
+    const fromLabels = await screen.findAllByText(/from|desde/i);
+    const fromLabel = fromLabels.find(el => el.tagName === 'LABEL');
     const fromGroup = fromLabel.closest('.filter-group');
     const fromInput = fromGroup.querySelector('input[type="date"]');
-  const toLabel = await screen.findByText(/to|hasta/i);
+    
+    const toLabels = await screen.findAllByText(/to|hasta/i);
+    const toLabel = toLabels.find(el => el.tagName === 'LABEL');
     const toGroup = toLabel.closest('.filter-group');
     const toInput = toGroup.querySelector('input[type="date"]');
-    await userEvent.clear(fromInput);
-    await userEvent.type(fromInput, '2000-01-01');
-    await userEvent.clear(toInput);
-    await userEvent.type(toInput, '2000-01-02');
+    
+    // Use click and type instead of clear for date inputs
+    await userEvent.click(fromInput);
+    await userEvent.type(fromInput, '{selectall}{delete}2000-01-01');
+    await userEvent.click(toInput);
+    await userEvent.type(toInput, '{selectall}{delete}2000-01-02');
 
     // Expect empty state
     expect(await screen.findByText(/no transactions|no hay transacciones/i)).toBeInTheDocument();
   });
 
   test('applies status class and method icon mapping', async () => {
-    // Override payments to have clear methods
+    // Override payments to have clear methods with dates early in the month
     const Svc = (await import('../src/app/services/PaymentsService')).default;
+    const now = new Date();
+    const dateInMonth = new Date(now.getFullYear(), now.getMonth(), 5); // 5th of current month
     Svc.getPaymentsByTutor.mockResolvedValue([
-      { id: '1', amount: 10000, pagado: true, method: 'transfer', subject: 'Cálculo', studentEmail: 'a@b.com', date_payment: new Date() },
-      { id: '2', amount: 20000, pagado: false, method: 'cash', subject: 'Álgebra', studentEmail: 'c@d.com', date_payment: new Date() },
-      { id: '3', amount: 30000, pagado: true, method: 'card', subject: 'Álgebra', studentEmail: 'e@f.com', date_payment: new Date() },
+      { id: '1', amount: 10000, pagado: true, method: 'transfer', subject: 'Cálculo', studentEmail: 'a@b.com', studentName: 'Student A', date_payment: dateInMonth },
+      { id: '2', amount: 20000, pagado: false, method: 'cash', subject: 'Álgebra', studentEmail: 'c@d.com', studentName: 'Student C', date_payment: dateInMonth },
+      { id: '3', amount: 30000, pagado: true, method: 'card', subject: 'Álgebra', studentEmail: 'e@f.com', studentName: 'Student E', date_payment: dateInMonth },
     ]);
 
-  render(<TutorStatistics />);
-  await screen.findByText(/payment history|historial de pagos/i);
-  // Wait until rows are rendered
-  await screen.findAllByText(/Tutoring|Tutoría/);
+    render(<TutorStatistics />);
+    await screen.findByText(/payment history|historial de pagos/i);
+    // Wait until rows are rendered
+    await screen.findAllByText(/Tutoring|Tutoría/);
 
-  // Query badges by class for robustness
-  const badges = Array.from(document.querySelectorAll('.status-badge'));
-  const completedBadge = badges.find((b) => /completed|completado/i.test(b.textContent || ''));
-  const pendingBadge = badges.find((b) => /pending|pendiente/i.test(b.textContent || ''));
-  expect(completedBadge && completedBadge.className).toMatch(/status-completed/);
-  expect(pendingBadge && pendingBadge.className).toMatch(/status-pending/);
+    // Query badges by class for robustness
+    const badges = Array.from(document.querySelectorAll('.status-badge'));
+    const completedBadge = badges.find((b) => /completed|completado/i.test(b.textContent || ''));
+    const pendingBadge = badges.find((b) => /pending|pendiente/i.test(b.textContent || ''));
+    expect(completedBadge && completedBadge.className).toMatch(/status-completed/);
+    expect(pendingBadge && pendingBadge.className).toMatch(/status-pending/);
 
     // Method icons: transfer 🏦, cash 💵, card 💳
     expect(screen.getByText(/🏦\s*transfer/i)).toBeInTheDocument();
@@ -169,11 +177,14 @@ describe('TutorStatistics page', () => {
   });
 
   test('loads average rating from Firestore when available', async () => {
-    // Mock getDoc to return rating 4.7
+    // Mock getDoc to return rating 4.7 BEFORE rendering
     const fs = await import('firebase/firestore');
-    fs.getDoc.mockResolvedValueOnce({ exists: () => true, data: () => ({ rating: '4.7' }) });
+    fs.getDoc.mockResolvedValue({ exists: () => true, data: () => ({ rating: '4.7' }) });
 
     render(<TutorStatistics />);
+    // Wait for component to load data
+    await screen.findByText(/payment history|historial de pagos/i);
+    
     const ratingCard = await screen.findByText(/average rating/i);
     const card = ratingCard.closest('.stat-card');
     expect(within(card).getByText(/4\.7\s*⭐/)).toBeInTheDocument();
