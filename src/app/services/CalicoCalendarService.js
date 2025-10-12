@@ -186,6 +186,16 @@ export class CalicoCalendarService {
         // NO incluir attendees para evitar problemas de permisos con Service Account
         // attendees: [...], // Comentado para evitar Domain-Wide Delegation requirement
         
+        // 🎥 Agregar Google Meet automáticamente
+        conferenceData: {
+          createRequest: {
+            requestId: `meet-${Date.now()}-${Math.random().toString(36).substring(7)}`,
+            conferenceSolutionKey: {  
+              type: 'hangoutsMeet'
+            }
+          }
+        },
+        
         // Configuraciones adicionales
         status: 'confirmed',
         visibility: 'default',
@@ -229,12 +239,45 @@ export class CalicoCalendarService {
       // Obtener el cliente de Calendar
       const calendar = await this.getCalendarClient();
 
-      // Crear el evento en el calendario central SIN enviar invitaciones
-      const response = await calendar.events.insert({
-        calendarId: this.calenderId,
-        resource: event,
-        sendUpdates: 'none' // No enviar invitaciones para evitar problemas de permisos
-      });
+      let response;
+      let meetLink = null;
+
+      try {
+        // Intentar crear el evento CON Google Meet
+        console.log('🎥 Attempting to create event with Google Meet...');
+        response = await calendar.events.insert({
+          calendarId: this.calenderId,
+          resource: event,
+          conferenceDataVersion: 1, // Requerido para crear Google Meet
+          sendUpdates: 'none' // No enviar invitaciones para evitar problemas de permisos
+        });
+
+        // Extraer el link de Google Meet si se creó
+        meetLink = response.data.conferenceData?.entryPoints?.find(
+          ep => ep.entryPointType === 'video'
+        )?.uri || response.data.hangoutLink || null;
+
+        if (meetLink) {
+          console.log('✅ Google Meet link created:', meetLink);
+        } else {
+          console.warn('⚠️ Event created but no Meet link generated');
+        }
+
+      } catch (meetError) {
+        console.warn('⚠️ Failed to create event with Meet, trying without conference data:', meetError.message);
+        
+        // Si falla con Meet, crear sin conferenceData
+        const eventWithoutMeet = { ...event };
+        delete eventWithoutMeet.conferenceData;
+
+        response = await calendar.events.insert({
+          calendarId: this.calenderId,
+          resource: eventWithoutMeet,
+          sendUpdates: 'none'
+        });
+
+        console.log('✅ Event created without Meet link');
+      }
 
       console.log('✅ Tutoring session event created successfully:', response.data.id);
 
@@ -243,6 +286,7 @@ export class CalicoCalendarService {
         eventId: response.data.id,
         htmlLink: response.data.htmlLink,
         hangoutLink: response.data.hangoutLink,
+        meetLink: meetLink, // Puede ser null si no se pudo crear Meet
         event: response.data
       };
 
