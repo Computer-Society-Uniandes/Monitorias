@@ -1,0 +1,38 @@
+.payment-card {
+  background: #ffffff;
+  border: 2px solid rgba(253, 174, 30, 0.16);
+  border-radius: 12px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 320px;
+}
+
+.payment-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.payment-card__subject {
+  font-weight: 700;
+  color: #101F24;
+}
+
+.payment-card__amount {
+  color: #FF9505;
+  font-weight: 700;
+}
+
+.payment-card__row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-top: 1px dashed #eee;
+}
+.payment-card__row:first-child { border-top: none; }
+
+.label { color: #6B7280; }
+.value { color: #101F24; max-width: 70%; text-align: right; overflow-wrap: anywhere; }
+.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }

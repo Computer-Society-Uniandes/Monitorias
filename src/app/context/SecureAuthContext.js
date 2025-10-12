@@ -66,6 +66,19 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setLoading(true);
+      // Log del cambio de estado de autenticación y datos relevantes del usuario
+      try {
+        console.log('[Auth] onAuthStateChanged ->', firebaseUser ? {
+          uid: firebaseUser?.uid,
+          email: firebaseUser?.email,
+          displayName: firebaseUser?.displayName || null,
+          providerData: (firebaseUser?.providerData || []).map(p => ({
+            providerId: p?.providerId,
+            email: p?.email || null,
+            uid: p?.uid || null,
+          }))
+        } : null);
+      } catch (_) {}
       
       if (firebaseUser) {
         // Usuario autenticado - obtener datos adicionales de Firestore

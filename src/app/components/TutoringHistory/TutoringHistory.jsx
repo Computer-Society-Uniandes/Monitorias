@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/SecureAuthContext';
 import TutoringHistoryService from '../../services/TutoringHistoryService';
 import './TutoringHistory.css';
+import PaymentHistory from '../PaymentHistory/PaymentHistory';
 
 const TutoringHistory = () => {
   const { user } = useAuth();
@@ -20,6 +21,7 @@ const TutoringHistory = () => {
   const [subjectFilter, setSubjectFilter] = useState('');
   const [availableSubjects, setAvailableSubjects] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [paymentsCount, setPaymentsCount] = useState(0);
 
   useEffect(() => {
     if (user?.email) {
@@ -206,9 +208,9 @@ const TutoringHistory = () => {
 
         {/* Tabla de resultados */}
         <div className="results-section">
-          <h2 className="section-title">Resultados</h2>
+          <h2 className="section-title">Historial de tutorías</h2>
           
-          {filteredSessions.length === 0 ? (
+          {filteredSessions.length === 0 && paymentsCount === 0 ? (
             <div className="empty-results">
               <p>No se encontraron tutorías</p>
               {hasActiveFilters() && (
@@ -217,7 +219,9 @@ const TutoringHistory = () => {
                 </button>
               )}
             </div>
-          ) : (
+          ) : null}
+
+          {filteredSessions.length > 0 && (
             <div className="results-table">
               <div className="table-header">
                 <div className="table-cell">Fecha</div>
@@ -225,7 +229,6 @@ const TutoringHistory = () => {
                 <div className="table-cell">Tutor</div>
                 <div className="table-cell">Rendimiento</div>
               </div>
-              
               {filteredSessions.map((session) => (
                 <div key={session.id} className="table-row">
                   <div className="table-cell" data-label="Fecha">
@@ -247,6 +250,16 @@ const TutoringHistory = () => {
               ))}
             </div>
           )}
+
+          {/* Historial de pagos embebido bajo Resultados */}
+          <div style={{ marginTop: 24 }}>
+            <PaymentHistory
+              subjectQuery={subjectFilter}
+              startDate={dateFilter.startDate}
+              endDate={dateFilter.endDate}
+              onCountChange={setPaymentsCount}
+            />
+          </div>
         </div>
       </div>
     </div>
