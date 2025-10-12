@@ -79,6 +79,11 @@ export default function TutoringDetailsModal({ isOpen, onClose, session, onSessi
 
   const handleRescheduleComplete = () => {
     setShowRescheduleModal(false);
+    // Close the session details modal as well
+    if (onClose) {
+      onClose();
+    }
+    // Update the parent component to refresh the sessions list
     if (onSessionUpdate) {
       onSessionUpdate();
     }
