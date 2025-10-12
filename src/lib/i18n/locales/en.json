@@ -479,5 +479,40 @@
     "connectionRenewed": "Connection renewed successfully",
     "sessionExpiredMessage": "Your Google Calendar session has expired.",
     "reconnectNow": "Do you want to reconnect now?"
+  },
+  "review": {
+    "newTitle": "Leave a review",
+    "updateTitle": "Update your review",
+    "fields": {
+      "subject": "Subject",
+      "tutor": "Tutor",
+      "date": "Date",
+      "price": "Price",
+      "rating": "Rating",
+      "comment": "Comment"
+    },
+    "placeholders": {
+      "comment": "Write your opinion about the tutoring session"
+    },
+    "buttons": {
+      "submit": "Submit review",
+      "update": "Update review",
+      "saving": "Saving...",
+      "close": "Close"
+    },
+    "errors": {
+      "validation": "You must select at least 1 star.",
+      "authRequired": "You must be logged in to submit a review.",
+      "sessionNotFound": "The session does not exist.",
+      "saveError": "Error saving the review."
+    }
+},
+
+  "successModal": {
+    "title": "Review sent successfully!",
+    "message": "Thank you for your feedback. It helps us a lot!",
+    "close": "Close"
   }
+
+  
 }

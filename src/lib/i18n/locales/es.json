@@ -479,5 +479,40 @@
     "connectionRenewed": "Conexión renovada exitosamente",
     "sessionExpiredMessage": "Tu sesión de Google Calendar ha expirado.",
     "reconnectNow": "¿Quieres reconectar ahora?"
+  },
+
+  "review": {
+    "newTitle": "Deja una reseña",
+    "updateTitle": "Actualiza tu reseña",
+    "fields": {
+      "subject": "Materia",
+      "tutor": "Tutor",
+      "date": "Fecha",
+      "price": "Precio",
+      "rating": "Calificación",
+      "comment": "Comentario"
+    },
+    "placeholders": {
+      "comment": "Escribe tu opinión sobre la tutoría"
+    },
+    "buttons": {
+      "submit": "Enviar reseña",
+      "update": "Actualizar reseña",
+      "saving": "Guardando...",
+      "close": "Cerrar"
+    },
+    "errors": {
+      "validation": "Debes seleccionar al menos 1 estrella.",
+      "authRequired": "Debes iniciar sesión para enviar una reseña.",
+      "sessionNotFound": "La sesión no existe.",
+      "saveError": "Error al guardar la reseña."
+  }
+},
+
+  "successModal": {
+    "title": "¡Reseña enviada con éxito!",
+    "message": "Gracias por tus comentarios. ¡Nos ayuda mucho!",
+    "close": "Cerrar"
   }
 }
+
