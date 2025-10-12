@@ -29,15 +29,20 @@ export class TutoringSessionService {
       
       console.log('📋 Creating tutoring session with cleaned data:', cleanedData);
       
+      // Determinar si es una sesión que requiere aprobación del tutor
+      const requiresApproval = sessionData.requiresApproval !== false; // Por defecto requiere aprobación
+      
       const docRef = await addDoc(collection(db, this.COLLECTION_NAME), {
         ...cleanedData,
-        status: 'scheduled',
+        status: requiresApproval ? 'pending' : 'scheduled',
+        tutorApprovalStatus: requiresApproval ? 'pending' : 'approved',
+        requestedAt: requiresApproval ? serverTimestamp() : null,
         paymentStatus: 'pending',
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       });
 
-      console.log('✅ Tutoring session created with ID:', docRef.id);
+      console.log('✅ Tutoring session created with ID:', docRef.id, 'Status:', requiresApproval ? 'pending' : 'scheduled');
       return { success: true, id: docRef.id };
     } catch (error) {
       console.error('❌ Error creating tutoring session:', error);
@@ -371,10 +376,12 @@ export class TutoringSessionService {
     }
   }
 
-  // Obtener sesiones de un tutor (manteniendo compatibilidad)
+  // Obtener sesiones de un tutor (excluyendo las pendientes de aprobación)
   static async getTutorSessions(tutorEmail) {
     try {
       console.log('tutorEmail', tutorEmail);
+      
+      // Obtener todas las sesiones del tutor
       const q = query(
         collection(db, this.COLLECTION_NAME),
         where('tutorEmail', '==', tutorEmail),
@@ -385,16 +392,23 @@ export class TutoringSessionService {
       const sessions = [];
 
       querySnapshot.forEach((doc) => {
-        sessions.push({
-          id: doc.id,
-          ...doc.data(),
-          createdAt: doc.data().createdAt?.toDate(),
-          updatedAt: doc.data().updatedAt?.toDate(),
-          scheduledDateTime: doc.data().scheduledDateTime?.toDate(),
-          endDateTime: doc.data().endDateTime?.toDate(),
-        });
+        const sessionData = doc.data();
+        
+        // Filtrar sesiones pendientes de aprobación
+        if (sessionData.status !== 'pending' && sessionData.tutorApprovalStatus !== 'pending') {
+          sessions.push({
+            id: doc.id,
+            ...sessionData,
+            createdAt: sessionData.createdAt?.toDate(),
+            updatedAt: sessionData.updatedAt?.toDate(),
+            scheduledDateTime: sessionData.scheduledDateTime?.toDate(),
+            endDateTime: sessionData.endDateTime?.toDate(),
+            requestedAt: sessionData.requestedAt?.toDate(),
+          });
+        }
       });
-      console.log('sessions', sessions);
+      
+      console.log('sessions (excluding pending):', sessions.length);
 
       return sessions;
     } catch (error) {
@@ -517,6 +531,52 @@ export class TutoringSessionService {
     }
   }
 
+  // Reject a pending tutoring session
+  static async rejectTutoringSession(sessionId, tutorEmail, reason = '') {
+    try {
+      const sessionRef = doc(db, this.COLLECTION_NAME, sessionId);
+      const sessionDoc = await getDoc(sessionRef);
+
+      if (!sessionDoc.exists()) {
+        throw new Error('Session not found');
+      }
+
+      const sessionData = sessionDoc.data();
+
+      // Verify the tutor is authorized to reject this session
+      if (sessionData.tutorEmail !== tutorEmail) {
+        throw new Error('Unauthorized to reject this session');
+      }
+
+      // Verify the session is still pending
+      if (sessionData.status !== 'pending') {
+        throw new Error('Session is no longer pending');
+      }
+
+      // Update session status to rejected
+      await updateDoc(sessionRef, {
+        status: 'rejected',
+        tutorApprovalStatus: 'rejected',
+        rejectedAt: serverTimestamp(),
+        rejectionReason: reason,
+        updatedAt: serverTimestamp()
+      });
+
+      // Create notification for the student
+      await NotificationService.createSessionRejectedNotification({
+        sessionId: sessionId,
+        studentEmail: sessionData.studentEmail,
+        reason: reason
+      });
+
+      console.log(`Session ${sessionId} rejected by tutor ${tutorEmail}`);
+      return { success: true, message: 'Session rejected successfully' };
+    } catch (error) {
+      console.error('Error rejecting session:', error);
+      throw new Error(`Error rejecting session: ${error.message}`);
+    }
+  }
+
   // Decline a pending tutoring session
   static async declineTutoringSession(sessionId, tutorEmail) {
     try {
@@ -584,11 +644,11 @@ export class TutoringSessionService {
   // Get pending sessions for a tutor
   static async getPendingSessionsForTutor(tutorEmail) {
     try {
+      // Buscar sesiones que están pendientes de aprobación del tutor
       const q = query(
         collection(db, this.COLLECTION_NAME),
         where('tutorEmail', '==', tutorEmail),
         where('status', '==', 'pending'),
-        where('tutorApprovalStatus', '==', 'pending'),
         orderBy('requestedAt', 'desc')
       );
 
@@ -596,17 +656,23 @@ export class TutoringSessionService {
       const sessions = [];
 
       querySnapshot.forEach((doc) => {
-        sessions.push({
-          id: doc.id,
-          ...doc.data(),
-          createdAt: doc.data().createdAt?.toDate(),
-          updatedAt: doc.data().updatedAt?.toDate(),
-          scheduledDateTime: doc.data().scheduledDateTime?.toDate(),
-          endDateTime: doc.data().endDateTime?.toDate(),
-          requestedAt: doc.data().requestedAt?.toDate(),
-        });
+        const sessionData = doc.data();
+        
+        // Solo incluir sesiones que realmente están pendientes de aprobación
+        if (sessionData.tutorApprovalStatus === 'pending') {
+          sessions.push({
+            id: doc.id,
+            ...sessionData,
+            createdAt: sessionData.createdAt?.toDate(),
+            updatedAt: sessionData.updatedAt?.toDate(),
+            scheduledDateTime: sessionData.scheduledDateTime?.toDate(),
+            endDateTime: sessionData.endDateTime?.toDate(),
+            requestedAt: sessionData.requestedAt?.toDate(),
+          });
+        }
       });
 
+      console.log(`Found ${sessions.length} pending sessions for tutor:`, tutorEmail);
       return sessions;
     } catch (error) {
       console.error('Error getting pending sessions:', error);

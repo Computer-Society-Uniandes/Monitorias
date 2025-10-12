@@ -486,33 +486,7 @@ export default function UnifiedAvailability() {
                   );
                 })}
               </div>
-            )}
-
-            {/* Notifications */}
-            <div className="notifications">
-              <h4>Recent Notifications</h4>
-              {notifications.length > 0 ? (
-                notifications.slice(0, 5).map((notification, index) => (
-                  <div 
-                    key={index} 
-                    className={`notification-item ${!notification.isRead ? 'unread' : ''}`}
-                    onClick={() => handleNotificationClick(notification)}
-                  >
-                    <Bell className="notification-icon" size={16} />
-                    <div className="notification-content">
-                      <p>{notification.message}</p>
-                      <small>{new Date(notification.createdAt).toLocaleDateString()}</small>
-                    </div>
-                    <ArrowRight className="notification-arrow" size={16} />
-                  </div>
-                ))
-              ) : (
-                <div className="no-notifications">
-                  <Bell size={24} />
-                  <p>No notifications</p>
-                </div>
-              )}
-            </div>
+            )}            
           </div>
         </div>
       </div>
