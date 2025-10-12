@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../context/SecureAuthContext";
 import PaymentsService from "../../services/PaymentsService";
+import { db } from "../../../firebaseConfig";
+import { doc, getDoc, collection, query, where, getDocs, limit } from "firebase/firestore";
 import { 
   BarChart3, 
   TrendingUp, 
@@ -56,8 +58,10 @@ export default function TutorStatistics() {
 
       // Filtrar pagos según materia/periodo
       const filteredPayments = filterPayments(paymentsData);
-  const calculatedStats = calculateStatistics(filteredPayments);
-      setStats(calculatedStats);
+      const calculatedStats = calculateStatistics(filteredPayments);
+      // Cargar calificación promedio desde colección user
+      const rating = await fetchTutorRating(user.email);
+      setStats({ ...calculatedStats, averageRating: Number(rating || 0) });
       
       // Generar historial de transacciones desde pagos
       const transactionHistory = generateTransactionHistory(filteredPayments);
@@ -67,6 +71,35 @@ export default function TutorStatistics() {
       console.error('Error loading statistics:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchTutorRating = async (email) => {
+    try {
+      const norm = (email || "").trim().toLowerCase();
+      if (!norm) return 0;
+      // Intento 1: doc ID = email
+      const ref = doc(db, "user", norm);
+      const snap = await getDoc(ref);
+      if (snap.exists()) {
+        const data = snap.data() || {};
+        const r = data.rating;
+        const n = typeof r === "string" ? parseFloat(r) : r;
+        return Number.isFinite(n) ? n : 0;
+      }
+      // Intento 2: buscar por campo 'mail'
+      const q = query(collection(db, "user"), where("mail", "==", norm), limit(1));
+      const qs = await getDocs(q);
+      if (!qs.empty) {
+        const data = qs.docs[0].data() || {};
+        const r = data.rating;
+        const n = typeof r === "string" ? parseFloat(r) : r;
+        return Number.isFinite(n) ? n : 0;
+      }
+      return 0;
+    } catch (e) {
+      console.warn("[statistics] fetchTutorRating error:", e);
+      return 0;
     }
   };
 
