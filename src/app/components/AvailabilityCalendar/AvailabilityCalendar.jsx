@@ -241,7 +241,7 @@ const AvailabilityCalendar = ({
         endDateTime: selectedSlotForBooking.endDateTime,
         location: selectedSlotForBooking.location || 'Virtual',
         notes: selectedSlotForBooking.description || '',
-        price: selectedSlotForBooking.price || 25000,
+        price: selectedSlotForBooking.price || 50000,
         parentAvailabilityId: selectedSlotForBooking.parentAvailabilityId || selectedSlotForBooking.id,
         slotIndex: selectedSlotForBooking.slotIndex || 0,
         slotId: selectedSlotForBooking.id,
@@ -462,7 +462,7 @@ const AvailabilityCalendar = ({
             scheduledDateTime: selectedSlotForBooking.startDateTime,
             endDateTime: selectedSlotForBooking.endDateTime,
             location: selectedSlotForBooking.location || 'Virtual',
-            price: selectedSlotForBooking.price || 25000,
+            price: selectedSlotForBooking.price || 50000,
             studentEmail: user?.email || '',
           }}
           onConfirm={handleBookingConfirm}

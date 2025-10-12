@@ -11,7 +11,7 @@ export default function TutorPagos() {
       fecha: "2024-01-15",
       concepto: "Tutoría Cálculo Diferencial",
       estudiante: "María García",
-      monto: 25000,
+      monto: 50000,
       estado: "completado",
       metodo: "transferencia"
     },

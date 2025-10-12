@@ -111,7 +111,7 @@ export class TutoringSessionService {
         scheduledDateTime: slot.startDateTime,
         endDateTime: slot.endDateTime,
         location: slot.location || 'Por definir',
-        price: 25000, // Precio por hora
+        price: 50000, // Precio por hora
         // Información específica del slot
         parentAvailabilityId: slot.parentAvailabilityId,
         slotIndex: slot.slotIndex,
@@ -1277,7 +1277,7 @@ export class TutoringSessionService {
       scheduledDateTime: null,
       endDateTime: null,
       location: 'Por definir',
-      price: 25000,
+      price: 50000,
       notes: '',
       parentAvailabilityId: null,
       slotIndex: null,

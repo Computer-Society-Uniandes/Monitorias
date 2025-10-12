@@ -13,7 +13,7 @@ export default function TutorMaterias() {
       categoria: "matematicas",
       estudiantes: 15,
       activa: true,
-      tarifa: 25000,
+      tarifa: 50000,
       demanda: "alta"
     },
     {
