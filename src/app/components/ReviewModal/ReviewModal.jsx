@@ -1,26 +1,53 @@
 "use client";
-
-import React, { useState } from "react";
-import { getFirestore, doc, updateDoc, arrayUnion } from "firebase/firestore";
+import React, { useState, useEffect } from "react";
+import {
+  getFirestore,
+  doc,
+  updateDoc,
+  arrayUnion,
+  runTransaction,
+  getDoc,
+} from "firebase/firestore";
 import { FaStar } from "react-icons/fa";
 import { z } from "zod";
 import "./ReviewModal.css";
 import SuccessModal from "./NotificationReview";
+import { useAuth } from "../../context/SecureAuthContext";
 
 const reviewSchema = z.object({
-  stars: z.number().min(1).max(5),
+  stars: z.number().min(1, "Debes seleccionar al menos 1 estrella").max(5),
   comment: z.string().max(500).optional().or(z.literal("")),
 });
 
-
-
-const ReviewModal = ({ session, onClose }) => {
+export default function ReviewModal({ session, onClose, currentUser = null }) {
   const [stars, setStars] = useState(0);
   const [comment, setComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [hasExistingReview, setHasExistingReview] = useState(false);
 
+  const { user: authUser } = useAuth ? useAuth() : { user: null };
+  const user = currentUser || authUser;
   const db = getFirestore();
+
+  useEffect(() => {
+    const checkExistingReview = async () => {
+      if (!user?.email || !session?.id) return;
+      const docRef = doc(db, "tutoring_sessions", session.id);
+      const snap = await getDoc(docRef);
+      if (snap.exists()) {
+        const data = snap.data();
+        const reviews = data.reviews || [];
+        const existing = reviews.find((r) => r.reviewerEmail === user.email);
+        if (existing) {
+          setHasExistingReview(true);
+          setStars(existing.stars || 0);
+          setComment(existing.comment || "");
+        }
+      }
+    };
+    checkExistingReview();
+  }, [user, session?.id]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -31,30 +58,56 @@ const ReviewModal = ({ session, onClose }) => {
       return;
     }
 
+    if (!user?.email) {
+      alert("Debes iniciar sesión para enviar una reseña.");
+      return;
+    }
+
     setIsSubmitting(true);
+    const docRef = doc(db, "tutoring_sessions", session.id);
+
+    const newReview = {
+      stars,
+      comment,
+      reviewerEmail: user.email, 
+      reviewerName: user.displayName || user.name || user.email || "Anonymous",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
 
     try {
-      const docRef = doc(db, "tutoring_sessions", session.id);
+      await runTransaction(db, async (transaction) => {
+        const sf = await transaction.get(docRef);
+        if (!sf.exists()) throw new Error("La sesión no existe");
 
-      await updateDoc(docRef, {
-        reviews: arrayUnion({
-          stars,
-          comment,
-          createdAt: new Date().toISOString(),
-        }),
+        const data = sf.data();
+        const reviews = Array.isArray(data.reviews) ? data.reviews : [];
+
+        
+        const existingIndex = reviews.findIndex(
+          (r) => r.reviewerEmail === user.email
+        );
+
+        if (existingIndex >= 0) {
+          const updatedReviews = reviews.map((r, idx) =>
+            idx === existingIndex
+              ? { ...r, ...newReview, updatedAt: new Date().toISOString() }
+              : r
+          );
+          transaction.update(docRef, { reviews: updatedReviews });
+        } else {
+          transaction.update(docRef, { reviews: arrayUnion(newReview) });
+        }
       });
 
       setShowSuccess(true);
-      setStars(0);
-      setComment("");
-
+      const SUCCESS_MS = 1900;
       setTimeout(() => {
         setShowSuccess(false);
         if (typeof onClose === "function") onClose();
-      }, 3000); 
-
-    } catch (error) {
-      console.error("Error al guardar la reseña:", error);
+      }, SUCCESS_MS);
+    } catch (err) {
+      console.error("Error al guardar/actualizar la reseña:", err);
       alert("Error al guardar la reseña");
     } finally {
       setIsSubmitting(false);
@@ -67,7 +120,9 @@ const ReviewModal = ({ session, onClose }) => {
     <>
       <div className="modal-overlay" onClick={onClose}>
         <div className="modal-content large" onClick={(e) => e.stopPropagation()}>
-          <h2 className="text-xl font-bold mb-4">Detalles de la tutoría</h2>
+          <h2 className="text-xl font-bold mb-4">
+            {hasExistingReview ? "Actualiza tu reseña" : "Deja una reseña"}
+          </h2>
 
           <p><strong>Materia:</strong> {session.subject}</p>
           <p><strong>Tutor:</strong> {session.tutorName}</p>
@@ -78,14 +133,9 @@ const ReviewModal = ({ session, onClose }) => {
               timeStyle: "short",
             })}
           </p>
-          <p>
-            <strong>Estado:</strong>{" "}
-            {session.endDateTime?.getTime() < new Date().getTime()
-              ? "Finalizada"
-              : "Pendiente"}
-          </p>
           <p><strong>Precio:</strong> ${session.price} COP</p>
 
+          {/* Formulario */}
           <form onSubmit={handleSubmit} className="mt-6 space-y-4">
             <div>
               <label className="block font-medium mb-1">Calificación</label>
@@ -96,22 +146,11 @@ const ReviewModal = ({ session, onClose }) => {
                     type="button"
                     onClick={() => setStars(n)}
                     className={`text-3xl ${n <= stars ? "text-yellow-500" : "text-gray-300"}`}
-                    aria-label={`Poner ${n} estrellas`}
-                    style={{
-                      background: "transparent",
-                      border: "none",
-                      cursor: "pointer",
-                      padding: 0,
-                      lineHeight: 1,
-                    }}
                   >
                     <FaStar />
                   </button>
                 ))}
               </div>
-              <p className="text-sm text-gray-500 mt-1">
-                {stars === 0 ? "Selecciona una calificación" : `Has puesto ${stars} estrella${stars > 1 ? "s" : ""}`}
-              </p>
             </div>
 
             <div>
@@ -122,7 +161,6 @@ const ReviewModal = ({ session, onClose }) => {
                 placeholder="Escribe tu opinión sobre la tutoría"
                 className="border p-2 w-full rounded h-32 resize-none"
                 maxLength={500}
-                style={{ minHeight: 120 }}
               />
             </div>
 
@@ -130,20 +168,18 @@ const ReviewModal = ({ session, onClose }) => {
               <button
                 type="submit"
                 disabled={stars === 0 || isSubmitting}
-                className={`px-4 py-2 rounded text-white font-semibold`}
+                className="px-4 py-2 rounded text-white font-semibold"
                 style={{
                   background: stars > 0 && !isSubmitting ? "#f97316" : "#9ca3af",
-                  cursor: stars > 0 && !isSubmitting ? "pointer" : "not-allowed",
                 }}
               >
-                {isSubmitting ? "Enviando..." : "Enviar reseña"}
+                {isSubmitting
+                  ? "Guardando..."
+                  : hasExistingReview
+                  ? "Actualizar reseña"
+                  : "Enviar reseña"}
               </button>
-              <button
-                type="button"
-                className="px-4 py-2 rounded border"
-                onClick={onClose}
-                style={{ background: "transparent", borderColor: "#d1d5db" }}
-              >
+              <button type="button" className="px-4 py-2 rounded border" onClick={onClose}>
                 Cerrar
               </button>
             </div>
@@ -151,10 +187,7 @@ const ReviewModal = ({ session, onClose }) => {
         </div>
       </div>
 
-      {}
       <SuccessModal open={showSuccess} onClose={() => setShowSuccess(false)} />
     </>
   );
-};
-
-export default ReviewModal;
+}
