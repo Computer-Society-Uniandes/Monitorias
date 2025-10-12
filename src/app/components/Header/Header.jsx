@@ -115,7 +115,7 @@ export default function Header() {
   const tutorNavItems = [
     { href: routes.TUTOR_INICIO, label: "Home", icon: Home },
     { href: routes.TUTOR_DISPONIBILIDAD, label: "Availability", icon: Calendar },
-    { href: "/tutor/statistics", label: "Statistics", icon: BarChart3 },
+    { href: routes.TUTOR_STATISTICS, label: "Statistics", icon: BarChart3 },
     { href: routes.TUTOR_MATERIAS, label: "Subjects", icon: BookOpen },
   ];
 
@@ -140,6 +140,20 @@ export default function Header() {
     } finally {
       router.push(routes.LOGIN);
     }
+  };
+
+  // Función para cambiar rol con refresh y redirección
+  const handleRoleChange = (newRole) => {
+    localStorage.setItem("rol", newRole);
+    window.dispatchEvent(
+      new CustomEvent("role-change", { detail: newRole })
+    );
+    
+    // Determinar la ruta de home según el rol
+    const homeRoute = newRole === "tutor" ? routes.TUTOR_INICIO : routes.HOME;
+    
+    // Refrescar la página y redirigir al home correspondiente
+    window.location.href = homeRoute;
   };
 
   return (
@@ -194,11 +208,7 @@ export default function Header() {
               className={`role-badge ${tutorMode ? "tutor" : "student"}`}
               onClick={() => {
                 const newRole = role === "student" ? "tutor" : "student";
-                setRole(newRole);
-                localStorage.setItem("rol", newRole);
-                window.dispatchEvent(
-                  new CustomEvent("role-change", { detail: newRole })
-                );
+                handleRoleChange(newRole);
               }}
             >
               {tutorMode ? "TUTOR" : "ESTUDIANTE"}

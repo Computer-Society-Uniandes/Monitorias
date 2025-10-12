@@ -19,6 +19,7 @@ const routes = {
     TUTOR_MIS_TUTORIAS: '/tutor/mis-tutorias',
     TUTOR_MATERIAS: '/tutor/materias',
     TUTOR_DISPONIBILIDAD: '/tutor/disponibilidad',
+    TUTOR_STATISTICS: '/tutor/statistics',
     TUTOR_PAGOS: '/tutor/pagos'
 };
 
