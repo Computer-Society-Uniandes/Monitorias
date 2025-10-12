@@ -74,6 +74,18 @@ export default function UnifiedAvailability() {
       
       // Load availability
       const availabilityResult = await AvailabilityService.getAvailabilityWithFallback();
+      console.log('Availability result:', {
+        slotsCount: availabilityResult.availabilitySlots?.length || 0,
+        connected: availabilityResult.connected,
+        source: availabilityResult.source,
+        slots: availabilityResult.availabilitySlots?.map(slot => ({
+          id: slot.id,
+          date: slot.date,
+          title: slot.title,
+          startTime: slot.startTime
+        }))
+      });
+      
       setAvailabilitySlots(availabilityResult.availabilitySlots);
       setIsConnected(availabilityResult.connected);
       setUsingMockData(availabilityResult.usingMockData || false);
@@ -96,6 +108,12 @@ export default function UnifiedAvailability() {
         setPendingSessions(fetchedPendingSessions);
         setNotifications(fetchedNotifications);
       }
+      else {
+        console.error('Error loading unified data: user.email is undefined');
+        setSessions([]);
+        setPendingSessions([]);
+        setNotifications([]);
+      }
       
       console.log('Unified data loaded successfully');
     } catch (error) {
@@ -103,7 +121,8 @@ export default function UnifiedAvailability() {
       setError(error.message);
       
       // Fallback to mock data
-      setAvailabilitySlots(AvailabilityService.getMockAvailability());
+      setAvailabilitySlots([]);
+
       setUsingMockData(true);
       setIsConnected(false);
     } finally {
@@ -123,9 +142,15 @@ export default function UnifiedAvailability() {
     }
 
     const selectedDateStr = selectedDate.toISOString().split('T')[0];
+    console.log(`Filtering slots for date: ${selectedDateStr}`);
+    console.log(`Total availability slots: ${availabilitySlots.length}`);
+    console.log('Available slots dates:', availabilitySlots.map(slot => ({ id: slot.id, date: slot.date, title: slot.title })));
+    
     const daySlots = availabilitySlots.filter(slot => {
       return slot.date === selectedDateStr;
     });
+
+    console.log(`Found ${daySlots.length} slots for ${selectedDateStr}:`, daySlots.map(slot => ({ id: slot.id, title: slot.title, startTime: slot.startTime })));
 
     // Ordenar por hora de inicio
     daySlots.sort((a, b) => {
@@ -461,33 +486,7 @@ export default function UnifiedAvailability() {
                   );
                 })}
               </div>
-            )}
-
-            {/* Notifications */}
-            <div className="notifications">
-              <h4>Recent Notifications</h4>
-              {notifications.length > 0 ? (
-                notifications.slice(0, 5).map((notification, index) => (
-                  <div 
-                    key={index} 
-                    className={`notification-item ${!notification.isRead ? 'unread' : ''}`}
-                    onClick={() => handleNotificationClick(notification)}
-                  >
-                    <Bell className="notification-icon" size={16} />
-                    <div className="notification-content">
-                      <p>{notification.message}</p>
-                      <small>{new Date(notification.createdAt).toLocaleDateString()}</small>
-                    </div>
-                    <ArrowRight className="notification-arrow" size={16} />
-                  </div>
-                ))
-              ) : (
-                <div className="no-notifications">
-                  <Bell size={24} />
-                  <p>No notifications</p>
-                </div>
-              )}
-            </div>
+            )}            
           </div>
         </div>
       </div>

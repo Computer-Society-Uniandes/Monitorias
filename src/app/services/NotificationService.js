@@ -13,7 +13,8 @@ import {
   limit,
   serverTimestamp,
   Timestamp,
-  addDoc
+  addDoc,
+  writeBatch
 } from 'firebase/firestore';
 
 export class NotificationService {
@@ -233,6 +234,176 @@ export class NotificationService {
     } catch (error) {
       console.error('Error getting student notifications:', error);
       throw new Error(`Error getting notifications: ${error.message}`);
+    }
+  }
+
+  // Create a notification when a session is accepted
+  static async createSessionAcceptedNotification(sessionData) {
+    try {
+      const notificationData = {
+        studentEmail: sessionData.studentEmail,
+        sessionId: sessionData.sessionId,
+        type: 'session_accepted',
+        title: 'Sesión Aprobada',
+        message: 'Tu solicitud de tutoría ha sido aprobada por el tutor',
+        isRead: false,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      };
+
+      const docRef = await addDoc(collection(db, this.COLLECTION_NAME), notificationData);
+      console.log('Session accepted notification created with ID:', docRef.id);
+      return { success: true, id: docRef.id };
+    } catch (error) {
+      console.error('Error creating session accepted notification:', error);
+      throw new Error(`Error creating notification: ${error.message}`);
+    }
+  }
+
+  // Create a notification when a session is rejected
+  static async createSessionRejectedNotification(sessionData) {
+    try {
+      const notificationData = {
+        studentEmail: sessionData.studentEmail,
+        sessionId: sessionData.sessionId,
+        type: 'session_rejected',
+        title: 'Sesión Rechazada',
+        message: `Tu solicitud de tutoría ha sido rechazada${sessionData.reason ? ': ' + sessionData.reason : ''}`,
+        isRead: false,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      };
+
+      const docRef = await addDoc(collection(db, this.COLLECTION_NAME), notificationData);
+      console.log('Session rejected notification created with ID:', docRef.id);
+      return { success: true, id: docRef.id };
+    } catch (error) {
+      console.error('Error creating session rejected notification:', error);
+      throw new Error(`Error creating notification: ${error.message}`);
+    }
+  }
+
+  // Get notifications for a student
+  static async getStudentNotifications(studentEmail, limitCount = 50) {
+    try {
+      const q = query(
+        collection(db, this.COLLECTION_NAME),
+        where('studentEmail', '==', studentEmail),
+        orderBy('createdAt', 'desc'),
+        limit(limitCount)
+      );
+
+      const querySnapshot = await getDocs(q);
+      const notifications = [];
+
+      querySnapshot.forEach((doc) => {
+        notifications.push({
+          id: doc.id,
+          ...doc.data(),
+          createdAt: doc.data().createdAt?.toDate(),
+          updatedAt: doc.data().updatedAt?.toDate(),
+          scheduledDateTime: doc.data().scheduledDateTime?.toDate(),
+        });
+      });
+
+      return notifications;
+    } catch (error) {
+      console.error('Error getting student notifications:', error);
+      throw new Error(`Error getting notifications: ${error.message}`);
+    }
+  }
+
+  // Create session reminder notification for students
+  static async createSessionReminderNotification(sessionData) {
+    try {
+      const notificationData = {
+        studentEmail: sessionData.studentEmail,
+        sessionId: sessionData.sessionId,
+        type: 'session_reminder',
+        title: 'Recordatorio de Sesión',
+        message: `Tu sesión de ${sessionData.subject} con ${sessionData.tutorName} es en 1 hora`,
+        isRead: false,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      };
+
+      const docRef = await addDoc(collection(db, this.COLLECTION_NAME), notificationData);
+      console.log('Session reminder notification created with ID:', docRef.id);
+      return { success: true, id: docRef.id };
+    } catch (error) {
+      console.error('Error creating session reminder notification:', error);
+      throw new Error(`Error creating notification: ${error.message}`);
+    }
+  }
+
+  // Create payment reminder notification for students
+  static async createPaymentReminderNotification(sessionData) {
+    try {
+      const notificationData = {
+        studentEmail: sessionData.studentEmail,
+        sessionId: sessionData.sessionId,
+        type: 'payment_reminder',
+        title: 'Recordatorio de Pago',
+        message: `Recuerda realizar el pago para tu sesión de ${sessionData.subject}`,
+        isRead: false,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      };
+
+      const docRef = await addDoc(collection(db, this.COLLECTION_NAME), notificationData);
+      console.log('Payment reminder notification created with ID:', docRef.id);
+      return { success: true, id: docRef.id };
+    } catch (error) {
+      console.error('Error creating payment reminder notification:', error);
+      throw new Error(`Error creating notification: ${error.message}`);
+    }
+  }
+
+  // Mark all notifications as read for a specific user
+  static async markAllAsRead(userEmail, userType = 'tutor') {
+    try {
+      let queryRef;
+      
+      if (userType === 'tutor') {
+        queryRef = query(
+          collection(db, this.COLLECTION_NAME),
+          where('tutorEmail', '==', userEmail),
+          where('isRead', '==', false)
+        );
+      } else {
+        queryRef = query(
+          collection(db, this.COLLECTION_NAME),
+          where('studentEmail', '==', userEmail),
+          where('isRead', '==', false)
+        );
+      }
+
+      const snapshot = await getDocs(queryRef);
+      
+      if (snapshot.empty) {
+        return { success: true, message: 'No unread notifications found' };
+      }
+
+      // Batch update all unread notifications
+      const batch = writeBatch(db);
+      snapshot.docs.forEach((doc) => {
+        batch.update(doc.ref, {
+          isRead: true,
+          updatedAt: serverTimestamp()
+        });
+      });
+
+      await batch.commit();
+      
+      console.log(`Marked ${snapshot.docs.length} notifications as read for ${userType}: ${userEmail}`);
+      return { 
+        success: true, 
+        message: `Marked ${snapshot.docs.length} notifications as read`,
+        count: snapshot.docs.length
+      };
+    } catch (error) {
+      console.error('Error marking all notifications as read:', error);
+      throw new Error(`Error marking notifications as read: ${error.message}`);
     }
   }
 }

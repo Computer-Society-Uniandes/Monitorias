@@ -7,10 +7,11 @@ import './AvailabilityCalendar.css';
 import { AvailabilityService } from 'app/app/services/AvailabilityService';
 import { SlotService } from 'app/app/services/SlotService';
 import { TutoringSessionService } from 'app/app/services/TutoringSessionService';
-import { PaymentService } from 'app/app/services/PaymentService';
+import { GoogleDriveService } from 'app/app/services/GoogleDriveService';
 import { useAuth } from 'app/app/context/SecureAuthContext';
 import { TutorSearchService } from 'app/app/services/TutorSearchService';
 import SessionConfirmationModal from '../SessionConfirmationModal/SessionConfirmationModal';
+import SessionBookedModal from '../SessionBookedModal/SessionBookedModal';
 
 const AvailabilityCalendar = ({ 
   tutorId = null,        // Para modo individual
@@ -33,6 +34,10 @@ const AvailabilityCalendar = ({
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [selectedSlotForBooking, setSelectedSlotForBooking] = useState(null);
   const [confirmLoading, setConfirmLoading] = useState(false);
+  
+  // Estados para el modal de sesión reservada
+  const [showBookedModal, setShowBookedModal] = useState(false);
+  const [bookedSessionData, setBookedSessionData] = useState(null);
 
   useEffect(() => {
     if (selectedDate) {
@@ -258,26 +263,28 @@ const AvailabilityCalendar = ({
       
       console.log('✅ Sesión creada exitosamente:', createdSession);
 
-      // 2. Subir comprobante de pago usando el sessionId
+      // 2. Subir comprobante de pago a Google Drive usando el sessionId
       if (proofFile && createdSession.id) {
-        console.log('📤 Subiendo comprobante de pago...');
-        const paymentProofResult = await PaymentService.uploadPaymentProofFile(createdSession.id, proofFile);
+        console.log('📤 Subiendo comprobante de pago a Google Drive...');
+        const paymentProofResult = await GoogleDriveService.uploadPaymentProofFile(createdSession.id, proofFile);
         
         if (paymentProofResult.success) {
-          console.log('✅ Comprobante subido:', paymentProofResult);
+          console.log('✅ Comprobante subido a Google Drive:', paymentProofResult);
           
           // 3. Actualizar la sesión con la URL del comprobante
           await TutoringSessionService.updateTutoringSession(createdSession.id, {
             paymentProofUrl: paymentProofResult.url,
-            paymentProofPath: paymentProofResult.path,
+            paymentProofFileId: paymentProofResult.fileId,
             paymentProofFileName: paymentProofResult.fileName,
+            paymentProofThumbnail: paymentProofResult.thumbnailLink,
             paymentStatus: 'en_verificación'
           });
           
-          console.log('✅ Sesión actualizada con comprobante de pago');
+          console.log('✅ Sesión actualizada con comprobante de pago de Google Drive');
         } else {
           console.error('⚠️ Error subiendo comprobante:', paymentProofResult.error);
           // No fallar la reserva si el comprobante no se sube
+          alert(`⚠️ La reserva se creó pero hubo un problema al subir el comprobante: ${paymentProofResult.error}\n\nPuedes enviar el comprobante después.`);
         }
       }
 
@@ -285,15 +292,16 @@ const AvailabilityCalendar = ({
       setShowConfirmationModal(false);
       setSelectedSlotForBooking(null);
       
-      alert(`✅ ¡Reserva exitosa!
-      
-Tu solicitud de tutoría ha sido enviada al tutor.
-      
-📧 Recibirás un correo de confirmación a: ${studentEmail}
-⏰ Fecha: ${new Date(sessionData.scheduledDateTime).toLocaleString('es-ES')}
-📚 Materia: ${sessionData.subject}
-      
-El tutor revisará tu solicitud y recibirás el link de Google Meet una vez aprobada.`);
+      // Mostrar modal de confirmación con datos de la sesión
+      setBookedSessionData({
+        tutorName: sessionData.tutorName || selectedSlotForBooking.tutorName || 'Tutor',
+        subject: sessionData.subject,
+        scheduledDateTime: sessionData.scheduledDateTime,
+        endDateTime: sessionData.endDateTime,
+        location: sessionData.location,
+        studentEmail: studentEmail
+      });
+      setShowBookedModal(true);
 
       // 5. Recargar la disponibilidad
       await loadAvailabilityData();
@@ -454,6 +462,18 @@ El tutor revisará tu solicitud y recibirás el link de Google Meet una vez apro
           }}
           onConfirm={handleBookingConfirm}
           confirmLoading={confirmLoading}
+        />
+      )}
+
+      {/* Modal de sesión reservada */}
+      {showBookedModal && bookedSessionData && (
+        <SessionBookedModal
+          isOpen={showBookedModal}
+          onClose={() => {
+            setShowBookedModal(false);
+            setBookedSessionData(null);
+          }}
+          sessionData={bookedSessionData}
         />
       )}
     </div>

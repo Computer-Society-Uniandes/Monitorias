@@ -1,0 +1,300 @@
+"use client";
+
+import React, { useState, useEffect, useRef } from "react";
+import {
+  Bell,
+  Clock,
+  CheckCircle,
+  XCircle,
+  Calendar,
+  CreditCard,
+  MessageSquare,
+  AlertCircle,
+  User
+} from "lucide-react";
+import { NotificationService } from "../../services/NotificationService";
+import { TutoringSessionService } from "../../services/TutoringSessionService";
+import { useAuth } from "../../context/SecureAuthContext";
+import SessionBookedModal from "../SessionBookedModal/SessionBookedModal";
+import "./NotificationDropdown.css";
+import { useRouter } from "next/navigation";
+import routes from "../../../routes";
+
+export default function StudentNotificationDropdown() {
+  const { user } = useAuth();
+  const [isOpen, setIsOpen] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [showSessionModal, setShowSessionModal] = useState(false);
+  const [selectedSession, setSelectedSession] = useState(null);
+  const dropdownRef = useRef(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (user.isLoggedIn) {
+      loadNotifications();
+    }
+  }, [user.isLoggedIn]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const loadNotifications = async () => {
+    try {
+      setLoading(true);
+      const notificationList = await NotificationService.getStudentNotifications(user.email);
+      setNotifications(notificationList);
+      const unread = notificationList.filter(n => !n.isRead).length;
+      setUnreadCount(unread);
+    } catch (error) {
+      console.error('Error loading notifications:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const markAsRead = async (notificationId) => {
+    try {
+      await NotificationService.markAsRead(notificationId);
+      setNotifications(prev => 
+        prev.map(n => n.id === notificationId ? { ...n, isRead: true } : n)
+      );
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+    }
+  };
+
+  const getConfirmedSessionData = async (sessionId) => {
+    try {
+      const confirmedSessions = await TutoringSessionService.getStudentSessions(user.email);
+      const session = confirmedSessions.find(s => s.id === sessionId);
+      return session;
+    } catch (error) {
+      console.error('Error getting confirmed session data:', error);
+      return null;
+    }
+  };
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      await NotificationService.markAllAsRead(user.email, 'student');
+      // Reload notifications to update the UI
+      loadNotifications();
+    } catch (error) {
+      console.error('Error marking all notifications as read:', error);
+    }
+  };
+
+  const handleNotificationClick = async (notification) => {
+    if (!notification.isRead) {
+      markAsRead(notification.id);
+    }
+
+    switch (notification.type) {
+      case 'session_accepted':
+        // Get session data and show session details modal
+        const sessionData = await getConfirmedSessionData(notification.sessionId);
+        if (sessionData) {
+          setSelectedSession(sessionData);
+          setShowSessionModal(true);
+          setIsOpen(false); // Close notification dropdown
+        }
+        break;
+      case 'session_rejected':
+        // Navigate to available slots or show alternative options
+        router.push(routes.SEARCH_TUTORS);
+        setIsOpen(false);
+        break;
+      case 'session_cancelled':
+        // Navigate to available slots
+        router.push(routes.SEARCH_TUTORS);
+        setIsOpen(false);
+        break;
+      case 'payment_reminder':
+        // Navigate to payment page
+        router.push(routes.HISTORY);
+        setIsOpen(false);
+        break;
+      case 'tutor_message':
+        // Navigate to messages or show message details
+        router.push(routes.HISTORY);
+        setIsOpen(false);
+        break;
+      default:
+        // Default action - close dropdown
+        setIsOpen(false);
+    }
+  };
+
+  const getNotificationIcon = (type) => {
+    switch (type) {
+      case 'session_accepted':
+        return <CheckCircle size={16} className="text-green-600" />;
+      case 'session_rejected':
+        return <XCircle size={16} className="text-red-600" />;
+      case 'session_cancelled':
+        return <AlertCircle size={16} className="text-orange-600" />;
+      case 'payment_reminder':
+        return <CreditCard size={16} className="text-blue-600" />;
+      case 'tutor_message':
+        return <MessageSquare size={16} className="text-purple-600" />;
+      default:
+        return <Bell size={16} className="text-gray-600" />;
+    }
+  };
+
+  const getNotificationTypeLabel = (type) => {
+    switch (type) {
+      case 'session_accepted':
+        return 'Sesión Aceptada';
+      case 'session_rejected':
+        return 'Sesión Rechazada';
+      case 'session_cancelled':
+        return 'Sesión Cancelada';
+      case 'payment_reminder':
+        return 'Recordatorio de Pago';
+      case 'tutor_message':
+        return 'Mensaje del Tutor';
+      default:
+        return 'Notificación';
+    }
+  };
+
+  const formatTimeAgo = (timestamp) => {
+    if (!timestamp) return '';
+    const now = new Date();
+    const notificationTime = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    const diffInMinutes = Math.floor((now - notificationTime) / (1000 * 60));
+    
+    if (diffInMinutes < 1) return 'Hace un momento';
+    if (diffInMinutes < 60) return `Hace ${diffInMinutes} min`;
+    if (diffInMinutes < 1440) return `Hace ${Math.floor(diffInMinutes / 60)} h`;
+    return `Hace ${Math.floor(diffInMinutes / 1440)} d`;
+  };
+
+  return (
+    <div className="notification-dropdown-container" ref={dropdownRef}>
+      <button
+        className="notification-btn"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <Bell size={20} />
+        {unreadCount > 0 && (
+          <span className="notification-badge">{unreadCount}</span>
+        )}
+      </button>
+
+      {isOpen && (
+        <div className="notification-dropdown">
+          <div className="notification-header">
+            <h3>Notificaciones</h3>
+            <div className="notification-actions">
+              {unreadCount > 0 && (
+                <button
+                  className="mark-all-read-btn"
+                  onClick={handleMarkAllAsRead}
+                  title="Marcar todas como leídas"
+                >
+                  ✓
+                </button>
+              )}
+              <button
+                className="close-dropdown-btn"
+                onClick={() => setIsOpen(false)}
+              >
+                ×
+              </button>
+            </div>
+          </div>
+
+          <div className="notification-list">
+            {loading ? (
+              <div className="loading-notifications">
+                <div className="loading-spinner"></div>
+                <span>Cargando notificaciones...</span>
+              </div>
+            ) : notifications.length === 0 ? (
+              <div className="no-notifications">
+                <Bell size={32} className="text-gray-400" />
+                <p>No tienes notificaciones</p>
+              </div>
+            ) : (
+              notifications.map((notification) => (
+                <div
+                  key={notification.id}
+                  className={`notification-item ${!notification.isRead ? 'unread' : ''}`}
+                  onClick={() => handleNotificationClick(notification)}
+                >
+                  <div className="notification-icon">
+                    {getNotificationIcon(notification.type)}
+                  </div>
+                  <div className="notification-content">
+                    <div className="notification-header-item">
+                      <span className="notification-type">
+                        {getNotificationTypeLabel(notification.type)}
+                      </span>
+                      <span className="notification-time">
+                        {formatTimeAgo(notification.timestamp)}
+                      </span>
+                    </div>
+                    <p className="notification-message">
+                      {notification.message}
+                    </p>
+                  </div>
+                  {!notification.isRead && <div className="unread-indicator"></div>}
+                </div>
+              ))
+            )}
+          </div>
+
+          {notifications.length > 0 && (
+            <div className="notification-footer">
+              <button
+                className="view-all-btn"
+                onClick={() => {
+                  router.push(routes.HISTORY);
+                  setIsOpen(false);
+                }}
+              >
+                Ver todas las notificaciones
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Session Details Modal for Students */}
+      {showSessionModal && selectedSession && (
+        <SessionBookedModal
+          isOpen={showSessionModal}
+          onClose={() => {
+            setShowSessionModal(false);
+            setSelectedSession(null);
+          }}
+          sessionData={{
+            tutorName: selectedSession.tutorName || 'Tutor',
+            studentName: selectedSession.studentName || selectedSession.studentEmail,
+            studentEmail: selectedSession.studentEmail,
+            subject: selectedSession.subject,
+            scheduledDateTime: selectedSession.scheduledDateTime,
+            endDateTime: selectedSession.endDateTime,
+            location: selectedSession.location
+          }}
+          userType="student"
+        />
+      )}
+    </div>
+  );
+}
