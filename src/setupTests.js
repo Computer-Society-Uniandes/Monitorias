@@ -89,15 +89,15 @@ jest.mock('./app/services/CalicoCalendarService', () => ({
 
 // Mock authentication context
 jest.mock('./app/context/SecureAuthContext', () => ({
-	useAuth: () => ({
+	useAuth: jest.fn(() => ({
 		user: {
 			isLoggedIn: true,
 			user: {
-				email: 'test@example.com',
-				name: 'Test User'
+				email: 'tutor@example.com',
+				name: 'Test Tutor'
 			}
 		}
-	})
+	}))
 }));
 
 // Mock global fetch
