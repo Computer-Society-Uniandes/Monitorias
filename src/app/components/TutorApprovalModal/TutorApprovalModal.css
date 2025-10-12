@@ -14,12 +14,13 @@
 
 .tutor-approval-modal {
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  max-width: 500px;
+  border-radius: 16px;
+  box-shadow: 0 25px 50px -12px rgba(255, 122, 0, 0.25), 0 0 0 1px rgba(255, 122, 0, 0.1);
+  max-width: 520px;
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
+  border: 2px solid rgba(255, 122, 0, 0.2);
 }
 
 .modal-header {
@@ -27,15 +28,36 @@
   align-items: center;
   justify-content: space-between;
   padding: 24px 24px 0 24px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 2px solid rgba(255, 122, 0, 0.2);
   margin-bottom: 24px;
+  background: transparent !important;
+  border-radius: 16px 16px 0 0;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #ff7a00, #ff9500);
+  border-radius: 12px;
+  color: white;
+  box-shadow: 0 4px 12px rgba(255, 122, 0, 0.3);
 }
 
 .modal-header h2 {
   margin: 0;
   font-size: 1.5rem;
-  font-weight: 600;
-  color: #111827;
+  font-weight: 700;
+  color: #ff7a00;
+  text-shadow: 0 1px 2px rgba(255, 122, 0, 0.1);
 }
 
 .close-btn {
@@ -50,7 +72,7 @@
 
 .close-btn:hover {
   background-color: #f3f4f6;
-  color: #374151;
+  color: #837751;
 }
 
 .close-btn:disabled {
@@ -60,6 +82,64 @@
 
 .modal-content {
   padding: 0 24px 24px 24px;
+}
+
+.announcement-banner {
+  display: flex;
+  gap: 16px;
+  padding: 20px;
+  background: linear-gradient(135deg, rgba(255, 149, 0, 0.1), rgba(255, 122, 0, 0.1));
+  border: 2px solid rgba(255, 149, 0, 0.3);
+  border-radius: 12px;
+  margin-bottom: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.announcement-banner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #ff7a00, #ff9500, #ff7a00);
+  background-size: 200% 100%;
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.announcement-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #ff7a00, #ff9500);
+  border-radius: 12px;
+  color: white;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(255, 122, 0, 0.3);
+}
+
+.announcement-content h3 {
+  margin: 0 0 8px 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #ff7a00;
+  text-shadow: 0 1px 2px rgba(255, 122, 0, 0.1);
+}
+
+.announcement-content p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #8b4513;
+  line-height: 1.5;
+  font-weight: 500;
 }
 
 .error-message {
@@ -89,9 +169,17 @@
 }
 
 .info-icon {
-  color: #6b7280;
+  color: #ff7a00;
   margin-top: 2px;
   flex-shrink: 0;
+  background: rgba(255, 122, 0, 0.1);
+  padding: 6px;
+  border-radius: 8px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .info-content {
@@ -147,23 +235,34 @@
 }
 
 .decline-btn {
-  background-color: #f3f4f6;
-  color: #374151;
-  border: 1px solid #d1d5db;
+  background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+  color: #6b7280;
+  border: 2px solid #d1d5db;
+  font-weight: 600;
+  transition: all 0.3s ease;
 }
 
 .decline-btn:hover:not(:disabled) {
-  background-color: #e5e7eb;
-  border-color: #9ca3af;
+  background: linear-gradient(135deg, #fee2e2, #fecaca);
+  border-color: #f87171;
+  color: #dc2626;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(248, 113, 113, 0.2);
 }
 
 .accept-btn {
-  background-color: #059669;
+  background: linear-gradient(135deg, #ff7a00, #ff9500);
   color: white;
+  border: 2px solid transparent;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(255, 122, 0, 0.3);
+  transition: all 0.3s ease;
 }
 
 .accept-btn:hover:not(:disabled) {
-  background-color: #047857;
+  background: linear-gradient(135deg, #e66a00, #e68500);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(255, 122, 0, 0.4);
 }
 
 .decline-btn:disabled, .accept-btn:disabled {
