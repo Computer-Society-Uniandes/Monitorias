@@ -36,7 +36,7 @@ jest.mock('firebase/firestore', () => ({
 }));
 
 import TutorStatistics from '../src/app/tutor/statistics/page.jsx';
-import PaymentsService from '../src/app/services/PaymentsService';
+import PaymentsService from '../src/app/services/PaymentsService.js';
 
 describe('TutorStatistics page', () => {
   test('renders statistics layout and fetches tutor payments', async () => {
