@@ -74,6 +74,18 @@ export default function UnifiedAvailability() {
       
       // Load availability
       const availabilityResult = await AvailabilityService.getAvailabilityWithFallback();
+      console.log('Availability result:', {
+        slotsCount: availabilityResult.availabilitySlots?.length || 0,
+        connected: availabilityResult.connected,
+        source: availabilityResult.source,
+        slots: availabilityResult.availabilitySlots?.map(slot => ({
+          id: slot.id,
+          date: slot.date,
+          title: slot.title,
+          startTime: slot.startTime
+        }))
+      });
+      
       setAvailabilitySlots(availabilityResult.availabilitySlots);
       setIsConnected(availabilityResult.connected);
       setUsingMockData(availabilityResult.usingMockData || false);
@@ -96,6 +108,12 @@ export default function UnifiedAvailability() {
         setPendingSessions(fetchedPendingSessions);
         setNotifications(fetchedNotifications);
       }
+      else {
+        console.error('Error loading unified data: user.email is undefined');
+        setSessions([]);
+        setPendingSessions([]);
+        setNotifications([]);
+      }
       
       console.log('Unified data loaded successfully');
     } catch (error) {
@@ -103,7 +121,8 @@ export default function UnifiedAvailability() {
       setError(error.message);
       
       // Fallback to mock data
-      setAvailabilitySlots(AvailabilityService.getMockAvailability());
+      setAvailabilitySlots([]);
+
       setUsingMockData(true);
       setIsConnected(false);
     } finally {
@@ -123,9 +142,15 @@ export default function UnifiedAvailability() {
     }
 
     const selectedDateStr = selectedDate.toISOString().split('T')[0];
+    console.log(`Filtering slots for date: ${selectedDateStr}`);
+    console.log(`Total availability slots: ${availabilitySlots.length}`);
+    console.log('Available slots dates:', availabilitySlots.map(slot => ({ id: slot.id, date: slot.date, title: slot.title })));
+    
     const daySlots = availabilitySlots.filter(slot => {
       return slot.date === selectedDateStr;
     });
+
+    console.log(`Found ${daySlots.length} slots for ${selectedDateStr}:`, daySlots.map(slot => ({ id: slot.id, title: slot.title, startTime: slot.startTime })));
 
     // Ordenar por hora de inicio
     daySlots.sort((a, b) => {
