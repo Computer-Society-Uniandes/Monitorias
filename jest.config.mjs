@@ -15,7 +15,7 @@ const customJestConfig = {
     '\\.(gif|ttf|eot|svg|png|jpg|jpeg|webp)$': '<rootDir>/test/__mocks__/fileMock.js',
     '^@/(.*)$': '<rootDir>/src/$1',
   },
-  testMatch: ['**/__tests__/**/*.[jt]s?(x)'],
+  testMatch: ['**/__tests__/**/*.[jt]s?(x)', '**/tests/**/*.[jt]s?(x)'],
   testPathIgnorePatterns: ['/node_modules/', '/.next/'],
   testTimeout: 15000,
 };
