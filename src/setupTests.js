@@ -92,10 +92,8 @@ jest.mock('./app/context/SecureAuthContext', () => ({
 	useAuth: () => ({
 		user: {
 			isLoggedIn: true,
-			user: {
-				email: 'test@example.com',
-				name: 'Test User'
-			}
+			email: 'test@example.com',
+			name: 'Test User'
 		}
 	})
 }));
