@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { AvailabilityService } from "../../services/AvailabilityService";
 import { SlotService } from "../../services/SlotService";
 import "./RescheduleSessionModal.css";
+import { useI18n } from "../../../lib/i18n";
 
 export default function RescheduleSessionModal({ 
   isOpen, 
@@ -11,6 +12,7 @@ export default function RescheduleSessionModal({
   session, 
   onRescheduleComplete 
 }) {
+  const { t, locale, formatDate: i18nFormatDate, formatDateTime: i18nFormatDateTime } = useI18n();
   const [slots, setSlots] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState(null);
@@ -64,12 +66,12 @@ export default function RescheduleSessionModal({
 
   const handleReschedule = async () => {
     if (!selectedSlot) {
-      alert('Por favor selecciona un nuevo horario');
+      alert(t('rescheduleModal.alerts.selectSlot'));
       return;
     }
 
     if (!reason.trim()) {
-      alert('Por favor proporciona un motivo para la reprogramación');
+      alert(t('rescheduleModal.alerts.provideReason'));
       return;
     }
 
@@ -92,10 +94,10 @@ export default function RescheduleSessionModal({
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.message || result.error || 'Error al reprogramar');
+        throw new Error(result.message || result.error || t('rescheduleModal.alerts.error'));
       }
 
-      alert('✅ Sesión reprogramada exitosamente');
+      alert(t('rescheduleModal.alerts.success'));
       
       if (onRescheduleComplete) {
         onRescheduleComplete();
@@ -117,7 +119,8 @@ export default function RescheduleSessionModal({
   const formatDate = (dateTime) => {
     if (!dateTime) return '';
     const date = new Date(dateTime);
-    return date.toLocaleDateString('es-ES', {
+    const localeStr = locale === 'en' ? 'en-US' : 'es-ES';
+    return date.toLocaleDateString(localeStr, {
       weekday: 'long',
       month: 'long',
       day: 'numeric',
@@ -128,7 +131,8 @@ export default function RescheduleSessionModal({
   const formatTime = (dateTime) => {
     if (!dateTime) return '';
     const date = new Date(dateTime);
-    return date.toLocaleTimeString('es-ES', { 
+    const localeStr = locale === 'en' ? 'en-US' : 'es-ES';
+    return date.toLocaleTimeString(localeStr, { 
       hour: '2-digit', 
       minute: '2-digit' 
     });
@@ -158,7 +162,7 @@ export default function RescheduleSessionModal({
               </svg>
             </button>
             <div>
-              <h2 className="text-lg font-semibold text-gray-900">Reprogramar Sesión</h2>
+              <h2 className="text-lg font-semibold text-gray-900">{t('rescheduleModal.title')}</h2>
               <p className="text-sm text-gray-500">{session.subject}</p>
             </div>
           </div>
@@ -169,25 +173,25 @@ export default function RescheduleSessionModal({
           {/* Current Session Info */}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <p className="text-sm font-semibold text-blue-800 mb-1">
-              📅 Horario Actual
+              📅 {t('rescheduleModal.currentSchedule')}
             </p>
             <p className="text-sm text-blue-700">
               {currentDateTime}
             </p>
             <p className="text-xs text-blue-600 mt-1">
-              Tutor: {session.tutorName || session.tutorEmail}
+              {t('rescheduleModal.tutorLabel')} {session.tutorName || session.tutorEmail}
             </p>
           </div>
 
           {/* Reason Input */}
           <div>
             <label className="block text-sm font-semibold text-gray-900 mb-2">
-              Motivo de la reprogramación *
+              {t('rescheduleModal.reasonLabel')}
             </label>
             <textarea
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              placeholder="Ej: Tengo otro compromiso a esa hora, necesito más tiempo para preparar..."
+              placeholder={t('rescheduleModal.reasonPlaceholder')}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#FF8C00]"
               rows="3"
             />
@@ -203,18 +207,18 @@ export default function RescheduleSessionModal({
           {/* Available Slots */}
           <div>
             <h3 className="text-sm font-semibold text-gray-900 mb-3">
-              Selecciona un nuevo horario
+              {t('rescheduleModal.selectNewTime')}
             </h3>
 
             {loading ? (
               <div className="text-center py-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#FF8C00] mx-auto"></div>
-                <p className="text-sm text-gray-500 mt-2">Cargando disponibilidad...</p>
+                <p className="text-sm text-gray-500 mt-2">{t('rescheduleModal.loading')}</p>
               </div>
             ) : Object.keys(groupedSlots).length === 0 ? (
               <div className="text-center py-8 bg-gray-50 rounded-lg">
-                <p className="text-sm text-gray-600">📭 No hay horarios disponibles</p>
-                <p className="text-xs text-gray-500 mt-1">El tutor no tiene disponibilidad en las próximas 2 semanas</p>
+                <p className="text-sm text-gray-600">📭 {t('rescheduleModal.noSlotsTitle')}</p>
+                <p className="text-xs text-gray-500 mt-1">{t('rescheduleModal.noSlotsText')}</p>
               </div>
             ) : (
               <div className="space-y-4 max-h-[400px] overflow-y-auto">
@@ -222,14 +226,17 @@ export default function RescheduleSessionModal({
                   <div key={dateKey} className="border border-gray-200 rounded-lg overflow-hidden">
                     <div className="bg-gray-100 px-4 py-2 border-b border-gray-200">
                       <p className="text-sm font-semibold text-gray-900">
-                        {dayData.date.toLocaleDateString('es-ES', {
+                        {dayData.date.toLocaleDateString(locale === 'en' ? 'en-US' : 'es-ES', {
                           weekday: 'long',
                           month: 'long',
                           day: 'numeric'
                         })}
                       </p>
                       <p className="text-xs text-gray-600">
-                        {dayData.slots.length} horario{dayData.slots.length !== 1 ? 's' : ''} disponible{dayData.slots.length !== 1 ? 's' : ''}
+                        {dayData.slots.length === 1 
+                          ? t('rescheduleModal.slotsAvailable', { count: dayData.slots.length })
+                          : t('rescheduleModal.slotsAvailablePlural', { count: dayData.slots.length })
+                        }
                       </p>
                     </div>
                     
@@ -281,7 +288,7 @@ export default function RescheduleSessionModal({
             className="w-full py-3 bg-[#FF8C00] text-white font-semibold rounded-lg hover:bg-[#E67E00] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={!selectedSlot || !reason.trim() || rescheduling}
           >
-            {rescheduling ? 'Reprogramando...' : 'Confirmar Reprogramación'}
+            {rescheduling ? t('rescheduleModal.confirmingButton') : t('rescheduleModal.confirmButton')}
           </button>
 
           <button
@@ -289,7 +296,7 @@ export default function RescheduleSessionModal({
             className="w-full py-3 bg-white text-gray-700 font-semibold rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
             disabled={rescheduling}
           >
-            Cancelar
+            {t('rescheduleModal.cancelButton')}
           </button>
         </div>
       </div>

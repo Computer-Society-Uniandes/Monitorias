@@ -397,5 +397,27 @@
       "open": "Abrir menú",
       "close": "Cerrar menú"
     }
+  },
+  "rescheduleModal": {
+    "title": "Reprogramar Sesión",
+    "currentSchedule": "Horario Actual",
+    "tutorLabel": "Tutor:",
+    "reasonLabel": "Motivo de la reprogramación *",
+    "reasonPlaceholder": "Ej: Tengo otro compromiso a esa hora, necesito más tiempo para preparar...",
+    "selectNewTime": "Selecciona un nuevo horario",
+    "loading": "Cargando disponibilidad...",
+    "noSlotsTitle": "No hay horarios disponibles",
+    "noSlotsText": "El tutor no tiene disponibilidad en las próximas 2 semanas",
+    "slotsAvailable": "{count} horario disponible",
+    "slotsAvailablePlural": "{count} horarios disponibles",
+    "confirmButton": "Confirmar Reprogramación",
+    "confirmingButton": "Reprogramando...",
+    "cancelButton": "Cancelar",
+    "alerts": {
+      "selectSlot": "Por favor selecciona un nuevo horario",
+      "provideReason": "Por favor proporciona un motivo para la reprogramación",
+      "success": "✅ Sesión reprogramada exitosamente",
+      "error": "Error al reprogramar"
+    }
   }
 }

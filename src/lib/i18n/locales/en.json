@@ -397,5 +397,27 @@
       "open": "Open menu",
       "close": "Close menu"
     }
+  },
+  "rescheduleModal": {
+    "title": "Reschedule Session",
+    "currentSchedule": "Current Schedule",
+    "tutorLabel": "Tutor:",
+    "reasonLabel": "Reason for rescheduling *",
+    "reasonPlaceholder": "E.g.: I have another commitment at that time, I need more time to prepare...",
+    "selectNewTime": "Select a new time",
+    "loading": "Loading availability...",
+    "noSlotsTitle": "No available times",
+    "noSlotsText": "The tutor has no availability in the next 2 weeks",
+    "slotsAvailable": "{count} time slot available",
+    "slotsAvailablePlural": "{count} time slots available",
+    "confirmButton": "Confirm Reschedule",
+    "confirmingButton": "Rescheduling...",
+    "cancelButton": "Cancel",
+    "alerts": {
+      "selectSlot": "Please select a new time",
+      "provideReason": "Please provide a reason for the rescheduling",
+      "success": "✅ Session successfully rescheduled",
+      "error": "Error rescheduling"
+    }
   }
 }
