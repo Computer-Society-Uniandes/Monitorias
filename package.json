@@ -28,7 +28,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "firebase-init": "npm install firebase && node scripts/firebase-init-data.js"
+    "firebase-init": "npm install firebase && node scripts/firebase-init-data.js",
+    "test-gdrive": "node scripts/test-google-drive.js",
+    "setup-admin-oauth": "node scripts/setup-admin-oauth.js"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
