@@ -258,9 +258,17 @@ export default function UnifiedAvailability() {
         }),
       });
 
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      if (!response.json) {
+        throw new Error('Invalid response format');
+      }
+
       const result = await response.json();
 
-      if (response.ok && result.success) {
+      if (result.success) {
         alert(`✅ ${t('tutorAvailability.syncSuccess')}\n\n- ${t('tutorAvailability.eventsProcessed')}: ${result.syncResults?.totalProcessed || 0}\n- ${t('tutorAvailability.newEvents')}: ${result.syncResults?.created || 0}\n- ${t('tutorAvailability.updatedEvents')}: ${result.syncResults?.updated || 0}`);
         
         // Recargar los datos para mostrar los cambios
