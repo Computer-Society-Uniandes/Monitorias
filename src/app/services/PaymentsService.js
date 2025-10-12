@@ -175,6 +175,83 @@ export class PaymentsService {
       return [];
     }
   }
+
+  /**
+   * Obtiene pagos por email del tutor autenticado.
+   * @param {string} tutorEmail
+   * @param {{ startDate?: Date|null, endDate?: Date|null }} options
+   * @returns {Promise<Array>} Lista de pagos normalizados
+   */
+  static async getPaymentsByTutor(tutorEmail, options = {}) {
+    if (!tutorEmail) return [];
+    const { startDate = null, endDate = null } = options;
+    const normalizedEmail = String(tutorEmail).trim().toLowerCase();
+
+    try {
+      console.log('[PaymentsService] getPaymentsByTutor for:', normalizedEmail);
+      let snapshot = null;
+      try {
+        const q = query(
+          collection(db, this.COLLECTION_NAME),
+          where('tutorEmail', '==', normalizedEmail),
+          orderBy('date_payment', 'desc')
+        );
+        snapshot = await getDocs(q);
+        console.log('[PaymentsService] tutor primary query size:', snapshot.size);
+      } catch (eOrder) {
+        console.warn('[PaymentsService] tutor orderBy(date_payment) no disponible, fallback sin orderBy', eOrder);
+        const q = query(
+          collection(db, this.COLLECTION_NAME),
+          where('tutorEmail', '==', normalizedEmail)
+        );
+        snapshot = await getDocs(q);
+        console.log('[PaymentsService] tutor fallback (no orderBy) size:', snapshot.size);
+      }
+
+      const results = [];
+      snapshot.forEach((docSnap) => {
+        const data = docSnap.data();
+        const storedEmail = (data.tutorEmail ? String(data.tutorEmail) : '').trim().toLowerCase();
+        if (storedEmail !== normalizedEmail) return;
+
+        const rawDate = data.date_payment;
+        let datePayment = null;
+        if (rawDate?.toDate) datePayment = rawDate.toDate();
+        else if (typeof rawDate === 'string') {
+          const parsed = new Date(rawDate);
+          datePayment = isNaN(parsed) ? null : parsed;
+        } else if (rawDate instanceof Date) datePayment = rawDate;
+
+        if (startDate && datePayment && datePayment < startDate) return;
+        if (endDate && datePayment && datePayment > endDate) return;
+
+        results.push({
+          id: docSnap.id,
+          amount: typeof data.amount === 'number' ? data.amount : Number(data.amount) || 0,
+          date_payment: datePayment,
+          method: data.method || '',
+          studentEmail: data.studentEmail || '',
+          subject: data.subject || '',
+          transactionID: data.transactionID || data.transactionId || '',
+          tutorEmail: data.tutorEmail || '',
+          pagado: Boolean(data.pagado),
+          raw: data
+        });
+      });
+
+      // Ordenar por fecha desc si no se pudo en la consulta
+      results.sort((a, b) => {
+        const ad = a.date_payment ? a.date_payment.getTime() : 0;
+        const bd = b.date_payment ? b.date_payment.getTime() : 0;
+        return bd - ad;
+      });
+
+      return results;
+    } catch (error) {
+      console.error('[PaymentsService] Error obteniendo pagos por tutor:', error);
+      return [];
+    }
+  }
 }
 
 export default PaymentsService;
