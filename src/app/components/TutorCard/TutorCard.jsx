@@ -2,16 +2,25 @@
 
 import React from 'react';
 import { Button } from '../../../components/ui/button';
-import { Heart } from 'lucide-react';
+import { useFavorites } from '../../hooks/useFavorites';
+import FavoriteButton from '../FavoriteButton/FavoriteButton';
 
 /**
  * TutorCard - Card de tutor según diseño de Calendly
  * @param {Object} tutor - Datos del tutor
- * @param {boolean} isFavorite - Si el tutor está en favoritos
  * @param {Function} onBookNow - Callback al hacer click en "Book Now"
- * @param {Function} onToggleFavorite - Callback al hacer click en favorito
  */
-export default function TutorCard({ tutor, isFavorite = false, onBookNow, onToggleFavorite }) {
+export default function TutorCard({ tutor, onBookNow }) {
+    const { isTutorFavorite, toggleTutorFavorite } = useFavorites();
+    
+    const isFavorite = tutor?.id ? isTutorFavorite(tutor.id) : false;
+    
+    const handleToggleFavorite = async () => {
+        if (tutor?.id) {
+            await toggleTutorFavorite(tutor.id);
+        }
+    };
+
     const getInitials = (name) => {
         if (!name) return 'T';
         const parts = name.split(' ');
@@ -52,16 +61,10 @@ export default function TutorCard({ tutor, isFavorite = false, onBookNow, onTogg
                     >
                         Ver disponibilidad
                     </Button>
-                    <Button
-                        variant="ghost"
-                        onClick={onToggleFavorite}
-                        className="flex items-center gap-2 text-gray-700 hover:text-gray-900 px-4 py-2 rounded-full border border-gray-300 hover:border-gray-400"
-                    >
-                        <Heart
-                            className={`h-4 w-4 ${isFavorite ? 'fill-red-500 text-red-500' : ''}`}
-                        />
-                        Favorito
-                    </Button>
+                    <FavoriteButton
+                        isFavorite={isFavorite}
+                        onClick={handleToggleFavorite}
+                    />
                 </div>
             </div>
 

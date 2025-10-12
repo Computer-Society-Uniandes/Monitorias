@@ -107,3 +107,13 @@
         font-size: 16px;
     }
 }
+
+/* -------------- LAYOUT PARA FAVORITOS -------------- */
+.subject-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
+}
+
+/* Removido: estilos de favoritos ahora están en FavoriteButton.css */

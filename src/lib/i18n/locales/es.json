@@ -1,0 +1,263 @@
+{
+  "common": {
+    "back": "Regresar",
+    "goBack": "Volver",
+    "loading": "Cargando...",
+    "error": "Error",
+    "retry": "Intentar de nuevo",
+    "noResults": "No se encontraron resultados.",
+    "startSearching": "Comienza buscando tutores o materias.",
+    "searchPlaceholder": "Buscar tutores o materias",
+    "allTutors": "Todos los tutores",
+    "allTutorsAvailable": "Todos los tutores disponibles",
+    "noTransactions": "No hay transacciones",
+    "transactionsAppearAfter": "Las transacciones aparecerán aquí una vez que completes sesiones de tutoría.",
+    "applyFilters": "Aplicar filtros",
+    "clearFilters": "Limpiar filtros",
+    "filters": "Filtros de búsqueda",
+    "subject": "Materia",
+    "tutor": "Tutor",
+    "date": "Fecha",
+    "concept": "Concepto",
+    "student": "Estudiante",
+    "amount": "Monto",
+    "status": "Estado",
+    "method": "Método",
+    "from": "Desde",
+    "to": "Hasta",
+    "period": "Período",
+    "custom": "Personalizado",
+    "week": "Esta semana",
+    "month": "Este mes",
+    "quarter": "Este trimestre",
+    "year": "Este año",
+    "allSubjects": "Todas las materias"
+  },
+  "tutorStats": {
+    "title": "Estadísticas",
+    "subtitle": "Analiza tu rendimiento y ganancias como tutor",
+    "filters": {
+      "subject": "Materia",
+      "period": "Período",
+      "from": "Desde",
+      "to": "Hasta"
+    },
+    "cards": {
+      "totalSessions": "Total Sesiones",
+      "nextPayment": "Próximo Pago",
+      "totalEarnings": "Ganancias Totales",
+      "averageRating": "Calificación Promedio"
+    },
+    "charts": {
+      "sessionsByMonth": "Tutorías por mes",
+      "viewDetails": "Ver detalles"
+    },
+    "transactions": {
+      "title": "Historial de Pagos",
+      "subtitle": "Registro de transferencias recibidas",
+      "emptyTitle": "No hay transacciones",
+      "emptyText": "Las transacciones aparecerán aquí una vez que completes sesiones de tutoría.",
+      "columns": {
+        "date": "Fecha",
+        "concept": "Concepto",
+        "student": "Estudiante",
+        "amount": "Monto",
+        "status": "Estado",
+        "method": "Método"
+      },
+      "status": {
+        "completed": "completado",
+        "pending": "pendiente",
+        "failed": "fallido"
+      },
+      "conceptPrefix": "Tutoría {subject}",
+      "studentFallback": "Estudiante",
+      "methodDefault": "transferencia"
+    },
+    "loading": "Cargando estadísticas..."
+  },
+  "studentHistory": {
+    "title": "Estadísticas e historial",
+    "filters": {
+      "title": "Filtros de búsqueda",
+      "searchSubject": "Buscar Materia",
+      "selectDate": "Seleccionar fecha",
+      "startDate": "Fecha inicio",
+      "endDate": "Fecha fin"
+    },
+    "table": {
+      "title": "Historial de tutorías",
+      "date": "Fecha",
+      "subject": "Materia",
+      "tutor": "Tutor",
+      "performance": "Rendimiento",
+      "performanceValues": {
+        "excellent": "Excelente",
+        "pending": "Pendiente",
+        "regular": "Regular"
+      },
+      "empty": "No se encontraron tutorías"
+    },
+    "errors": {
+      "loading": "Error al cargar el historial de tutorías",
+      "title": "Error al cargar historial"
+    },
+    "loading": "Cargando historial de tutorías..."
+  },
+  "search": {
+    "tabs": {
+      "tutors": "Tutores",
+      "subjects": "Materias",
+      "both": "Ambos"
+    },
+    "cta": {
+      "viewJointAvailability": "Ver Disponibilidad Conjunta",
+      "seeCombinedSchedules": "Ver horarios combinados",
+      "availabilityOfAllTutors": "Disponibilidad de todos los tutores de {subject}"
+    },
+    "subjects": {
+      "tutorsFor": "Tutores para {subject}",
+      "noTutors": "No hay tutores disponibles para esta materia.",
+      "loadingTutors": "Cargando tutores...",
+      "noTutorsShort": "No hay tutores disponibles"
+    },
+    "placeholders": {
+      "search": "Buscar tutores o materias"
+    },
+    "states": {
+      "searching": "Buscando...",
+      "noResults": "No se encontraron resultados.",
+      "start": "Comienza buscando tutores o materias.",
+      "loading": "Cargando..."
+    },
+    "calendar": {
+      "individualTitle": "Disponibilidad de {tutor}",
+      "jointTitle": "Disponibilidad Conjunta"
+    },
+    "back": {
+      "toSubjects": "Volver a materias"
+    }
+  },
+  "availability": {
+    "calendar": {
+      "header": {
+        "jointTitle": "Disponibilidad Conjunta",
+        "individualTitle": "Disponibilidad de {tutor}",
+        "individualFallback": "Disponibilidad Individual"
+      },
+      "loading": "Cargando disponibilidad...",
+      "slots": {
+        "title": "Horarios Disponibles",
+        "noneTitle": "No hay horarios disponibles",
+        "noneHint": "Selecciona otro día en el calendario",
+        "tutorAvailable": "Tutor disponible",
+        "viewOptions": "Ver opciones",
+        "book": "Agendar"
+      },
+      "errors": {
+        "load": "Error cargando disponibilidad. Por favor intenta de nuevo.",
+        "generate": "Error generando horarios disponibles. Por favor intenta de nuevo.",
+        "slotNotAvailable": "El horario seleccionado ya no está disponible. Por favor selecciona otro.",
+        "selecting": "Error seleccionando el horario. Por favor intenta de nuevo.",
+        "createSession": "Error al crear la sesión: {message}",
+        "reserveError": "❌ Error al reservar: {message}\n\nPor favor intenta nuevamente."
+      },
+      "alerts": {
+        "proofUploadProblem": "⚠️ La reserva se creó pero hubo un problema al subir el comprobante: {error}\n\nPuedes enviar el comprobante después."
+      }
+    },
+    "joint": {
+      "errorTitle": "Error de Datos",
+      "errorText": "No se especificó la materia para buscar disponibilidad conjunta.",
+      "back": "Volver a Buscar",
+      "title": "Disponibilidad Conjunta",
+      "allTutors": "Todos los tutores disponibles",
+      "loading": "Cargando disponibilidad conjunta..."
+    },
+    "individual": {
+      "errorTitle": "Error de Datos",
+      "errorText": "No se pudieron cargar los datos del tutor. Por favor, regresa e intenta nuevamente.",
+      "back": "Volver a Buscar",
+      "backShort": "Regresar",
+      "loading": "Cargando disponibilidad..."
+    },
+    "tutorCard": {
+      "bookWith": "Reservar con {name}",
+      "tutorFallback": "Tutor",
+      "subjects": "Materias:",
+      "more": "más",
+      "sessions": "sesiones",
+      "perHour": "COP/hora",
+      "availability": "Disponibilidad",
+      "retry": "Reintentar",
+      "noAvailability": "No hay disponibilidad próxima para esta materia",
+      "availableSlots": "horarios disponibles",
+      "nextSlot": "Próximo horario",
+      "at": "a las",
+      "viewAll": "Ver todos los horarios",
+      "bookNow": "Reservar ahora",
+      "noAvailabilityShort": "Sin disponibilidad",
+      "contact": "Contactar",
+      "errors": {
+        "load": "Error cargando disponibilidad del tutor"
+      }
+    },
+    "confirmationModal": {
+      "title": "Confirmación de Sesión",
+      "subject": "Materia",
+      "tutor": "Tutor",
+      "sessionDetails": "Detalles de la Sesión",
+      "emailForMeet": "Email para Google Meet",
+      "emailHint": "El link de la sesión llegará a este correo",
+      "emailPlaceholder": "tu-correo@ejemplo.com",
+      "paymentProof": "Comprobante de Pago",
+      "paymentProofHint": "Sube una foto o PDF de tu comprobante de transferencia",
+      "selectFile": "Seleccionar archivo...",
+      "fileSelected": "Archivo seleccionado: {name}",
+      "cost": "Costo",
+      "total": "Total",
+      "confirming": "Confirmando...",
+      "confirmAndSend": "Confirmar Reserva y Enviar Invitación",
+      "cancel": "Cancelar",
+      "errors": {
+        "invalidType": "Por favor sube una imagen (JPG, PNG) o PDF",
+        "tooLarge": "El archivo no debe superar 5MB",
+        "missingProof": "Debes subir el comprobante de pago",
+        "invalidEmail": "Ingresa un correo válido"
+      }
+    },
+    "bookedModal": {
+      "approvedTitle": "¡Sesión Aprobada!",
+      "reservedTitle": "¡Sesión Reservada!",
+      "thanksTutor": "Gracias por aprobar la sesión de tutoría.",
+      "thanksStudent": "Gracias por reservar con Calico.",
+      "statusTutor": "Has aprobado esta sesión de tutoría. El estudiante recibirá una notificación y el link de Google Meet para la sesión.",
+      "statusStudent": "Tu solicitud ha sido enviada al tutor. Recibirás un correo de confirmación cuando la acepte y el link de Google Meet una vez que sea aprobada.",
+      "scheduled": "Sesión programada para el {date} a las {time}",
+      "seeYou": "Te vemos el {date} a las {time}",
+      "detailsApproved": "Detalles de la sesión aprobada:",
+      "detailsYour": "Detalles de tu sesión:",
+      "labels": {
+        "student": "Estudiante:",
+        "tutor": "Tutor:",
+        "subject": "Materia:",
+        "date": "Fecha:",
+        "time": "Hora:",
+        "location": "Ubicación:"
+      },
+      "ok": "¡Perfecto!"
+    }
+  },
+  "payments": {
+    "loading": "Cargando pagos...",
+    "error": "Error cargando pagos",
+    "emptyFor": "No hay pagos registrados para {email}.",
+    "card": {
+      "method": "Método",
+      "date": "Fecha",
+      "transaction": "Transacción",
+      "tutor": "Tutor",
+      "subjectFallback": "Materia"
+    }
+  }
+}

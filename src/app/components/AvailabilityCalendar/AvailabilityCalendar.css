@@ -1,0 +1,425 @@
+/* Container principal */
+.availability-calendar-container {
+  display: flex;
+  gap: 2rem;
+  min-height: 70vh;
+  background: #FFF8F0;
+  padding: 2rem;
+  border-radius: 12px;
+}
+
+/* Panel del calendario - 60% del ancho */
+.calendar-panel {
+  flex: 0 0 60%;
+  width: 60%;
+  background: #FFFFFF;
+  border: 2px solid #FDAE1E;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(253, 174, 30, 0.1);
+}
+
+/* Panel de horarios - 40% del ancho */
+.slots-panel {
+  flex: 0 0 40%;
+  width: 40%;
+  background: #FFFFFF;
+  border: 2px solid #FDAE1E;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(253, 174, 30, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+.calendar-header {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #FDAE1E;
+}
+
+.calendar-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #101F24;
+  margin: 0;
+}
+
+.calendar-title svg {
+  color: #FF9505;
+}
+
+.calendar-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+.loading-spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid #FFF8F0;
+  border-top: 4px solid #FDAE1E;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Estilos del calendario React */
+.react-calendar {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  line-height: 1.125em;
+}
+
+.react-calendar__navigation {
+  display: flex;
+  height: 44px;
+  margin-bottom: 1rem;
+}
+
+.react-calendar__navigation button {
+  background: none;
+  border: 2px solid #FDAE1E;
+  color: #FF9505;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 44px;
+}
+
+.react-calendar__navigation button:hover {
+  background: #FFF8F0;
+  transform: translateY(-2px);
+}
+
+.react-calendar__navigation button:disabled {
+  background-color: #F3F4F6;
+  color: #9CA3AF;
+  border-color: #E5E7EB;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.react-calendar__navigation__label {
+  flex-grow: 1;
+  text-align: center;
+  background: linear-gradient(135deg, #FDAE1E, #FF9505);
+  color: #FFFFFF;
+  border-radius: 8px;
+  margin: 0 0.5rem;
+}
+
+.react-calendar__month-view__weekdays {
+  text-align: center;
+  text-transform: uppercase;
+  font-weight: 600;
+  font-size: 0.75em;
+  color: #6B7280;
+  margin-bottom: 0.5rem;
+}
+
+.react-calendar__month-view__weekdays__weekday {
+  padding: 0.5rem;
+}
+
+.react-calendar__month-view__days {
+  display: grid !important;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.react-calendar__tile {
+  max-width: 100%;
+  padding: 12px 8px;
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  text-align: center;
+  line-height: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #101F24;
+}
+
+.react-calendar__tile:hover {
+  background: #FFF8F0;
+  border-color: #FDAE1E;
+  transform: translateY(-2px);
+}
+
+.react-calendar__tile.selected {
+  background: linear-gradient(135deg, #FDAE1E, #FF9505);
+  color: #FFFFFF;
+  border-color: #FF9505;
+  font-weight: 600;
+}
+
+.react-calendar__tile.has-availability {
+  position: relative;
+}
+
+.react-calendar__tile.has-availability::after {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  background: #10B981;
+  border-radius: 50%;
+}
+
+.react-calendar__tile.selected.has-availability::after {
+  background: #FFFFFF;
+}
+
+.react-calendar__tile.past-date {
+  background: #F9FAFB;
+  color: #9CA3AF;
+  cursor: not-allowed;
+}
+
+.react-calendar__tile.past-date:hover {
+  background: #F9FAFB;
+  transform: none;
+  border-color: #E5E7EB;
+}
+
+/* Panel de horarios - Ya definido arriba */
+
+.slots-header {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #FDAE1E;
+}
+
+.slots-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #101F24;
+  margin: 0 0 0.5rem 0;
+}
+
+.slots-title svg {
+  color: #FF9505;
+}
+
+.selected-date {
+  font-size: 1rem;
+  color: #6B7280;
+  margin: 0;
+  text-transform: capitalize;
+}
+
+.slots-list {
+  flex: 1;
+  overflow-y: auto;
+  max-height: 60vh;
+}
+
+.slot-item {
+  background: #FFF8F0;
+  border: 2px solid #FDAE1E;
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.slot-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(253, 174, 30, 0.15);
+  border-color: #FF9505;
+}
+
+.slot-time {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #101F24;
+  margin-bottom: 0.75rem;
+}
+
+.slot-time svg {
+  color: #FF9505;
+}
+
+.slot-tutor,
+.slot-tutors {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: #6B7280;
+  margin-bottom: 1rem;
+}
+
+.slot-tutor svg,
+.slot-tutors svg {
+  color: #9CA3AF;
+}
+
+.tutors-names {
+  font-size: 0.8rem;
+  color: #9CA3AF;
+  margin-top: 0.25rem;
+}
+
+.book-slot-btn {
+  background: linear-gradient(135deg, #FDAE1E, #FF9505);
+  color: #FFFFFF;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+  text-align: center;
+}
+
+.book-slot-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(253, 174, 30, 0.3);
+}
+
+.book-slot-btn:active {
+  transform: translateY(0);
+}
+
+/* Estado sin horarios */
+.no-slots {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 3rem 2rem;
+  color: #6B7280;
+}
+
+.no-slots-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.no-slots h4 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #101F24;
+  margin: 0 0 0.5rem 0;
+}
+
+.no-slots p {
+  font-size: 1rem;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .availability-calendar-container {
+    flex-direction: column;
+    padding: 1.5rem;
+    gap: 1.5rem;
+  }
+
+  .calendar-panel,
+  .slots-panel {
+    flex: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .availability-calendar-container {
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  .calendar-panel,
+  .slots-panel {
+    padding: 1rem;
+  }
+
+  .calendar-title,
+  .slots-title {
+    font-size: 1.1rem;
+  }
+
+  .react-calendar__tile {
+    padding: 8px 4px;
+    font-size: 0.8rem;
+  }
+
+  .slot-item {
+    padding: 1rem;
+  }
+
+  .slot-time {
+    font-size: 1rem;
+  }
+
+  .slots-list {
+    max-height: 50vh;
+  }
+}
+
+@media (max-width: 640px) {
+  .availability-calendar-container {
+    padding: 0.75rem;
+  }
+
+  .calendar-panel,
+  .slots-panel {
+    padding: 0.75rem;
+  }
+
+  .react-calendar__navigation button {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+  }
+
+  .react-calendar__tile {
+    padding: 6px 3px;
+    font-size: 0.75rem;
+  }
+
+  .slot-item {
+    padding: 0.75rem;
+  }
+
+  .book-slot-btn {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.85rem;
+  }
+}

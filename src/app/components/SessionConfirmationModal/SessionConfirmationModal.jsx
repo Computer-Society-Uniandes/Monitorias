@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { PaymentService } from "../../services/PaymentService";
+import { useI18n } from "app/lib/i18n";
 
 export default function SessionConfirmationModal({ 
   isOpen, 
@@ -10,6 +11,7 @@ export default function SessionConfirmationModal({
   onConfirm, 
   confirmLoading = false 
 }) {
+  const { t, locale } = useI18n();
   const [studentEmail, setStudentEmail] = useState(session?.studentEmail || '');
   const [proofFile, setProofFile] = useState(null);
   const [proofFileName, setProofFileName] = useState('');
@@ -17,13 +19,14 @@ export default function SessionConfirmationModal({
 
   if (!isOpen || !session) return null;
 
-  const formattedDate = new Date(session.scheduledDateTime).toLocaleDateString('es-ES', {
+  const localeStr = locale === 'en' ? 'en-US' : 'es-ES';
+  const formattedDate = new Date(session.scheduledDateTime).toLocaleDateString(localeStr, {
     weekday: 'long',
     month: 'long',
     day: 'numeric',
     year: 'numeric'
   });
-  const timeRange = `${new Date(session.scheduledDateTime).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })} - ${new Date(session.endDateTime).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`;
+  const timeRange = `${new Date(session.scheduledDateTime).toLocaleTimeString(localeStr, { hour: '2-digit', minute: '2-digit' })} - ${new Date(session.endDateTime).toLocaleTimeString(localeStr, { hour: '2-digit', minute: '2-digit' })}`;
 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
@@ -31,12 +34,12 @@ export default function SessionConfirmationModal({
       // Validar tipo de archivo
       const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
       if (!validTypes.includes(file.type)) {
-        setError('Por favor sube una imagen (JPG, PNG) o PDF');
+        setError(t('availability.confirmationModal.errors.invalidType'));
         return;
       }
       // Validar tamaño (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
-        setError('El archivo no debe superar 5MB');
+        setError(t('availability.confirmationModal.errors.tooLarge'));
         return;
       }
       setProofFile(file);
@@ -55,8 +58,8 @@ export default function SessionConfirmationModal({
 
   const handleConfirm = () => {
     if (!canConfirm()) {
-      if (!proofFile) setError('Debes subir el comprobante de pago');
-      else if (!isValidEmail(studentEmail)) setError('Ingresa un correo válido');
+      if (!proofFile) setError(t('availability.confirmationModal.errors.missingProof'));
+      else if (!isValidEmail(studentEmail)) setError(t('availability.confirmationModal.errors.invalidEmail'));
       return;
     }
     
@@ -81,14 +84,14 @@ export default function SessionConfirmationModal({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <h2 className="text-lg font-semibold text-gray-900">Confirmación de Sesión</h2>
+          <h2 className="text-lg font-semibold text-gray-900">{t('availability.confirmationModal.title')}</h2>
         </div>
 
         {/* Content */}
         <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
           {/* Course */}
           <div>
-            <h3 className="text-sm font-semibold text-gray-900 mb-2">Materia</h3>
+            <h3 className="text-sm font-semibold text-gray-900 mb-2">{t('availability.confirmationModal.subject')}</h3>
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm">
                 <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -104,7 +107,7 @@ export default function SessionConfirmationModal({
 
           {/* Tutor */}
           <div>
-            <h3 className="text-sm font-semibold text-gray-900 mb-2">Tutor</h3>
+            <h3 className="text-sm font-semibold text-gray-900 mb-2">{t('availability.confirmationModal.tutor')}</h3>
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
                 <span className="text-lg">👨‍🏫</span>
@@ -115,7 +118,7 @@ export default function SessionConfirmationModal({
 
           {/* Session Details */}
           <div>
-            <h3 className="text-sm font-semibold text-gray-900 mb-2">Detalles de la Sesión</h3>
+            <h3 className="text-sm font-semibold text-gray-900 mb-2">{t('availability.confirmationModal.sessionDetails')}</h3>
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm">
                 <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -131,13 +134,13 @@ export default function SessionConfirmationModal({
 
           {/* Email for Google Meet */}
           <div>
-            <h3 className="text-sm font-semibold text-gray-900 mb-2">Email para Google Meet</h3>
-            <p className="text-xs text-gray-500 mb-2">El link de la sesión llegará a este correo</p>
+            <h3 className="text-sm font-semibold text-gray-900 mb-2">{t('availability.confirmationModal.emailForMeet')}</h3>
+            <p className="text-xs text-gray-500 mb-2">{t('availability.confirmationModal.emailHint')}</p>
             <input
               type="email"
               value={studentEmail}
               onChange={(e) => setStudentEmail(e.target.value)}
-              placeholder="tu-correo@ejemplo.com"
+              placeholder={t('availability.confirmationModal.emailPlaceholder')}
               className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FF8C00] focus:border-transparent"
               disabled={confirmLoading}
             />
@@ -145,8 +148,8 @@ export default function SessionConfirmationModal({
 
           {/* Payment Proof Upload */}
           <div>
-            <h3 className="text-sm font-semibold text-gray-900 mb-2">Comprobante de Pago</h3>
-            <p className="text-xs text-gray-500 mb-2">Sube una foto o PDF de tu comprobante de transferencia</p>
+            <h3 className="text-sm font-semibold text-gray-900 mb-2">{t('availability.confirmationModal.paymentProof')}</h3>
+            <p className="text-xs text-gray-500 mb-2">{t('availability.confirmationModal.paymentProofHint')}</p>
             <label className="block">
               <input
                 type="file"
@@ -157,7 +160,7 @@ export default function SessionConfirmationModal({
               />
               <div className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-gray-500 cursor-pointer hover:border-[#FF8C00] transition-colors flex items-center justify-between">
                 <span className="text-sm">
-                  {proofFileName || 'Seleccionar archivo...'}
+                  {proofFileName || t('availability.confirmationModal.selectFile')}
                 </span>
                 <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
@@ -169,17 +172,17 @@ export default function SessionConfirmationModal({
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
-                Archivo seleccionado: {proofFile.name}
+                {t('availability.confirmationModal.fileSelected', { name: proofFile.name })}
               </p>
             )}
           </div>
 
           {/* Cost */}
           <div>
-            <h3 className="text-sm font-semibold text-gray-900 mb-2">Costo</h3>
+            <h3 className="text-sm font-semibold text-gray-900 mb-2">{t('availability.confirmationModal.cost')}</h3>
             <div className="flex justify-between items-center">
               <span className="text-lg font-bold text-gray-900">${session.price ? session.price.toLocaleString() : '25,000'} COP</span>
-              <span className="text-sm text-gray-500">Total</span>
+              <span className="text-sm text-gray-500">{t('availability.confirmationModal.total')}</span>
             </div>
           </div>
 
@@ -198,14 +201,14 @@ export default function SessionConfirmationModal({
             disabled={!canConfirm()}
             className="w-full py-3 bg-[#FF8C00] text-white font-semibold rounded-lg hover:bg-[#e07d00] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {confirmLoading ? 'Confirmando...' : 'Confirmar Reserva y Enviar Invitación'}
+            {confirmLoading ? t('availability.confirmationModal.confirming') : t('availability.confirmationModal.confirmAndSend')}
           </button>
           <button
             onClick={onClose}
             disabled={confirmLoading}
             className="w-full py-3 bg-white text-gray-700 font-semibold rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors disabled:opacity-50"
           >
-            Cancelar
+            {t('availability.confirmationModal.cancel')}
           </button>
         </div>
       </div>

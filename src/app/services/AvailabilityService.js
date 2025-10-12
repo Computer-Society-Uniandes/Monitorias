@@ -33,8 +33,6 @@ export class AvailabilityService {
       throw error;
     }
   }
-
-
   
   // Obtener disponibilidad para la semana actual
   static async getWeeklyAvailability() {
@@ -72,7 +70,6 @@ export class AvailabilityService {
           throw new Error(`Token expirado. ${refreshResult.error}. Por favor, reconecta tu Google Calendar.`);
         }
       }
-      
       // Si no es un error de autenticación, relanzar el error original
       throw error;
     }
@@ -130,32 +127,32 @@ export class AvailabilityService {
     try {
       const isConnected = await this.checkConnection();
       
-      if (!isConnected) {
-        console.log('Not connected to Google Calendar, checking Firebase...');
-        
-        // Intentar obtener desde Firebase
-        try {
-          const firebaseResult = await this.getAvailabilitiesFromFirebase();
-          if (firebaseResult.success && firebaseResult.availabilitySlots.length > 0) {
-            return {
-              ...firebaseResult,
-              connected: false,
-              source: 'firebase'
-            };
-          }
-        } catch (firebaseError) {
-          console.log('Firebase also unavailable, using mock data');
+      // Siempre intentar cargar desde Firebase primero (datos más completos)
+      try {
+        const firebaseResult = await this.getAvailabilitiesFromFirebase();
+        if (firebaseResult.success && firebaseResult.availabilitySlots.length > 0) {
+          console.log(`Loaded ${firebaseResult.availabilitySlots.length} availability slots from Firebase`);
+          return {
+            ...firebaseResult,
+            connected: isConnected,
+            source: 'firebase'
+          };
         }
-        
+      } catch (firebaseError) {
+        console.log('Firebase unavailable, trying Google Calendar...');
+      }
+      
+      if (!isConnected) {
         return {
           success: true,
           connected: false,
-          availabilitySlots: this.getMockAvailability(),
-          totalEvents: 5,
+          availabilitySlots: [],
+          totalEvents: 0,
           usingMockData: true
         };
       }
       
+      // Si Firebase no tiene datos, cargar desde Google Calendar
       const result = await this.getWeeklyAvailability();
       
       // Iniciar sincronización automática si está conectado y hay eventos
@@ -166,7 +163,7 @@ export class AvailabilityService {
         console.log('No availability events found, using mock data as example');
         return {
           ...result,
-          availabilitySlots: this.getMockAvailability(),
+          availabilitySlots: [],
           usingMockData: true,
           message: 'No se encontraron eventos de disponibilidad en tu calendario. Mostrando ejemplos.'
         };
@@ -178,8 +175,8 @@ export class AvailabilityService {
       return {
         success: false,
         connected: false,
-        availabilitySlots: this.getMockAvailability(),
-        totalEvents: 5,
+        availabilitySlots: [],
+        totalEvents: 0,
         usingMockData: true,
         error: error.message
       };
@@ -187,75 +184,75 @@ export class AvailabilityService {
   }
   
   // Mock data para cuando no hay conexión o eventos
-  static getMockAvailability() {
-    return [
-      {
-        id: 'mock-1',
-        title: 'Disponible para Cálculo',
-        day: 'Lunes',
-        startTime: '09:00',
-        endTime: '11:00',
-        date: this.getDateForDay(1), // Lunes
-        recurring: true,
-        color: '#4CAF50',
-        description: 'Horario disponible para tutorías de Cálculo',
-        location: 'Virtual o Presencial',
-        googleEventId: null
-      },
-      {
-        id: 'mock-2',
-        title: 'Disponible para Física',
-        day: 'Martes',
-        startTime: '14:00',
-        endTime: '16:00',
-        date: this.getDateForDay(2), // Martes
-        recurring: true,
-        color: '#2196F3',
-        description: 'Horario disponible para tutorías de Física',
-        location: 'Virtual o Presencial',
-        googleEventId: null
-      },
-      {
-        id: 'mock-3',
-        title: 'Disponible para Matemáticas',
-        day: 'Miércoles',
-        startTime: '10:00',
-        endTime: '12:00',
-        date: this.getDateForDay(3), // Miércoles
-        recurring: true,
-        color: '#FF9800',
-        description: 'Horario disponible para tutorías de Matemáticas',
-        location: 'Virtual o Presencial',
-        googleEventId: null
-      },
-      {
-        id: 'mock-4',
-        title: 'Disponible para Programación',
-        day: 'Jueves',
-        startTime: '15:00',
-        endTime: '17:00',
-        date: this.getDateForDay(4), // Jueves
-        recurring: true,
-        color: '#9C27B0',
-        description: 'Horario disponible para tutorías de Programación',
-        location: 'Virtual o Presencial',
-        googleEventId: null
-      },
-      {
-        id: 'mock-5',
-        title: 'Disponible para Tutorías Generales',
-        day: 'Viernes',
-        startTime: '08:00',
-        endTime: '10:00',
-        date: this.getDateForDay(5), // Viernes
-        recurring: true,
-        color: '#607D8B',
-        description: 'Horario disponible para tutorías de cualquier materia',
-        location: 'Virtual o Presencial',
-        googleEventId: null
-      }
-    ];
-  }
+  // static getMockAvailability() {
+  //   return [
+  //     {
+  //       id: 'mock-1',
+  //       title: 'Disponible para Cálculo',
+  //       day: 'Lunes',
+  //       startTime: '09:00',
+  //       endTime: '11:00',
+  //       date: this.getDateForDay(1), // Lunes
+  //       recurring: true,
+  //       color: '#4CAF50',
+  //       description: 'Horario disponible para tutorías de Cálculo',
+  //       location: 'Virtual o Presencial',
+  //       googleEventId: null
+  //     },
+  //     {
+  //       id: 'mock-2',
+  //       title: 'Disponible para Física',
+  //       day: 'Martes',
+  //       startTime: '14:00',
+  //       endTime: '16:00',
+  //       date: this.getDateForDay(2), // Martes
+  //       recurring: true,
+  //       color: '#2196F3',
+  //       description: 'Horario disponible para tutorías de Física',
+  //       location: 'Virtual o Presencial',
+  //       googleEventId: null
+  //     },
+  //     {
+  //       id: 'mock-3',
+  //       title: 'Disponible para Matemáticas',
+  //       day: 'Miércoles',
+  //       startTime: '10:00',
+  //       endTime: '12:00',
+  //       date: this.getDateForDay(3), // Miércoles
+  //       recurring: true,
+  //       color: '#FF9800',
+  //       description: 'Horario disponible para tutorías de Matemáticas',
+  //       location: 'Virtual o Presencial',
+  //       googleEventId: null
+  //     },
+  //     {
+  //       id: 'mock-4',
+  //       title: 'Disponible para Programación',
+  //       day: 'Jueves',
+  //       startTime: '15:00',
+  //       endTime: '17:00',
+  //       date: this.getDateForDay(4), // Jueves
+  //       recurring: true,
+  //       color: '#9C27B0',
+  //       description: 'Horario disponible para tutorías de Programación',
+  //       location: 'Virtual o Presencial',
+  //       googleEventId: null
+  //     },
+  //     {
+  //       id: 'mock-5',
+  //       title: 'Disponible para Tutorías Generales',
+  //       day: 'Viernes',
+  //       startTime: '08:00',
+  //       endTime: '10:00',
+  //       date: this.getDateForDay(5), // Viernes
+  //       recurring: true,
+  //       color: '#607D8B',
+  //       description: 'Horario disponible para tutorías de cualquier materia',
+  //       location: 'Virtual o Presencial',
+  //       googleEventId: null
+  //     }
+  //   ];
+  // }
   
   // Obtener fecha para un día específico de la semana actual
   static getDateForDay(dayOfWeek) {
@@ -837,7 +834,7 @@ export class AvailabilityService {
 
       // Obtener información del usuario
       const tutorEmail = auth.currentUser?.email || '';
-      const tutorId = auth.currentUser?.uid || tutorEmail; // preferir UID, fallback a email
+      const tutorId = tutorEmail;
       if (!tutorEmail && !tutorId) {
         console.log('❌ No hay información del usuario, saltando sync automático');
         return { success: false, reason: 'no_user_info' };

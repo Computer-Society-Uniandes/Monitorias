@@ -15,6 +15,7 @@ import {
   Calendar,
   GraduationCap,
   CreditCard,
+  History,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -22,6 +23,9 @@ import CalicoLogo from "../../../../public/CalicoLogo.png";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "../../context/SecureAuthContext";
 import { NotificationService } from "../../services/NotificationService";
+import { useFavorites } from "../../hooks/useFavorites";
+import NotificationDropdown from "../NotificationDropdown/NotificationDropdown";
+import StudentNotificationDropdown from "../NotificationDropdown/StudentNotificationDropdown";
 import routes from "../../../routes";
 
 export default function Header() {
@@ -32,7 +36,9 @@ export default function Header() {
   const [mounted, setMounted] = useState(false);
   const [role, setRole] = useState("student"); // 'student' | 'tutor'
   const [menuOpen, setMenuOpen] = useState(false);   // ⟵ estado del menú
-  const [notificationCount, setNotificationCount] = useState(0);
+  
+  // Hook de favoritos
+  const { getFavoritesCount } = useFavorites();
 
   useEffect(() => {
     setMounted(true);
@@ -70,45 +76,26 @@ export default function Header() {
     };
   }, [mounted]);
 
-  // Load notification count for tutors
-  useEffect(() => {
-    const loadNotificationCount = async () => {
-      if (user.isLoggedIn && role === "tutor" && user.email) {
-        try {
-          const count = await NotificationService.getUnreadNotificationCount(user.email);
-          setNotificationCount(count);
-        } catch (error) {
-          console.error('Error loading notification count:', error);
-        }
-      } else {
-        setNotificationCount(0);
-      }
-    };
-
-    loadNotificationCount();
-    
-    // Refresh notification count every 30 seconds
-    const interval = setInterval(loadNotificationCount, 30000);
-    
-    return () => clearInterval(interval);
-  }, [user.isLoggedIn, user.email, role]);
 
   if (!mounted) return null;
 
   const tutorMode = user.isLoggedIn && role === "tutor";
 
   // Navigation items configuration
+  const favoritesCount = getFavoritesCount();
+  
   const studentNavItems = [
-    { href: routes.HOME, label: "Home", icon: Home },
-    { href: routes.SEARCH_TUTORS, label: "Search", icon: Search },
-    { href: routes.FAVORITES, label: "Favorites", icon: Heart }
+    { href: routes.HOME, label: "Inicio", icon: Home },
+    { href: routes.SEARCH_TUTORS, label: "Buscar", icon: Search },
+    { href: routes.FAVORITES, label: "Favoritos", icon: Heart, count: favoritesCount },
+    { href: routes.HISTORY, label: "Historial", icon: History }
   ];
 
   const tutorNavItems = [
-    { href: routes.TUTOR_INICIO, label: "Home", icon: Home },
-    { href: routes.TUTOR_DISPONIBILIDAD, label: "Availability", icon: Calendar },
-    { href: "/tutor/statistics", label: "Statistics", icon: BarChart3 },
-    { href: routes.TUTOR_MATERIAS, label: "Subjects", icon: BookOpen },
+    { href: routes.TUTOR_INICIO, label: "Inicio", icon: Home },
+    { href: routes.TUTOR_DISPONIBILIDAD, label: "Disponibilidad", icon: Calendar },
+    { href: routes.TUTOR_STATISTICS, label: "Estadísticas", icon: BarChart3 },
+    { href: routes.TUTOR_MATERIAS, label: "Materias", icon: BookOpen },
   ];
 
   // Check if current path matches navigation item
@@ -134,6 +121,20 @@ export default function Header() {
     }
   };
 
+  // Función para cambiar rol con refresh y redirección
+  const handleRoleChange = (newRole) => {
+    localStorage.setItem("rol", newRole);
+    window.dispatchEvent(
+      new CustomEvent("role-change", { detail: newRole })
+    );
+    
+    // Determinar la ruta de home según el rol
+    const homeRoute = newRole === "tutor" ? routes.TUTOR_INICIO : routes.HOME;
+    
+    // Refrescar la página y redirigir al home correspondiente
+    window.location.href = homeRoute;
+  };
+
   return (
     <header className={`header ${menuOpen ? 'is-open' : ''}`}>
       <Link href="/" className="logo">
@@ -157,17 +158,22 @@ export default function Header() {
         onClick={() => setMenuOpen(false)} // cerrar al elegir una opción
       >
         {(tutorMode ? tutorNavItems : studentNavItems).map(
-          ({ href, label, icon: IconComponent }) => (
+          ({ href, label, icon: IconComponent, count }) => (
             <Link
               key={href}
               href={href}
               className={`nav-item ${isActiveRoute(href) ? "active" : ""}`}
             >
-              <IconComponent
-                size={24}
-                fill={isActiveRoute(href) ? "currentColor" : "none"}
-                className="nav-icon"
-              />
+              <div className="nav-icon-container">
+                <IconComponent
+                  size={24}
+                  fill={isActiveRoute(href) ? "currentColor" : "none"}
+                  className="nav-icon"
+                />
+                {count > 0 && (
+                  <span className="nav-badge">{count}</span>
+                )}
+              </div>
               <span className="nav-label">{label}</span>
             </Link>
           )
@@ -181,11 +187,7 @@ export default function Header() {
               className={`role-badge ${tutorMode ? "tutor" : "student"}`}
               onClick={() => {
                 const newRole = role === "student" ? "tutor" : "student";
-                setRole(newRole);
-                localStorage.setItem("rol", newRole);
-                window.dispatchEvent(
-                  new CustomEvent("role-change", { detail: newRole })
-                );
+                handleRoleChange(newRole);
               }}
             >
               {tutorMode ? "TUTOR" : "ESTUDIANTE"}
@@ -195,12 +197,11 @@ export default function Header() {
 
         {user.isLoggedIn ? (
           <div className="user-actions">
-            <button className="notification-btn" aria-label="Notifications">
-              <Bell size={20} />
-              {notificationCount > 0 && (
-                <span className="notification-badge">{notificationCount}</span>
-              )}
-            </button>
+            {tutorMode ? (
+              <NotificationDropdown />
+            ) : (
+              <StudentNotificationDropdown />
+            )}
             <button
               className="profile-btn"
               onClick={() => {
@@ -236,17 +237,22 @@ export default function Header() {
       </div>
       {/* Bottom mobile nav */}
       <nav className={`bottom-nav ${tutorMode ? 'bottom-nav-tutor' : 'bottom-nav-student'}`} aria-label="Mobile bottom navigation">
-        {(tutorMode ? tutorNavItems : studentNavItems).map(({ href, label, icon: IconComponent }) => (
+        {(tutorMode ? tutorNavItems : studentNavItems).map(({ href, label, icon: IconComponent, count }) => (
           <Link 
             key={`bottom-${href}`}
             href={href}
             className={`bottom-nav-item ${isActiveRoute(href) ? 'active' : ''}`}
           >
-            <IconComponent 
-              size={22} 
-              className="bottom-nav-icon" 
-              fill={isActiveRoute(href) ? 'currentColor' : 'none'}
-            />
+            <div className="bottom-nav-icon-container">
+              <IconComponent 
+                size={22} 
+                className="bottom-nav-icon" 
+                fill={isActiveRoute(href) ? 'currentColor' : 'none'}
+              />
+              {count > 0 && (
+                <span className="bottom-nav-badge">{count}</span>
+              )}
+            </div>
             <span className="bottom-nav-label">{label}</span>
           </Link>
         ))}

@@ -2,16 +2,28 @@
 
 import React from 'react';
 import { Button } from '../../../components/ui/button';
-import { Heart } from 'lucide-react';
+import { useFavorites } from '../../hooks/useFavorites';
+import FavoriteButton from '../FavoriteButton/FavoriteButton';
 
 /**
  * SubjectCard - Card de materia según diseño de Calendly
  * @param {Object} subject - Datos de la materia
- * @param {boolean} isFavorite - Si la materia está en favoritos
+ * @param {boolean} isFavorite - Si la materia está en favoritos (se ignora, se usa el hook)
  * @param {Function} onFindTutor - Callback al hacer click en "Find Tutor"
- * @param {Function} onToggleFavorite - Callback al hacer click en favorito
+ * @param {Function} onToggleFavorite - Callback al hacer click en favorito (se ignora, se usa el hook)
  */
-export default function SubjectCard({ subject, isFavorite = false, onFindTutor, onToggleFavorite }) {
+export default function SubjectCard({ subject, isFavorite: _, onFindTutor, onToggleFavorite: __ }) {
+    const { isCourseFavorite, toggleCourseFavorite } = useFavorites();
+    
+    // Usar el hook para determinar si es favorito
+    const isFavorite = subject?.codigo ? isCourseFavorite(subject.codigo) : false;
+    
+    const handleToggleFavorite = async () => {
+        if (subject?.codigo) {
+            await toggleCourseFavorite(subject.codigo);
+        }
+    };
+
     // Colores de iconos según la materia (basado en las imágenes)
     const getIconColor = (index) => {
         const colors = [
@@ -66,16 +78,10 @@ export default function SubjectCard({ subject, isFavorite = false, onFindTutor, 
                     >
                         Buscar tutor
                     </Button>
-                    <Button
-                        variant="ghost"
-                        onClick={onToggleFavorite}
-                        className="flex items-center gap-2 text-gray-700 hover:text-gray-900 px-4 py-2 rounded-full border border-gray-300 hover:border-gray-400"
-                    >
-                        <Heart
-                            className={`h-4 w-4 ${isFavorite ? 'fill-red-500 text-red-500' : ''}`}
-                        />
-                        Favorito
-                    </Button>
+                    <FavoriteButton
+                        isFavorite={isFavorite}
+                        onClick={handleToggleFavorite}
+                    />
                 </div>
             </div>
 

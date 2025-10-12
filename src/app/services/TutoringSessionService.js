@@ -29,15 +29,20 @@ export class TutoringSessionService {
       
       console.log('📋 Creating tutoring session with cleaned data:', cleanedData);
       
+      // Determinar si es una sesión que requiere aprobación del tutor
+      const requiresApproval = sessionData.requiresApproval !== false; // Por defecto requiere aprobación
+      
       const docRef = await addDoc(collection(db, this.COLLECTION_NAME), {
         ...cleanedData,
-        status: 'scheduled',
+        status: requiresApproval ? 'pending' : 'scheduled',
+        tutorApprovalStatus: requiresApproval ? 'pending' : 'approved',
+        requestedAt: requiresApproval ? serverTimestamp() : null,
         paymentStatus: 'pending',
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       });
 
-      console.log('✅ Tutoring session created with ID:', docRef.id);
+      console.log('✅ Tutoring session created with ID:', docRef.id, 'Status:', requiresApproval ? 'pending' : 'scheduled');
       return { success: true, id: docRef.id };
     } catch (error) {
       console.error('❌ Error creating tutoring session:', error);
@@ -137,16 +142,25 @@ export class TutoringSessionService {
           notes: notes
         });
 
-        // Actualizar la sesión con el ID del evento de Google Calendar
-        if (calendarEventResult.success) {
-          await this.updateTutoringSession(sessionResult.id, {
+        // Actualizar la sesión con el ID del evento de Google Calendar y link de Meet
+        if (calendarEventResult.success && calendarEventResult.eventId) {
+          const updateData = {
             calicoCalendarEventId: calendarEventResult.eventId,
             calicoCalendarHtmlLink: calendarEventResult.htmlLink,
             updatedAt: serverTimestamp()
-          });
-        }
+          };
 
-        console.log('✅ Evento creado en calendario central de Calico:', calendarEventResult.eventId);
+          // Agregar link de Meet si existe
+          if (calendarEventResult.meetLink) {
+            updateData.meetLink = calendarEventResult.meetLink;
+            console.log('🎥 Google Meet link agregado a la sesión:', calendarEventResult.meetLink);
+          }
+
+          await this.updateTutoringSession(sessionResult.id, updateData);
+          console.log('✅ Evento creado en calendario central de Calico:', calendarEventResult.eventId);
+        } else if (calendarEventResult.warning) {
+          console.warn('⚠️ Calendario externo:', calendarEventResult.warning);
+        }
       } catch (calendarError) {
         console.error('⚠️ Error creando evento en calendario central (pero sesión de Firebase creada):', calendarError);
         // No fallar la reserva si el calendario falla, pero registrar el error
@@ -371,10 +385,12 @@ export class TutoringSessionService {
     }
   }
 
-  // Obtener sesiones de un tutor (manteniendo compatibilidad)
+  // Obtener sesiones de un tutor (excluyendo las pendientes de aprobación)
   static async getTutorSessions(tutorEmail) {
     try {
       console.log('tutorEmail', tutorEmail);
+      
+      // Obtener todas las sesiones del tutor
       const q = query(
         collection(db, this.COLLECTION_NAME),
         where('tutorEmail', '==', tutorEmail),
@@ -385,16 +401,23 @@ export class TutoringSessionService {
       const sessions = [];
 
       querySnapshot.forEach((doc) => {
-        sessions.push({
-          id: doc.id,
-          ...doc.data(),
-          createdAt: doc.data().createdAt?.toDate(),
-          updatedAt: doc.data().updatedAt?.toDate(),
-          scheduledDateTime: doc.data().scheduledDateTime?.toDate(),
-          endDateTime: doc.data().endDateTime?.toDate(),
-        });
+        const sessionData = doc.data();
+        
+        // Filtrar sesiones pendientes de aprobación
+        if (sessionData.status !== 'pending' && sessionData.tutorApprovalStatus !== 'pending') {
+          sessions.push({
+            id: doc.id,
+            ...sessionData,
+            createdAt: sessionData.createdAt?.toDate(),
+            updatedAt: sessionData.updatedAt?.toDate(),
+            scheduledDateTime: sessionData.scheduledDateTime?.toDate(),
+            endDateTime: sessionData.endDateTime?.toDate(),
+            requestedAt: sessionData.requestedAt?.toDate(),
+          });
+        }
       });
-      console.log('sessions', sessions);
+      
+      console.log('sessions (excluding pending):', sessions.length);
 
       return sessions;
     } catch (error) {
@@ -517,6 +540,52 @@ export class TutoringSessionService {
     }
   }
 
+  // Reject a pending tutoring session
+  static async rejectTutoringSession(sessionId, tutorEmail, reason = '') {
+    try {
+      const sessionRef = doc(db, this.COLLECTION_NAME, sessionId);
+      const sessionDoc = await getDoc(sessionRef);
+
+      if (!sessionDoc.exists()) {
+        throw new Error('Session not found');
+      }
+
+      const sessionData = sessionDoc.data();
+
+      // Verify the tutor is authorized to reject this session
+      if (sessionData.tutorEmail !== tutorEmail) {
+        throw new Error('Unauthorized to reject this session');
+      }
+
+      // Verify the session is still pending
+      if (sessionData.status !== 'pending') {
+        throw new Error('Session is no longer pending');
+      }
+
+      // Update session status to rejected
+      await updateDoc(sessionRef, {
+        status: 'rejected',
+        tutorApprovalStatus: 'rejected',
+        rejectedAt: serverTimestamp(),
+        rejectionReason: reason,
+        updatedAt: serverTimestamp()
+      });
+
+      // Create notification for the student
+      await NotificationService.createSessionRejectedNotification({
+        sessionId: sessionId,
+        studentEmail: sessionData.studentEmail,
+        reason: reason
+      });
+
+      console.log(`Session ${sessionId} rejected by tutor ${tutorEmail}`);
+      return { success: true, message: 'Session rejected successfully' };
+    } catch (error) {
+      console.error('Error rejecting session:', error);
+      throw new Error(`Error rejecting session: ${error.message}`);
+    }
+  }
+
   // Decline a pending tutoring session
   static async declineTutoringSession(sessionId, tutorEmail) {
     try {
@@ -584,11 +653,11 @@ export class TutoringSessionService {
   // Get pending sessions for a tutor
   static async getPendingSessionsForTutor(tutorEmail) {
     try {
+      // Buscar sesiones que están pendientes de aprobación del tutor
       const q = query(
         collection(db, this.COLLECTION_NAME),
         where('tutorEmail', '==', tutorEmail),
         where('status', '==', 'pending'),
-        where('tutorApprovalStatus', '==', 'pending'),
         orderBy('requestedAt', 'desc')
       );
 
@@ -596,17 +665,23 @@ export class TutoringSessionService {
       const sessions = [];
 
       querySnapshot.forEach((doc) => {
-        sessions.push({
-          id: doc.id,
-          ...doc.data(),
-          createdAt: doc.data().createdAt?.toDate(),
-          updatedAt: doc.data().updatedAt?.toDate(),
-          scheduledDateTime: doc.data().scheduledDateTime?.toDate(),
-          endDateTime: doc.data().endDateTime?.toDate(),
-          requestedAt: doc.data().requestedAt?.toDate(),
-        });
+        const sessionData = doc.data();
+        
+        // Solo incluir sesiones que realmente están pendientes de aprobación
+        if (sessionData.tutorApprovalStatus === 'pending') {
+          sessions.push({
+            id: doc.id,
+            ...sessionData,
+            createdAt: sessionData.createdAt?.toDate(),
+            updatedAt: sessionData.updatedAt?.toDate(),
+            scheduledDateTime: sessionData.scheduledDateTime?.toDate(),
+            endDateTime: sessionData.endDateTime?.toDate(),
+            requestedAt: sessionData.requestedAt?.toDate(),
+          });
+        }
       });
 
+      console.log(`Found ${sessions.length} pending sessions for tutor:`, tutorEmail);
       return sessions;
     } catch (error) {
       console.error('Error getting pending sessions:', error);
@@ -639,9 +714,14 @@ export class TutoringSessionService {
   // Método para actualizar una sesión de tutoría existente
   static async updateTutoringSession(sessionId, updateData) {
     try {
+      // Eliminar campos con valores undefined o null para evitar errores de Firestore
+      const cleanedData = Object.fromEntries(
+        Object.entries(updateData).filter(([_, value]) => value !== undefined && value !== null)
+      );
+
       const docRef = doc(db, this.COLLECTION_NAME, sessionId);
       await updateDoc(docRef, {
-        ...updateData,
+        ...cleanedData,
         updatedAt: serverTimestamp()
       });
 
@@ -756,13 +836,20 @@ export class TutoringSessionService {
         throw new Error(result.message || 'Failed to create calendar event');
       }
 
-      console.log('✅ Calico Calendar event created successfully:', result.eventId);
+      // Extraer el eventId del objeto calendarEvent si existe
+      const eventId = result.calendarEvent?.id || result.eventId || null;
+      const htmlLink = result.calendarEvent?.htmlLink || result.htmlLink || null;
 
+      console.log('✅ Calico Calendar event created successfully:', eventId);
+
+      // Si el evento no se creó realmente (Google Calendar no configurado), 
+      // devolver success pero sin eventId para evitar guardar undefined/null
       return {
         success: true,
-        eventId: result.eventId,
-        htmlLink: result.htmlLink,
-        hangoutLink: result.hangoutLink
+        eventId: eventId,
+        htmlLink: htmlLink,
+        hangoutLink: result.hangoutLink || null,
+        warning: result.warning // Incluir advertencia si existe
       };
 
     } catch (error) {
@@ -891,6 +978,119 @@ export class TutoringSessionService {
     } catch (error) {
       console.error('Error cancelling tutoring session with calendar:', error);
       throw new Error(`Error cancelando sesión con calendario: ${error.message}`);
+    }
+  }
+
+  // Obtener una sesión de tutoría por ID
+  static async getTutoringSessionById(sessionId) {
+    try {
+      const docRef = doc(db, this.COLLECTION_NAME, sessionId);
+      const docSnap = await getDoc(docRef);
+
+      if (!docSnap.exists()) {
+        return null;
+      }
+
+      return {
+        id: docSnap.id,
+        ...docSnap.data(),
+        createdAt: docSnap.data().createdAt?.toDate(),
+        updatedAt: docSnap.data().updatedAt?.toDate(),
+        scheduledDateTime: docSnap.data().scheduledDateTime?.toDate(),
+        endDateTime: docSnap.data().endDateTime?.toDate(),
+        cancelledAt: docSnap.data().cancelledAt?.toDate(),
+      };
+    } catch (error) {
+      console.error('Error getting tutoring session by ID:', error);
+      throw new Error(`Error obteniendo sesión: ${error.message}`);
+    }
+  }
+
+  // Verificar si una sesión puede ser cancelada (más de 2 horas antes)
+  static canCancelSession(scheduledDateTime) {
+    const now = new Date();
+    const sessionDate = new Date(scheduledDateTime);
+    const hoursUntilSession = (sessionDate - now) / (1000 * 60 * 60);
+    
+    return hoursUntilSession > 2;
+  }
+
+  // Cancelar una sesión de tutoría (con validación de tiempo)
+  static async cancelSession(sessionId, cancelledBy, reason = 'Sesión cancelada') {
+    try {
+      // Obtener la sesión
+      const session = await this.getTutoringSessionById(sessionId);
+      
+      if (!session) {
+        throw new Error('Sesión no encontrada');
+      }
+
+      // Verificar si la sesión ya fue cancelada
+      if (session.status === 'cancelled') {
+        throw new Error('Esta sesión ya fue cancelada');
+      }
+
+      // Verificar si la sesión puede ser cancelada (más de 2 horas antes)
+      if (!this.canCancelSession(session.scheduledDateTime)) {
+        throw new Error('No puedes cancelar esta sesión. Debe ser con al menos 2 horas de anticipación.');
+      }
+
+      // Cancelar evento en calendario central si existe
+      if (session.calicoCalendarEventId) {
+        await this.cancelCalicoCalendarEvent(session.calicoCalendarEventId, reason);
+      }
+
+      // Actualizar el estado de la sesión en Firebase
+      const sessionRef = doc(db, this.COLLECTION_NAME, sessionId);
+      await updateDoc(sessionRef, {
+        status: 'cancelled',
+        cancelledBy: cancelledBy,
+        cancelledAt: serverTimestamp(),
+        cancellationReason: reason,
+        updatedAt: serverTimestamp()
+      });
+
+      // Eliminar el slot booking si existe para liberar el horario
+      if (session.parentAvailabilityId && session.slotIndex !== undefined) {
+        const slotBookingQuery = query(
+          collection(db, this.SLOT_BOOKINGS_COLLECTION),
+          where('parentAvailabilityId', '==', session.parentAvailabilityId),
+          where('slotIndex', '==', session.slotIndex),
+          where('sessionId', '==', sessionId)
+        );
+
+        const slotBookingSnapshot = await getDocs(slotBookingQuery);
+        
+        for (const doc of slotBookingSnapshot.docs) {
+          await deleteDoc(doc.ref);
+          console.log(`Slot booking ${doc.id} deleted after cancellation`);
+        }
+      }
+
+      // Crear notificación para la otra parte
+      const otherPartyEmail = cancelledBy === session.tutorEmail ? session.studentEmail : session.tutorEmail;
+      const cancellerRole = cancelledBy === session.tutorEmail ? 'tutor' : 'estudiante';
+      
+      await NotificationService.createSessionCancelledNotification({
+        sessionId: sessionId,
+        recipientEmail: otherPartyEmail,
+        cancelledBy: cancelledBy,
+        cancellerRole: cancellerRole,
+        subject: session.subject,
+        scheduledDateTime: session.scheduledDateTime,
+        reason: reason
+      });
+
+      console.log('✅ Session cancelled successfully by', cancelledBy);
+      return { 
+        success: true, 
+        message: 'Sesión cancelada exitosamente',
+        id: sessionId 
+      };
+
+    } catch (error) {
+      console.error('Error cancelling session:', error);
+      throw new Error(error.message || 'Error cancelando la sesión');
     }
   }
 
