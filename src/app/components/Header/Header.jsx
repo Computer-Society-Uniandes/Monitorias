@@ -85,17 +85,17 @@ export default function Header() {
   const favoritesCount = getFavoritesCount();
   
   const studentNavItems = [
-    { href: routes.HOME, label: "Home", icon: Home },
-    { href: routes.SEARCH_TUTORS, label: "Search", icon: Search },
-    { href: routes.FAVORITES, label: "Favorites", icon: Heart, count: favoritesCount },
-    { href: routes.HISTORY, label: "History", icon: History }
+    { href: routes.HOME, label: "Inicio", icon: Home },
+    { href: routes.SEARCH_TUTORS, label: "Buscar", icon: Search },
+    { href: routes.FAVORITES, label: "Favoritos", icon: Heart, count: favoritesCount },
+    { href: routes.HISTORY, label: "Historial", icon: History }
   ];
 
   const tutorNavItems = [
-    { href: routes.TUTOR_INICIO, label: "Home", icon: Home },
-    { href: routes.TUTOR_DISPONIBILIDAD, label: "Availability", icon: Calendar },
-    { href: routes.TUTOR_STATISTICS, label: "Statistics", icon: BarChart3 },
-    { href: routes.TUTOR_MATERIAS, label: "Subjects", icon: BookOpen },
+    { href: routes.TUTOR_INICIO, label: "Inicio", icon: Home },
+    { href: routes.TUTOR_DISPONIBILIDAD, label: "Disponibilidad", icon: Calendar },
+    { href: routes.TUTOR_STATISTICS, label: "Estadísticas", icon: BarChart3 },
+    { href: routes.TUTOR_MATERIAS, label: "Materias", icon: BookOpen },
   ];
 
   // Check if current path matches navigation item
