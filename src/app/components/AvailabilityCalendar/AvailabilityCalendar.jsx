@@ -74,9 +74,41 @@ const AvailabilityCalendar = ({
         console.log('Tutor availability:', tutorAvailability);
         setAvailabilityData(tutorAvailability);
       } else if (mode === 'joint' && subject) {
-        const data = await AvailabilityService.getAvailabilitiesBySubject(subject);
-        console.log('Joint availability data:', data);
-        setAvailabilityData(data.availabilitySlots || []);
+        // Use joint-availability API to aggregate across all tutors teaching the subject
+        const response = await fetch(`/api/joint-availability?subject=${encodeURIComponent(subject)}`);
+        const data = await response.json();
+        if (!response.ok || !data.success) {
+          throw new Error(data.error || 'Error al obtener disponibilidad conjunta');
+        }
+
+        // Flatten tutor slots into availability items expected by SlotService
+        const tutors = Array.isArray(data.tutors) ? data.tutors : [];
+        const tutorNameByEmail = {};
+        tutors.forEach(t => {
+          if (t?.mail) tutorNameByEmail[t.mail] = t.name || t.mail;
+        });
+
+        const flattened = (data.availabilities || []).flatMap(item => {
+          const email = item.tutorEmail;
+          const name = tutorNameByEmail[email] || email;
+          return (item.slots || []).map(slot => ({
+            id: slot.id || `${email}-${slot.start || Math.random()}`,
+            tutorId: email,
+            tutorEmail: email,
+            tutorName: name,
+            title: slot.title || 'Disponible',
+            description: slot.description || '',
+            startDateTime: slot.start,
+            endDateTime: slot.end,
+            location: slot.location || 'Virtual',
+            subject: slot.subject || subject,
+            color: '#2196F3',
+            googleEventId: slot.id
+          }));
+        });
+
+        console.log('Joint availability flattened:', flattened.length);
+        setAvailabilityData(flattened);
       }
     } catch (error) {
       console.error('Error loading availability data:', error);

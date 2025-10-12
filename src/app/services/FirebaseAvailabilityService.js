@@ -85,33 +85,87 @@ export class FirebaseAvailabilityService {
     }
   }
 
-  // Obtener todas las disponibilidades de un tutor
+  // Obtener todas las disponibilidades de un tutor (por tutorId o tutorEmail)
   static async getAvailabilitiesByTutor(tutorId, limitCount = 50) {
     try {
-      const q = query(
-        collection(db, this.COLLECTION_NAME),
-        where('tutorId', '==', tutorId),
-        orderBy('startDateTime', 'asc'),
-        limit(limitCount)
-      );
+      const results = [];
+      const seen = new Set();
 
-      const querySnapshot = await getDocs(q);
-      const availabilities = [];
-
-      querySnapshot.forEach((doc) => {
-        availabilities.push({
-          id: doc.id,
-          ...doc.data(),
-          // Convertir timestamps a objetos Date
-          createdAt: doc.data().createdAt?.toDate(),
-          updatedAt: doc.data().updatedAt?.toDate(),
-          syncedAt: doc.data().syncedAt?.toDate(),
-          startDateTime: doc.data().startDateTime?.toDate(),
-          endDateTime: doc.data().endDateTime?.toDate(),
+      // Helper para procesar snapshots
+      const pushFromSnapshot = (snapshot) => {
+        snapshot.forEach((docSnap) => {
+          if (seen.has(docSnap.id)) return;
+          seen.add(docSnap.id);
+          results.push({
+            id: docSnap.id,
+            ...docSnap.data(),
+            createdAt: docSnap.data().createdAt?.toDate(),
+            updatedAt: docSnap.data().updatedAt?.toDate(),
+            syncedAt: docSnap.data().syncedAt?.toDate(),
+            startDateTime: docSnap.data().startDateTime?.toDate(),
+            endDateTime: docSnap.data().endDateTime?.toDate(),
+          });
         });
+      };
+
+      // 1) Intentar por tutorId con orderBy
+      try {
+        const qById = query(
+          collection(db, this.COLLECTION_NAME),
+          where('tutorId', '==', tutorId),
+          orderBy('startDateTime', 'asc'),
+          limit(limitCount)
+        );
+        const snapById = await getDocs(qById);
+        pushFromSnapshot(snapById);
+      } catch (e1) {
+        console.warn('getAvailabilitiesByTutor: fallo consulta por tutorId con orderBy, usando fallback sin orderBy');
+        try {
+          const qByIdNoOrder = query(
+            collection(db, this.COLLECTION_NAME),
+            where('tutorId', '==', tutorId),
+            limit(limitCount)
+          );
+          const snapByIdNoOrder = await getDocs(qByIdNoOrder);
+          pushFromSnapshot(snapByIdNoOrder);
+        } catch (e1b) {
+          console.warn('getAvailabilitiesByTutor: fallo fallback por tutorId sin orderBy', e1b);
+        }
+      }
+
+      // 2) Intentar por tutorEmail con orderBy
+      try {
+        const qByEmail = query(
+          collection(db, this.COLLECTION_NAME),
+          where('tutorEmail', '==', tutorId),
+          orderBy('startDateTime', 'asc'),
+          limit(limitCount)
+        );
+        const snapByEmail = await getDocs(qByEmail);
+        pushFromSnapshot(snapByEmail);
+      } catch (e2) {
+        console.warn('getAvailabilitiesByTutor: fallo consulta por tutorEmail con orderBy, usando fallback sin orderBy');
+        try {
+          const qByEmailNoOrder = query(
+            collection(db, this.COLLECTION_NAME),
+            where('tutorEmail', '==', tutorId),
+            limit(limitCount)
+          );
+          const snapByEmailNoOrder = await getDocs(qByEmailNoOrder);
+          pushFromSnapshot(snapByEmailNoOrder);
+        } catch (e2b) {
+          console.warn('getAvailabilitiesByTutor: fallo fallback por tutorEmail sin orderBy', e2b);
+        }
+      }
+
+      // Ordenar por fecha de inicio
+      results.sort((a, b) => {
+        const da = a.startDateTime ? new Date(a.startDateTime) : new Date(0);
+        const dbd = b.startDateTime ? new Date(b.startDateTime) : new Date(0);
+        return da - dbd;
       });
 
-      return availabilities;
+      return results;
     } catch (error) {
       console.error('Error getting availabilities by tutor:', error);
       throw new Error(`Error obteniendo disponibilidades del tutor: ${error.message}`);
