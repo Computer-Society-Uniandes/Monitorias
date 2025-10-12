@@ -6,13 +6,23 @@ export class SlotService {
     const startTime = new Date(availability.startDateTime);
     const endTime = new Date(availability.endDateTime);
     
-    // Calcular la duración total en horas
-    const totalHours = Math.floor((endTime - startTime) / (1000 * 60 * 60));
+    // If endTime is less than or equal to startTime, nothing to generate
+    if (!(endTime > startTime)) {
+      return slots;
+    }
+
+    // Calcular la duración total en horas (incluir parcial como una hora completa)
+    const totalHoursFloat = (endTime - startTime) / (1000 * 60 * 60);
+    const totalHours = Math.ceil(totalHoursFloat);
     
-    // Generar slots de 1 hora
+    // Generar slots de 1 hora de forma inclusiva
     for (let i = 0; i < totalHours; i++) {
-      const slotStart = new Date(startTime.getTime() + (i * 60 * 60 * 1000));
-      const slotEnd = new Date(slotStart.getTime() + (60 * 60 * 1000));
+      let slotStart = new Date(startTime.getTime() + (i * 60 * 60 * 1000));
+      let slotEnd = new Date(slotStart.getTime() + (60 * 60 * 1000));
+      // Recortar el último slot al endTime si es parcial
+      if (slotEnd > endTime) {
+        slotEnd = new Date(endTime);
+      }
       
       // Crear ID único para este slot específico
       const slotId = `${availability.id}_slot_${i}`;
@@ -39,12 +49,16 @@ export class SlotService {
         // Información adicional del slot
         originalStartDateTime: availability.startDateTime,
         originalEndDateTime: availability.endDateTime,
-        slotDuration: 1, // 1 hora
+        // Duración en horas, puede ser < 1h en el último slot parcial
+        slotDuration: Math.max(0, (slotEnd - slotStart) / (1000 * 60 * 60)),
         recurring: availability.recurring,
         recurrenceRule: availability.recurrenceRule
       };
       
-      slots.push(slot);
+      // Evitar slots vacíos o negativos (en caso de recortes)
+      if (slotEnd > slotStart) {
+        slots.push(slot);
+      }
     }
     
     return slots;
