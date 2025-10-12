@@ -86,7 +86,7 @@
       "endDate": "Fecha fin"
     },
     "table": {
-      "title": "Historial de tutorías",
+      "title": "Historial de tutorías (Elige una tutoría completada para dejar tu reseña)",
       "date": "Fecha",
       "subject": "Materia",
       "tutor": "Tutor",
@@ -515,6 +515,40 @@
       "minutesAgoShort": "Hace {count} min",
       "hoursAgoShort": "Hace {count} h",
       "daysAgoShort": "Hace {count} d"
-    }
+    }},
+
+  "review": {
+    "newTitle": "Deja una reseña",
+    "updateTitle": "Actualiza tu reseña",
+    "fields": {
+      "subject": "Materia",
+      "tutor": "Tutor",
+      "date": "Fecha",
+      "price": "Precio",
+      "rating": "Calificación",
+      "comment": "Comentario"
+    },
+    "placeholders": {
+      "comment": "Escribe tu opinión sobre la tutoría"
+    },
+    "buttons": {
+      "submit": "Enviar reseña",
+      "update": "Actualizar reseña",
+      "saving": "Guardando...",
+      "close": "Cerrar"
+    },
+    "errors": {
+      "validation": "Debes seleccionar al menos 1 estrella.",
+      "authRequired": "Debes iniciar sesión para enviar una reseña.",
+      "sessionNotFound": "La sesión no existe.",
+      "saveError": "Error al guardar la reseña."
+  }
+},
+
+  "successModal": {
+    "title": "¡Reseña enviada con éxito!",
+    "message": "Gracias por tus comentarios. ¡Nos ayuda mucho!",
+    "close": "Cerrar"
   }
 }
+
