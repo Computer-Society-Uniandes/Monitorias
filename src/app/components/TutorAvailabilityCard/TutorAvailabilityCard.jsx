@@ -29,7 +29,7 @@ export default function TutorAvailabilityCard({ tutor, materia }) {
       console.log(`📋 Obtenidas ${availability.length} disponibilidades para ${tutor.name}`);
       console.log(availability);
       
-      // Filtrar solo las disponibilidades futuras y para la materia actual si se especifica
+      // Filtrar solo las disponibilidades futuras
       const now = new Date();
       const filtered = availability.filter(avail => {
         const startDate = new Date(avail.startDateTime);
