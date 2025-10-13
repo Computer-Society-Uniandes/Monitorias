@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import TutoringDetailsModal from '../src/app/components/TutoringDetailsModal/TutoringDetailsModal';
 
 // Mock AuthContext
@@ -145,7 +145,7 @@ describe('TutoringDetailsModal', () => {
     expect(screen.getByRole('button', { name: /Cancel Session/i })).toBeInTheDocument();
   });
 
-  test('opens reschedule modal when reschedule button is clicked', () => {
+  test('opens reschedule modal when reschedule button is clicked', async () => {
     render(
       <TutoringDetailsModal
         isOpen={true}
@@ -156,13 +156,15 @@ describe('TutoringDetailsModal', () => {
     );
 
     const rescheduleButton = screen.getByRole('button', { name: /Reschedule/i });
-    fireEvent.click(rescheduleButton);
+    await act(async () => {
+      fireEvent.click(rescheduleButton);
+    });
 
     expect(screen.getByTestId('reschedule-modal')).toBeInTheDocument();
     expect(screen.getByText('Reschedule Modal')).toBeInTheDocument();
   });
 
-  test('closes both modals after successful reschedule', () => {
+  test('closes both modals after successful reschedule', async () => {
     render(
       <TutoringDetailsModal
         isOpen={true}
@@ -174,17 +176,21 @@ describe('TutoringDetailsModal', () => {
 
     // Open reschedule modal
     const rescheduleButton = screen.getByRole('button', { name: /Reschedule/i });
-    fireEvent.click(rescheduleButton);
+    await act(async () => {
+      fireEvent.click(rescheduleButton);
+    });
 
     // Complete reschedule
     const completeButton = screen.getByRole('button', { name: /Complete Reschedule/i });
-    fireEvent.click(completeButton);
+    await act(async () => {
+      fireEvent.click(completeButton);
+    });
 
     expect(mockOnClose).toHaveBeenCalled();
     expect(mockOnSessionUpdate).toHaveBeenCalled();
   });
 
-  test('shows cancel confirmation when cancel button is clicked', () => {
+  test('shows cancel confirmation when cancel button is clicked', async () => {
     render(
       <TutoringDetailsModal
         isOpen={true}
@@ -195,7 +201,9 @@ describe('TutoringDetailsModal', () => {
     );
 
     const cancelButton = screen.getByRole('button', { name: /Cancel Session/i });
-    fireEvent.click(cancelButton);
+    await act(async () => {
+      fireEvent.click(cancelButton);
+    });
 
     expect(screen.getByText(/Are you sure you want to cancel/i)).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/Please provide a reason/i)).toBeInTheDocument();
@@ -213,7 +221,9 @@ describe('TutoringDetailsModal', () => {
 
     // Open cancel confirmation
     const cancelButton = screen.getByRole('button', { name: /Cancel Session/i });
-    fireEvent.click(cancelButton);
+    await act(async () => {
+      fireEvent.click(cancelButton);
+    });
 
     // Try to confirm without reason
     const confirmCancelButton = screen.getByRole('button', { name: /Yes, cancel/i });
@@ -236,15 +246,21 @@ describe('TutoringDetailsModal', () => {
 
     // Open cancel confirmation
     const cancelButton = screen.getByRole('button', { name: /Cancel Session/i });
-    fireEvent.click(cancelButton);
+    await act(async () => {
+      fireEvent.click(cancelButton);
+    });
 
     // Enter reason
     const reasonInput = screen.getByPlaceholderText(/Please provide a reason/i);
-    fireEvent.change(reasonInput, { target: { value: 'Emergency situation' } });
+    await act(async () => {
+      fireEvent.change(reasonInput, { target: { value: 'Emergency situation' } });
+    });
 
     // Confirm cancellation
     const confirmCancelButton = screen.getByRole('button', { name: /Yes, cancel/i });
-    fireEvent.click(confirmCancelButton);
+    await act(async () => {
+      fireEvent.click(confirmCancelButton);
+    });
 
     await waitFor(() => {
       expect(TutoringSessionService.cancelSession).toHaveBeenCalledWith(
@@ -272,15 +288,21 @@ describe('TutoringDetailsModal', () => {
 
     // Open cancel confirmation
     const cancelButton = screen.getByRole('button', { name: /Cancel Session/i });
-    fireEvent.click(cancelButton);
+    await act(async () => {
+      fireEvent.click(cancelButton);
+    });
 
     // Enter reason
     const reasonInput = screen.getByPlaceholderText(/Please provide a reason/i);
-    fireEvent.change(reasonInput, { target: { value: 'Emergency' } });
+    await act(async () => {
+      fireEvent.change(reasonInput, { target: { value: 'Emergency' } });
+    });
 
     // Confirm cancellation
     const confirmCancelButton = screen.getByRole('button', { name: /Yes, cancel/i });
-    fireEvent.click(confirmCancelButton);
+    await act(async () => {
+      fireEvent.click(confirmCancelButton);
+    });
 
     await waitFor(() => {
       expect(global.alert).toHaveBeenCalledWith(expect.stringContaining('Network error'));
@@ -345,7 +367,7 @@ describe('TutoringDetailsModal', () => {
     expect(screen.getByText(/Cannot cancel with less than 2 hours notice/i)).toBeInTheDocument();
   });
 
-  test('closes modal when close button is clicked', () => {
+  test('closes modal when close button is clicked', async () => {
     render(
       <TutoringDetailsModal
         isOpen={true}
@@ -356,12 +378,14 @@ describe('TutoringDetailsModal', () => {
     );
 
     const closeButton = screen.getByRole('button', { name: /Close/i });
-    fireEvent.click(closeButton);
+    await act(async () => {
+      fireEvent.click(closeButton);
+    });
 
     expect(mockOnClose).toHaveBeenCalled();
   });
 
-  test('allows keeping the session in cancel confirmation', () => {
+  test('allows keeping the session in cancel confirmation', async () => {
     render(
       <TutoringDetailsModal
         isOpen={true}
@@ -373,11 +397,15 @@ describe('TutoringDetailsModal', () => {
 
     // Open cancel confirmation
     const cancelButton = screen.getByRole('button', { name: /Cancel Session/i });
-    fireEvent.click(cancelButton);
+    await act(async () => {
+      fireEvent.click(cancelButton);
+    });
 
     // Click "No, keep it"
     const keepButton = screen.getByRole('button', { name: /No, keep it/i });
-    fireEvent.click(keepButton);
+    await act(async () => {
+      fireEvent.click(keepButton);
+    });
 
     // Should return to normal view
     expect(screen.queryByPlaceholderText(/Please provide a reason/i)).not.toBeInTheDocument();

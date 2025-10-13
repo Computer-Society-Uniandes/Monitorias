@@ -91,6 +91,10 @@ export default function RescheduleSessionModal({
         })
       });
 
+      if (!response) {
+        throw new Error('No response received from server');
+      }
+
       const result = await response.json();
 
       if (!response.ok) {

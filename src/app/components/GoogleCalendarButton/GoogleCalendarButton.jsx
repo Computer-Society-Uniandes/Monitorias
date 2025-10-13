@@ -14,6 +14,11 @@ export default function GoogleCalendarButton() {
     try {
       setConnectionStatus('checking');
       const response = await fetch('/api/calendar/check-connection');
+      
+      if (!response) {
+        throw new Error('No response received from server');
+      }
+      
       const data = await response.json();
       
       if (data.connected) {
@@ -68,6 +73,10 @@ export default function GoogleCalendarButton() {
       const response = await fetch('/api/calendar/refresh-token', {
         method: 'POST'
       });
+
+      if (!response) {
+        throw new Error('No response received from server');
+      }
 
       if (response.ok) {
         setConnectionStatus('connected');

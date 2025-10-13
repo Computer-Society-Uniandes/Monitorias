@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import SessionConfirmationModal from '../src/app/components/SessionConfirmationModal/SessionConfirmationModal';
 
 // Mock PaymentService
@@ -103,7 +103,7 @@ describe('SessionConfirmationModal', () => {
     expect(emailInput).toHaveValue('student@example.com');
   });
 
-  test('allows user to change email', () => {
+  test('allows user to change email', async () => {
     render(
       <SessionConfirmationModal
         isOpen={true}
@@ -114,12 +114,14 @@ describe('SessionConfirmationModal', () => {
     );
 
     const emailInput = screen.getByPlaceholderText(/your-email@example.com/i);
-    fireEvent.change(emailInput, { target: { value: 'newemail@example.com' } });
+    await act(async () => {
+      fireEvent.change(emailInput, { target: { value: 'newemail@example.com' } });
+    });
 
     expect(emailInput).toHaveValue('newemail@example.com');
   });
 
-  test('validates file type on upload', () => {
+  test('validates file type on upload', async () => {
     render(
       <SessionConfirmationModal
         isOpen={true}
@@ -133,12 +135,14 @@ describe('SessionConfirmationModal', () => {
     
     // Try to upload invalid file type
     const invalidFile = new File(['content'], 'document.txt', { type: 'text/plain' });
-    fireEvent.change(fileInput, { target: { files: [invalidFile] } });
+    await act(async () => {
+      fireEvent.change(fileInput, { target: { files: [invalidFile] } });
+    });
 
     expect(screen.getByText(/Please upload an image.*or PDF/i)).toBeInTheDocument();
   });
 
-  test('validates file size on upload', () => {
+  test('validates file size on upload', async () => {
     render(
       <SessionConfirmationModal
         isOpen={true}
@@ -154,12 +158,14 @@ describe('SessionConfirmationModal', () => {
     const largeFile = new File(['x'.repeat(6 * 1024 * 1024)], 'proof.jpg', { type: 'image/jpeg' });
     Object.defineProperty(largeFile, 'size', { value: 6 * 1024 * 1024 });
     
-    fireEvent.change(fileInput, { target: { files: [largeFile] } });
+    await act(async () => {
+      fireEvent.change(fileInput, { target: { files: [largeFile] } });
+    });
 
     expect(screen.getByText(/File must not exceed 5MB/i)).toBeInTheDocument();
   });
 
-  test('accepts valid image file', () => {
+  test('accepts valid image file', async () => {
     render(
       <SessionConfirmationModal
         isOpen={true}
@@ -174,12 +180,14 @@ describe('SessionConfirmationModal', () => {
     const validFile = new File(['content'], 'proof.jpg', { type: 'image/jpeg' });
     Object.defineProperty(validFile, 'size', { value: 1024 * 1024 }); // 1MB
     
-    fireEvent.change(fileInput, { target: { files: [validFile] } });
+    await act(async () => {
+      fireEvent.change(fileInput, { target: { files: [validFile] } });
+    });
 
     expect(screen.getByText(/File selected: proof.jpg/i)).toBeInTheDocument();
   });
 
-  test('accepts valid PDF file', () => {
+  test('accepts valid PDF file', async () => {
     render(
       <SessionConfirmationModal
         isOpen={true}
@@ -194,7 +202,9 @@ describe('SessionConfirmationModal', () => {
     const validFile = new File(['content'], 'proof.pdf', { type: 'application/pdf' });
     Object.defineProperty(validFile, 'size', { value: 1024 * 1024 }); // 1MB
     
-    fireEvent.change(fileInput, { target: { files: [validFile] } });
+    await act(async () => {
+      fireEvent.change(fileInput, { target: { files: [validFile] } });
+    });
 
     expect(screen.getByText(/File selected: proof.pdf/i)).toBeInTheDocument();
   });
@@ -213,7 +223,7 @@ describe('SessionConfirmationModal', () => {
     expect(confirmButton).toBeDisabled();
   });
 
-  test('confirm button is disabled with invalid email', () => {
+  test('confirm button is disabled with invalid email', async () => {
     render(
       <SessionConfirmationModal
         isOpen={true}
@@ -227,17 +237,21 @@ describe('SessionConfirmationModal', () => {
     const fileInput = screen.getByLabelText(/Select file/i).closest('label').querySelector('input[type="file"]');
     const validFile = new File(['content'], 'proof.jpg', { type: 'image/jpeg' });
     Object.defineProperty(validFile, 'size', { value: 1024 });
-    fireEvent.change(fileInput, { target: { files: [validFile] } });
+    await act(async () => {
+      fireEvent.change(fileInput, { target: { files: [validFile] } });
+    });
 
     // Set invalid email
     const emailInput = screen.getByPlaceholderText(/your-email@example.com/i);
-    fireEvent.change(emailInput, { target: { value: 'invalid-email' } });
+    await act(async () => {
+      fireEvent.change(emailInput, { target: { value: 'invalid-email' } });
+    });
 
     const confirmButton = screen.getByRole('button', { name: /Confirm Booking and Send Invite/i });
     expect(confirmButton).toBeDisabled();
   });
 
-  test('confirm button is enabled with valid inputs', () => {
+  test('confirm button is enabled with valid inputs', async () => {
     render(
       <SessionConfirmationModal
         isOpen={true}
@@ -251,14 +265,16 @@ describe('SessionConfirmationModal', () => {
     const fileInput = screen.getByLabelText(/Select file/i).closest('label').querySelector('input[type="file"]');
     const validFile = new File(['content'], 'proof.jpg', { type: 'image/jpeg' });
     Object.defineProperty(validFile, 'size', { value: 1024 });
-    fireEvent.change(fileInput, { target: { files: [validFile] } });
+    await act(async () => {
+      fireEvent.change(fileInput, { target: { files: [validFile] } });
+    });
 
     // Email is already pre-filled with valid email
     const confirmButton = screen.getByRole('button', { name: /Confirm Booking and Send Invite/i });
     expect(confirmButton).not.toBeDisabled();
   });
 
-  test('calls onConfirm with correct data when confirmed', () => {
+  test('calls onConfirm with correct data when confirmed', async () => {
     render(
       <SessionConfirmationModal
         isOpen={true}
@@ -272,15 +288,21 @@ describe('SessionConfirmationModal', () => {
     const fileInput = screen.getByLabelText(/Select file/i).closest('label').querySelector('input[type="file"]');
     const validFile = new File(['content'], 'proof.jpg', { type: 'image/jpeg' });
     Object.defineProperty(validFile, 'size', { value: 1024 });
-    fireEvent.change(fileInput, { target: { files: [validFile] } });
+    await act(async () => {
+      fireEvent.change(fileInput, { target: { files: [validFile] } });
+    });
 
     // Change email
     const emailInput = screen.getByPlaceholderText(/your-email@example.com/i);
-    fireEvent.change(emailInput, { target: { value: 'newemail@example.com' } });
+    await act(async () => {
+      fireEvent.change(emailInput, { target: { value: 'newemail@example.com' } });
+    });
 
     // Confirm
     const confirmButton = screen.getByRole('button', { name: /Confirm Booking and Send Invite/i });
-    fireEvent.click(confirmButton);
+    await act(async () => {
+      fireEvent.click(confirmButton);
+    });
 
     expect(mockOnConfirm).toHaveBeenCalledWith({
       studentEmail: 'newemail@example.com',
@@ -288,7 +310,7 @@ describe('SessionConfirmationModal', () => {
     });
   });
 
-  test('closes modal when back button is clicked', () => {
+  test('closes modal when back button is clicked', async () => {
     render(
       <SessionConfirmationModal
         isOpen={true}
@@ -299,12 +321,14 @@ describe('SessionConfirmationModal', () => {
     );
 
     const backButton = screen.getAllByRole('button')[0]; // First button is back button
-    fireEvent.click(backButton);
+    await act(async () => {
+      fireEvent.click(backButton);
+    });
 
     expect(mockOnClose).toHaveBeenCalled();
   });
 
-  test('closes modal when cancel button is clicked', () => {
+  test('closes modal when cancel button is clicked', async () => {
     render(
       <SessionConfirmationModal
         isOpen={true}
@@ -315,7 +339,9 @@ describe('SessionConfirmationModal', () => {
     );
 
     const cancelButton = screen.getByRole('button', { name: /Cancel/i });
-    fireEvent.click(cancelButton);
+    await act(async () => {
+      fireEvent.click(cancelButton);
+    });
 
     expect(mockOnClose).toHaveBeenCalled();
   });
@@ -354,7 +380,7 @@ describe('SessionConfirmationModal', () => {
     expect(screen.getByText('Confirming...')).toBeInTheDocument();
   });
 
-  test('displays error message when present', () => {
+  test('displays error message when present', async () => {
     render(
       <SessionConfirmationModal
         isOpen={true}
@@ -367,7 +393,9 @@ describe('SessionConfirmationModal', () => {
     // Try to upload invalid file to trigger error
     const fileInput = screen.getByLabelText(/Select file/i).closest('label').querySelector('input[type="file"]');
     const invalidFile = new File(['content'], 'document.txt', { type: 'text/plain' });
-    fireEvent.change(fileInput, { target: { files: [invalidFile] } });
+    await act(async () => {
+      fireEvent.change(fileInput, { target: { files: [invalidFile] } });
+    });
 
     // Error should be displayed
     const errorMessage = screen.getByText(/Please upload an image.*or PDF/i);
@@ -375,7 +403,7 @@ describe('SessionConfirmationModal', () => {
     expect(errorMessage.closest('div')).toHaveClass('bg-red-50');
   });
 
-  test('clears error when valid file is uploaded', () => {
+  test('clears error when valid file is uploaded', async () => {
     render(
       <SessionConfirmationModal
         isOpen={true}
@@ -389,13 +417,17 @@ describe('SessionConfirmationModal', () => {
     
     // First upload invalid file
     const invalidFile = new File(['content'], 'document.txt', { type: 'text/plain' });
-    fireEvent.change(fileInput, { target: { files: [invalidFile] } });
+    await act(async () => {
+      fireEvent.change(fileInput, { target: { files: [invalidFile] } });
+    });
     expect(screen.getByText(/Please upload an image.*or PDF/i)).toBeInTheDocument();
 
     // Then upload valid file
     const validFile = new File(['content'], 'proof.jpg', { type: 'image/jpeg' });
     Object.defineProperty(validFile, 'size', { value: 1024 });
-    fireEvent.change(fileInput, { target: { files: [validFile] } });
+    await act(async () => {
+      fireEvent.change(fileInput, { target: { files: [validFile] } });
+    });
 
     // Error should be cleared
     expect(screen.queryByText(/Please upload an image.*or PDF/i)).not.toBeInTheDocument();
@@ -440,7 +472,7 @@ describe('SessionConfirmationModal', () => {
     expect(screen.getByText(/25,000/)).toBeInTheDocument();
   });
 
-  test('validates email format', () => {
+  test('validates email format', async () => {
     render(
       <SessionConfirmationModal
         isOpen={true}
@@ -454,21 +486,29 @@ describe('SessionConfirmationModal', () => {
     const fileInput = screen.getByLabelText(/Select file/i).closest('label').querySelector('input[type="file"]');
     const validFile = new File(['content'], 'proof.jpg', { type: 'image/jpeg' });
     Object.defineProperty(validFile, 'size', { value: 1024 });
-    fireEvent.change(fileInput, { target: { files: [validFile] } });
+    await act(async () => {
+      fireEvent.change(fileInput, { target: { files: [validFile] } });
+    });
 
     const emailInput = screen.getByPlaceholderText(/your-email@example.com/i);
     
     // Test invalid emails
-    fireEvent.change(emailInput, { target: { value: 'notanemail' } });
+    await act(async () => {
+      fireEvent.change(emailInput, { target: { value: 'notanemail' } });
+    });
     let confirmButton = screen.getByRole('button', { name: /Confirm Booking and Send Invite/i });
     expect(confirmButton).toBeDisabled();
 
-    fireEvent.change(emailInput, { target: { value: 'missing@domain' } });
+    await act(async () => {
+      fireEvent.change(emailInput, { target: { value: 'missing@domain' } });
+    });
     confirmButton = screen.getByRole('button', { name: /Confirm Booking and Send Invite/i });
     expect(confirmButton).toBeDisabled();
 
     // Test valid email
-    fireEvent.change(emailInput, { target: { value: 'valid@example.com' } });
+    await act(async () => {
+      fireEvent.change(emailInput, { target: { value: 'valid@example.com' } });
+    });
     confirmButton = screen.getByRole('button', { name: /Confirm Booking and Send Invite/i });
     expect(confirmButton).not.toBeDisabled();
   });

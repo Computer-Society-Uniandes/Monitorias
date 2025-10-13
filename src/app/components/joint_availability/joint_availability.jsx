@@ -40,6 +40,10 @@ export default function JointAvailability({ subject = "Matemáticas" }) {
       // Usar la nueva API optimizada para disponibilidad conjunta
       const response = await fetch(`/api/joint-availability?subject=${encodeURIComponent(subject)}`);
       
+      if (!response) {
+        throw new Error('No response received from server');
+      }
+      
       console.log(`📡 API Response status: ${response.status}`);
       
       if (!response.ok) {

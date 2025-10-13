@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import TutorApprovalModal from '../src/app/components/TutorApprovalModal/TutorApprovalModal';
 import { TutoringSessionService } from '../src/app/services/TutoringSessionService';
@@ -141,7 +141,9 @@ describe('TutorApprovalModal Component', () => {
       render(<TutorApprovalModal {...mockProps} />);
       
       const acceptButton = screen.getByRole('button', { name: /aprobar/i });
-      fireEvent.click(acceptButton);
+      await act(async () => {
+        fireEvent.click(acceptButton);
+      });
       
       await waitFor(() => {
         expect(TutoringSessionService.acceptTutoringSession).toHaveBeenCalledWith(
@@ -159,7 +161,9 @@ describe('TutorApprovalModal Component', () => {
       render(<TutorApprovalModal {...mockProps} />);
       
       const acceptButton = screen.getByRole('button', { name: /aprobar/i });
-      fireEvent.click(acceptButton);
+      await act(async () => {
+        fireEvent.click(acceptButton);
+      });
       
       expect(screen.getByText(/aprobando/i)).toBeInTheDocument();
       expect(acceptButton).toBeDisabled();
@@ -169,7 +173,9 @@ describe('TutorApprovalModal Component', () => {
       render(<TutorApprovalModal {...mockProps} />);
       
       const acceptButton = screen.getByRole('button', { name: /aprobar/i });
-      fireEvent.click(acceptButton);
+      await act(async () => {
+        fireEvent.click(acceptButton);
+      });
       
       await waitFor(() => {
         expect(screen.getByTestId('session-booked-modal')).toBeInTheDocument();
@@ -180,7 +186,9 @@ describe('TutorApprovalModal Component', () => {
       render(<TutorApprovalModal {...mockProps} />);
       
       const acceptButton = screen.getByRole('button', { name: /aprobar/i });
-      fireEvent.click(acceptButton);
+      await act(async () => {
+        fireEvent.click(acceptButton);
+      });
       
       await waitFor(() => {
         expect(mockProps.onApprovalComplete).toHaveBeenCalled();
@@ -195,7 +203,9 @@ describe('TutorApprovalModal Component', () => {
       render(<TutorApprovalModal {...mockProps} />);
       
       const acceptButton = screen.getByRole('button', { name: /aprobar/i });
-      fireEvent.click(acceptButton);
+      await act(async () => {
+        fireEvent.click(acceptButton);
+      });
       
       await waitFor(() => {
         expect(screen.getByText(/failed to accept session/i)).toBeInTheDocument();
@@ -210,7 +220,9 @@ describe('TutorApprovalModal Component', () => {
       render(<TutorApprovalModal {...mockProps} />);
       
       const acceptButton = screen.getByRole('button', { name: /aprobar/i });
-      fireEvent.click(acceptButton);
+      await act(async () => {
+        fireEvent.click(acceptButton);
+      });
       
       await waitFor(() => {
         expect(screen.getByText(/failed to accept session/i)).toBeInTheDocument();
@@ -226,7 +238,9 @@ describe('TutorApprovalModal Component', () => {
       render(<TutorApprovalModal {...mockProps} />);
       
       const declineButton = screen.getByRole('button', { name: /rechazar/i });
-      fireEvent.click(declineButton);
+      await act(async () => {
+        fireEvent.click(declineButton);
+      });
       
       await waitFor(() => {
         expect(TutoringSessionService.declineTutoringSession).toHaveBeenCalledWith(
@@ -244,7 +258,9 @@ describe('TutorApprovalModal Component', () => {
       render(<TutorApprovalModal {...mockProps} />);
       
       const declineButton = screen.getByRole('button', { name: /rechazar/i });
-      fireEvent.click(declineButton);
+      await act(async () => {
+        fireEvent.click(declineButton);
+      });
       
       expect(screen.getByText(/rechazando/i)).toBeInTheDocument();
       expect(declineButton).toBeDisabled();
@@ -254,7 +270,9 @@ describe('TutorApprovalModal Component', () => {
       render(<TutorApprovalModal {...mockProps} />);
       
       const declineButton = screen.getByRole('button', { name: /rechazar/i });
-      fireEvent.click(declineButton);
+      await act(async () => {
+        fireEvent.click(declineButton);
+      });
       
       await waitFor(() => {
         expect(mockProps.onClose).toHaveBeenCalled();
@@ -265,7 +283,9 @@ describe('TutorApprovalModal Component', () => {
       render(<TutorApprovalModal {...mockProps} />);
       
       const declineButton = screen.getByRole('button', { name: /rechazar/i });
-      fireEvent.click(declineButton);
+      await act(async () => {
+        fireEvent.click(declineButton);
+      });
       
       await waitFor(() => {
         expect(mockProps.onApprovalComplete).toHaveBeenCalled();
@@ -280,7 +300,9 @@ describe('TutorApprovalModal Component', () => {
       render(<TutorApprovalModal {...mockProps} />);
       
       const declineButton = screen.getByRole('button', { name: /rechazar/i });
-      fireEvent.click(declineButton);
+      await act(async () => {
+        fireEvent.click(declineButton);
+      });
       
       await waitFor(() => {
         expect(screen.getByText(/failed to decline session/i)).toBeInTheDocument();
@@ -295,7 +317,9 @@ describe('TutorApprovalModal Component', () => {
       render(<TutorApprovalModal {...mockProps} />);
       
       const declineButton = screen.getByRole('button', { name: /rechazar/i });
-      fireEvent.click(declineButton);
+      await act(async () => {
+        fireEvent.click(declineButton);
+      });
       
       await waitFor(() => {
         expect(screen.getByText(/failed to decline session/i)).toBeInTheDocument();
@@ -307,13 +331,15 @@ describe('TutorApprovalModal Component', () => {
   });
 
   describe('Modal Controls', () => {
-    test('closes modal when close button is clicked', () => {
+    test('closes modal when close button is clicked', async () => {
       render(<TutorApprovalModal {...mockProps} />);
       
       // Get the close button (the X button in the header)
       const buttons = screen.getAllByRole('button');
       const closeButton = buttons.find(button => button.querySelector('svg'));
-      fireEvent.click(closeButton);
+      await act(async () => {
+        fireEvent.click(closeButton);
+      });
       
       expect(mockProps.onClose).toHaveBeenCalled();
     });
@@ -326,7 +352,9 @@ describe('TutorApprovalModal Component', () => {
       render(<TutorApprovalModal {...mockProps} />);
       
       const acceptButton = screen.getByRole('button', { name: /aprobar/i });
-      fireEvent.click(acceptButton);
+      await act(async () => {
+        fireEvent.click(acceptButton);
+      });
       
       // Get all buttons and find the close button (the X button in the header)
       const buttons = screen.getAllByRole('button');
@@ -342,7 +370,9 @@ describe('TutorApprovalModal Component', () => {
       render(<TutorApprovalModal {...mockProps} />);
       
       const acceptButton = screen.getByRole('button', { name: /aprobar/i });
-      fireEvent.click(acceptButton);
+      await act(async () => {
+        fireEvent.click(acceptButton);
+      });
       
       // During loading, the decline button shows "Rechazando..." text
       const declineButton = screen.getByText(/rechazando/i);
@@ -356,7 +386,9 @@ describe('TutorApprovalModal Component', () => {
       render(<TutorApprovalModal {...mockProps} />);
       
       const acceptButton = screen.getByRole('button', { name: /aprobar/i });
-      fireEvent.click(acceptButton);
+      await act(async () => {
+        fireEvent.click(acceptButton);
+      });
       
       await waitFor(() => {
         expect(screen.getByTestId('session-booked-modal')).toBeInTheDocument();
@@ -378,14 +410,18 @@ describe('TutorApprovalModal Component', () => {
       render(<TutorApprovalModal {...mockProps} />);
       
       const acceptButton = screen.getByRole('button', { name: /aprobar/i });
-      fireEvent.click(acceptButton);
+      await act(async () => {
+        fireEvent.click(acceptButton);
+      });
       
       await waitFor(() => {
         expect(screen.getByTestId('session-booked-modal')).toBeInTheDocument();
       });
       
       const closeModalButton = screen.getByText('Close Modal');
-      fireEvent.click(closeModalButton);
+      await act(async () => {
+        fireEvent.click(closeModalButton);
+      });
       
       await waitFor(() => {
         expect(screen.queryByTestId('session-booked-modal')).not.toBeInTheDocument();
@@ -398,7 +434,9 @@ describe('TutorApprovalModal Component', () => {
       render(<TutorApprovalModal {...mockProps} />);
       
       const acceptButton = screen.getByRole('button', { name: /aprobar/i });
-      fireEvent.click(acceptButton);
+      await act(async () => {
+        fireEvent.click(acceptButton);
+      });
       
       await waitFor(() => {
         expect(screen.getByTestId('session-booked-modal')).toBeInTheDocument();
@@ -448,7 +486,9 @@ describe('TutorApprovalModal Component', () => {
       render(<TutorApprovalModal {...mockProps} />);
       
       const acceptButton = screen.getByRole('button', { name: /aprobar/i });
-      fireEvent.click(acceptButton);
+      await act(async () => {
+        fireEvent.click(acceptButton);
+      });
       
       await waitFor(() => {
         expect(screen.getByText(/network error/i)).toBeInTheDocument();
@@ -463,7 +503,9 @@ describe('TutorApprovalModal Component', () => {
       render(<TutorApprovalModal {...mockProps} />);
       
       const declineButton = screen.getByRole('button', { name: /rechazar/i });
-      fireEvent.click(declineButton);
+      await act(async () => {
+        fireEvent.click(declineButton);
+      });
       
       await waitFor(() => {
         expect(screen.getByText(/service temporarily unavailable/i)).toBeInTheDocument();
@@ -478,7 +520,9 @@ describe('TutorApprovalModal Component', () => {
       render(<TutorApprovalModal {...mockProps} />);
       
       const acceptButton = screen.getByRole('button', { name: /aprobar/i });
-      fireEvent.click(acceptButton);
+      await act(async () => {
+        fireEvent.click(acceptButton);
+      });
       
       await waitFor(() => {
         expect(screen.getByText(/first error/i)).toBeInTheDocument();
@@ -491,7 +535,9 @@ describe('TutorApprovalModal Component', () => {
       });
       
       const declineButton = screen.getByRole('button', { name: /rechazar/i });
-      fireEvent.click(declineButton);
+      await act(async () => {
+        fireEvent.click(declineButton);
+      });
       
       await waitFor(() => {
         expect(screen.queryByText(/first error/i)).not.toBeInTheDocument();

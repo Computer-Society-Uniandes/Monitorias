@@ -668,7 +668,9 @@ describe('UnifiedAvailability Component', () => {
       });
       
       const saveButton = screen.getByText('Save');
-      fireEvent.click(saveButton);
+      await act(async () => {
+        fireEvent.click(saveButton);
+      });
       
       await waitFor(() => {
         expect(screen.getByText('Failed to create')).toBeInTheDocument();

@@ -11,9 +11,15 @@ export default function CalendarEvents() {
     const fetchEvents = async () => {
       try {
         const response = await fetch('/api/calendar/events');
+        
+        if (!response) {
+          throw new Error('No response received from server');
+        }
+        
         if (!response.ok) {
           throw new Error('Error al obtener eventos');
         }
+        
         const data = await response.json();
         setEvents(data);
       } catch (err) {

@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
 import ReviewModal from "../src/app/components/ReviewModal/ReviewModal";
 
 
@@ -78,18 +78,22 @@ describe("ReviewModal - tests completos", () => {
     expect(screen.getByText(/\$30000/)).toBeInTheDocument();
   });
 
-  it("permite seleccionar estrellas y escribir un comentario", () => {
+  it("permite seleccionar estrellas y escribir un comentario", async () => {
     render(<ReviewModal session={sessionMock} onClose={() => {}} />);
 
     const allButtons = screen.getAllByRole("button");
     const starButtons = allButtons.filter((b) => b.className && b.className.includes("text-3xl"));
     expect(starButtons.length).toBeGreaterThanOrEqual(5);
 
-    fireEvent.click(starButtons[4]);
+    await act(async () => {
+      fireEvent.click(starButtons[4]);
+    });
     expect(starButtons[4].className).toEqual(expect.stringContaining("text-yellow-500"));
 
     const textarea = screen.getByRole("textbox");
-    fireEvent.change(textarea, { target: { value: "Excelente tutoría" } });
+    await act(async () => {
+      fireEvent.change(textarea, { target: { value: "Excelente tutoría" } });
+    });
     expect(textarea).toHaveValue("Excelente tutoría");
   });
 
@@ -118,12 +122,18 @@ describe("ReviewModal - tests completos", () => {
 
     const allButtons = screen.getAllByRole("button");
     const starButtons = allButtons.filter((b) => b.className && b.className.includes("text-3xl"));
-    fireEvent.click(starButtons[4]);
+    await act(async () => {
+      fireEvent.click(starButtons[4]);
+    });
 
-    fireEvent.change(screen.getByRole("textbox"), { target: { value: "Muy buena clase" } });
+    await act(async () => {
+      fireEvent.change(screen.getByRole("textbox"), { target: { value: "Muy buena clase" } });
+    });
 
     const submit = screen.getByRole("button", { name: "review.buttons.submit" });
-    fireEvent.click(submit);
+    await act(async () => {
+      fireEvent.click(submit);
+    });
 
     await waitFor(() => {
       expect(screen.getByTestId("success-modal")).toBeInTheDocument();
@@ -146,11 +156,17 @@ describe("ReviewModal - tests completos", () => {
 
     const allButtons = screen.getAllByRole("button");
     const starButtons = allButtons.filter((b) => b.className && b.className.includes("text-3xl"));
-    fireEvent.click(starButtons[1]); // 2 estrellas
-    fireEvent.change(screen.getByRole("textbox"), { target: { value: "updated" } });
+    await act(async () => {
+      fireEvent.click(starButtons[1]); // 2 estrellas
+    });
+    await act(async () => {
+      fireEvent.change(screen.getByRole("textbox"), { target: { value: "updated" } });
+    });
 
     const submit = screen.getByRole("button", { name: "review.buttons.submit" });
-    fireEvent.click(submit);
+    await act(async () => {
+      fireEvent.click(submit);
+    });
 
     await waitFor(() => {
       expect(txMock.update).toHaveBeenCalled();
@@ -171,11 +187,17 @@ describe("ReviewModal - tests completos", () => {
 
     const allButtons = screen.getAllByRole("button");
     const starButtons = allButtons.filter((b) => b.className && b.className.includes("text-3xl"));
-    fireEvent.click(starButtons[4]);
-    fireEvent.change(screen.getByRole("textbox"), { target: { value: "x" } });
+    await act(async () => {
+      fireEvent.click(starButtons[4]);
+    });
+    await act(async () => {
+      fireEvent.change(screen.getByRole("textbox"), { target: { value: "x" } });
+    });
 
     const submit = screen.getByRole("button", { name: "review.buttons.submit" });
-    fireEvent.click(submit);
+    await act(async () => {
+      fireEvent.click(submit);
+    });
 
     await waitFor(() => {
       expect(global.alert).toHaveBeenCalledWith("review.errors.saveError");
@@ -193,21 +215,29 @@ describe("ReviewModal - tests completos", () => {
 
     const allButtons = screen.getAllByRole("button");
     const starButtons = allButtons.filter((b) => b.className && b.className.includes("text-3xl"));
-    fireEvent.click(starButtons[4]);
-    fireEvent.change(screen.getByRole("textbox"), { target: { value: "x" } });
+    await act(async () => {
+      fireEvent.click(starButtons[4]);
+    });
+    await act(async () => {
+      fireEvent.change(screen.getByRole("textbox"), { target: { value: "x" } });
+    });
 
     const submit = screen.getByRole("button", { name: "review.buttons.submit" });
-    fireEvent.click(submit);
+    await act(async () => {
+      fireEvent.click(submit);
+    });
 
     expect(submit).toBeDisabled();
   });
 
-  it("cierra el modal principal al hacer click en 'Cerrar'", () => {
+  it("cierra el modal principal al hacer click en 'Cerrar'", async () => {
     const mockOnClose = jest.fn();
     render(<ReviewModal session={sessionMock} onClose={mockOnClose} />);
 
     const closeBtn = screen.getByRole("button", { name: "review.buttons.close" });
-    fireEvent.click(closeBtn);
+    await act(async () => {
+      fireEvent.click(closeBtn);
+    });
     expect(mockOnClose).toHaveBeenCalled();
   });
 
@@ -218,16 +248,24 @@ describe("ReviewModal - tests completos", () => {
 
     const allButtons = screen.getAllByRole("button");
     const starButtons = allButtons.filter((b) => b.className && b.className.includes("text-3xl"));
-    fireEvent.click(starButtons[4]);
-    fireEvent.change(screen.getByRole("textbox"), { target: { value: "ok" } });
+    await act(async () => {
+      fireEvent.click(starButtons[4]);
+    });
+    await act(async () => {
+      fireEvent.change(screen.getByRole("textbox"), { target: { value: "ok" } });
+    });
 
     const submit = screen.getByRole("button", { name: "review.buttons.submit" });
-    fireEvent.click(submit);
+    await act(async () => {
+      fireEvent.click(submit);
+    });
 
     await waitFor(() => expect(screen.getByTestId("success-modal")).toBeInTheDocument());
 
     const closeSuccess = screen.getByRole("button", { name: "successModal.close" });
-    fireEvent.click(closeSuccess);
+    await act(async () => {
+      fireEvent.click(closeSuccess);
+    });
 
     await waitFor(() => {
       expect(mockOnClose).toHaveBeenCalled();

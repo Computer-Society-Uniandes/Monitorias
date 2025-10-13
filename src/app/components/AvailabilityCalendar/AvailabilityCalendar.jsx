@@ -84,6 +84,11 @@ const AvailabilityCalendar = ({
       } else if (mode === 'joint' && subject) {
         // Use joint-availability API to aggregate across all tutors teaching the subject
         const response = await fetch(`/api/joint-availability?subject=${encodeURIComponent(subject)}`);
+        
+        if (!response) {
+          throw new Error('No response received from server');
+        }
+        
         const data = await response.json();
         if (!response.ok || !data.success) {
           throw new Error(data.error || t('availability.calendar.errors.load'));
