@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { auth, db } from '../../../firebaseConfig';
 import { doc, getDoc } from "firebase/firestore";
 import { useAuth } from '../../context/SecureAuthContext';
+import { useI18n } from '../../../lib/i18n';
 import routes from 'app/routes';
 import './Login.css';
 import CalicoLogo from "../../../../public/CalicoLogo.png";
@@ -15,6 +16,7 @@ import Image from "next/image";
 export default function Login() {
   const router = useRouter();
   const { user, login } = useAuth();
+  const { t } = useI18n();
   const [form, setForm] = useState({ email: '', password: '' });
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -60,8 +62,30 @@ export default function Login() {
       // Usar el contexto para manejar el login
       login(userData);
       router.push(routes.HOME);
-    } catch {
-      setError('Usuario o contraseña incorrectos.');
+    } catch (error) {
+      console.error('Login error:', error);
+      
+      // Map Firebase error codes to translated messages
+      let errorMessage = t('auth.login.errors.generic');
+      switch (error.code) {
+        case 'auth/user-not-found':
+          errorMessage = t('auth.login.errors.userNotFound');
+          break;
+        case 'auth/wrong-password':
+          errorMessage = t('auth.login.errors.wrongPassword');
+          break;
+        case 'auth/invalid-credential':
+          errorMessage = t('auth.login.errors.invalidCredentials');
+          break;
+        case 'auth/too-many-requests':
+          errorMessage = t('auth.login.errors.tooManyAttempts');
+          break;
+        default:
+          errorMessage = t('auth.login.errors.generic');
+      }
+      
+      setError(errorMessage);
+    } finally {
       setLoading(false);
     }
   };
@@ -72,34 +96,34 @@ export default function Login() {
         <div className="login-card">
           <div className='flex flex-col justify-center items-center'>
             <Image src={CalicoLogo} alt="Calico" className="logoImg w-28 md:w-36 " priority />
-            <h2 className="login-title">Bienvenido de Vuelta!</h2>
-            <div className='flex gap-1 mb-2'><p className='text-gray-600 text-bold'>Registrate para acceder a Calico</p> </div> 
+            <h2 className="login-title">{t('auth.login.subtitle')}</h2>
+            <div className='flex gap-1 mb-2'><p className='text-gray-600 text-bold'>{t('auth.login.subtitle')}</p> </div> 
           </div>
           
           <form onSubmit={handleSubmit} className="login-form">
             <label htmlFor="email" className="login-label">
-              Correo
+              {t('auth.login.email')}
             </label>
             <input
               id="email"
               name="email"
               type="email"
               className="login-input"
-              placeholder="Tu correo"
+              placeholder={t('auth.login.emailPlaceholder')}
               value={form.email}
               onChange={handleChange}
               required
             />
 
             <label htmlFor="password" className="login-label">
-              Contraseña
+              {t('auth.login.password')}
             </label>
             <input
               id="password"
               name="password"
               type="password"
               className="login-input"
-              placeholder="Tu contraseña"
+              placeholder={t('auth.login.passwordPlaceholder')}
               value={form.password}
               onChange={handleChange}
               required
@@ -112,16 +136,16 @@ export default function Login() {
               className="login-btn"
               disabled={loading}
             >
-              {loading ? 'Cargando...' : 'Iniciar Sesión'}
+              {loading ? t('auth.login.loading') : t('auth.login.loginButton')}
             </button>
           </form>
           <p className="login-text">
-            ¿No tienes una cuenta?
+            {t('auth.login.noAccount')}
             <span
               className="login-link"
               onClick={() => router.push(routes.REGISTER)}
             >
-              &nbsp;Regístrate
+              &nbsp;{t('auth.login.signUp')}
             </span>
           </p>
         </div>

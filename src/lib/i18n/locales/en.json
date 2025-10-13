@@ -672,5 +672,58 @@
         "description": "Transform the educational experience at Uniandes, creating an ecosystem where knowledge flows freely among students. We seek to eliminate barriers in learning and foster a culture of collaboration and academic excellence."
       }
     }
+  },
+  "auth": {
+    "login": {
+      "title": "Log In",
+      "subtitle": "Welcome back to Calico",
+      "email": "Email",
+      "emailPlaceholder": "Your email",
+      "password": "Password",
+      "passwordPlaceholder": "Your password",
+      "loginButton": "Log In",
+      "loading": "Loading...",
+      "noAccount": "Don't have an account?",
+      "signUp": "Sign Up",
+      "errors": {
+        "invalidCredentials": "Invalid credentials. Check your email and password.",
+        "userNotFound": "User not found.",
+        "wrongPassword": "Wrong password.",
+        "tooManyAttempts": "Too many failed attempts. Try again later.",
+        "generic": "Error logging in. Please try again."
+      }
+    },
+    "register": {
+      "title": "Create an account",
+      "subtitle": "Sign up to access Calico",
+      "continueWithGoogle": "Continue with Google",
+      "or": "––––––––   &nbsp; or &nbsp;   ––––––––",
+      "name": "Name",
+      "namePlaceholder": "Your name",
+      "phone": "Phone",
+      "phonePlaceholder": "Phone number",
+      "major": "Major",
+      "majorPlaceholder": "Select...",
+      "email": "Uniandes Email",
+      "emailPlaceholder": "Your email",
+      "password": "Password",
+      "passwordPlaceholder": "Your password",
+      "confirmPassword": "Confirm password",
+      "confirmPasswordPlaceholder": "Repeat your password",
+      "registerButton": "Sign Up",
+      "alreadyHaveAccount": "Already have an account?",
+      "signIn": "Log In",
+      "errors": {
+        "allFieldsRequired": "All fields are required.",
+        "passwordsDontMatch": "Passwords don't match.",
+        "registrationFailed": "Could not register user.",
+        "emailAlreadyExists": "This email is already registered.",
+        "weakPassword": "Password must be at least 6 characters.",
+        "invalidEmail": "Invalid email address."
+      },
+      "success": {
+        "registrationSuccessful": "Registration successful"
+      }
+    }
   }
 }

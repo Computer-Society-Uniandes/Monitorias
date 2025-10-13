@@ -673,6 +673,59 @@
         "description": "Transformar la experiencia educativa en Uniandes, creando un ecosistema donde el conocimiento fluya libremente entre estudiantes. Buscamos eliminar barreras en el aprendizaje y fomentar una cultura de colaboración y excelencia académica."
       }
     }
+  },
+  "auth": {
+    "login": {
+      "title": "Iniciar Sesión",
+      "subtitle": "Bienvenido de vuelta a Calico",
+      "email": "Correo electrónico",
+      "emailPlaceholder": "Tu correo electrónico",
+      "password": "Contraseña",
+      "passwordPlaceholder": "Tu contraseña",
+      "loginButton": "Iniciar Sesión",
+      "loading": "Cargando...",
+      "noAccount": "¿No tienes una cuenta?",
+      "signUp": "Regístrate",
+      "errors": {
+        "invalidCredentials": "Credenciales inválidas. Verifica tu correo y contraseña.",
+        "userNotFound": "Usuario no encontrado.",
+        "wrongPassword": "Contraseña incorrecta.",
+        "tooManyAttempts": "Demasiados intentos fallidos. Intenta de nuevo más tarde.",
+        "generic": "Error al iniciar sesión. Intenta de nuevo."
+      }
+    },
+    "register": {
+      "title": "Crea una cuenta",
+      "subtitle": "Registrate para acceder a Calico",
+      "continueWithGoogle": "Continua con Google",
+      "or": "––––––––   &nbsp; o &nbsp;   ––––––––",
+      "name": "Nombre",
+      "namePlaceholder": "Tu nombre",
+      "phone": "Teléfono",
+      "phonePlaceholder": "Número de teléfono",
+      "major": "Carrera",
+      "majorPlaceholder": "Seleccione...",
+      "email": "Correo Uniandes",
+      "emailPlaceholder": "Tu correo",
+      "password": "Contraseña",
+      "passwordPlaceholder": "Tu contraseña",
+      "confirmPassword": "Confirmar contraseña",
+      "confirmPasswordPlaceholder": "Repite tu contraseña",
+      "registerButton": "Registrarme",
+      "alreadyHaveAccount": "¿Ya tienes una cuenta?",
+      "signIn": "Inicia sesión",
+      "errors": {
+        "allFieldsRequired": "Todos los campos son obligatorios.",
+        "passwordsDontMatch": "Las contraseñas no coinciden.",
+        "registrationFailed": "No se pudo registrar el usuario.",
+        "emailAlreadyExists": "Este correo ya está registrado.",
+        "weakPassword": "La contraseña debe tener al menos 6 caracteres.",
+        "invalidEmail": "Correo electrónico inválido."
+      },
+      "success": {
+        "registrationSuccessful": "Registro exitoso"
+      }
+    }
   }
 }
 
