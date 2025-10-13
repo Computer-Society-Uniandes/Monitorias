@@ -197,8 +197,12 @@ describe('RescheduleSessionModal', () => {
       expect(screen.getByText(/time slot available/i)).toBeInTheDocument();
     });
 
-    // Find the slot button by its content (component converts UTC to local time)
-    const slotButton = screen.getByRole('button', { name: /04:00 AM.*05:00 AM/i });
+    // Find the slot button by looking for any time pattern (timezone-independent)
+    const slotButtons = screen.getAllByRole('button');
+    const slotButton = slotButtons.find(button => 
+      button.textContent && button.textContent.match(/\d{1,2}:\d{2}\s*(AM|PM)?.*\d{1,2}:\d{2}\s*(AM|PM)?/i)
+    );
+    expect(slotButton).toBeInTheDocument();
     await act(async () => {
       fireEvent.click(slotButton);
     });
@@ -238,8 +242,12 @@ describe('RescheduleSessionModal', () => {
       expect(screen.getByText(/time slot available/i)).toBeInTheDocument();
     });
 
-    // Select slot (component converts UTC to local time)
-    const slotButton = screen.getByRole('button', { name: /04:00 AM.*05:00 AM/i });
+    // Select slot (timezone-independent approach)
+    const slotButtons = screen.getAllByRole('button');
+    const slotButton = slotButtons.find(button => 
+      button.textContent && button.textContent.match(/\d{1,2}:\d{2}\s*(AM|PM)?.*\d{1,2}:\d{2}\s*(AM|PM)?/i)
+    );
+    expect(slotButton).toBeInTheDocument();
     await act(async () => {
       fireEvent.click(slotButton);
     });
@@ -291,8 +299,12 @@ describe('RescheduleSessionModal', () => {
       expect(screen.getByText(/time slot available/i)).toBeInTheDocument();
     });
 
-    // Select slot (component converts UTC to local time)
-    const slotButton = screen.getByRole('button', { name: /04:00 AM.*05:00 AM/i });
+    // Select slot (timezone-independent approach)
+    const slotButtons = screen.getAllByRole('button');
+    const slotButton = slotButtons.find(button => 
+      button.textContent && button.textContent.match(/\d{1,2}:\d{2}\s*(AM|PM)?.*\d{1,2}:\d{2}\s*(AM|PM)?/i)
+    );
+    expect(slotButton).toBeInTheDocument();
     await act(async () => {
       fireEvent.click(slotButton);
     });
@@ -360,8 +372,12 @@ describe('RescheduleSessionModal', () => {
       expect(screen.getByText(/time slot available/i)).toBeInTheDocument();
     });
 
-    // Select slot and enter reason (component converts UTC to local time)
-    const slotButton = screen.getByRole('button', { name: /04:00 AM.*05:00 AM/i });
+    // Select slot and enter reason (timezone-independent approach)
+    const slotButtons = screen.getAllByRole('button');
+    const slotButton = slotButtons.find(button => 
+      button.textContent && button.textContent.match(/\d{1,2}:\d{2}\s*(AM|PM)?.*\d{1,2}:\d{2}\s*(AM|PM)?/i)
+    );
+    expect(slotButton).toBeInTheDocument();
     await act(async () => {
       fireEvent.click(slotButton);
     });
@@ -441,8 +457,12 @@ describe('RescheduleSessionModal', () => {
       expect(screen.getByText(/time slot available/i)).toBeInTheDocument();
     });
 
-    // Select slot and enter reason (component converts UTC to local time)
-    const slotButton = screen.getByRole('button', { name: /04:00 AM.*05:00 AM/i });
+    // Select slot and enter reason (timezone-independent approach)
+    const slotButtons = screen.getAllByRole('button');
+    const slotButton = slotButtons.find(button => 
+      button.textContent && button.textContent.match(/\d{1,2}:\d{2}\s*(AM|PM)?.*\d{1,2}:\d{2}\s*(AM|PM)?/i)
+    );
+    expect(slotButton).toBeInTheDocument();
     await act(async () => {
       fireEvent.click(slotButton);
     });
