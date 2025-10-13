@@ -334,7 +334,7 @@ export default function TutorStatistics() {
       case 'transfer': return '🏦';
       case 'cash': return '💵';
       case 'card': return '💳';
-      default: return '💰';
+      default: return '';
     }
   };
 

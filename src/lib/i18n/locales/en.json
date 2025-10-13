@@ -433,7 +433,7 @@
     "tomorrow": "Tomorrow",
     "student": "Student:",
     "tutor": "Tutor:",
-    "pendingApproval": "⏳ Pending approval",
+    "pendingApproval": "Pending approval",
     "statusScheduled": "Scheduled",
     "statusPending": "Pending"
   },
@@ -741,7 +741,7 @@
     "myTutorings": "📚 My Tutorings",
     "manageSubjects": "📖 Manage Subjects",
     "availability": "📅 Availability",
-    "payments": "💰 Payments",
+    "payments": " Payments",
     "addSubject": "Add subject",
     "stats": {
       "thisMonth": "This month",
@@ -759,7 +759,7 @@
     "noSubjects": "No subjects available",
     "upcomingSession": "Next session",
     "noUpcomingSession": "No upcoming session",
-    "upcomingTutorials": "Upcoming Tutorings 📚",
+    "upcomingTutorials": "Upcoming Tutorings",
     "viewAllTutorials": "View all",
     "calendar": {
       "title": "Calendar Integration",
@@ -790,7 +790,7 @@
   },
 
   "tutorPayments": {
-    "title": "Payments and Earnings 💰",
+    "title": "Payments and Earnings ",
     "subtitle": "Manage your income and payment history",
     "requestWithdrawal": "💸 Request Withdrawal",
     "cards": {
@@ -844,7 +844,7 @@
     "card": {
       "active": "Active",
       "students": "👥 Students",
-      "ratePerHour": "💰 Rate/hour",
+      "ratePerHour": " Rate/hour",
       "edit": "Edit"
     },
     "stats": {

@@ -229,12 +229,12 @@ export default function TutoringSummary({ userType, title, linkText, linkHref })
                     </p>
                     {session.location && (
                       <p className="text-sm text-gray-500">
-                        📍 {session.location}
+                         {session.location}
                       </p>
                     )}
                     {session.price && (
                       <p className="text-sm text-gray-500">
-                        💰 {formatCurrency(session.price)}
+                         {formatCurrency(session.price)}
                       </p>
                     )}
                   </div>

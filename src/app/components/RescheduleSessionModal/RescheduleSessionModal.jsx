@@ -272,7 +272,7 @@ export default function RescheduleSessionModal({
                           </div>
                           {slot.location && (
                             <p className="text-xs text-gray-600 mt-1 ml-6">
-                              📍 {slot.location}
+                               {slot.location}
                             </p>
                           )}
                         </button>
