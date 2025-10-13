@@ -1,9 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useI18n } from '../../../lib/i18n';
 import './GoogleCalendarButton.css';
 
 export default function GoogleCalendarButton() {
+  const { t } = useI18n();
   const [connectionStatus, setConnectionStatus] = useState('checking'); // 'checking', 'connected', 'disconnected', 'expired'
   const [isLoading, setIsLoading] = useState(false);
   const [lastChecked, setLastChecked] = useState(null);
@@ -69,7 +71,7 @@ export default function GoogleCalendarButton() {
 
       if (response.ok) {
         setConnectionStatus('connected');
-        alert('✅ Conexión renovada exitosamente');
+        alert(`✅ ${t('googleCalendar.connectionRenewed')}`);
         
         // Notificar a otros componentes
         window.dispatchEvent(new CustomEvent('calendar-status-update'));
@@ -79,7 +81,7 @@ export default function GoogleCalendarButton() {
           setConnectionStatus('expired');
           
           const shouldReconnect = window.confirm(
-            '🔑 Tu sesión de Google Calendar ha expirado.\n\n¿Quieres reconectar ahora?'
+            `🔑 ${t('googleCalendar.sessionExpiredMessage')}\n\n${t('googleCalendar.reconnectNow')}`
           );
           
           if (shouldReconnect) {
@@ -132,18 +134,18 @@ export default function GoogleCalendarButton() {
   }, []);
 
   const getButtonText = () => {
-    if (isLoading) return '🔄 Cargando...';
+    if (isLoading) return `🔄 ${t('googleCalendar.loading')}`;
     
     switch (connectionStatus) {
       case 'checking':
-        return '🔄 Verificando...';
+        return `🔄 ${t('googleCalendar.checking')}`;
       case 'connected':
-        return '✅ Conectado';
+        return `✅ ${t('googleCalendar.connected')}`;
       case 'expired':
-        return '🔑 Sesión Expirada';
+        return `🔑 ${t('googleCalendar.sessionExpired')}`;
       case 'disconnected':
       default:
-        return '📅 Conectar Google Calendar';
+        return `📅 ${t('googleCalendar.connect')}`;
     }
   };
 
@@ -185,10 +187,10 @@ export default function GoogleCalendarButton() {
         disabled={isLoading}
         title={
           connectionStatus === 'connected' 
-            ? `Conectado a Google Calendar (verificado: ${lastChecked?.toLocaleTimeString()})`
+            ? t('googleCalendar.connectedTooltip', { time: lastChecked?.toLocaleTimeString() })
             : connectionStatus === 'expired'
-            ? 'Sesión expirada - Haz click para renovar'
-            : 'Conectar con Google Calendar'
+            ? t('googleCalendar.expiredTooltip')
+            : t('googleCalendar.connectTooltip')
         }
       >
         {getButtonText()}
@@ -196,7 +198,7 @@ export default function GoogleCalendarButton() {
       
       {connectionStatus === 'expired' && (
         <div className="token-expired-notice">
-          <small>⚠️ Tu sesión ha expirado. Haz click para renovar la conexión.</small>
+          <small>⚠️ {t('googleCalendar.sessionExpiredNotice')}</small>
         </div>
       )}
     </div>

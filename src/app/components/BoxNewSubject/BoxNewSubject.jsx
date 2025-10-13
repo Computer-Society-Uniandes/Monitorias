@@ -1,7 +1,9 @@
 import React from "react";
 import "./BoxNewSubject.css";
+import { useI18n } from "../../../lib/i18n";
 
 const BoxNewSubject = ({name, number}) => {
+  const { t } = useI18n();
   return (
     <div className="card-ingenieria">
       <div className="card-ingenieria-left">
@@ -20,7 +22,7 @@ const BoxNewSubject = ({name, number}) => {
             {name}
           </div>
           <div className="card-ingenieria-subtitle">
-            {number} tutores
+            {number} {number === 1 ? t('boxSubject.tutor') : t('boxSubject.tutors')}
           </div>
         </div>
       </div>

@@ -3,19 +3,23 @@
 import React, { useState } from "react";
 import { TutoringSessionService } from "../../services/TutoringSessionService";
 import { useAuth } from "../../context/SecureAuthContext";
+import { useI18n } from "../../../lib/i18n";
+import RescheduleSessionModal from "../RescheduleSessionModal/RescheduleSessionModal";
 import "./TutoringDetailsModal.css";
 
 export default function TutoringDetailsModal({ isOpen, onClose, session, onSessionUpdate }) {
   const { user } = useAuth();
+  const { t, locale, formatCurrency } = useI18n();
   const [cancelling, setCancelling] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
+  const [showRescheduleModal, setShowRescheduleModal] = useState(false);
 
   if (!isOpen || !session) return null;
 
   const handleCancelSession = async () => {
     if (!cancelReason.trim()) {
-      alert('Por favor proporciona un motivo para la cancelación');
+      alert(t('sessionDetails.cancelReasonPlaceholder'));
       return;
     }
 
@@ -28,7 +32,7 @@ export default function TutoringDetailsModal({ isOpen, onClose, session, onSessi
         cancelReason
       );
       
-      alert('✅ Sesión cancelada exitosamente');
+      alert('✅ ' + t('sessionDetails.statusCancelled'));
       setShowCancelConfirm(false);
       
       // Llamar al callback de actualización si existe
@@ -57,22 +61,52 @@ export default function TutoringDetailsModal({ isOpen, onClose, session, onSessi
     return TutoringSessionService.canCancelSession(session.scheduledDateTime);
   };
 
+  const canReschedule = () => {
+    // No se puede reprogramar si está cancelada o completada
+    if (session.status === 'cancelled' || session.status === 'completed') return false;
+    
+    // No se puede reprogramar si ya pasó
+    const now = new Date();
+    if (new Date(session.scheduledDateTime) <= now) return false;
+    
+    // Verificar si faltan más de 2 horas
+    return TutoringSessionService.canCancelSession(session.scheduledDateTime);
+  };
+
+  const handleRescheduleClick = () => {
+    setShowRescheduleModal(true);
+  };
+
+  const handleRescheduleComplete = () => {
+    setShowRescheduleModal(false);
+    // Close the session details modal as well
+    if (onClose) {
+      onClose();
+    }
+    // Update the parent component to refresh the sessions list
+    if (onSessionUpdate) {
+      onSessionUpdate();
+    }
+  };
+
   const getTimeUntilSession = () => {
     const now = new Date();
     const sessionDate = new Date(session.scheduledDateTime);
     const hoursUntilSession = (sessionDate - now) / (1000 * 60 * 60);
     
-    if (hoursUntilSession < 0) return 'La sesión ya pasó';
-    if (hoursUntilSession < 1) return `Faltan ${Math.round(hoursUntilSession * 60)} minutos`;
-    return `Faltan ${Math.round(hoursUntilSession)} horas`;
+    if (hoursUntilSession < 0) return t('sessionDetails.sessionPassed');
+    if (hoursUntilSession < 1) {
+      return t('sessionDetails.minutesRemaining', { minutes: Math.round(hoursUntilSession * 60) });
+    }
+    return t('sessionDetails.hoursRemaining', { hours: Math.round(hoursUntilSession) });
   };
 
   const getPaymentStatusBadge = (paymentStatus) => {
     // Only show payment badge for meaningful states after booking
     const paymentConfig = {
-      en_verificación: { text: 'En verificación', className: 'AccentBackground PrimaryText' },
-      verificado: { text: 'Verificado', className: 'bg-green-100 text-green-800' },
-      rechazado: { text: 'Rechazado', className: 'bg-red-100 text-red-800' }
+      en_verificación: { text: t('sessionDetails.paymentStatus.en_verificación'), className: 'AccentBackground PrimaryText' },
+      verificado: { text: t('sessionDetails.paymentStatus.verificado'), className: 'bg-green-100 text-green-800' },
+      rechazado: { text: t('sessionDetails.paymentStatus.rechazado'), className: 'bg-red-100 text-red-800' }
     };
 
     if (!paymentStatus || !paymentConfig[paymentStatus]) return null;
@@ -84,13 +118,14 @@ export default function TutoringDetailsModal({ isOpen, onClose, session, onSessi
     );
   };
   
-  const formattedDate = new Date(session.scheduledDateTime).toLocaleDateString('es-ES', {
+  const localeStr = locale === 'en' ? 'en-US' : 'es-ES';
+  const formattedDate = new Date(session.scheduledDateTime).toLocaleDateString(localeStr, {
     weekday: 'long',
     month: 'long',
     day: 'numeric',
     year: 'numeric'
   });
-  const timeRange = `${new Date(session.scheduledDateTime).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })} - ${new Date(session.endDateTime).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}`;
+  const timeRange = `${new Date(session.scheduledDateTime).toLocaleTimeString(localeStr, { hour: '2-digit', minute: '2-digit' })} - ${new Date(session.endDateTime).toLocaleTimeString(localeStr, { hour: '2-digit', minute: '2-digit' })}`;
 
   return (
     <div 
@@ -109,7 +144,7 @@ export default function TutoringDetailsModal({ isOpen, onClose, session, onSessi
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <h2 className="text-lg font-semibold text-gray-900">Detalles de la Sesión</h2>
+          <h2 className="text-lg font-semibold text-gray-900">{t('sessionDetails.title')}</h2>
         </div>
 
         {/* Content */}
@@ -123,7 +158,7 @@ export default function TutoringDetailsModal({ isOpen, onClose, session, onSessi
 
           {/* Course */}
           <div>
-            <h3 className="text-sm font-semibold text-gray-900 mb-2">Materia</h3>
+            <h3 className="text-sm font-semibold text-gray-900 mb-2">{t('sessionDetails.subject')}</h3>
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm">
                 <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -139,7 +174,7 @@ export default function TutoringDetailsModal({ isOpen, onClose, session, onSessi
 
           {/* Tutor */}
           <div>
-            <h3 className="text-sm font-semibold text-gray-900 mb-2">Tutor</h3>
+            <h3 className="text-sm font-semibold text-gray-900 mb-2">{t('sessionDetails.tutor')}</h3>
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
                 <span className="text-lg">👨‍🏫</span>
@@ -151,7 +186,7 @@ export default function TutoringDetailsModal({ isOpen, onClose, session, onSessi
           {/* Student */}
           {session.studentName && (
             <div>
-              <h3 className="text-sm font-semibold text-gray-900 mb-2">Estudiante</h3>
+              <h3 className="text-sm font-semibold text-gray-900 mb-2">{t('sessionDetails.student')}</h3>
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
                   <span className="text-lg">👨‍🎓</span>
@@ -163,7 +198,7 @@ export default function TutoringDetailsModal({ isOpen, onClose, session, onSessi
 
           {/* Session Details */}
           <div>
-            <h3 className="text-sm font-semibold text-gray-900 mb-2">Detalles de la Sesión</h3>
+            <h3 className="text-sm font-semibold text-gray-900 mb-2">{t('sessionDetails.sessionDetailsLabel')}</h3>
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm">
                 <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -180,24 +215,24 @@ export default function TutoringDetailsModal({ isOpen, onClose, session, onSessi
           {/* Location */}
           {session.location && session.location !== 'Por definir' && (
             <div>
-              <h3 className="text-sm font-semibold text-gray-900 mb-2">Ubicación</h3>
+              <h3 className="text-sm font-semibold text-gray-900 mb-2">{t('sessionDetails.location')}</h3>
               <p className="text-sm text-gray-700">{session.location}</p>
             </div>
           )}
 
           {/* Cost */}
           <div>
-            <h3 className="text-sm font-semibold text-gray-900 mb-2">Costo</h3>
+            <h3 className="text-sm font-semibold text-gray-900 mb-2">{t('sessionDetails.cost')}</h3>
             <div className="flex justify-between items-center">
-              <span className="text-lg font-bold text-gray-900">${session.price ? session.price.toLocaleString() : '25,000'} COP</span>
-              <span className="text-sm text-gray-500">Total</span>
+              <span className="text-lg font-bold text-gray-900">{formatCurrency(session.price || 50000)}</span>
+              <span className="text-sm text-gray-500">{t('sessionDetails.total')}</span>
             </div>
           </div>
 
           {/* Notes */}
           {session.notes && (
             <div>
-              <h3 className="text-sm font-semibold text-gray-900 mb-2">Notas</h3>
+              <h3 className="text-sm font-semibold text-gray-900 mb-2">{t('sessionDetails.notes')}</h3>
               <p className="text-sm text-gray-700">{session.notes}</p>
             </div>
           )}
@@ -209,39 +244,53 @@ export default function TutoringDetailsModal({ isOpen, onClose, session, onSessi
           {session.status === 'cancelled' && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-3">
               <p className="text-sm font-semibold text-red-800 mb-1">
-                ⚠️ Sesión Cancelada
+                {t('sessionDetails.statusCancelled')}
               </p>
               {session.cancelledBy && (
                 <p className="text-xs text-red-700">
-                  Cancelada por: {session.cancelledBy === user.email ? 'ti' : session.cancelledBy}
+                  {t('sessionDetails.cancelledBy', { 
+                    by: session.cancelledBy === user.email ? t('sessionDetails.cancelledByYou') : session.cancelledBy 
+                  })}
                 </p>
               )}
               {session.cancellationReason && (
                 <p className="text-xs text-red-600 mt-1">
-                  Motivo: {session.cancellationReason}
+                  {t('sessionDetails.cancelReason', { reason: session.cancellationReason })}
                 </p>
               )}
             </div>
           )}
 
-          {/* Botón de cancelación si es posible cancelar */}
-          {!showCancelConfirm && canCancel() && (
-            <button
-              onClick={() => setShowCancelConfirm(true)}
-              className="w-full py-3 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 transition-colors"
-            >
-              Cancelar Tutoría
-            </button>
+          {/* Botones de acción si es posible reprogramar o cancelar */}
+          {!showCancelConfirm && (canReschedule() || canCancel()) && (
+            <div className="grid grid-cols-2 gap-3">
+              {canReschedule() && (
+                <button
+                  onClick={handleRescheduleClick}
+                  className="py-3 bg-[#FF8C00] text-white font-semibold rounded-lg hover:bg-[#E67E00] transition-colors"
+                >
+                  {t('sessionDetails.reschedule')}
+                </button>
+              )}
+              {canCancel() && (
+                <button
+                  onClick={() => setShowCancelConfirm(true)}
+                  className={`py-3 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 transition-colors ${canReschedule() ? '' : 'col-span-2'}`}
+                >
+                  {t('sessionDetails.cancelSession')}
+                </button>
+              )}
+            </div>
           )}
 
           {/* Mostrar mensaje si no se puede cancelar */}
           {!canCancel() && session.status !== 'cancelled' && (
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-3">
               <p className="text-sm text-yellow-800 text-center">
-                ⏰ {getTimeUntilSession()}
+                {t('sessionDetails.timeUntil', { time: getTimeUntilSession() })}
               </p>
               <p className="text-xs text-yellow-700 text-center mt-1">
-                No se puede cancelar con menos de 2 horas de anticipación
+                {t('sessionDetails.cannotCancelWarning')}
               </p>
             </div>
           )}
@@ -250,12 +299,12 @@ export default function TutoringDetailsModal({ isOpen, onClose, session, onSessi
           {showCancelConfirm && (
             <div className="bg-red-50 border-2 border-red-200 rounded-lg p-4 space-y-3">
               <p className="text-sm font-semibold text-red-800">
-                ¿Estás seguro que deseas cancelar esta tutoría?
+                {t('sessionDetails.cancelConfirmTitle')}
               </p>
               <textarea
                 value={cancelReason}
                 onChange={(e) => setCancelReason(e.target.value)}
-                placeholder="Por favor proporciona un motivo para la cancelación..."
+                placeholder={t('sessionDetails.cancelReasonPlaceholder')}
                 className="w-full px-3 py-2 border border-red-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
                 rows="3"
               />
@@ -268,14 +317,14 @@ export default function TutoringDetailsModal({ isOpen, onClose, session, onSessi
                   className="flex-1 py-2 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300 transition-colors"
                   disabled={cancelling}
                 >
-                  No, mantener
+                  {t('sessionDetails.cancelKeep')}
                 </button>
                 <button
                   onClick={handleCancelSession}
                   className="flex-1 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
                   disabled={cancelling || !cancelReason.trim()}
                 >
-                  {cancelling ? 'Cancelando...' : 'Sí, cancelar'}
+                  {cancelling ? t('sessionDetails.cancelling') : t('sessionDetails.cancelConfirm')}
                 </button>
               </div>
             </div>
@@ -286,10 +335,18 @@ export default function TutoringDetailsModal({ isOpen, onClose, session, onSessi
             onClick={onClose}
             className="w-full py-3 bg-white text-gray-700 font-semibold rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
           >
-            Cerrar
+            {t('sessionDetails.close')}
           </button>
         </div>
       </div>
+
+      {/* Modal de Reprogramación */}
+      <RescheduleSessionModal
+        isOpen={showRescheduleModal}
+        onClose={() => setShowRescheduleModal(false)}
+        session={session}
+        onRescheduleComplete={handleRescheduleComplete}
+      />
     </div>
   );
 } 

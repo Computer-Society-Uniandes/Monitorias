@@ -111,7 +111,7 @@ export class TutoringSessionService {
         scheduledDateTime: slot.startDateTime,
         endDateTime: slot.endDateTime,
         location: slot.location || 'Por definir',
-        price: 25000, // Precio por hora
+        price: 50000, // Precio por hora
         // Información específica del slot
         parentAvailabilityId: slot.parentAvailabilityId,
         slotIndex: slot.slotIndex,
@@ -1094,6 +1094,147 @@ export class TutoringSessionService {
     }
   }
 
+  // Reprogramar una sesión de tutoría a un nuevo horario
+  static async rescheduleSession(sessionId, newSlot, reason = 'Sesión reprogramada') {
+    try {
+      // Obtener la sesión actual
+      const session = await this.getTutoringSessionById(sessionId);
+      
+      if (!session) {
+        throw new Error('Sesión no encontrada');
+      }
+
+      // Verificar que la sesión no esté cancelada o completada
+      if (session.status === 'cancelled') {
+        throw new Error('No puedes reprogramar una sesión cancelada');
+      }
+      if (session.status === 'completed') {
+        throw new Error('No puedes reprogramar una sesión completada');
+      }
+
+      // Verificar que el nuevo slot esté disponible
+      if (newSlot.isBooked) {
+        throw new Error('Este horario ya no está disponible');
+      }
+
+      const existingBooking = await this.getSlotBooking(newSlot.parentAvailabilityId, newSlot.slotIndex);
+      if (existingBooking) {
+        throw new Error('Este horario ya fue reservado por otro estudiante');
+      }
+
+      // Verificar que el tutor sea el mismo
+      if (newSlot.tutorEmail !== session.tutorEmail) {
+        throw new Error('Solo puedes reprogramar con el mismo tutor');
+      }
+
+      // Liberar el slot anterior si existe
+      if (session.parentAvailabilityId && session.slotIndex !== undefined) {
+        const oldSlotBookingQuery = query(
+          collection(db, this.SLOT_BOOKINGS_COLLECTION),
+          where('parentAvailabilityId', '==', session.parentAvailabilityId),
+          where('slotIndex', '==', session.slotIndex),
+          where('sessionId', '==', sessionId)
+        );
+
+        const oldSlotBookingSnapshot = await getDocs(oldSlotBookingQuery);
+        
+        for (const doc of oldSlotBookingSnapshot.docs) {
+          await deleteDoc(doc.ref);
+          console.log(`Old slot booking ${doc.id} deleted for rescheduling`);
+        }
+      }
+
+      // Cancelar el evento anterior en el calendario de Calico
+      if (session.calicoCalendarEventId) {
+        await this.cancelCalicoCalendarEvent(session.calicoCalendarEventId, reason);
+      }
+
+      // Crear nuevo evento en el calendario de Calico
+      let newCalendarEventId = null;
+      let newCalendarHtmlLink = null;
+      
+      try {
+        const calendarEventResult = await this.createCalicoCalendarEvent({
+          sessionId: sessionId,
+          tutorEmail: session.tutorEmail,
+          tutorName: session.tutorName || session.tutorEmail,
+          studentEmail: session.studentEmail,
+          studentName: session.studentName,
+          subject: session.subject,
+          startDateTime: newSlot.startDateTime,
+          endDateTime: newSlot.endDateTime,
+          location: newSlot.location || session.location,
+          notes: `${session.notes}\n\n[REPROGRAMADA] ${reason}`
+        });
+
+        if (calendarEventResult?.success) {
+          newCalendarEventId = calendarEventResult.eventId;
+          newCalendarHtmlLink = calendarEventResult.htmlLink;
+        }
+      } catch (error) {
+        console.warn('Warning: Could not create calendar event for rescheduled session:', error);
+        // No fallar la reprogramación si el calendario falla
+      }
+
+      // Actualizar la sesión con los nuevos datos
+      const sessionRef = doc(db, this.COLLECTION_NAME, sessionId);
+      await updateDoc(sessionRef, {
+        scheduledDateTime: newSlot.startDateTime,
+        endDateTime: newSlot.endDateTime,
+        location: newSlot.location || session.location,
+        parentAvailabilityId: newSlot.parentAvailabilityId,
+        slotIndex: newSlot.slotIndex,
+        slotId: newSlot.id,
+        googleEventId: newSlot.googleEventId || session.googleEventId,
+        calicoCalendarEventId: newCalendarEventId || session.calicoCalendarEventId,
+        calicoCalendarHtmlLink: newCalendarHtmlLink || session.calicoCalendarHtmlLink,
+        rescheduledAt: serverTimestamp(),
+        rescheduledReason: reason,
+        updatedAt: serverTimestamp()
+      });
+
+      // Crear el nuevo slot booking
+      const newSlotBookingData = {
+        parentAvailabilityId: newSlot.parentAvailabilityId,
+        slotIndex: newSlot.slotIndex,
+        slotId: newSlot.id,
+        tutorEmail: session.tutorEmail,
+        studentEmail: session.studentEmail,
+        sessionId: sessionId,
+        bookedAt: serverTimestamp(),
+        slotStartTime: newSlot.startDateTime,
+        slotEndTime: newSlot.endDateTime,
+        subject: session.subject
+      };
+
+      await this.createSlotBooking(newSlotBookingData);
+
+      // Crear notificación para el tutor
+      await NotificationService.createSessionRescheduledNotification({
+        sessionId: sessionId,
+        tutorEmail: session.tutorEmail,
+        studentEmail: session.studentEmail,
+        studentName: session.studentName,
+        subject: session.subject,
+        oldDateTime: session.scheduledDateTime,
+        newDateTime: newSlot.startDateTime,
+        reason: reason
+      });
+
+      console.log('✅ Session rescheduled successfully:', sessionId);
+      return { 
+        success: true, 
+        message: 'Sesión reprogramada exitosamente',
+        id: sessionId,
+        newDateTime: newSlot.startDateTime
+      };
+
+    } catch (error) {
+      console.error('Error rescheduling session:', error);
+      throw new Error(error.message || 'Error reprogramando la sesión');
+    }
+  }
+
   // Método auxiliar para extraer materia del título del evento
   static extractSubjectFromTitle(title) {
     if (!title) return 'Tutoría General';
@@ -1136,7 +1277,7 @@ export class TutoringSessionService {
       scheduledDateTime: null,
       endDateTime: null,
       location: 'Por definir',
-      price: 25000,
+      price: 50000,
       notes: '',
       parentAvailabilityId: null,
       slotIndex: null,

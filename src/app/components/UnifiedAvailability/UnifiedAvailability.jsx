@@ -4,18 +4,20 @@ import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
-import { Calendar as CalendarIcon, Plus, Edit, Bell, ArrowRight, Clock, RefreshCw } from "lucide-react";
+import { Calendar as CalendarIcon, Plus, Edit, Bell, ArrowRight, Clock, RefreshCw, ChevronLeft, ChevronRight } from "lucide-react";
 import "./UnifiedAvailability.css";
 import { AvailabilityService } from "../../services/AvailabilityService";
 import { TutoringSessionService } from "../../services/TutoringSessionService";
 import { NotificationService } from "../../services/NotificationService";
 import { useAuth } from "../../context/SecureAuthContext";
+import { useI18n } from "../../../lib/i18n";
 import GoogleCalendarButton from "../GoogleCalendarButton/GoogleCalendarButton";
 import TutoringDetailsModal from "../TutoringDetailsModal/TutoringDetailsModal";
 import TutorApprovalModal from "../TutorApprovalModal/TutorApprovalModal";
 
 export default function UnifiedAvailability() {
   const { user } = useAuth();
+  const { t, locale } = useI18n();
   const [date, setDate] = useState(new Date());
   const [availabilitySlots, setAvailabilitySlots] = useState([]);
   const [sessions, setSessions] = useState([]);
@@ -176,7 +178,7 @@ export default function UnifiedAvailability() {
       }
       
       if (!isConnected) {
-        setValidationErrors(['Debes conectar tu Google Calendar para crear eventos']);
+        setValidationErrors([t('tutorAvailability.connectCalendarRequired')]);
         return;
       }
       
@@ -201,7 +203,7 @@ export default function UnifiedAvailability() {
       
     } catch (error) {
       console.error('Error creating event:', error);
-      setValidationErrors([error.message || 'Error al crear el evento']);
+      setValidationErrors([error.message || t('tutorAvailability.errorCreatingEvent')]);
     } finally {
       setCreatingEvent(false);
     }
@@ -234,7 +236,7 @@ export default function UnifiedAvailability() {
 
   const handleSyncCalendar = async () => {
     if (!user.email || !isConnected) {
-      alert('⚠️ Debes estar conectado a Google Calendar para sincronizar');
+      alert(`⚠️ ${t('tutorAvailability.mustBeConnectedToSync')}`);
       return;
     }
 
@@ -256,19 +258,27 @@ export default function UnifiedAvailability() {
         }),
       });
 
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      if (!response.json) {
+        throw new Error('Invalid response format');
+      }
+
       const result = await response.json();
 
-      if (response.ok && result.success) {
-        alert(`✅ Sincronización exitosa!\n\n- Eventos procesados: ${result.syncResults?.totalProcessed || 0}\n- Nuevos eventos: ${result.syncResults?.created || 0}\n- Actualizados: ${result.syncResults?.updated || 0}`);
+      if (result.success) {
+        alert(`✅ ${t('tutorAvailability.syncSuccess')}\n\n- ${t('tutorAvailability.eventsProcessed')}: ${result.syncResults?.totalProcessed || 0}\n- ${t('tutorAvailability.newEvents')}: ${result.syncResults?.created || 0}\n- ${t('tutorAvailability.updatedEvents')}: ${result.syncResults?.updated || 0}`);
         
         // Recargar los datos para mostrar los cambios
         await loadData();
       } else {
-        throw new Error(result.error || 'Error en la sincronización');
+        throw new Error(result.error || t('tutorAvailability.syncError'));
       }
     } catch (error) {
       console.error('Error syncing calendar:', error);
-      alert(`❌ Error al sincronizar: ${error.message}`);
+      alert(`❌ ${t('tutorAvailability.syncFailed')}: ${error.message}`);
     } finally {
       setSyncing(false);
     }
@@ -299,13 +309,14 @@ export default function UnifiedAvailability() {
 
   const formatSessionDateTime = (dateTime) => {
     const date = new Date(dateTime);
+    const localeStr = locale === 'en' ? 'en-US' : 'es-ES';
     return {
-      date: date.toLocaleDateString('es-ES', { 
+      date: date.toLocaleDateString(localeStr, { 
         year: 'numeric', 
         month: 'long', 
         day: 'numeric' 
       }),
-      time: date.toLocaleTimeString('es-ES', { 
+      time: date.toLocaleTimeString(localeStr, { 
         hour: '2-digit', 
         minute: '2-digit' 
       })
@@ -316,7 +327,7 @@ export default function UnifiedAvailability() {
     return (
       <div className="unified-availability-loading">
         <div className="loading-spinner"></div>
-        <p>Cargando disponibilidad y sesiones...</p>
+        <p>{t('tutorAvailability.loading')}</p>
       </div>
     );
   }
@@ -324,7 +335,7 @@ export default function UnifiedAvailability() {
   return (
     <div className="unified-availability">
       <div className="unified-header">
-  <h1 className="unified-title">Disponibilidad</h1>
+        <h1 className="unified-title">{t('tutorAvailability.title')}</h1>
         <GoogleCalendarButton />
       </div>
 
@@ -335,42 +346,58 @@ export default function UnifiedAvailability() {
             <Calendar
               onChange={handleDateChange}
               value={date}
+              locale={locale === 'en' ? 'en-US' : 'es-ES'}
+              minDate={new Date()}
               className="availability-calendar"
+              navigationLabel={({ date }) => (
+                `${date.toLocaleDateString(locale === 'en' ? 'en-US' : 'es-ES', { month: 'long', year: 'numeric' })}`
+              )}
+              nextLabel={<ChevronRight size={16} />}
+              prevLabel={<ChevronLeft size={16} />}
+              next2Label={null}
+              prev2Label={null}
             />
           </div>
 
           <div className="availability-slots">
-            <h3>Horarios disponibles</h3>
+            <h3>{t('tutorAvailability.availableSlots')}</h3>
             <div className="slot-actions">
               <button 
+                id="add-slot-btn"
                 className="add-slot-btn"
                 onClick={() => setShowAddModal(true)}
               >
-                Agregar horario
-              </button>
-              <button className="edit-slots-btn">
-                Editar horarios
+                {t('tutorAvailability.addSlot')}
               </button>
               <button 
+                id="edit-slots-btn"
+                className="edit-slots-btn"
+              >
+                {t('tutorAvailability.editSlots')}
+              </button>
+              <button 
+                id="sync-calendar-btn"
                 className="sync-calendar-btn"
                 onClick={handleSyncCalendar}
                 disabled={syncing || !isConnected}
-                title={!isConnected ? "Conecta tu Google Calendar primero" : "Sincronizar eventos de Google Calendar"}
+                title={!isConnected ? t('tutorAvailability.connectCalendarFirst') : t('tutorAvailability.syncCalendarTitle')}
               >
                 <RefreshCw size={16} className={syncing ? "spinning" : ""} />
-                {syncing ? "Sincronizando..." : "Sincronizar calendario"}
+                {syncing ? t('tutorAvailability.syncing') : t('tutorAvailability.syncCalendar')}
               </button>
             </div>
 
             {/* Selected Day Slots */}
             <div className="selected-day-slots">
               <h4>
-                {date ? `Disponibilidad para ${date.toLocaleDateString('es-ES', { 
-                  weekday: 'long', 
-                  year: 'numeric', 
-                  month: 'long', 
-                  day: 'numeric' 
-                })}` : 'Selecciona un día'}
+                {date ? t('tutorAvailability.availabilityFor', { 
+                  date: date.toLocaleDateString(locale === 'en' ? 'en-US' : 'es-ES', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                  })
+                }) : t('tutorAvailability.selectDay')}
               </h4>
               
               {selectedDaySlots.length > 0 ? (
@@ -392,7 +419,7 @@ export default function UnifiedAvailability() {
                       </div>
                       <div className="slot-status">
                         <span className={`status-badge ${slot.isBooked ? 'booked' : 'available'}`}>
-                          {slot.isBooked ? 'Reservado' : 'Disponible'}
+                          {slot.isBooked ? t('tutorAvailability.booked') : t('tutorAvailability.available')}
                         </span>
                       </div>
                     </div>
@@ -401,8 +428,8 @@ export default function UnifiedAvailability() {
               ) : (
                 <div className="no-slots">
                   <CalendarIcon size={24} />
-                  <p>No hay horarios disponibles para este día</p>
-                  <small>Usa "Agregar horario" para agregar disponibilidad</small>
+                  <p>{t('tutorAvailability.noSlotsForDay')}</p>
+                  <small>{t('tutorAvailability.useAddSlotHint')}</small>
                 </div>
               )}
             </div>
@@ -413,22 +440,25 @@ export default function UnifiedAvailability() {
         <div className="sessions-section">
           <div className="session-tabs">
             <button 
+              id="pending-tab"
               className={`tab ${activeTab === "pending" ? "active" : ""}`}
               onClick={() => setActiveTab("pending")}
             >
-              Pendientes ({getPendingSessionsForDisplay().length})
+              {t('tutorAvailability.pending')} ({getPendingSessionsForDisplay().length})
             </button>
             <button 
+              id="upcoming-tab"
               className={`tab ${activeTab === "upcoming" ? "active" : ""}`}
               onClick={() => setActiveTab("upcoming")}
             >
-              Próximas
+              {t('tutorAvailability.upcoming')}
             </button>
             <button 
+              id="past-tab"
               className={`tab ${activeTab === "past" ? "active" : ""}`}
               onClick={() => setActiveTab("past")}
             >
-              Pasadas
+              {t('tutorAvailability.past')}
             </button>
           </div>
 
@@ -444,7 +474,7 @@ export default function UnifiedAvailability() {
                         <div className="session-info">
                           <h4>{session.subject} - {session.studentName || session.studentEmail}</h4>
                           <p>{sessionDate} - {time}</p>
-                          <span className="pending-badge">Pendiente de aprobación</span>
+                          <span className="pending-badge">{t('tutorAvailability.pendingApproval')}</span>
                         </div>
                       </div>
                     );
@@ -452,7 +482,7 @@ export default function UnifiedAvailability() {
                 ) : (
                     <div className="no-sessions">
                     <Bell size={24} />
-                    <p>No hay solicitudes pendientes</p>
+                    <p>{t('tutorAvailability.noPendingRequests')}</p>
                   </div>
                 )}
               </div>
@@ -464,7 +494,7 @@ export default function UnifiedAvailability() {
                     <div key={index} className="session-item" onClick={() => handleSessionClick(session)}>
                       <CalendarIcon className="session-icon" size={16} />
                       <div className="session-info">
-                        <h4>{session.subject || "Introducción a la programación con estudiante"}</h4>
+                        <h4>{session.subject || t('tutorAvailability.defaultSessionTitle')}</h4>
                         <p>{sessionDate} - {time}</p>
                       </div>
                     </div>
@@ -479,7 +509,7 @@ export default function UnifiedAvailability() {
                     <div key={index} className="session-item" onClick={() => handleSessionClick(session)}>
                       <CalendarIcon className="session-icon" size={16} />
                       <div className="session-info">
-                        <h4>{session.subject || "Introducción a la programación con estudiante"}</h4>
+                        <h4>{session.subject || t('tutorAvailability.defaultSessionTitle')}</h4>
                         <p>{sessionDate} - {time}</p>
                       </div>
                     </div>
@@ -495,7 +525,7 @@ export default function UnifiedAvailability() {
       {showAddModal && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <h3>Agregar horario de disponibilidad</h3>
+            <h3>{t('tutorAvailability.addAvailabilitySlot')}</h3>
             
             {validationErrors.length > 0 && (
               <div className="validation-errors">
@@ -506,18 +536,20 @@ export default function UnifiedAvailability() {
             )}
             
             <div className="form-group">
-              <label>Título</label>
+              <label htmlFor="slot-title">{t('tutorAvailability.titleLabel')}</label>
               <input
+                id="slot-title"
                 type="text"
                 value={newSlot.title}
                 onChange={(e) => setNewSlot({...newSlot, title: e.target.value})}
-                placeholder="Horario de disponibilidad"
+                placeholder={t('tutorAvailability.titlePlaceholder')}
               />
             </div>
             
             <div className="form-group">
-              <label>Fecha</label>
+              <label htmlFor="slot-date">{t('tutorAvailability.dateLabel')}</label>
               <input
+                id="slot-date"
                 type="date"
                 value={newSlot.date}
                 onChange={(e) => setNewSlot({...newSlot, date: e.target.value})}
@@ -526,16 +558,18 @@ export default function UnifiedAvailability() {
             
             <div className="form-row">
               <div className="form-group">
-                <label>Hora inicio</label>
+                <label htmlFor="slot-start-time">{t('tutorAvailability.startTimeLabel')}</label>
                 <input
+                  id="slot-start-time"
                   type="time"
                   value={newSlot.startTime}
                   onChange={(e) => setNewSlot({...newSlot, startTime: e.target.value})}
                 />
               </div>
               <div className="form-group">
-                <label>Hora fin</label>
+                <label htmlFor="slot-end-time">{t('tutorAvailability.endTimeLabel')}</label>
                 <input
+                  id="slot-end-time"
                   type="time"
                   value={newSlot.endTime}
                   onChange={(e) => setNewSlot({...newSlot, endTime: e.target.value})}
@@ -544,27 +578,30 @@ export default function UnifiedAvailability() {
             </div>
             
             <div className="form-group">
-              <label>Descripción</label>
+              <label htmlFor="slot-description">{t('tutorAvailability.descriptionLabel')}</label>
               <textarea
+                id="slot-description"
                 value={newSlot.description}
                 onChange={(e) => setNewSlot({...newSlot, description: e.target.value})}
-                placeholder="Descripción opcional"
+                placeholder={t('tutorAvailability.descriptionPlaceholder')}
               />
             </div>
             
             <div className="modal-actions">
               <button 
+                id="cancel-slot-btn"
                 className="cancel-btn"
                 onClick={() => setShowAddModal(false)}
               >
-                Cancelar
+                {t('tutorAvailability.cancel')}
               </button>
               <button 
+                id="save-slot-btn"
                 className="save-btn"
                 onClick={handleAddSlot}
                 disabled={creatingEvent}
               >
-                {creatingEvent ? "Creando..." : "Guardar"}
+                {creatingEvent ? t('tutorAvailability.creating') : t('tutorAvailability.save')}
               </button>
             </div>
           </div>

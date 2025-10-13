@@ -5,12 +5,14 @@ import { createPortal } from "react-dom";
 import Link from "next/link";
 import { TutoringSessionService } from "../../services/TutoringSessionService";
 import { useAuth } from "../../context/SecureAuthContext";
+import { useI18n } from "../../../lib/i18n";
 import TutoringDetailsModal from "../TutoringDetailsModal/TutoringDetailsModal";
 import routes from "../../../routes";
 import "./TutoringSummary.css";
 
 export default function TutoringSummary({ userType, title, linkText, linkHref }) {
   const { user } = useAuth();
+  const { t, locale, formatCurrency } = useI18n();
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -32,28 +34,34 @@ export default function TutoringSummary({ userType, title, linkText, linkHref })
           fetchedSessions = await TutoringSessionService.getStudentSessions(user.email);
         }
 
-        // Filtrar solo sesiones programadas y futuras
+        // Filtrar sesiones programadas, pendientes y futuras
         const now = new Date();
         const upcomingSessions = fetchedSessions
-          .filter(session => 
-            session.status === 'scheduled' && 
-            session.scheduledDateTime && 
-            new Date(session.scheduledDateTime) > now
-          )
+          .filter(session => {
+            // Para estudiantes: mostrar pending (esperando aprobación) y scheduled
+            // Para tutores: solo mostrar scheduled (las pending se ven en notificaciones)
+            const validStatus = userType === 'student' 
+              ? (session.status === 'scheduled' || session.status === 'pending')
+              : session.status === 'scheduled';
+            
+            return validStatus && 
+              session.scheduledDateTime && 
+              new Date(session.scheduledDateTime) > now;
+          })
           .sort((a, b) => new Date(a.scheduledDateTime) - new Date(b.scheduledDateTime))
           .slice(0, 3); // Mostrar solo las próximas 3
 
         setSessions(upcomingSessions);
       } catch (err) {
         console.error('Error fetching sessions:', err);
-        setError('Error cargando las tutorías');
+        setError(t('tutoringSummary.error'));
       } finally {
         setLoading(false);
       }
     };
 
     fetchSessions();
-  }, [user.email, userType]);
+  }, [user.email, userType, t]);
 
   const formatDateTime = (dateTime) => {
     if (!dateTime) return '';
@@ -63,26 +71,28 @@ export default function TutoringSummary({ userType, title, linkText, linkHref })
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const sessionDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
     
+    const localeStr = locale === 'en' ? 'en-US' : 'es-ES';
+    
     let dayText = '';
     if (sessionDate.getTime() === today.getTime()) {
-      dayText = 'Hoy';
+      dayText = t('tutoringSummary.today');
     } else if (sessionDate.getTime() === today.getTime() + 86400000) {
-      dayText = 'Mañana';
+      dayText = t('tutoringSummary.tomorrow');
     } else {
-      dayText = date.toLocaleDateString('es-ES', { 
+      dayText = date.toLocaleDateString(localeStr, { 
         weekday: 'long', 
         day: 'numeric', 
         month: 'short' 
       });
     }
     
-    const timeText = date.toLocaleTimeString('es-ES', { 
+    const timeText = date.toLocaleTimeString(localeStr, { 
       hour: '2-digit', 
       minute: '2-digit' 
     });
 
     const endTime = new Date(date.getTime() + 60 * 60 * 1000); // Agregar 1 hora
-    const endTimeText = endTime.toLocaleTimeString('es-ES', { 
+    const endTimeText = endTime.toLocaleTimeString(localeStr, { 
       hour: '2-digit', 
       minute: '2-digit' 
     });
@@ -121,14 +131,20 @@ export default function TutoringSummary({ userType, title, linkText, linkHref })
         fetchedSessions = await TutoringSessionService.getStudentSessions(user.email);
       }
 
-      // Filtrar solo sesiones programadas y futuras
+      // Filtrar sesiones programadas, pendientes y futuras
       const now = new Date();
       const upcomingSessions = fetchedSessions
-        .filter(session => 
-          session.status === 'scheduled' && 
-          session.scheduledDateTime && 
-          new Date(session.scheduledDateTime) > now
-        )
+        .filter(session => {
+          // Para estudiantes: mostrar pending y scheduled
+          // Para tutores: solo mostrar scheduled
+          const validStatus = userType === 'student' 
+            ? (session.status === 'scheduled' || session.status === 'pending')
+            : session.status === 'scheduled';
+          
+          return validStatus && 
+            session.scheduledDateTime && 
+            new Date(session.scheduledDateTime) > now;
+        })
         .sort((a, b) => new Date(a.scheduledDateTime) - new Date(b.scheduledDateTime))
         .slice(0, 3);
 
@@ -174,12 +190,12 @@ export default function TutoringSummary({ userType, title, linkText, linkHref })
         <div className="text-center py-8">
           <div className="text-6xl mb-4">📚</div>
           <h3 className="text-lg font-semibold text-gray-700 mb-2">
-            No tienes tutorías programadas
+            {t('tutoringSummary.noSessions')}
           </h3>
           <p className="text-gray-600">
             {userType === 'tutor' 
-              ? 'Las tutorías que tengas agendadas aparecerán aquí'
-              : 'Cuando reserves una tutoría, la verás aquí'
+              ? t('tutoringSummary.noSessionsTutor')
+              : t('tutoringSummary.noSessionsStudent')
             }
           </p>
         </div>
@@ -194,14 +210,21 @@ export default function TutoringSummary({ userType, title, linkText, linkHref })
               >
                 <div className="flex justify-between items-start">
                   <div className="flex-1 session-content">
-                    <p className="font-semibold text-gray-700">{session.subject}</p>
+                    <div className="flex items-center gap-2 mb-1">
+                      <p className="font-semibold text-gray-700">{session.subject}</p>
+                      {session.status === 'pending' && (
+                        <span className="px-2 py-0.5 bg-yellow-100 text-yellow-800 text-xs rounded-full font-medium">
+                          {t('tutoringSummary.pendingApproval')}
+                        </span>
+                      )}
+                    </div>
                     <p className="text-sm text-gray-600">
                       {formatDateTime(session.scheduledDateTime)}
                     </p>
                     <p className={`text-sm ${colors.text}`}>
                       {userType === 'tutor' 
-                        ? `Estudiante: ${session.studentEmail}`
-                        : `Tutor: ${session.tutorEmail}`
+                        ? `${t('tutoringSummary.student')} ${session.studentEmail}`
+                        : `${t('tutoringSummary.tutor')} ${session.tutorEmail}`
                       }
                     </p>
                     {session.location && (
@@ -211,7 +234,7 @@ export default function TutoringSummary({ userType, title, linkText, linkHref })
                     )}
                     {session.price && (
                       <p className="text-sm text-gray-500">
-                        💰 ${session.price.toLocaleString()}
+                        💰 {formatCurrency(session.price)}
                       </p>
                     )}
                   </div>
@@ -220,7 +243,7 @@ export default function TutoringSummary({ userType, title, linkText, linkHref })
                     onClick={() => handleShowDetails(session)}
                     className="ml-3 px-3 py-1 text-xs bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-colors font-medium text-gray-700 details-button"
                   >
-                    Ver detalles
+                    {t('tutoringSummary.viewDetails')}
                   </button>
                 </div>
               </div>

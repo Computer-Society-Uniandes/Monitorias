@@ -3,11 +3,13 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../context/SecureAuthContext";
+import { useI18n } from "../../lib/i18n";
 import StudentHome from "../components/StudentHome/StudentHome";
 import routes from "../../routes";
 
 export default function Home() {
   const { user, loading } = useAuth();
+  const { t } = useI18n();
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
 
@@ -32,7 +34,7 @@ export default function Home() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-[#FF7A7A]"></div>
-          <p className="mt-4 text-gray-600">Cargando...</p>
+          <p className="mt-4 text-gray-600">{t('home.loading')}</p>
         </div>
       </div>
     );
@@ -44,10 +46,10 @@ export default function Home() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-800 mb-4">
-            Acceso Restringido
+            {t('home.accessRestricted')}
           </h2>
           <p className="text-gray-600">
-            Debes iniciar sesión para acceder a esta página.
+            {t('home.loginRequired')}
           </p>
         </div>
       </div>

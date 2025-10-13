@@ -8,18 +8,19 @@ import { useRouter } from 'next/navigation';
 import routes from 'app/routes';
 import './Profile.css';
 import { useAuth } from '../../context/SecureAuthContext';
+import { useI18n } from '../../../lib/i18n';
 
 const TUTOR_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSdxeOSt5jjjSVtXY9amQRiXeufm65-11N4FMvJ96fcxyiN58A/viewform?usp=sharing&ouid=102056237631790140503'; 
 
 // Modal de invitación (accesible y responsive)
-function TutorInviteModal({ open, onClose }) {
+function TutorInviteModal({ open, onClose, t }) {
   if (!open) return null;
   return (
     <div className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="inviteTitle">
       <div className="modal-card">
-        <h3 id="inviteTitle" className="modal-title">¿Quieres ser tutor?</h3>
+        <h3 id="inviteTitle" className="modal-title">{t('profile.becomeTutorTitle')}</h3>
         <p className="modal-text">
-          Aún no tienes habilitado el perfil de tutor. Completa el formulario para solicitar acceso.
+          {t('profile.becomeTutorText')}
         </p>
         <div className="modal-actions">
           <a
@@ -28,9 +29,9 @@ function TutorInviteModal({ open, onClose }) {
             rel="noopener noreferrer"
             className="btn-header btn-header--primary"
           >
-            Ir al formulario
+            {t('profile.goToForm')}
           </a>
-          <button className="btn-header" onClick={onClose}>Cerrar</button>
+          <button className="btn-header" onClick={onClose}>{t('profile.close')}</button>
         </div>
       </div>
     </div>
@@ -47,6 +48,7 @@ const Profile = () => {
 
   const router = useRouter();
   const { user, loading, logout } = useAuth();
+  const { t } = useI18n();
 
   // Cargar datos de perfil
   useEffect(() => {
@@ -161,7 +163,7 @@ const Profile = () => {
       </svg>
     </div>
         <div className="relative z-10 max-w-4xl mx-auto bg-white rounded-xl shadow p-8 mt-10 justify-items-center">
-        <h1 className="text-3xl font-bold mb-6 title">Perfil del Usuario</h1>
+        <h1 className="text-3xl font-bold mb-6 title">{t('profile.title')}</h1>
         <div className="row-span-3"><img
 
         //placeholder sacado de https://avatar-placeholder.iran.liara.run/
@@ -173,28 +175,28 @@ const Profile = () => {
 
           
             {/* aqui se debe cambiar por los datos del usuario */}
-            <p className='text-info'><strong className='text-campos'>Nombre: </strong> {userData?.name || 'No definido'}</p>
-            <p className='text-info'><strong className='text-campos'>Teléfono: </strong>{userData?.phone_number || 'No definido'} </p>
-            <p className='text-info'><strong className='text-campos'>Correo: </strong>{user?.email || 'No definido'} </p>
-            <p className='text-info'><strong className='text-campos'>Carrera:</strong> {majorName || 'No definida'}</p>
+            <p className='text-info'><strong className='text-campos'>{t('profile.name')} </strong> {userData?.name || t('profile.notDefined')}</p>
+            <p className='text-info'><strong className='text-campos'>{t('profile.phone')} </strong>{userData?.phone_number || t('profile.notDefined')} </p>
+            <p className='text-info'><strong className='text-campos'>{t('profile.email')} </strong>{user?.email || t('profile.notDefined')} </p>
+            <p className='text-info'><strong className='text-campos'>{t('profile.major')}</strong> {majorName || t('profile.notDefined')}</p>
 
             <button
             className="mt-4 btn-editar text-white py-2 px-4 rounded"
             >
-            Editar Perfil
+            {t('profile.editProfile')}
             </button>
             <button
             onClick={handleLogout}
 
             className="mt-4 btn-logout text-white py-2 px-4 rounded mx-4"
             >
-            Cerrar Sesión
+            {t('profile.logout')}
             </button>
         </div>
         </div>
 
       {/* Modal */}
-      <TutorInviteModal open={inviteOpen} onClose={() => setInviteOpen(false)} />
+      <TutorInviteModal open={inviteOpen} onClose={() => setInviteOpen(false)} t={t} />
     </div>
   );
 };

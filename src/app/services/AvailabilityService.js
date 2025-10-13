@@ -622,6 +622,34 @@ export class AvailabilityService {
     }
   }
 
+  // Obtener disponibilidades de un tutor específico en un rango de fechas
+  static async getAvailabilitiesByTutorAndRange(tutorEmail, startDate, endDate) {
+    try {
+      const params = new URLSearchParams({
+        tutorEmail: tutorEmail,
+        startDate: startDate,
+        endDate: endDate
+      });
+
+      const response = await fetch(`/api/availability?${params}`);
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Error al obtener disponibilidades del tutor');
+      }
+
+      return {
+        success: true,
+        availabilitySlots: result.availabilities || [],
+        totalEvents: result.totalCount || 0,
+        source: 'firebase'
+      };
+    } catch (error) {
+      console.error('Error fetching tutor availabilities in range:', error);
+      throw error;
+    }
+  }
+
   // Función de testing y debugging para verificar la sincronización completa
   static async testFirebaseSync() {
     console.log('🔄 Iniciando test completo de sincronización con Firebase...');

@@ -27,11 +27,13 @@ import { useFavorites } from "../../hooks/useFavorites";
 import NotificationDropdown from "../NotificationDropdown/NotificationDropdown";
 import StudentNotificationDropdown from "../NotificationDropdown/StudentNotificationDropdown";
 import routes from "../../../routes";
+import { useI18n } from "../../../lib/i18n";
 
 export default function Header() {
   const router = useRouter();
   const pathname = usePathname();
   const { user, logout } = useAuth();
+  const { t } = useI18n();
 
   const [mounted, setMounted] = useState(false);
   const [role, setRole] = useState("student"); // 'student' | 'tutor'
@@ -85,17 +87,17 @@ export default function Header() {
   const favoritesCount = getFavoritesCount();
   
   const studentNavItems = [
-    { href: routes.HOME, label: "Inicio", icon: Home },
-    { href: routes.SEARCH_TUTORS, label: "Buscar", icon: Search },
-    { href: routes.FAVORITES, label: "Favoritos", icon: Heart, count: favoritesCount },
-    { href: routes.HISTORY, label: "Historial", icon: History }
+    { href: routes.HOME, label: t('header.navigation.home'), icon: Home },
+    { href: routes.SEARCH_TUTORS, label: t('header.navigation.search'), icon: Search },
+    { href: routes.FAVORITES, label: t('header.navigation.favorites'), icon: Heart, count: favoritesCount },
+    { href: routes.HISTORY, label: t('header.navigation.history'), icon: History }
   ];
 
   const tutorNavItems = [
-    { href: routes.TUTOR_INICIO, label: "Inicio", icon: Home },
-    { href: routes.TUTOR_DISPONIBILIDAD, label: "Disponibilidad", icon: Calendar },
-    { href: routes.TUTOR_STATISTICS, label: "Estadísticas", icon: BarChart3 },
-    { href: routes.TUTOR_MATERIAS, label: "Materias", icon: BookOpen },
+    { href: routes.TUTOR_INICIO, label: t('header.navigation.home'), icon: Home },
+    { href: routes.TUTOR_DISPONIBILIDAD, label: t('header.navigation.availability'), icon: Calendar },
+    { href: routes.TUTOR_STATISTICS, label: t('header.navigation.statistics'), icon: BarChart3 },
+    { href: routes.TUTOR_MATERIAS, label: t('header.navigation.subjects'), icon: BookOpen },
   ];
 
   // Check if current path matches navigation item
@@ -144,7 +146,7 @@ export default function Header() {
       {/* Botón hamburguesa solo móvil */}
       <button
         className="hamburger"
-        aria-label={menuOpen ? "Cerrar menú" : "Abrir menú"}
+        aria-label={menuOpen ? t('header.menu.close') : t('header.menu.open')}
         aria-expanded={menuOpen}
         aria-controls="site-nav"
         onClick={() => setMenuOpen((v) => !v)}
@@ -190,7 +192,7 @@ export default function Header() {
                 handleRoleChange(newRole);
               }}
             >
-              {tutorMode ? "TUTOR" : "ESTUDIANTE"}
+              {tutorMode ? t('header.roles.tutor') : t('header.roles.student')}
             </button>
           </div>
         )}
@@ -221,7 +223,7 @@ export default function Header() {
                 router.push(routes.LOGIN);
               }}
             >
-              Iniciar Sesión
+              {t('header.auth.login')}
             </button>
             <button
               className="btn-header btn-header--primary"
@@ -230,7 +232,7 @@ export default function Header() {
                 router.push(routes.REGISTER);
               }}
             >
-              Regístrate
+              {t('header.auth.register')}
             </button>
           </div>
         )}

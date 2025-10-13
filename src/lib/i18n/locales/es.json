@@ -86,7 +86,7 @@
       "endDate": "Fecha fin"
     },
     "table": {
-      "title": "Historial de tutorías",
+      "title": "Historial de tutorías (Elige una tutoría completada para dejar tu reseña)",
       "date": "Fecha",
       "subject": "Materia",
       "tutor": "Tutor",
@@ -160,11 +160,14 @@
         "slotNotAvailable": "El horario seleccionado ya no está disponible. Por favor selecciona otro.",
         "selecting": "Error seleccionando el horario. Por favor intenta de nuevo.",
         "createSession": "Error al crear la sesión: {message}",
-        "reserveError": "❌ Error al reservar: {message}\n\nPor favor intenta nuevamente."
+        "reserveError": "❌ Error al reservar: {message}\n\nPor favor intenta nuevamente.",
+        "incompleteSessionInfo": "Información de sesión incompleta"
       },
       "alerts": {
         "proofUploadProblem": "⚠️ La reserva se creó pero hubo un problema al subir el comprobante: {error}\n\nPuedes enviar el comprobante después."
-      }
+      },
+      "defaultSubject": "Tutoría",
+      "defaultTutorName": "Tutor"
     },
     "joint": {
       "errorTitle": "Error de Datos",
@@ -259,5 +262,342 @@
       "tutor": "Tutor",
       "subjectFallback": "Materia"
     }
+  },
+  "findTutor": {
+    "title": "Buscar un tutor",
+    "autoAssign": "Auto-Asignar",
+    "searchPlaceholder": "Buscar tutores o materias",
+    "loading": "Cargando tutores...",
+    "emptyStates": {
+      "noTutorsFound": "No se encontraron tutores",
+      "noMatch": "Ningún tutor coincide con \"{term}\"",
+      "noSubject": "No hay tutores disponibles para {subject}",
+      "noAvailable": "No hay tutores disponibles en este momento"
+    }
+  },
+  "sessionDetails": {
+    "title": "Detalles de la Sesión",
+    "subject": "Materia",
+    "tutor": "Tutor",
+    "student": "Estudiante",
+    "sessionDetailsLabel": "Detalles de la Sesión",
+    "location": "Ubicación",
+    "cost": "Costo",
+    "total": "Total",
+    "notes": "Notas",
+    "close": "Cerrar",
+    "reschedule": "Reprogramar",
+    "cancelSession": "Cancelar Tutoría",
+    "cancelConfirmTitle": "¿Estás seguro que deseas cancelar esta tutoría?",
+    "cancelReasonPlaceholder": "Por favor proporciona un motivo para la cancelación...",
+    "cancelKeep": "No, mantener",
+    "cancelConfirm": "Sí, cancelar",
+    "cancelling": "Cancelando...",
+    "statusCancelled": "⚠️ Sesión Cancelada",
+    "cancelledBy": "Cancelada por: {by}",
+    "cancelledByYou": "ti",
+    "cancelReason": "Motivo: {reason}",
+    "timeUntil": "⏰ {time}",
+    "cannotCancelWarning": "No se puede cancelar con menos de 2 horas de anticipación",
+    "sessionPassed": "La sesión ya pasó",
+    "hoursRemaining": "Faltan {hours} horas",
+    "minutesRemaining": "Faltan {minutes} minutos",
+    "paymentStatus": {
+      "en_verificación": "En verificación",
+      "verificado": "Verificado",
+      "rechazado": "Rechazado"
+    }
+  },
+  "home": {
+    "loading": "Cargando...",
+    "accessRestricted": "Acceso Restringido",
+    "loginRequired": "Debes iniciar sesión para acceder a esta página."
+  },
+  "explore": {
+    "bannerTitle": "¿Necesitas ayuda en tus clases?",
+    "subjectsTitle": "Tus materias este semestre"
+  },
+  "favorites": {
+    "loading": "Cargando…",
+    "searchPlaceholder": "Busca materias o tutores",
+    "coursesTitle": "Cursos favoritos",
+    "tutorsTitle": "Tutores favoritos",
+    "emptyCourses": "Aún no tienes cursos favoritos.",
+    "emptyTutors": "Aún no tienes tutores favoritos.",
+    "program": "Programa:",
+    "findTutor": "Buscar un tutor",
+    "reserve": "Reservar",
+    "user": "Usuario",
+    "tutor": "Tutor"
+  },
+  "profile": {
+    "title": "Perfil del Usuario",
+    "name": "Nombre:",
+    "phone": "Teléfono:",
+    "email": "Correo:",
+    "major": "Carrera:",
+    "notDefined": "No definido",
+    "editProfile": "Editar Perfil",
+    "logout": "Cerrar Sesión",
+    "becomeTutorTitle": "¿Quieres ser tutor?",
+    "becomeTutorText": "Aún no tienes habilitado el perfil de tutor. Completa el formulario para solicitar acceso.",
+    "goToForm": "Ir al formulario",
+    "close": "Cerrar",
+    "loadingProfile": "Cargando perfil..."
+  },
+  "welcome": {
+    "greeting": "Bienvenido",
+    "greetingWithName": "Bienvenidx, {name}",
+    "findTutor": "Encuentra el tutor para ti"
+  },
+  "studentHome": {
+    "scheduledSessions": "Mis Tutorías Programadas 📚",
+    "viewHistory": "Ver historial",
+    "needHelpTitle": "¿Necesitas ayuda académica? 🎯",
+    "needHelpText": "Encuentra tutores expertos para mejorar en cualquier materia.",
+    "searchTutors": "🔍 Buscar Tutores",
+    "exploreSubjects": "🌟 Explorar Materias",
+    "yourSubjects": "Tus materias este semestre"
+  },
+  "tutoringSummary": {
+    "loading": "Cargando...",
+    "error": "Error cargando las tutorías",
+    "noSessions": "No tienes tutorías programadas",
+    "noSessionsStudent": "Cuando reserves una tutoría, la verás aquí",
+    "noSessionsTutor": "Las tutorías que tengas agendadas aparecerán aquí",
+    "viewDetails": "Ver detalles",
+    "today": "Hoy",
+    "tomorrow": "Mañana",
+    "student": "Estudiante:",
+    "tutor": "Tutor:",
+    "pendingApproval": "⏳ Pendiente de aprobación",
+    "statusScheduled": "Programada",
+    "statusPending": "Pendiente"
+  },
+  "boxSubject": {
+    "tutors": "tutores",
+    "tutor": "tutor"
+  },
+  "header": {
+    "navigation": {
+      "home": "Inicio",
+      "search": "Buscar",
+      "favorites": "Favoritos",
+      "history": "Historial",
+      "availability": "Disponibilidad",
+      "statistics": "Estadísticas",
+      "subjects": "Materias"
+    },
+    "roles": {
+      "student": "ESTUDIANTE",
+      "tutor": "TUTOR"
+    },
+    "auth": {
+      "login": "Iniciar Sesión",
+      "register": "Regístrate"
+    },
+    "menu": {
+      "open": "Abrir menú",
+      "close": "Cerrar menú"
+    }
+  },
+  "rescheduleModal": {
+    "title": "Reprogramar Sesión",
+    "currentSchedule": "Horario Actual",
+    "tutorLabel": "Tutor:",
+    "reasonLabel": "Motivo de la reprogramación *",
+    "reasonPlaceholder": "Ej: Tengo otro compromiso a esa hora, necesito más tiempo para preparar...",
+    "selectNewTime": "Selecciona un nuevo horario",
+    "loading": "Cargando disponibilidad...",
+    "noSlotsTitle": "No hay horarios disponibles",
+    "noSlotsText": "El tutor no tiene disponibilidad en las próximas 2 semanas",
+    "slotsAvailable": "{count} horario disponible",
+    "slotsAvailablePlural": "{count} horarios disponibles",
+    "confirmButton": "Confirmar Reprogramación",
+    "confirmingButton": "Reprogramando...",
+    "cancelButton": "Cancelar",
+    "alerts": {
+      "selectSlot": "Por favor selecciona un nuevo horario",
+      "provideReason": "Por favor proporciona un motivo para la reprogramación",
+      "success": "✅ Sesión reprogramada exitosamente",
+      "error": "Error al reprogramar"
+    }
+  },
+  "tutorAvailability": {
+    "title": "Disponibilidad",
+    "loading": "Cargando disponibilidad y sesiones...",
+    "availableSlots": "Horarios disponibles",
+    "addSlot": "Agregar horario",
+    "editSlots": "Editar horarios",
+    "syncCalendar": "Sincronizar calendario",
+    "syncing": "Sincronizando...",
+    "connectCalendarFirst": "Conecta tu Google Calendar primero",
+    "syncCalendarTitle": "Sincronizar eventos de Google Calendar",
+    "availabilityFor": "Disponibilidad para {date}",
+    "selectDay": "Selecciona un día",
+    "booked": "Reservado",
+    "available": "Disponible",
+    "noSlotsForDay": "No hay horarios disponibles para este día",
+    "useAddSlotHint": "Usa 'Agregar horario' para agregar disponibilidad",
+    "pending": "Pendientes",
+    "upcoming": "Próximas",
+    "past": "Pasadas",
+    "pendingApproval": "Pendiente de aprobación",
+    "noPendingRequests": "No hay solicitudes pendientes",
+    "defaultSessionTitle": "Introducción a la programación con estudiante",
+    "addAvailabilitySlot": "Agregar horario de disponibilidad",
+    "titleLabel": "Título",
+    "titlePlaceholder": "Horario de disponibilidad",
+    "dateLabel": "Fecha",
+    "startTimeLabel": "Hora inicio",
+    "endTimeLabel": "Hora fin",
+    "descriptionLabel": "Descripción",
+    "descriptionPlaceholder": "Descripción opcional",
+    "cancel": "Cancelar",
+    "creating": "Creando...",
+    "save": "Guardar",
+    "connectCalendarRequired": "Debes conectar tu Google Calendar para crear eventos",
+    "syncSuccessful": "Sincronización exitosa",
+    "syncFailed": "Error en sincronización",
+    "errorCreatingEvent": "Error al crear evento",
+    "mustBeConnectedToSync": "Debes estar conectado a Google Calendar para sincronizar",
+    "syncSuccess": "¡Sincronización exitosa!",
+    "eventsProcessed": "Eventos procesados",
+    "newEvents": "Nuevos eventos",
+    "updatedEvents": "Actualizados",
+    "syncError": "Error en la sincronización",
+    "syncFailed": "Error al sincronizar"
+  },
+  "googleCalendar": {
+    "loading": "Cargando...",
+    "checking": "Verificando...",
+    "connected": "Conectado",
+    "sessionExpired": "Sesión Expirada",
+    "connect": "Conectar Google Calendar",
+    "connectedTooltip": "Conectado a Google Calendar (verificado: {time})",
+    "expiredTooltip": "Sesión expirada - Haz click para renovar",
+    "connectTooltip": "Conectar con Google Calendar",
+    "sessionExpiredNotice": "Tu sesión ha expirado. Haz click para renovar la conexión.",
+    "connectionRenewed": "Conexión renovada exitosamente",
+    "sessionExpiredMessage": "Tu sesión de Google Calendar ha expirado.",
+    "reconnectNow": "¿Quieres reconectar ahora?"
+  },
+  "notifications": {
+    "title": "Notificaciones",
+    "loading": "Cargando notificaciones...",
+    "empty": "No tienes notificaciones",
+    "emptyDescription": "Todas tus notificaciones aparecerán aquí",
+    "markAllAsRead": "Marcar todas como leídas",
+    "close": "Cerrar",
+    "viewAll": "Ver todas las notificaciones",
+    "defaultTutorName": "Tutor",
+    "common": {
+      "notification": "Notificación"
+    },
+    "pendingSessionRequest": {
+      "title": "Nueva Solicitud de Tutoría",
+      "message": "{studentName} ha solicitado una sesión de tutoría para {subject}"
+    },
+    "sessionAccepted": {
+      "title": "Sesión Aprobada",
+      "message": "Tu sesión de tutoría para {subject} ha sido aprobada"
+    },
+    "sessionDeclined": {
+      "title": "Sesión Rechazada",
+      "message": "Tu sesión de tutoría para {subject} ha sido rechazada"
+    },
+    "sessionCancelled": {
+      "title": "Sesión Cancelada",
+      "message": "Tu tutoría de {subject} ha sido cancelada por {cancellerRole}. Motivo: {reason}",
+      "tutor": "el tutor",
+      "student": "el estudiante",
+      "noReason": "Sin razón especificada"
+    },
+    "sessionRescheduled": {
+      "title": "Sesión Reprogramada",
+      "message": "{studentName} ha reprogramado la tutoría de {subject}. Anterior: {oldDate}. Nueva: {newDate}. Motivo: {reason}",
+      "noReason": "Sin razón especificada"
+    },
+    "sessionRejected": {
+      "title": "Sesión Rechazada",
+      "message": "Tu solicitud de tutoría ha sido rechazada{reason}"
+    },
+    "sessionReminder": {
+      "title": "Recordatorio de Sesión",
+      "message": "Tu sesión de {subject} con {tutorName} es en 1 hora"
+    },
+    "paymentReminder": {
+      "title": "Recordatorio de Pago",
+      "message": "Recuerda realizar el pago para tu sesión de {subject}"
+    },
+    "markAllAsRead": {
+      "success": "Marcadas {count} notificaciones como leídas",
+      "noUnread": "No se encontraron notificaciones sin leer"
+    },
+    "errors": {
+      "creationFailed": "Error creando notificación: {error}",
+      "retrievalFailed": "Error obteniendo notificaciones: {error}",
+      "markAsReadFailed": "Error marcando notificación como leída: {error}",
+      "deletionFailed": "Error eliminando notificación: {error}",
+      "markAllAsReadFailed": "Error marcando notificaciones como leídas: {error}"
+    },
+    "tutor": {
+      "pendingSessionRequest": "Solicitud de Tutoría",
+      "sessionReminder": "Recordatorio de Sesión",
+      "message": "Mensaje"
+    },
+    "student": {
+      "sessionAccepted": "Sesión Aceptada",
+      "sessionRejected": "Sesión Rechazada",
+      "sessionCancelled": "Sesión Cancelada",
+      "paymentReminder": "Recordatorio de Pago",
+      "tutorMessage": "Mensaje del Tutor"
+    },
+    "timeAgo": {
+      "justNow": "Hace un momento",
+      "minutesAgo": "Hace {count} minuto",
+      "minutesAgo_other": "Hace {count} minutos",
+      "hoursAgo": "Hace {count} hora",
+      "hoursAgo_other": "Hace {count} horas",
+      "daysAgo": "Hace {count} día",
+      "daysAgo_other": "Hace {count} días",
+      "minutesAgoShort": "Hace {count} min",
+      "hoursAgoShort": "Hace {count} h",
+      "daysAgoShort": "Hace {count} d"
+    }},
+
+  "review": {
+    "newTitle": "Deja una reseña",
+    "updateTitle": "Actualiza tu reseña",
+    "fields": {
+      "subject": "Materia",
+      "tutor": "Tutor",
+      "date": "Fecha",
+      "price": "Precio",
+      "rating": "Calificación",
+      "comment": "Comentario"
+    },
+    "placeholders": {
+      "comment": "Escribe tu opinión sobre la tutoría"
+    },
+    "buttons": {
+      "submit": "Enviar reseña",
+      "update": "Actualizar reseña",
+      "saving": "Guardando...",
+      "close": "Cerrar"
+    },
+    "errors": {
+      "validation": "Debes seleccionar al menos 1 estrella.",
+      "authRequired": "Debes iniciar sesión para enviar una reseña.",
+      "sessionNotFound": "La sesión no existe.",
+      "saveError": "Error al guardar la reseña."
+  }
+},
+
+  "successModal": {
+    "title": "¡Reseña enviada con éxito!",
+    "message": "Gracias por tus comentarios. ¡Nos ayuda mucho!",
+    "close": "Cerrar"
   }
 }
+
