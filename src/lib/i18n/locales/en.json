@@ -461,8 +461,6 @@
     "syncSuccessful": "Sync successful",
     "errorCreatingEvent": "Error creating event",
     "mustBeConnectedToSync": "You must be connected to Google Calendar to sync",
-    "syncSuccess": "Sync successful!",
-    "syncSuccessful": "Sync successful",
     "eventsProcessed": "Events processed",
     "newEvents": "New events",
     "updatedEvents": "Updated",
@@ -488,10 +486,7 @@
     "loading": "Loading notifications...",
     "empty": "You have no notifications",
     "emptyDescription": "All your notifications will appear here",
-<<<<<<< HEAD
-=======
     "markAllAsReadButton": "Mark all as read",
->>>>>>> 0a9149bb96d9e4cbcbf7bff1320496f44e41b724
     "close": "Close",
     "viewAll": "View all notifications",
     "defaultTutorName": "Tutor",
@@ -604,7 +599,6 @@
     "message": "Thank you for your feedback. It helps us a lot!",
     "close": "Close"
   },
-<<<<<<< HEAD
   "landing": {
     "header": {
       "viewProfile": "View Profile",
@@ -678,7 +672,8 @@
         "title": "Our Mission",
         "description": "Transform the educational experience at Uniandes, creating an ecosystem where knowledge flows freely among students. We seek to eliminate barriers in learning and foster a culture of collaboration and academic excellence."
       }
-=======
+    }
+  },
 
   "tutorHome": {
     "title": "Tutor Dashboard 🎓",
@@ -797,7 +792,6 @@
     "slotDetails": {
       "recurring": "Recurring",
       "available": "Available"
->>>>>>> 0a9149bb96d9e4cbcbf7bff1320496f44e41b724
     }
   },
   "auth": {
