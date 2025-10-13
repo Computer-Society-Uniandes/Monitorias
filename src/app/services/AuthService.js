@@ -127,7 +127,8 @@ export class AuthService {
       'auth/user-disabled': 'Esta cuenta ha sido deshabilitada',
       'auth/too-many-requests': 'Demasiados intentos. Intenta más tarde',
       'auth/network-request-failed': 'Error de conexión. Verifica tu internet',
-      'auth/invalid-credential': 'Credenciales inválidas'
+      'auth/invalid-credential': 'Credenciales inválidas',
+      'auth/missing-password': 'La contraseña es requerida'
     };
     
     return messages[errorCode] || 'Error de autenticación. Intenta nuevamente.';
