@@ -99,11 +99,12 @@ describe('SessionConfirmationModal', () => {
       />
     );
 
-    const emailInput = screen.getByPlaceholderText(/your-email@example.com/i);
-    expect(emailInput).toHaveValue('student@example.com');
+    const emailInput = screen.getByDisplayValue('student@example.com');
+    expect(emailInput).toBeInTheDocument();
+    expect(emailInput).toHaveAttribute('readonly');
   });
 
-  test('allows user to change email', async () => {
+  test('email field is read-only', () => {
     render(
       <SessionConfirmationModal
         isOpen={true}
@@ -113,12 +114,9 @@ describe('SessionConfirmationModal', () => {
       />
     );
 
-    const emailInput = screen.getByPlaceholderText(/your-email@example.com/i);
-    await act(async () => {
-      fireEvent.change(emailInput, { target: { value: 'newemail@example.com' } });
-    });
-
-    expect(emailInput).toHaveValue('newemail@example.com');
+    const emailInput = screen.getByDisplayValue('student@example.com');
+    expect(emailInput).toHaveAttribute('readonly');
+    expect(emailInput).toHaveAttribute('type', 'email');
   });
 
   test('validates file type on upload', async () => {
@@ -223,12 +221,18 @@ describe('SessionConfirmationModal', () => {
     expect(confirmButton).toBeDisabled();
   });
 
-  test('confirm button is disabled with invalid email', async () => {
+  test('confirm button validates email from session', async () => {
+    // Test with session that has invalid email
+    const sessionWithInvalidEmail = {
+      ...mockSession,
+      studentEmail: 'invalid-email', // Invalid email format
+    };
+
     render(
       <SessionConfirmationModal
         isOpen={true}
         onClose={mockOnClose}
-        session={mockSession}
+        session={sessionWithInvalidEmail}
         onConfirm={mockOnConfirm}
       />
     );
@@ -239,12 +243,6 @@ describe('SessionConfirmationModal', () => {
     Object.defineProperty(validFile, 'size', { value: 1024 });
     await act(async () => {
       fireEvent.change(fileInput, { target: { files: [validFile] } });
-    });
-
-    // Set invalid email
-    const emailInput = screen.getByPlaceholderText(/your-email@example.com/i);
-    await act(async () => {
-      fireEvent.change(emailInput, { target: { value: 'invalid-email' } });
     });
 
     const confirmButton = screen.getByRole('button', { name: /Confirm Booking and Send Invite/i });
@@ -292,12 +290,6 @@ describe('SessionConfirmationModal', () => {
       fireEvent.change(fileInput, { target: { files: [validFile] } });
     });
 
-    // Change email
-    const emailInput = screen.getByPlaceholderText(/your-email@example.com/i);
-    await act(async () => {
-      fireEvent.change(emailInput, { target: { value: 'newemail@example.com' } });
-    });
-
     // Confirm
     const confirmButton = screen.getByRole('button', { name: /Confirm Booking and Send Invite/i });
     await act(async () => {
@@ -305,7 +297,7 @@ describe('SessionConfirmationModal', () => {
     });
 
     expect(mockOnConfirm).toHaveBeenCalledWith({
-      studentEmail: 'newemail@example.com',
+      studentEmail: 'student@example.com', // Email from session
       proofFile: validFile,
     });
   });
@@ -357,11 +349,11 @@ describe('SessionConfirmationModal', () => {
       />
     );
 
-    const emailInput = screen.getByPlaceholderText(/your-email@example.com/i);
+    const emailInput = screen.getByDisplayValue('student@example.com');
     const fileInput = screen.getByLabelText(/Select file/i).closest('label').querySelector('input[type="file"]');
     const confirmButton = screen.getByRole('button', { name: /Confirming.../i });
 
-    expect(emailInput).toBeDisabled();
+    expect(emailInput).toHaveAttribute('readonly'); // Email is always readonly
     expect(fileInput).toBeDisabled();
     expect(confirmButton).toBeDisabled();
   });
@@ -472,8 +464,9 @@ describe('SessionConfirmationModal', () => {
     expect(screen.getByText(/25,000/)).toBeInTheDocument();
   });
 
-  test('validates email format', async () => {
-    render(
+  test('validates email format from session', async () => {
+    // Test with valid email from session
+    const { unmount } = render(
       <SessionConfirmationModal
         isOpen={true}
         onClose={mockOnClose}
@@ -490,26 +483,28 @@ describe('SessionConfirmationModal', () => {
       fireEvent.change(fileInput, { target: { files: [validFile] } });
     });
 
-    const emailInput = screen.getByPlaceholderText(/your-email@example.com/i);
-    
-    // Test invalid emails
-    await act(async () => {
-      fireEvent.change(emailInput, { target: { value: 'notanemail' } });
-    });
     let confirmButton = screen.getByRole('button', { name: /Confirm Booking and Send Invite/i });
-    expect(confirmButton).toBeDisabled();
-
-    await act(async () => {
-      fireEvent.change(emailInput, { target: { value: 'missing@domain' } });
-    });
-    confirmButton = screen.getByRole('button', { name: /Confirm Booking and Send Invite/i });
-    expect(confirmButton).toBeDisabled();
-
-    // Test valid email
-    await act(async () => {
-      fireEvent.change(emailInput, { target: { value: 'valid@example.com' } });
-    });
-    confirmButton = screen.getByRole('button', { name: /Confirm Booking and Send Invite/i });
     expect(confirmButton).not.toBeDisabled();
+
+    // Unmount first modal
+    unmount();
+
+    // Test with invalid email formats in session
+    render(
+      <SessionConfirmationModal
+        isOpen={true}
+        onClose={mockOnClose}
+        session={{ ...mockSession, studentEmail: 'notanemail' }}
+        onConfirm={mockOnConfirm}
+      />
+    );
+
+    const fileInput2 = screen.getByLabelText(/Select file/i).closest('label').querySelector('input[type="file"]');
+    await act(async () => {
+      fireEvent.change(fileInput2, { target: { files: [validFile] } });
+    });
+
+    confirmButton = screen.getByRole('button', { name: /Confirm Booking and Send Invite/i });
+    expect(confirmButton).toBeDisabled();
   });
 });
