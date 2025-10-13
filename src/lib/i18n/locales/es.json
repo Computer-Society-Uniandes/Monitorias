@@ -598,6 +598,81 @@
     "title": "¡Reseña enviada con éxito!",
     "message": "Gracias por tus comentarios. ¡Nos ayuda mucho!",
     "close": "Cerrar"
+  },
+  "landing": {
+    "header": {
+      "viewProfile": "Ver Perfil",
+      "signUp": "Regístrate",
+      "login": "Iniciar Sesión"
+    },
+    "hero": {
+      "badge": "✨ Nueva Plataforma",
+      "title": "Conecta con los mejores {accent} de Uniandes",
+      "titleAccent": "monitores",
+      "subtitle": "Encuentra ayuda académica personalizada, programa sesiones flexibles y mejora tu rendimiento con estudiantes destacados de tu universidad.",
+      "benefits": {
+        "verifiedTutors": "Tutores verificados y calificados",
+        "flexibleSchedule": "Horarios flexibles 24/7",
+        "personalizedLearning": "Aprendizaje personalizado"
+      },
+      "cta": {
+        "startLearning": "Comienza a aprender",
+        "becomeTutor": "Únete como monitor"
+      }
+    },
+    "keyPoints": {
+      "title": "¿Por qué elegir Calico?",
+      "cards": {
+        "expertTutors": {
+          "title": "Monitores Expertos",
+          "description": "Conecta con estudiantes destacados de Uniandes que han demostrado excelencia académica en sus materias."
+        },
+        "flexibleSessions": {
+          "title": "Sesiones Flexibles",
+          "description": "Programa sesiones que se adapten a tu horario. Disponibilidad 24/7 para que estudies cuando mejor te convenga."
+        },
+        "personalizedMethods": {
+          "title": "Métodos Personalizados",
+          "description": "Cada sesión se adapta a tu estilo de aprendizaje y nivel actual para maximizar tu comprensión y rendimiento."
+        },
+        "provenResults": {
+          "title": "Resultados Comprobados",
+          "description": "Estudiantes que usan Calico mejoran significativamente sus calificaciones y comprensión de las materias."
+        }
+      }
+    },
+    "statistics": {
+      "activeStudents": "Estudiantes Activos",
+      "expertTutors": "Monitores Expertos",
+      "completedSessions": "Sesiones Completadas",
+      "averageRating": "Calificación Promedio"
+    },
+    "about": {
+      "title": "Sobre Nosotros",
+      "description": "Somos un equipo comprometido con conectar a estudiantes con monitores dispuestos a ayudar. Facilitamos el aprendizaje a través de una plataforma que promueve la confianza y una conexión efectiva, asegurando una experiencia de apoyo accesible y de calidad.",
+      "features": {
+        "community": {
+          "title": "Comunidad",
+          "description": "Creamos una comunidad de aprendizaje colaborativo entre estudiantes y monitores."
+        },
+        "learning": {
+          "title": "Aprendizaje",
+          "description": "Facilitamos el proceso de aprendizaje con metodologías efectivas y personalizadas."
+        },
+        "quality": {
+          "title": "Calidad",
+          "description": "Garantizamos monitores de alta calidad, seleccionados por su excelencia académica."
+        },
+        "flexibility": {
+          "title": "Flexibilidad",
+          "description": "Ofrecemos horarios flexibles que se adaptan a las necesidades de cada estudiante."
+        }
+      },
+      "mission": {
+        "title": "Nuestra Misión",
+        "description": "Transformar la experiencia educativa en Uniandes, creando un ecosistema donde el conocimiento fluya libremente entre estudiantes. Buscamos eliminar barreras en el aprendizaje y fomentar una cultura de colaboración y excelencia académica."
+      }
+    }
   }
 }
 

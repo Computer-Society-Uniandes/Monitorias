@@ -10,12 +10,14 @@ import CalicoLogo from "../../../../public/CalicoLogo.png";
 import routes from "app/routes";
 import styles from "./Landing.module.css";
 import { useAuth } from "../../context/SecureAuthContext";
+import { useI18n } from "../../../lib/i18n";
 
 export default function Landing() {
   const [scrolled, setScrolled] = useState(false);
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
   const { user, loading } = useAuth();
+  const { t } = useI18n();
 
   /* Detectar scroll */
   useEffect(() => {
@@ -53,7 +55,7 @@ export default function Landing() {
                 }`}
                 onClick={() => router.push(routes.PROFILE)}
               >
-                Ver Perfil
+                {t('landing.header.viewProfile')}
               </button>
             ) : (
               <>
@@ -63,7 +65,7 @@ export default function Landing() {
                   }`}
                   onClick={() => router.push(routes.REGISTER)}
                 >
-                  Regístrate
+                  {t('landing.header.signUp')}
                 </button>
                 <button
                   className={`${styles.btn} ${
@@ -71,7 +73,7 @@ export default function Landing() {
                   }`}
                   onClick={() => router.push(routes.LOGIN)}
                 >
-                  Iniciar Sesión
+                  {t('landing.header.login')}
                 </button>
               </>
             )}
@@ -91,43 +93,41 @@ export default function Landing() {
             {/* Left Side - Content */}
             <div className={styles.heroLeft}>
               <div className={styles.heroBadge}>
-                <span className={styles.heroBadgeText}>✨ Nueva Plataforma</span>
+                <span className={styles.heroBadgeText}>{t('landing.hero.badge')}</span>
               </div>
               
               <h1 className={styles.heroTitle}>
-                Conecta con los mejores 
-                <span className={styles.heroTitleAccent}> monitores</span> de Uniandes
+                {t('landing.hero.title', { accent: t('landing.hero.titleAccent') })}
               </h1>
               
               <p className={styles.heroSubtitle}>
-                Encuentra ayuda académica personalizada, programa sesiones flexibles 
-                y mejora tu rendimiento con estudiantes destacados de tu universidad.
+                {t('landing.hero.subtitle')}
               </p>
               
               {/* Modern Benefits List */}
               <div className={styles.heroBenefits}>
                 <div className={styles.heroBenefit}>
                   <div className={styles.heroBenefitCheck}>✓</div>
-                  <span>Tutores verificados y calificados</span>
+                  <span>{t('landing.hero.benefits.verifiedTutors')}</span>
                 </div>
                 <div className={styles.heroBenefit}>
                   <div className={styles.heroBenefitCheck}>✓</div>
-                  <span>Horarios flexibles 24/7</span>
+                  <span>{t('landing.hero.benefits.flexibleSchedule')}</span>
                 </div>
                 <div className={styles.heroBenefit}>
                   <div className={styles.heroBenefitCheck}>✓</div>
-                  <span>Aprendizaje personalizado</span>
+                  <span>{t('landing.hero.benefits.personalizedLearning')}</span>
                 </div>
               </div>
               
               {/* CTA Buttons */}
               <div className={styles.heroCTAWrapper}>
                 <button className={styles.ctaButton} onClick={() => router.push(routes.HOME)}>
-                  <span>Comienza a aprender</span>
+                  <span>{t('landing.hero.cta.startLearning')}</span>
                   <span className={styles.ctaButtonIcon}>→</span>
                 </button>
                 <button className={styles.ctaButtonSecondary} onClick={() => router.push(routes.REGISTER)}>
-                  Únete como monitor
+                  {t('landing.hero.cta.becomeTutor')}
                 </button>
               </div>
             </div>
@@ -160,16 +160,15 @@ export default function Landing() {
       {/* ------------------------  KEY POINTS  -------------------- */}
       <section className={styles.keyPoints}>
         <div className={styles.keyPointsInner}>
-          <h2 className={styles.keyPointsTitle}>¿Por qué elegir Calico?</h2>
+          <h2 className={styles.keyPointsTitle}>{t('landing.keyPoints.title')}</h2>
           <div className={styles.keyPointsGrid}>
             <div className={styles.keyPointCard}>
               <div className={styles.keyPointIcon}>
                 <Users className={styles.keyPointIconSvg} />
               </div>
-              <h3 className={styles.keyPointTitle}>Monitores Expertos</h3>
+              <h3 className={styles.keyPointTitle}>{t('landing.keyPoints.cards.expertTutors.title')}</h3>
               <p className={styles.keyPointDescription}>
-                Conecta con estudiantes destacados de Uniandes que han demostrado 
-                excelencia académica en sus materias.
+                {t('landing.keyPoints.cards.expertTutors.description')}
               </p>
             </div>
 
@@ -177,10 +176,9 @@ export default function Landing() {
               <div className={styles.keyPointIcon}>
                 <Clock className={styles.keyPointIconSvg} />
               </div>
-              <h3 className={styles.keyPointTitle}>Sesiones Flexibles</h3>
+              <h3 className={styles.keyPointTitle}>{t('landing.keyPoints.cards.flexibleSessions.title')}</h3>
               <p className={styles.keyPointDescription}>
-                Programa sesiones que se adapten a tu horario. Disponibilidad 
-                24/7 para que estudies cuando mejor te convenga.
+                {t('landing.keyPoints.cards.flexibleSessions.description')}
               </p>
             </div>
 
@@ -188,10 +186,9 @@ export default function Landing() {
               <div className={styles.keyPointIcon}>
                 <BookOpen className={styles.keyPointIconSvg} />
               </div>
-              <h3 className={styles.keyPointTitle}>Métodos Personalizados</h3>
+              <h3 className={styles.keyPointTitle}>{t('landing.keyPoints.cards.personalizedMethods.title')}</h3>
               <p className={styles.keyPointDescription}>
-                Cada sesión se adapta a tu estilo de aprendizaje y nivel actual 
-                para maximizar tu comprensión y rendimiento.
+                {t('landing.keyPoints.cards.personalizedMethods.description')}
               </p>
             </div>
 
@@ -199,10 +196,9 @@ export default function Landing() {
               <div className={styles.keyPointIcon}>
                 <Award className={styles.keyPointIconSvg} />
               </div>
-              <h3 className={styles.keyPointTitle}>Resultados Comprobados</h3>
+              <h3 className={styles.keyPointTitle}>{t('landing.keyPoints.cards.provenResults.title')}</h3>
               <p className={styles.keyPointDescription}>
-                Estudiantes que usan Calico mejoran significativamente sus calificaciones 
-                y comprensión de las materias.
+                {t('landing.keyPoints.cards.provenResults.description')}
               </p>
             </div>
           </div>
@@ -214,19 +210,19 @@ export default function Landing() {
         <div className={styles.statisticsInner}>
           <div className={styles.statCard}>
             <div className={styles.statNumber}>500+</div>
-            <div className={styles.statLabel}>Estudiantes Activos</div>
+            <div className={styles.statLabel}>{t('landing.statistics.activeStudents')}</div>
           </div>
           <div className={styles.statCard}>
             <div className={styles.statNumber}>150+</div>
-            <div className={styles.statLabel}>Monitores Expertos</div>
+            <div className={styles.statLabel}>{t('landing.statistics.expertTutors')}</div>
           </div>
           <div className={styles.statCard}>
             <div className={styles.statNumber}>1000+</div>
-            <div className={styles.statLabel}>Sesiones Completadas</div>
+            <div className={styles.statLabel}>{t('landing.statistics.completedSessions')}</div>
           </div>
           <div className={styles.statCard}>
             <div className={styles.statNumber}>4.8</div>
-            <div className={styles.statLabel}>Calificación Promedio</div>
+            <div className={styles.statLabel}>{t('landing.statistics.averageRating')}</div>
           </div>
         </div>
       </section>
@@ -234,13 +230,10 @@ export default function Landing() {
       {/* ------------------------  ABOUT  ------------------------- */}
       <section className={styles.about}>
         <div className={styles.aboutInner}>
-          <h2 className={styles.sectionTitle}>Sobre Nosotros</h2>
+          <h2 className={styles.sectionTitle}>{t('landing.about.title')}</h2>
           <div className={styles.sectionLine} />
           <p className={styles.sectionText}>
-            Somos un equipo comprometido con conectar a estudiantes con monitores
-            dispuestos a ayudar. Facilitamos el aprendizaje a través de una
-            plataforma que promueve la confianza y una conexión efectiva,
-            asegurando una experiencia de apoyo accesible y de calidad.
+            {t('landing.about.description')}
           </p>
         </div>
 
@@ -251,10 +244,9 @@ export default function Landing() {
             <div className={styles.featureIcon}>
               <Users />
             </div>
-            <h3 className={styles.featureTitle}>Comunidad</h3>
+            <h3 className={styles.featureTitle}>{t('landing.about.features.community.title')}</h3>
             <p className={styles.featureText}>
-              Creamos una comunidad de aprendizaje colaborativo entre estudiantes
-              y monitores.
+              {t('landing.about.features.community.description')}
             </p>
           </div>
 
@@ -263,10 +255,9 @@ export default function Landing() {
             <div className={styles.featureIcon}>
               <BookOpen />
             </div>
-            <h3 className={styles.featureTitle}>Aprendizaje</h3>
+            <h3 className={styles.featureTitle}>{t('landing.about.features.learning.title')}</h3>
             <p className={styles.featureText}>
-              Facilitamos el proceso de aprendizaje con metodologías efectivas y
-              personalizadas.
+              {t('landing.about.features.learning.description')}
             </p>
           </div>
 
@@ -275,10 +266,9 @@ export default function Landing() {
             <div className={styles.featureIcon}>
               <Award />
             </div>
-            <h3 className={styles.featureTitle}>Calidad</h3>
+            <h3 className={styles.featureTitle}>{t('landing.about.features.quality.title')}</h3>
             <p className={styles.featureText}>
-              Garantizamos monitores de alta calidad, seleccionados por su
-              excelencia académica.
+              {t('landing.about.features.quality.description')}
             </p>
           </div>
 
@@ -287,10 +277,9 @@ export default function Landing() {
             <div className={styles.featureIcon}>
               <Clock />
             </div>
-            <h3 className={styles.featureTitle}>Flexibilidad</h3>
+            <h3 className={styles.featureTitle}>{t('landing.about.features.flexibility.title')}</h3>
             <p className={styles.featureText}>
-              Ofrecemos horarios flexibles que se adaptan a las necesidades de
-              cada estudiante.
+              {t('landing.about.features.flexibility.description')}
             </p>
           </div>
         </div>
@@ -298,12 +287,9 @@ export default function Landing() {
         {/* ----------------  MISIÓN ---------------- */}
         <div className={styles.mission}>
           <div className={styles.missionContent}>
-            <h3 className={styles.missionTitle}>Nuestra Misión</h3>
+            <h3 className={styles.missionTitle}>{t('landing.about.mission.title')}</h3>
             <p className={styles.missionText}>
-              Transformar la experiencia educativa en Uniandes, creando un
-              ecosistema donde el conocimiento fluya libremente entre
-              estudiantes. Buscamos eliminar barreras en el aprendizaje y
-              fomentar una cultura de colaboración y excelencia académica.
+              {t('landing.about.mission.description')}
             </p>
           </div>
           <div className={styles.missionEmojiWrapper}>

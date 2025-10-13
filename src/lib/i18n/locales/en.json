@@ -447,10 +447,6 @@
     "defaultSessionTitle": "Programming introduction with student",
     "addAvailabilitySlot": "Add Availability Time Slot",
     "titleLabel": "Title",
-    "syncSuccessful": "Sync successful",
-    "syncFailed": "Sync failed",
-    "errorCreatingEvent": "Error creating event",
-    "creating": "Creating...",
     "titlePlaceholder": "Availability time slot",
     "dateLabel": "Date",
     "startTimeLabel": "Start Time",
@@ -464,6 +460,7 @@
     "errorCreatingEvent": "Error creating event",
     "mustBeConnectedToSync": "You must be connected to Google Calendar to sync",
     "syncSuccess": "Sync successful!",
+    "syncSuccessful": "Sync successful",
     "eventsProcessed": "Events processed",
     "newEvents": "New events",
     "updatedEvents": "Updated",
@@ -489,7 +486,6 @@
     "loading": "Loading notifications...",
     "empty": "You have no notifications",
     "emptyDescription": "All your notifications will appear here",
-    "markAllAsRead": "Mark all as read",
     "close": "Close",
     "viewAll": "View all notifications",
     "defaultTutorName": "Tutor",
@@ -533,6 +529,7 @@
       "message": "Remember to make payment for your {subject} session"
     },
     "markAllAsRead": {
+      "label": "Mark all as read",
       "success": "Marked {count} notifications as read",
       "noUnread": "No unread notifications found"
     },
@@ -600,7 +597,80 @@
     "title": "Review sent successfully!",
     "message": "Thank you for your feedback. It helps us a lot!",
     "close": "Close"
+  },
+  "landing": {
+    "header": {
+      "viewProfile": "View Profile",
+      "signUp": "Sign Up",
+      "login": "Log In"
+    },
+    "hero": {
+      "badge": "✨ New Platform",
+      "title": "Connect with the best {accent} at Uniandes",
+      "titleAccent": "tutors",
+      "subtitle": "Find personalized academic help, schedule flexible sessions, and improve your performance with outstanding students from your university.",
+      "benefits": {
+        "verifiedTutors": "Verified and qualified tutors",
+        "flexibleSchedule": "Flexible 24/7 schedules",
+        "personalizedLearning": "Personalized learning"
+      },
+      "cta": {
+        "startLearning": "Start learning",
+        "becomeTutor": "Join as a tutor"
+      }
+    },
+    "keyPoints": {
+      "title": "Why choose Calico?",
+      "cards": {
+        "expertTutors": {
+          "title": "Expert Tutors",
+          "description": "Connect with outstanding Uniandes students who have demonstrated academic excellence in their subjects."
+        },
+        "flexibleSessions": {
+          "title": "Flexible Sessions",
+          "description": "Schedule sessions that fit your schedule. 24/7 availability so you can study whenever works best for you."
+        },
+        "personalizedMethods": {
+          "title": "Personalized Methods",
+          "description": "Each session adapts to your learning style and current level to maximize your understanding and performance."
+        },
+        "provenResults": {
+          "title": "Proven Results",
+          "description": "Students who use Calico significantly improve their grades and understanding of subjects."
+        }
+      }
+    },
+    "statistics": {
+      "activeStudents": "Active Students",
+      "expertTutors": "Expert Tutors",
+      "completedSessions": "Completed Sessions",
+      "averageRating": "Average Rating"
+    },
+    "about": {
+      "title": "About Us",
+      "description": "We are a team committed to connecting students with tutors willing to help. We facilitate learning through a platform that promotes trust and effective connection, ensuring an accessible and quality support experience.",
+      "features": {
+        "community": {
+          "title": "Community",
+          "description": "We create a collaborative learning community between students and tutors."
+        },
+        "learning": {
+          "title": "Learning",
+          "description": "We facilitate the learning process with effective and personalized methodologies."
+        },
+        "quality": {
+          "title": "Quality",
+          "description": "We guarantee high-quality tutors, selected for their academic excellence."
+        },
+        "flexibility": {
+          "title": "Flexibility",
+          "description": "We offer flexible schedules that adapt to each student's needs."
+        }
+      },
+      "mission": {
+        "title": "Our Mission",
+        "description": "Transform the educational experience at Uniandes, creating an ecosystem where knowledge flows freely among students. We seek to eliminate barriers in learning and foster a culture of collaboration and academic excellence."
+      }
+    }
   }
-
-  
 }
