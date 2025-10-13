@@ -258,9 +258,17 @@ export default function UnifiedAvailability() {
         }),
       });
 
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      if (!response.json) {
+        throw new Error('Invalid response format');
+      }
+
       const result = await response.json();
 
-      if (response.ok && result.success) {
+      if (result.success) {
         alert(`✅ ${t('tutorAvailability.syncSuccess')}\n\n- ${t('tutorAvailability.eventsProcessed')}: ${result.syncResults?.totalProcessed || 0}\n- ${t('tutorAvailability.newEvents')}: ${result.syncResults?.created || 0}\n- ${t('tutorAvailability.updatedEvents')}: ${result.syncResults?.updated || 0}`);
         
         // Recargar los datos para mostrar los cambios
@@ -355,15 +363,20 @@ export default function UnifiedAvailability() {
             <h3>{t('tutorAvailability.availableSlots')}</h3>
             <div className="slot-actions">
               <button 
+                id="add-slot-btn"
                 className="add-slot-btn"
                 onClick={() => setShowAddModal(true)}
               >
                 {t('tutorAvailability.addSlot')}
               </button>
-              <button className="edit-slots-btn">
+              <button 
+                id="edit-slots-btn"
+                className="edit-slots-btn"
+              >
                 {t('tutorAvailability.editSlots')}
               </button>
               <button 
+                id="sync-calendar-btn"
                 className="sync-calendar-btn"
                 onClick={handleSyncCalendar}
                 disabled={syncing || !isConnected}
@@ -427,18 +440,21 @@ export default function UnifiedAvailability() {
         <div className="sessions-section">
           <div className="session-tabs">
             <button 
+              id="pending-tab"
               className={`tab ${activeTab === "pending" ? "active" : ""}`}
               onClick={() => setActiveTab("pending")}
             >
               {t('tutorAvailability.pending')} ({getPendingSessionsForDisplay().length})
             </button>
             <button 
+              id="upcoming-tab"
               className={`tab ${activeTab === "upcoming" ? "active" : ""}`}
               onClick={() => setActiveTab("upcoming")}
             >
               {t('tutorAvailability.upcoming')}
             </button>
             <button 
+              id="past-tab"
               className={`tab ${activeTab === "past" ? "active" : ""}`}
               onClick={() => setActiveTab("past")}
             >
@@ -520,8 +536,9 @@ export default function UnifiedAvailability() {
             )}
             
             <div className="form-group">
-              <label>{t('tutorAvailability.titleLabel')}</label>
+              <label htmlFor="slot-title">{t('tutorAvailability.titleLabel')}</label>
               <input
+                id="slot-title"
                 type="text"
                 value={newSlot.title}
                 onChange={(e) => setNewSlot({...newSlot, title: e.target.value})}
@@ -530,8 +547,9 @@ export default function UnifiedAvailability() {
             </div>
             
             <div className="form-group">
-              <label>{t('tutorAvailability.dateLabel')}</label>
+              <label htmlFor="slot-date">{t('tutorAvailability.dateLabel')}</label>
               <input
+                id="slot-date"
                 type="date"
                 value={newSlot.date}
                 onChange={(e) => setNewSlot({...newSlot, date: e.target.value})}
@@ -540,16 +558,18 @@ export default function UnifiedAvailability() {
             
             <div className="form-row">
               <div className="form-group">
-                <label>{t('tutorAvailability.startTimeLabel')}</label>
+                <label htmlFor="slot-start-time">{t('tutorAvailability.startTimeLabel')}</label>
                 <input
+                  id="slot-start-time"
                   type="time"
                   value={newSlot.startTime}
                   onChange={(e) => setNewSlot({...newSlot, startTime: e.target.value})}
                 />
               </div>
               <div className="form-group">
-                <label>{t('tutorAvailability.endTimeLabel')}</label>
+                <label htmlFor="slot-end-time">{t('tutorAvailability.endTimeLabel')}</label>
                 <input
+                  id="slot-end-time"
                   type="time"
                   value={newSlot.endTime}
                   onChange={(e) => setNewSlot({...newSlot, endTime: e.target.value})}
@@ -558,8 +578,9 @@ export default function UnifiedAvailability() {
             </div>
             
             <div className="form-group">
-              <label>{t('tutorAvailability.descriptionLabel')}</label>
+              <label htmlFor="slot-description">{t('tutorAvailability.descriptionLabel')}</label>
               <textarea
+                id="slot-description"
                 value={newSlot.description}
                 onChange={(e) => setNewSlot({...newSlot, description: e.target.value})}
                 placeholder={t('tutorAvailability.descriptionPlaceholder')}
@@ -568,12 +589,14 @@ export default function UnifiedAvailability() {
             
             <div className="modal-actions">
               <button 
+                id="cancel-slot-btn"
                 className="cancel-btn"
                 onClick={() => setShowAddModal(false)}
               >
                 {t('tutorAvailability.cancel')}
               </button>
               <button 
+                id="save-slot-btn"
                 className="save-btn"
                 onClick={handleAddSlot}
                 disabled={creatingEvent}
