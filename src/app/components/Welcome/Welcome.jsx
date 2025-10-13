@@ -42,21 +42,7 @@ const WelcomeBanner = ({ usuario }) => {
           <p className="text-lg md:text-xl text-white/90 mb-6 max-w-2xl">
             {t('welcome.subtitle')}
           </p>
-          
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex items-center gap-2 text-white/80">
-              <div className="w-2 h-2 bg-white/60 rounded-full"></div>
-              <span className="text-sm">{t('welcome.features.verifiedTutors')}</span>
-            </div>
-            <div className="flex items-center gap-2 text-white/80">
-              <div className="w-2 h-2 bg-white/60 rounded-full"></div>
-              <span className="text-sm">{t('welcome.features.flexibleSchedule')}</span>
-            </div>
-            <div className="flex items-center gap-2 text-white/80">
-              <div className="w-2 h-2 bg-white/60 rounded-full"></div>
-              <span className="text-sm">{t('welcome.features.personalizedLearning')}</span>
-            </div>
-          </div>
+
         </div>
         
         {/* Right side decorative content */}

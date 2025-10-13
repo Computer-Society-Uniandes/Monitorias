@@ -104,22 +104,6 @@ export default function Landing() {
                 {t('landing.hero.subtitle')}
               </p>
               
-              {/* Modern Benefits List */}
-              <div className={styles.heroBenefits}>
-                <div className={styles.heroBenefit}>
-                  <div className={styles.heroBenefitCheck}>✓</div>
-                  <span>{t('landing.hero.benefits.verifiedTutors')}</span>
-                </div>
-                <div className={styles.heroBenefit}>
-                  <div className={styles.heroBenefitCheck}>✓</div>
-                  <span>{t('landing.hero.benefits.flexibleSchedule')}</span>
-                </div>
-                <div className={styles.heroBenefit}>
-                  <div className={styles.heroBenefitCheck}>✓</div>
-                  <span>{t('landing.hero.benefits.personalizedLearning')}</span>
-                </div>
-              </div>
-              
               {/* CTA Buttons */}
               <div className={styles.heroCTAWrapper}>
                 <button className={styles.ctaButton} onClick={() => router.push(routes.HOME)}>

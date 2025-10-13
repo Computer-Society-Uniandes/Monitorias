@@ -484,6 +484,76 @@ export class TutoringSessionService {
     }
   }
 
+  // Obtener estadísticas de rendimiento semanal para un tutor
+  static async getTutorWeeklyPerformance(tutorEmail) {
+    try {
+      const sessions = await this.getTutorSessions(tutorEmail);
+      const now = new Date();
+      
+      // Calcular fecha de inicio de la semana (lunes)
+      const startOfWeek = new Date(now);
+      const dayOfWeek = now.getDay();
+      const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Si es domingo (0), restar 6 días
+      startOfWeek.setDate(now.getDate() - daysToMonday);
+      startOfWeek.setHours(0, 0, 0, 0);
+      
+      // Calcular fecha de fin de la semana (domingo)
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(startOfWeek.getDate() + 6);
+      endOfWeek.setHours(23, 59, 59, 999);
+
+      // Filtrar sesiones de esta semana
+      const weeklySessions = sessions.filter(session => {
+        const sessionDate = new Date(session.scheduledDateTime);
+        return sessionDate >= startOfWeek && sessionDate <= endOfWeek;
+      });
+
+      // Calcular métricas de la semana
+      const weeklyStats = {
+        weeklySessions: weeklySessions.length,
+        weeklyEarnings: weeklySessions
+          .filter(s => s.status === 'completed' && s.paymentStatus === 'paid')
+          .reduce((sum, s) => sum + (s.price || 0), 0),
+        studentRetention: this.calculateStudentRetention(weeklySessions),
+        completedSessions: weeklySessions.filter(s => s.status === 'completed').length,
+        scheduledSessions: weeklySessions.filter(s => s.status === 'scheduled').length,
+        cancelledSessions: weeklySessions.filter(s => s.status === 'cancelled').length
+      };
+
+      return weeklyStats;
+    } catch (error) {
+      console.error('Error getting tutor weekly performance:', error);
+      return {
+        weeklySessions: 0,
+        weeklyEarnings: 0,
+        studentRetention: 0,
+        completedSessions: 0,
+        scheduledSessions: 0,
+        cancelledSessions: 0
+      };
+    }
+  }
+
+  // Calcular retención de estudiantes (porcentaje de estudiantes que regresan)
+  static calculateStudentRetention(sessions) {
+    if (sessions.length === 0) return 0;
+    
+    // Obtener emails únicos de estudiantes
+    const uniqueStudents = new Set(sessions.map(s => s.studentEmail));
+    const totalStudents = uniqueStudents.size;
+    
+    // Contar estudiantes que han tenido más de una sesión
+    let returningStudents = 0;
+    uniqueStudents.forEach(studentEmail => {
+      const studentSessions = sessions.filter(s => s.studentEmail === studentEmail);
+      if (studentSessions.length > 1) {
+        returningStudents++;
+      }
+    });
+    
+    return totalStudents > 0 ? Math.round((returningStudents / totalStudents) * 100) : 0;
+  }
+
   // Calcular calificación promedio (manteniendo compatibilidad)
   static calculateAverageRating(sessions) {
     const ratedSessions = sessions.filter(s => s.rating && s.rating.score);

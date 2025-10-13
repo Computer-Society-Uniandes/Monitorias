@@ -24,17 +24,57 @@ import BoxNewSubject from "../BoxNewSubject/BoxNewSubject";
 import GoogleCalendarButton from "../GoogleCalendarButton/GoogleCalendarButton";
 import TutoringSummary from "../TutoringSummary/TutoringSummary";
 import { getMaterias } from "../../services/HomeService.service";
+import { TutoringSessionService } from "../../services/TutoringSessionService";
+import { useAuth } from "../../context/SecureAuthContext";
 import { useI18n } from "../../../lib/i18n";
 import routes from "../../../routes";
 
 export default function TutorHome({ userName }) {
   const { t } = useI18n();
+  const { user } = useAuth();
   const [materias, setMaterias] = useState([]);
+  const [weeklyPerformance, setWeeklyPerformance] = useState({
+    weeklySessions: 0,
+    weeklyEarnings: 0,
+    studentRetention: 0
+  });
+  const [tutorStats, setTutorStats] = useState({
+    total: 0,
+    completed: 0,
+    scheduled: 0,
+    totalEarnings: 0,
+    averageRating: 0
+  });
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    getMaterias().then(setMaterias);
-  }, []);
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        
+        // Load subjects
+        const subjectsData = await getMaterias();
+        setMaterias(subjectsData);
+        
+        // Load weekly performance data and general stats if user is logged in
+        if (user?.email) {
+          const [performanceData, statsData] = await Promise.all([
+            TutoringSessionService.getTutorWeeklyPerformance(user.email),
+            TutoringSessionService.getTutorSessionStats(user.email)
+          ]);
+          setWeeklyPerformance(performanceData);
+          setTutorStats(statsData);
+        }
+      } catch (error) {
+        console.error('Error loading tutor home data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, [user?.email]);
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
@@ -46,8 +86,12 @@ export default function TutorHome({ userName }) {
           <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-blue-100 hover:shadow-xl transition-all duration-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">{t('tutorHome.stats.tutorialsToday')}</p>
-                <p className="text-2xl font-bold text-blue-600">3</p>
+                <p className="text-sm font-medium text-gray-600">{t('tutorHome.stats.sessions')}</p>
+                {loading ? (
+                  <div className="w-12 h-8 bg-gray-200 rounded animate-pulse mb-1"></div>
+                ) : (
+                  <p className="text-2xl font-bold text-blue-600">{tutorStats.scheduled}</p>
+                )}
                 <p className="text-xs text-gray-500">{t('tutorHome.stats.scheduled')}</p>
               </div>
               <div className="p-3 bg-blue-100 rounded-xl">
@@ -59,9 +103,13 @@ export default function TutorHome({ userName }) {
           <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-green-100 hover:shadow-xl transition-all duration-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">{t('tutorHome.stats.students')}</p>
-                <p className="text-2xl font-bold text-green-600">12</p>
-                <p className="text-xs text-gray-500">{t('tutorHome.stats.thisMonth')}</p>
+                <p className="text-sm font-medium text-gray-600">{t('tutorHome.stats.sessions')}</p>
+                {loading ? (
+                  <div className="w-12 h-8 bg-gray-200 rounded animate-pulse mb-1"></div>
+                ) : (
+                  <p className="text-2xl font-bold text-green-600">{tutorStats.completed}</p>
+                )}
+                <p className="text-xs text-gray-500">Completadas</p>
               </div>
               <div className="p-3 bg-green-100 rounded-xl">
                 <Users className="w-6 h-6 text-green-600" />
@@ -72,9 +120,15 @@ export default function TutorHome({ userName }) {
           <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-yellow-100 hover:shadow-xl transition-all duration-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">{t('tutorHome.stats.income')}</p>
-                <p className="text-2xl font-bold text-yellow-600">$450K</p>
-                <p className="text-xs text-gray-500">{t('tutorHome.stats.thisMonth')}</p>
+                <p className="text-sm font-medium text-gray-600">{t('tutorHome.stats.earnings')}</p>
+                {loading ? (
+                  <div className="w-16 h-8 bg-gray-200 rounded animate-pulse mb-1"></div>
+                ) : (
+                  <p className="text-2xl font-bold text-yellow-600">
+                    ${tutorStats.totalEarnings.toLocaleString('es-CO')}
+                  </p>
+                )}
+                <p className="text-xs text-gray-500">Total</p>
               </div>
               <div className="p-3 bg-yellow-100 rounded-xl">
                 <DollarSign className="w-6 h-6 text-yellow-600" />
@@ -86,8 +140,14 @@ export default function TutorHome({ userName }) {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">{t('tutorHome.stats.rating')}</p>
-                <p className="text-2xl font-bold text-purple-600">4.9</p>
-                <p className="text-xs text-gray-500">⭐⭐⭐⭐⭐</p>
+                {loading ? (
+                  <div className="w-12 h-8 bg-gray-200 rounded animate-pulse mb-1"></div>
+                ) : (
+                  <p className="text-2xl font-bold text-purple-600">
+                    {tutorStats.averageRating > 0 ? tutorStats.averageRating.toFixed(1) : 'N/A'}
+                  </p>
+                )}
+                <p className="text-xs text-gray-500">Promedio</p>
               </div>
               <div className="p-3 bg-purple-100 rounded-xl">
                 <Star className="w-6 h-6 text-purple-600" />
@@ -99,7 +159,7 @@ export default function TutorHome({ userName }) {
         {/* Main Dashboard Cards */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
           {/* Quick Actions Card */}
-          <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-3xl p-8 text-white relative overflow-hidden">
+          <div className="bg-gradient-to-br from-orange-400 to-orange-500 rounded-3xl p-8 text-white relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
             <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full translate-y-12 -translate-x-12"></div>
             
@@ -245,22 +305,43 @@ export default function TutorHome({ userName }) {
               <h3 className="text-xl font-bold text-gray-800">{t('tutorHome.performance.title')}</h3>
             </div>
             
-            <div className="space-y-4">
-              <div className="flex justify-between items-center p-4 bg-blue-50 rounded-xl">
-                <span className="font-medium text-gray-700">{t('tutorHome.performance.weeklySessions')}</span>
-                <span className="text-2xl font-bold text-blue-600">18</span>
+            {loading ? (
+              <div className="space-y-4">
+                <div className="flex justify-between items-center p-4 bg-gray-50 rounded-xl">
+                  <span className="font-medium text-gray-700">{t('tutorHome.performance.weeklySessions')}</span>
+                  <div className="w-12 h-8 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+                
+                <div className="flex justify-between items-center p-4 bg-gray-50 rounded-xl">
+                  <span className="font-medium text-gray-700">{t('tutorHome.performance.weeklyEarnings')}</span>
+                  <div className="w-16 h-8 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+                
+                <div className="flex justify-between items-center p-4 bg-gray-50 rounded-xl">
+                  <span className="font-medium text-gray-700">{t('tutorHome.performance.studentRetention')}</span>
+                  <div className="w-12 h-8 bg-gray-200 rounded animate-pulse"></div>
+                </div>
               </div>
-              
-              <div className="flex justify-between items-center p-4 bg-green-50 rounded-xl">
-                <span className="font-medium text-gray-700">{t('tutorHome.performance.weeklyEarnings')}</span>
-                <span className="text-2xl font-bold text-green-600">$125K</span>
+            ) : (
+              <div className="space-y-4">
+                <div className="flex justify-between items-center p-4 bg-blue-50 rounded-xl">
+                  <span className="font-medium text-gray-700">{t('tutorHome.performance.weeklySessions')}</span>
+                  <span className="text-2xl font-bold text-blue-600">{weeklyPerformance.weeklySessions}</span>
+                </div>
+                
+                <div className="flex justify-between items-center p-4 bg-green-50 rounded-xl">
+                  <span className="font-medium text-gray-700">{t('tutorHome.performance.weeklyEarnings')}</span>
+                  <span className="text-2xl font-bold text-green-600">
+                    ${weeklyPerformance.weeklyEarnings.toLocaleString('es-CO')}
+                  </span>
+                </div>
+                
+                <div className="flex justify-between items-center p-4 bg-purple-50 rounded-xl">
+                  <span className="font-medium text-gray-700">{t('tutorHome.performance.studentRetention')}</span>
+                  <span className="text-2xl font-bold text-purple-600">{weeklyPerformance.studentRetention}%</span>
+                </div>
               </div>
-              
-              <div className="flex justify-between items-center p-4 bg-purple-50 rounded-xl">
-                <span className="font-medium text-gray-700">{t('tutorHome.performance.studentRetention')}</span>
-                <span className="text-2xl font-bold text-purple-600">85%</span>
-              </div>
-            </div>
+            )}
           </div>
 
           {/* Achievement Badge */}
@@ -271,61 +352,28 @@ export default function TutorHome({ userName }) {
               </div>
               <h3 className="text-xl font-bold">{t('tutorHome.achievement.title')}</h3>
             </div>
-            <p className="text-white/90 mb-4">{t('tutorHome.achievement.description')}</p>
-            <div className="flex items-center gap-2">
-              <TrendingUp className="w-5 h-5" />
-              <span className="font-semibold">{t('tutorHome.achievement.progress')}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* New Features Notice */}
-        <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-3xl p-8 border border-indigo-100">
-          <div className="flex items-start gap-4 mb-6">
-            <div className="p-3 bg-indigo-100 rounded-xl">
-              <Zap className="w-6 h-6 text-indigo-600" />
-            </div>
-            <div>
-              <h3 className="text-xl font-bold text-gray-800 mb-2">
-                {t('tutorHome.newFeatures.title')}
-              </h3>
-              <p className="text-gray-600">
-                {t('tutorHome.newFeatures.description')}
-              </p>
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div className="flex items-center gap-3 p-4 bg-white/60 rounded-xl">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Calendar className="w-5 h-5 text-blue-600" />
+            {loading ? (
+              <div className="space-y-2">
+                <div className="w-full h-4 bg-white/20 rounded animate-pulse"></div>
+                <div className="w-3/4 h-4 bg-white/20 rounded animate-pulse"></div>
+                <div className="w-1/2 h-4 bg-white/20 rounded animate-pulse mt-4"></div>
               </div>
-              <span className="font-medium text-gray-700">{t('tutorHome.newFeatures.startPanel')}</span>
-            </div>
-            <div className="flex items-center gap-3 p-4 bg-white/60 rounded-xl">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <BookOpen className="w-5 h-5 text-green-600" />
-              </div>
-              <span className="font-medium text-gray-700">{t('tutorHome.newFeatures.completeManagement')}</span>
-            </div>
-            <div className="flex items-center gap-3 p-4 bg-white/60 rounded-xl">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <Settings className="w-5 h-5 text-purple-600" />
-              </div>
-              <span className="font-medium text-gray-700">{t('tutorHome.newFeatures.subjectsAdmin')}</span>
-            </div>
-            <div className="flex items-center gap-3 p-4 bg-white/60 rounded-xl">
-              <div className="p-2 bg-orange-100 rounded-lg">
-                <Clock className="w-5 h-5 text-orange-600" />
-              </div>
-              <span className="font-medium text-gray-700">{t('tutorHome.newFeatures.availabilityManagement')}</span>
-            </div>
-            <div className="flex items-center gap-3 p-4 bg-white/60 rounded-xl">
-              <div className="p-2 bg-yellow-100 rounded-lg">
-                <DollarSign className="w-5 h-5 text-yellow-600" />
-              </div>
-              <span className="font-medium text-gray-700">{t('tutorHome.newFeatures.paymentControl')}</span>
-            </div>
+            ) : (
+              <>
+                <p className="text-white/90 mb-4">
+                  {tutorStats.completed > 0 
+                    ? `Has completado ${tutorStats.completed} sesiones y mantienes una calificación de ${tutorStats.averageRating > 0 ? tutorStats.averageRating.toFixed(1) : 'N/A'} estrellas.`
+                    : 'Comienza a dar tutorías para ver tus logros aquí.'
+                  }
+                </p>
+                <div className="flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5" />
+                  <span className="font-semibold">
+                    {tutorStats.completed > 0 ? `${tutorStats.completed} sesiones completadas` : '¡Comienza tu primera sesión!'}
+                  </span>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>

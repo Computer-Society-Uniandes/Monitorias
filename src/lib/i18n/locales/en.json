@@ -350,13 +350,9 @@
     "greeting": "Welcome",
     "greetingWithName": "Welcome, {name}",
     "findTutor": "Find the right tutor for you",
-    "badge": "✨ New Platform",
-    "subtitle": "Your personalized learning platform at Uniandes",
-    "features": {
-      "verifiedTutors": "Verified tutors",
-      "flexibleSchedule": "Flexible schedules",
-      "personalizedLearning": "Personalized learning"
-    }
+    "badge": "New Platform ",
+    "subtitle": "Your personalized learning platform at Uniandes"
+
   },
   "studentHome": {
     "scheduledSessions": "My Scheduled Tutoring Sessions 📚",
@@ -635,15 +631,10 @@
       "login": "Log In"
     },
     "hero": {
-      "badge": "✨ New Platform",
+      "badge": "New Platform",
       "title": "Connect with the best {accent} at Uniandes",
       "titleAccent": "tutors",
       "subtitle": "Find personalized academic help, schedule flexible sessions, and improve your performance with outstanding students from your university.",
-      "benefits": {
-        "verifiedTutors": "Verified and qualified tutors",
-        "flexibleSchedule": "Flexible 24/7 schedules",
-        "personalizedLearning": "Personalized learning"
-      },
       "cta": {
         "startLearning": "Start learning",
         "becomeTutor": "Join as a tutor"
