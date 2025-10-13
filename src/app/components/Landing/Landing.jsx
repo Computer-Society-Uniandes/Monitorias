@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Users, BookOpen, Award, Clock } from "lucide-react";
-import Logo from "../../../../public/Logo.png";
+import Logo from "../../../../public/CalicoLogo.png";
 import Logo2 from "../../../../public/Logo2.png";
 import CalicoLogo from "../../../../public/CalicoLogo.png";
 import routes from "app/routes";
@@ -86,15 +86,147 @@ export default function Landing() {
         }`}
       >
         <div className={styles.heroInner}>
-          <div className={styles.heroLogoWrapper}>
-            <Image src={Logo} alt="Monitorias Uniandes" className={styles.heroLogo} sizes="(max-width: 540px) 70vw, 420px"/>
-          </div>
-          <div className={styles.heroBottom}>
-            <div className={styles.heroCTAWrapper}>
-              <button className={styles.ctaButton} onClick={() => router.push(routes.HOME)}>
-                Empieza ahora
-              </button>
+          {/* Modern Split Layout */}
+          <div className={styles.heroContainer}>
+            {/* Left Side - Content */}
+            <div className={styles.heroLeft}>
+              <div className={styles.heroBadge}>
+                <span className={styles.heroBadgeText}>✨ Nueva Plataforma</span>
+              </div>
+              
+              <h1 className={styles.heroTitle}>
+                Conecta con los mejores 
+                <span className={styles.heroTitleAccent}> monitores</span> de Uniandes
+              </h1>
+              
+              <p className={styles.heroSubtitle}>
+                Encuentra ayuda académica personalizada, programa sesiones flexibles 
+                y mejora tu rendimiento con estudiantes destacados de tu universidad.
+              </p>
+              
+              {/* Modern Benefits List */}
+              <div className={styles.heroBenefits}>
+                <div className={styles.heroBenefit}>
+                  <div className={styles.heroBenefitCheck}>✓</div>
+                  <span>Tutores verificados y calificados</span>
+                </div>
+                <div className={styles.heroBenefit}>
+                  <div className={styles.heroBenefitCheck}>✓</div>
+                  <span>Horarios flexibles 24/7</span>
+                </div>
+                <div className={styles.heroBenefit}>
+                  <div className={styles.heroBenefitCheck}>✓</div>
+                  <span>Aprendizaje personalizado</span>
+                </div>
+              </div>
+              
+              {/* CTA Buttons */}
+              <div className={styles.heroCTAWrapper}>
+                <button className={styles.ctaButton} onClick={() => router.push(routes.HOME)}>
+                  <span>Comienza a aprender</span>
+                  <span className={styles.ctaButtonIcon}>→</span>
+                </button>
+                <button className={styles.ctaButtonSecondary} onClick={() => router.push(routes.REGISTER)}>
+                  Únete como monitor
+                </button>
+              </div>
             </div>
+            
+            {/* Right Side - Visual */}
+            <div className={styles.heroRight}>
+              <div className={styles.heroVisual}>
+                <div className={styles.heroLogoWrapper}>
+                  <Image src={Logo} alt="Monitorias Uniandes" className={styles.heroLogo} sizes="(max-width: 700px) 120vw, 650px"/>
+                </div>
+                
+                {/* Floating Elements */}
+                <div className={styles.heroFloatingElements}>
+                  <div className={styles.floatingElement} style={{'--delay': '0s'}}>
+                    <Users className={styles.floatingIcon} />
+                  </div>
+                  <div className={styles.floatingElement} style={{'--delay': '0.5s'}}>
+                    <BookOpen className={styles.floatingIcon} />
+                  </div>
+                  <div className={styles.floatingElement} style={{'--delay': '1s'}}>
+                    <Award className={styles.floatingIcon} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ------------------------  KEY POINTS  -------------------- */}
+      <section className={styles.keyPoints}>
+        <div className={styles.keyPointsInner}>
+          <h2 className={styles.keyPointsTitle}>¿Por qué elegir Calico?</h2>
+          <div className={styles.keyPointsGrid}>
+            <div className={styles.keyPointCard}>
+              <div className={styles.keyPointIcon}>
+                <Users className={styles.keyPointIconSvg} />
+              </div>
+              <h3 className={styles.keyPointTitle}>Monitores Expertos</h3>
+              <p className={styles.keyPointDescription}>
+                Conecta con estudiantes destacados de Uniandes que han demostrado 
+                excelencia académica en sus materias.
+              </p>
+            </div>
+
+            <div className={styles.keyPointCard}>
+              <div className={styles.keyPointIcon}>
+                <Clock className={styles.keyPointIconSvg} />
+              </div>
+              <h3 className={styles.keyPointTitle}>Sesiones Flexibles</h3>
+              <p className={styles.keyPointDescription}>
+                Programa sesiones que se adapten a tu horario. Disponibilidad 
+                24/7 para que estudies cuando mejor te convenga.
+              </p>
+            </div>
+
+            <div className={styles.keyPointCard}>
+              <div className={styles.keyPointIcon}>
+                <BookOpen className={styles.keyPointIconSvg} />
+              </div>
+              <h3 className={styles.keyPointTitle}>Métodos Personalizados</h3>
+              <p className={styles.keyPointDescription}>
+                Cada sesión se adapta a tu estilo de aprendizaje y nivel actual 
+                para maximizar tu comprensión y rendimiento.
+              </p>
+            </div>
+
+            <div className={styles.keyPointCard}>
+              <div className={styles.keyPointIcon}>
+                <Award className={styles.keyPointIconSvg} />
+              </div>
+              <h3 className={styles.keyPointTitle}>Resultados Comprobados</h3>
+              <p className={styles.keyPointDescription}>
+                Estudiantes que usan Calico mejoran significativamente sus calificaciones 
+                y comprensión de las materias.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ------------------------  STATISTICS  -------------------- */}
+      <section className={styles.statistics}>
+        <div className={styles.statisticsInner}>
+          <div className={styles.statCard}>
+            <div className={styles.statNumber}>500+</div>
+            <div className={styles.statLabel}>Estudiantes Activos</div>
+          </div>
+          <div className={styles.statCard}>
+            <div className={styles.statNumber}>150+</div>
+            <div className={styles.statLabel}>Monitores Expertos</div>
+          </div>
+          <div className={styles.statCard}>
+            <div className={styles.statNumber}>1000+</div>
+            <div className={styles.statLabel}>Sesiones Completadas</div>
+          </div>
+          <div className={styles.statCard}>
+            <div className={styles.statNumber}>4.8</div>
+            <div className={styles.statLabel}>Calificación Promedio</div>
           </div>
         </div>
       </section>
