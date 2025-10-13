@@ -333,7 +333,7 @@ const Profile = () => {
                 {user.isTutor && activeRole === 'student' && (
                   <button
                     onClick={handleChangeRole}
-                    className="flex items-center gap-2 bg-black-500 hover:bg-black-600 text-white px-6 py-3 rounded-xl font-semibold transition-colors duration-300"
+                    className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold transition-colors duration-300"
                   >
                     <Settings className="w-5 h-5" />
                     {t('profile.changeToTutorMode')}
