@@ -39,10 +39,59 @@ export default function TutorStatistics() {
   // Filters
   const [selectedSubject, setSelectedSubject] = useState("all");
   const [selectedTimeframe, setSelectedTimeframe] = useState("month");
-  const [selectedPeriod, setSelectedPeriod] = useState({
-    start: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0],
-    end: new Date().toISOString().split('T')[0]
+  const [selectedPeriod, setSelectedPeriod] = useState(() => {
+    const now = new Date();
+    const start = new Date(now.getFullYear(), now.getMonth(), 1);
+    const formatDate = (d) => {
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+    return {
+      start: formatDate(start),
+      end: formatDate(now)
+    };
   });
+
+  useEffect(() => {
+    if (selectedTimeframe !== 'custom') {
+      const now = new Date();
+      // Reset time to midnight to avoid timezone issues
+      now.setHours(0, 0, 0, 0);
+      let start, end = new Date(now);
+      
+      switch (selectedTimeframe) {
+        case 'week':
+          start = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+          break;
+        case 'month':
+          start = new Date(now.getFullYear(), now.getMonth(), 1);
+          break;
+        case 'quarter':
+          start = new Date(now.getFullYear(), now.getMonth() - 3, 1);
+          break;
+        case 'year':
+          start = new Date(now.getFullYear(), 0, 1);
+          break;
+        default:
+          start = new Date(now.getFullYear(), now.getMonth(), 1);
+      }
+      
+      // Format dates as YYYY-MM-DD in local timezone
+      const formatDate = (d) => {
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      };
+      
+      setSelectedPeriod({
+        start: formatDate(start),
+        end: formatDate(end)
+      });
+    }
+  }, [selectedTimeframe]);
 
   useEffect(() => {
     if (user.isLoggedIn && user.email) {
@@ -116,7 +165,9 @@ export default function TutorStatistics() {
     }
     
     const periodStart = new Date(selectedPeriod.start);
+    periodStart.setHours(0, 0, 0, 0);
     const periodEnd = new Date(selectedPeriod.end);
+    periodEnd.setHours(23, 59, 59, 999);
     
     filtered = filtered.filter(p => {
       const d = p.date_payment instanceof Date ? p.date_payment : (p.date_payment ? new Date(p.date_payment) : null);
@@ -224,7 +275,7 @@ export default function TutorStatistics() {
         statusCode: p.pagado ? 'completed' : 'pending',
         status: p.pagado ? t('tutorStats.transactions.status.completed') : t('tutorStats.transactions.status.pending'),
         methodCode: normalizeMethod(p.method),
-        method: p.method || t('tutorStats.transactions.methodDefault')
+        method: (p.method || t('tutorStats.transactions.methodDefault')).toLowerCase()
       }))
       .sort((a, b) => new Date(b.date) - new Date(a.date));
   };
