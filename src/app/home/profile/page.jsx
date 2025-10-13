@@ -1,63 +1,178 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { db } from '../../../firebaseConfig';
-import { doc, getDoc } from 'firebase/firestore';
-import Header from '../../components/Header/Header';
 import { useRouter } from 'next/navigation';
-import routes from 'app/routes';
-import './Profile.css';
+import { 
+  Edit3, 
+  Star, 
+  Calendar, 
+  Users, 
+  Settings, 
+  ArrowRight,
+  Plus,
+  Trash2
+} from 'lucide-react';
+import routes from '../../../routes';
 import { useAuth } from '../../context/SecureAuthContext';
 import { useI18n } from '../../../lib/i18n';
+import { UserProfileService } from '../../services/UserProfileService';
+import './Profile.css';
 
 const TUTOR_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSdxeOSt5jjjSVtXY9amQRiXeufm65-11N4FMvJ96fcxyiN58A/viewform?usp=sharing&ouid=102056237631790140503'; 
 
-// Modal de invitación (accesible y responsive)
-function TutorInviteModal({ open, onClose, t }) {
+// Edit Profile Modal
+function EditProfileModal({ open, onClose, userData, onSave, t }) {
+  const [formData, setFormData] = useState({
+    name: userData?.name || '',
+    phone_number: userData?.phone_number || '',
+    description: userData?.description || '',
+    specialization: userData?.specialization || ''
+  });
+
+  useEffect(() => {
+    if (userData) {
+      setFormData({
+        name: userData.name || '',
+        phone_number: userData.phone_number || '',
+        description: userData.description || '',
+        specialization: userData.specialization || ''
+      });
+    }
+  }, [userData]);
+
+  const handleSave = () => {
+    onSave(formData);
+    onClose();
+  };
+
   if (!open) return null;
+
   return (
-    <div className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="inviteTitle">
-      <div className="modal-card">
-        <h3 id="inviteTitle" className="modal-title">{t('profile.becomeTutorTitle')}</h3>
-        <p className="modal-text">
-          {t('profile.becomeTutorText')}
-        </p>
-        <div className="modal-actions">
-          <a
-            href={TUTOR_FORM_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn-header btn-header--primary"
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl p-8 max-w-md w-full max-h-[90vh] overflow-y-auto">
+        <h2 className="text-2xl font-bold text-gray-800 mb-6">{t('profile.editModal.title')}</h2>
+        
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              {t('profile.editModal.name')}
+            </label>
+            <input
+              type="text"
+              value={formData.name}
+              onChange={(e) => setFormData({...formData, name: e.target.value})}
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              placeholder="Enter your full name"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              {t('profile.editModal.phone')}
+            </label>
+            <input
+              type="tel"
+              value={formData.phone_number}
+              onChange={(e) => setFormData({...formData, phone_number: e.target.value})}
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              placeholder="Enter your phone number"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              {t('profile.editModal.specialization')}
+            </label>
+            <input
+              type="text"
+              value={formData.specialization}
+              onChange={(e) => setFormData({...formData, specialization: e.target.value})}
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              placeholder="e.g., Math, Physics, Chemistry"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              {t('profile.editModal.description')}
+            </label>
+            <textarea
+              value={formData.description}
+              onChange={(e) => setFormData({...formData, description: e.target.value})}
+              rows={4}
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"
+              placeholder={t('profile.descriptionPlaceholder')}
+            />
+          </div>
+        </div>
+
+        <div className="flex gap-3 mt-8">
+          <button
+            onClick={handleSave}
+            className="flex-1 bg-orange-500 hover:bg-orange-600 text-white py-3 px-6 rounded-xl font-semibold transition-colors duration-300"
           >
-            {t('profile.goToForm')}
-          </a>
-          <button className="btn-header" onClick={onClose}>{t('profile.close')}</button>
+            {t('profile.editModal.save')}
+          </button>
+          <button
+            onClick={onClose}
+            className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-3 px-6 rounded-xl font-semibold transition-colors duration-300"
+          >
+            {t('profile.editModal.cancel')}
+          </button>
         </div>
       </div>
     </div>
   );
 }
 
-
+// Tutor Invite Modal
+function TutorInviteModal({ open, onClose, t }) {
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl p-8 max-w-md w-full">
+        <h3 className="text-2xl font-bold text-gray-800 mb-4">{t('profile.becomeTutorTitle')}</h3>
+        <p className="text-gray-600 mb-6">
+          {t('profile.becomeTutorText')}
+        </p>
+        <div className="flex gap-3">
+          <a
+            href={TUTOR_FORM_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1 bg-orange-500 hover:bg-orange-600 text-white py-3 px-6 rounded-xl font-semibold text-center transition-colors duration-300"
+          >
+            {t('profile.goToForm')}
+          </a>
+          <button 
+            onClick={onClose}
+            className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-3 px-6 rounded-xl font-semibold transition-colors duration-300"
+          >
+            {t('profile.close')}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 const Profile = () => {
   const [userData, setUserData] = useState(null);
-  const [majorName, setMajorName] = useState('');
-  const [activeRole, setActiveRole] = useState('student'); // 'student' | 'tutor'
+  const [tutorSubjects, setTutorSubjects] = useState([]);
+  const [activeRole, setActiveRole] = useState('student');
   const [inviteOpen, setInviteOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const router = useRouter();
-  const { user, loading, logout } = useAuth();
+  const { user, authLoading, logout } = useAuth();
   const { t } = useI18n();
 
-  // Cargar datos de perfil
+  // Load profile data
   useEffect(() => {
-    // Don't run any client-only or user-dependent logic while auth is loading
-    if (loading) return;
+    if (authLoading) return;
 
-    // user may be null during server prerender — guard access
     if (!user || !user.isLoggedIn) {
-      // Only redirect on the client
       if (typeof window !== 'undefined') {
         router.push(routes.LANDING);
       }
@@ -66,35 +181,45 @@ const Profile = () => {
 
     if (!user.email) return;
 
-    const fetchUserData = async () => {
+    const loadProfileData = async () => {
       try {
-        const userDocRef = doc(db, 'user', user.email);
-        const userSnap = await getDoc(userDocRef);
-        if (userSnap.exists()) {
-          const data = userSnap.data();
-          setUserData(data || null);
+        setLoading(true);
+        
+        // Load user profile data
+        const profileResult = await UserProfileService.getUserProfile(user.email);
+        if (profileResult.success) {
+          setUserData(profileResult.data);
+        }
+
+        // Load tutor subjects if user is a tutor
+        if (user.isTutor) {
+          const subjectsResult = await UserProfileService.getTutorSubjects(user.email);
+          if (subjectsResult.success) {
+            setTutorSubjects(subjectsResult.data);
+          }
         }
       } catch (error) {
-        console.error('Error fetching user data:', error);
+        console.error('Error loading profile data:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchUserData();
+    loadProfileData();
 
-    // Only access localStorage on the client
+    // Set active role
     const saved = typeof window !== 'undefined' ? localStorage.getItem('rol') : null;
     if (user.isTutor && saved === 'tutor') {
       setActiveRole('tutor');
     } else if (saved === 'student') {
       setActiveRole('student');
     } else {
-      // Por defecto estudiante si el valor es inesperado o no existe
       if (typeof window !== 'undefined') {
         localStorage.setItem('rol', 'student');
       }
       setActiveRole('student');
     }
-  }, [loading, user, router]);
+  }, [authLoading, user, router]);
 
   const handleLogout = async () => {
     try {
@@ -109,20 +234,15 @@ const Profile = () => {
     }
   };
 
-                                                    // Función para cambiar rol con refresh y redirección
   const handleRoleChangeWithRefresh = (newRole) => {
     localStorage.setItem('rol', newRole);
     setActiveRole(newRole);
     notifyRoleChange(newRole);
     
-    // Determinar la ruta de home según el rol
     const homeRoute = newRole === 'tutor' ? routes.TUTOR_INICIO : routes.HOME;
-    
-    // Refrescar la página y redirigir al home correspondiente
     window.location.href = homeRoute;
   };
 
-  // Intentar cambiar a modo tutor desde el perfil
   const handleChangeRole = () => {
     if (!user.isTutor) {
       setInviteOpen(true);
@@ -135,17 +255,20 @@ const Profile = () => {
     handleRoleChangeWithRefresh('student');
   };
 
+  const handleSaveProfile = async (formData) => {
+    try {
+      const result = await UserProfileService.updateUserProfile(user.email, formData);
+      if (result.success) {
+        setUserData({...userData, ...formData});
+      }
+    } catch (error) {
+      console.error('Error saving profile:', error);
+    }
+  };
 
-  // const handleLogout = () => {
-  //   auth.signOut()
-  //   localStorage.removeItem('userEmail')
-  //   localStorage.removeItem('isLoggedIn')
-  //   router.push(routes.LANDING)
-  // }
-
-  // if (!userData) {
-  //   return <div className="p-6">Cargando perfil...</div>
-  // }
+  const handleManageAvailability = () => {
+    router.push(routes.TUTOR_DISPONIBILIDAD);
+  };
 
   const notifyRoleChange = (next) => {
     if (typeof window !== 'undefined') {
@@ -153,50 +276,194 @@ const Profile = () => {
     }
   };
 
+  if (loading || authLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">{t('profile.loadingProfile')}</p>
+        </div>
+      </div>
+    );
+  }
+
 
   return (
-    <div className='background-profile'>
-         <div className="absolute bottom-0 left-0 w-full z-0">
-      <svg className="w-full h-auto" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
-      <path fill="#1A237E" fillOpacity="1" d="M0,192L40,181.3C80,171,160,149,240,117.3C320,85,400,43,480,69.3C560,96,640,192,720,197.3C800,203,880,117,960,74.7C1040,32,1120,32,1200,64C1280,96,1360,160,1400,192L1440,224L1440,320L1400,320C1360,320,1280,320,1200,320C1120,320,1040,320,960,320C880,320,800,320,720,320C640,320,560,320,480,320C400,320,320,320,240,320C160,320,80,320,40,320L0,320Z"></path>
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50">
+      <div className="container mx-auto px-6 py-12">
+        <div className="max-w-4xl mx-auto">
 
-      </svg>
-    </div>
-        <div className="relative z-10 max-w-4xl mx-auto bg-white rounded-xl shadow p-8 mt-10 justify-items-center">
-        <h1 className="text-3xl font-bold mb-6 title">{t('profile.title')}</h1>
-        <div className="row-span-3"><img
+          {/* Profile Card */}
+          <div className="profile-card bg-white rounded-3xl shadow-xl p-8 mb-8">
+            {/* Profile Header */}
+            <div className="flex flex-col md:flex-row items-start md:items-center gap-6 mb-8">
+              <div className="profile-avatar relative">
+                <img
+                  src='https://avatar.iran.liara.run/public/40'
+                  alt="Profile"
+                  className="w-24 h-24 rounded-full object-cover border-4 border-orange-100"
+                />
+                <div className="absolute -bottom-2 -right-2 p-2 bg-orange-500 rounded-full">
+                  <Edit3 className="w-4 h-4 text-white" />
+                </div>
+              </div>
+              
+              <div className="flex-1">
+                <h2 className="text-2xl font-bold text-gray-800 mb-1">
+                  {userData?.name || t('profile.notDefined')}
+                </h2>
+                <p className="text-orange-600 font-medium mb-2">
+                  {userData?.specialization || t('profile.notDefined')}
+                </p>
+                <div className="flex items-center gap-4 text-sm text-gray-600">
+                  <span>📧 {user?.email}</span>
+                  <span>📱 {userData?.phone_number || t('profile.notDefined')}</span>
+                </div>
+              </div>
 
-        //placeholder sacado de https://avatar-placeholder.iran.liara.run/
-            src='https://avatar.iran.liara.run/public/40' // Cambiar esto por la imagen del usuario
-            alt="Foto de perfil"
-            className="w-32 h-32 rounded-full object-cover border border-gray-300"
-          /></div>
-        <div className="bg-white p-10 rounded inset-shadow-sm w-full mx-auto mt-5 max-w-3xl">
+              <div className="flex flex-col sm:flex-row gap-3">
+                <button
+                  onClick={() => setEditModalOpen(true)}
+                  className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-xl font-semibold transition-colors duration-300"
+                >
+                  <Edit3 className="w-5 h-5" />
+                  {t('profile.editProfile')}
+                </button>
+                
+                {user.isTutor && activeRole === 'student' && (
+                  <button
+                    onClick={handleChangeRole}
+                    className="flex items-center gap-2 bg-black-500 hover:bg-black-600 text-white px-6 py-3 rounded-xl font-semibold transition-colors duration-300"
+                  >
+                    <Settings className="w-5 h-5" />
+                    {t('profile.changeToTutorMode')}
+                  </button>
+                )}
+                
+                {activeRole === 'tutor' && (
+                  <button
+                    onClick={handleBackToStudent}
+                    className="flex items-center gap-2 bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-xl font-semibold transition-colors duration-300"
+                  >
+                    {t('profile.changeToStudentMode')}
+                  </button>
+                )}
+              </div>
+            </div>
 
-          
-            {/* aqui se debe cambiar por los datos del usuario */}
-            <p className='text-info'><strong className='text-campos'>{t('profile.name')} </strong> {userData?.name || t('profile.notDefined')}</p>
-            <p className='text-info'><strong className='text-campos'>{t('profile.phone')} </strong>{userData?.phone_number || t('profile.notDefined')} </p>
-            <p className='text-info'><strong className='text-campos'>{t('profile.email')} </strong>{user?.email || t('profile.notDefined')} </p>
-            <p className='text-info'><strong className='text-campos'>{t('profile.major')}</strong> {majorName || t('profile.notDefined')}</p>
+            {/* Rating Section (for tutors) */}
+            {user.isTutor && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div className="rating-card bg-gray-50 rounded-2xl p-6 text-center">
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <Star className="w-6 h-6 text-orange-500" />
+                    <span className="text-3xl font-bold text-gray-800">4.9</span>
+                  </div>
+                  <p className="text-gray-600 font-medium">{t('profile.rating')}</p>
+                </div>
+                
+                <div className="rating-card bg-gray-50 rounded-2xl p-6 text-center">
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <Calendar className="w-6 h-6 text-orange-500" />
+                    <span className="text-3xl font-bold text-gray-800">24</span>
+                  </div>
+                  <p className="text-gray-600 font-medium">{t('profile.sessionsCompleted')}</p>
+                </div>
+                
+                <div className="rating-card bg-gray-50 rounded-2xl p-6 text-center">
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <Users className="w-6 h-6 text-orange-500" />
+                    <span className="text-3xl font-bold text-gray-800">12</span>
+                  </div>
+                  <p className="text-gray-600 font-medium">{t('profile.studentsHelped')}</p>
+                </div>
+              </div>
+            )}
 
-            <button
-            className="mt-4 btn-editar text-white py-2 px-4 rounded"
-            >
-            {t('profile.editProfile')}
-            </button>
-            <button
-            onClick={handleLogout}
+            {/* About Section */}
+            <div className="mb-8">
+              <h3 className="text-xl font-bold text-gray-800 mb-4">{t('profile.about')}</h3>
+              <p className="text-gray-600 leading-relaxed">
+                {userData?.description || t('profile.descriptionPlaceholder')}
+              </p>
+            </div>
 
-            className="mt-4 btn-logout text-white py-2 px-4 rounded mx-4"
-            >
-            {t('profile.logout')}
-            </button>
+            {/* Subjects Section (for tutors) */}
+            {user.isTutor && (
+              <div className="mb-8">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-bold text-gray-800">{t('profile.subjects')}</h3>
+                  <button className="flex items-center gap-2 text-orange-600 hover:text-orange-700 font-medium">
+                    <Plus className="w-4 h-4" />
+                    {t('profile.addSubject')}
+                  </button>
+                </div>
+                
+                {tutorSubjects.length > 0 ? (
+                  <div className="flex flex-wrap gap-3">
+                    {tutorSubjects.map((subject, index) => (
+                      <div key={index} className="subject-tag bg-orange-100 text-orange-800 px-4 py-2 rounded-xl flex items-center gap-2">
+                        <span className="font-medium">{subject.name || subject.subject}</span>
+                        <button className="text-orange-600 hover:text-orange-800">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <p>{t('profile.noSubjects')}</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Availability Management (for tutors) */}
+            {user.isTutor && (
+              <div className="availability-card bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 mb-8">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-800 mb-2">{t('profile.availability.title')}</h3>
+                    <p className="text-gray-600">{t('profile.availability.description')}</p>
+                  </div>
+                  <button
+                    onClick={handleManageAvailability}
+                    className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold transition-colors duration-300"
+                  >
+                    <Calendar className="w-5 h-5" />
+                    {t('profile.availability.goToAvailability')}
+                    <ArrowRight className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200">
+              <button
+                onClick={handleLogout}
+                className="flex-1 bg-red-500 hover:bg-red-600 text-white py-3 px-6 rounded-xl font-semibold transition-colors duration-300"
+              >
+                {t('profile.logout')}
+              </button>
+            </div>
+          </div>
         </div>
-        </div>
+      </div>
 
-      {/* Modal */}
-      <TutorInviteModal open={inviteOpen} onClose={() => setInviteOpen(false)} t={t} />
+      {/* Modals */}
+      <EditProfileModal 
+        open={editModalOpen} 
+        onClose={() => setEditModalOpen(false)} 
+        userData={userData}
+        onSave={handleSaveProfile}
+        t={t}
+      />
+      <TutorInviteModal 
+        open={inviteOpen} 
+        onClose={() => setInviteOpen(false)} 
+        t={t} 
+      />
     </div>
   );
 };
