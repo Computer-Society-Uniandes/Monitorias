@@ -139,11 +139,27 @@ export default function SessionConfirmationModal({
             <input
               type="email"
               value={studentEmail}
-              onChange={(e) => setStudentEmail(e.target.value)}
-              placeholder={t('availability.confirmationModal.emailPlaceholder')}
-              className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#FF8C00] focus:border-transparent"
-              disabled={confirmLoading}
+              readOnly
+              className="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-lg text-gray-900 cursor-not-allowed"
             />
+          </div>
+
+          {/* Payment Information */}
+          <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4">
+            <h3 className="text-sm font-semibold text-blue-900 mb-2 flex items-center gap-2">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+              {t('availability.confirmationModal.paymentInformation')}
+            </h3>
+            <div className="space-y-2">
+              <p className="text-sm text-blue-800">
+                <strong>💳 Nequi/Daviplata:</strong> 310 7551592
+              </p>
+              <p className="text-xs text-blue-700">
+                {t('availability.confirmationModal.paymentInstructions')}
+              </p>
+            </div>
           </div>
 
           {/* Payment Proof Upload */}

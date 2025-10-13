@@ -274,6 +274,63 @@
   font-weight: 500;
 }
 
+/* ====== GOOGLE MEET LINK ====== */
+.meet-link-container {
+  background: linear-gradient(135deg, #EEF2FF, #E0E7FF);
+  border: 2px solid #818CF8;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 24px;
+  animation: slideInLeft 0.6s ease-out 1.3s both;
+}
+
+.meet-link-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.meet-link-header svg {
+  color: #4F46E5;
+  flex-shrink: 0;
+}
+
+.meet-link-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #312E81;
+}
+
+.meet-link-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: white;
+  border: 2px solid #A5B4FC;
+  border-radius: 10px;
+  padding: 12px 16px;
+  text-decoration: none;
+  color: #4F46E5;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  word-break: break-all;
+}
+
+.meet-link-button:hover {
+  background: #4F46E5;
+  color: white;
+  border-color: #4F46E5;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+}
+
+.meet-link-button svg {
+  flex-shrink: 0;
+}
+
 /* ====== ACTIONS ====== */
 .modal-actions {
   animation: fadeInUp 0.6s ease-out 1.4s both;

@@ -2,10 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
-import { auth, db } from '../../../firebaseConfig';
-import { doc, getDoc } from "firebase/firestore";
 import { useAuth } from '../../context/SecureAuthContext';
 import { useI18n } from '../../../lib/i18n';
 import routes from 'app/routes';
@@ -41,27 +38,15 @@ export default function Login() {
     setLoading(true);
     setError('');
     try {
-      await signInWithEmailAndPassword(auth, form.email, form.password);
+      // Use the login method from context which handles Firebase Auth
+      const result = await login({ email: form.email, password: form.password });
       
-      const userRef = doc(db, 'user', form.email);
-      const userSnap = await getDoc(userRef);
-
-      let userData = { email: form.email, name: '', isTutor: false };
-      
-      if (userSnap.exists()) {
-        const firestoreData = userSnap.data();
-        userData = {
-          email: form.email,
-          name: firestoreData.name || '',
-          isTutor: firestoreData.isTutor || false // Por defecto es estudiante
-        };
+      if (result.success) {
+        router.push(routes.HOME);
       } else {
-        console.warn(`No existe el usuario ${form.email} en Firestore.`);
+        // Handle error from AuthService
+        setError(result.error || t('auth.login.errors.generic'));
       }
-      
-      // Usar el contexto para manejar el login
-      login(userData);
-      router.push(routes.HOME);
     } catch (error) {
       console.error('Login error:', error);
       
