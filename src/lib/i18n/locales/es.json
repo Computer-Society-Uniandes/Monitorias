@@ -350,7 +350,38 @@
     "becomeTutorText": "Aún no tienes habilitado el perfil de tutor. Completa el formulario para solicitar acceso.",
     "goToForm": "Ir al formulario",
     "close": "Cerrar",
-    "loadingProfile": "Cargando perfil..."
+    "loadingProfile": "Cargando perfil...",
+    "about": "Acerca de",
+    "subjects": "Materias",
+    "changeToTutorMode": "Cambiar a Modo Tutor",
+    "changeToStudentMode": "Cambiar a Modo Estudiante",
+    "manageAvailability": "Gestionar Disponibilidad",
+    "editPersonalInfo": "Editar Información Personal",
+    "saveChanges": "Guardar Cambios",
+    "cancel": "Cancelar",
+    "description": "Descripción",
+    "descriptionPlaceholder": "Cuéntales a los estudiantes sobre ti y tu estilo de enseñanza...",
+    "specialization": "Especialización",
+    "rating": "Calificación",
+    "sessionsCompleted": "Sesiones Completadas",
+    "studentsHelped": "Estudiantes Ayudados",
+    "noSubjects": "Aún no tienes materias asignadas",
+    "addSubject": "Agregar Materia",
+    "removeSubject": "Eliminar",
+    "editModal": {
+      "title": "Editar Perfil",
+      "name": "Nombre Completo",
+      "phone": "Número de Teléfono",
+      "description": "Descripción",
+      "specialization": "Especialización",
+      "save": "Guardar Cambios",
+      "cancel": "Cancelar"
+    },
+    "availability": {
+      "title": "Gestión de Disponibilidad",
+      "description": "Gestiona tus horarios disponibles para sesiones de tutoría",
+      "goToAvailability": "Ir a Disponibilidad"
+    }
   },
   "welcome": {
     "greeting": "Bienvenido",

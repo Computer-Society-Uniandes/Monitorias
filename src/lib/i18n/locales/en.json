@@ -350,7 +350,38 @@
     "becomeTutorText": "You don't have a tutor profile enabled yet. Complete the form to request access.",
     "goToForm": "Go to form",
     "close": "Close",
-    "loadingProfile": "Loading profile..."
+    "loadingProfile": "Loading profile...",
+    "about": "About",
+    "subjects": "Subjects",
+    "changeToTutorMode": "Change to Tutor Mode",
+    "changeToStudentMode": "Change to Student Mode",
+    "manageAvailability": "Manage Availability",
+    "editPersonalInfo": "Edit Personal Information",
+    "saveChanges": "Save Changes",
+    "cancel": "Cancel",
+    "description": "Description",
+    "descriptionPlaceholder": "Tell students about yourself and your teaching style...",
+    "specialization": "Specialization",
+    "rating": "Rating",
+    "sessionsCompleted": "Sessions Completed",
+    "studentsHelped": "Students Helped",
+    "noSubjects": "No subjects assigned yet",
+    "addSubject": "Add Subject",
+    "removeSubject": "Remove",
+    "editModal": {
+      "title": "Edit Profile",
+      "name": "Full Name",
+      "phone": "Phone Number",
+      "description": "Description",
+      "specialization": "Specialization",
+      "save": "Save Changes",
+      "cancel": "Cancel"
+    },
+    "availability": {
+      "title": "Availability Management",
+      "description": "Manage your available hours for tutoring sessions",
+      "goToAvailability": "Go to Availability"
+    }
   },
   "welcome": {
     "greeting": "Welcome",
