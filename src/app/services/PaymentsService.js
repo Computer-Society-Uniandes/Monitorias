@@ -218,7 +218,10 @@ export class PaymentsService {
       snapshot.forEach((docSnap) => {
         const data = docSnap.data();
         const storedEmail = (data.tutorEmail ? String(data.tutorEmail) : '').trim().toLowerCase();
-        if (storedEmail !== normalizedEmail) return;
+        if (storedEmail !== normalizedEmail) {
+          console.log('[PaymentsService] Skipping doc, email mismatch:', storedEmail, 'vs', normalizedEmail);
+          return;
+        }
 
         const rawDate = data.date_payment;
         let datePayment = null;
@@ -228,15 +231,23 @@ export class PaymentsService {
           datePayment = isNaN(parsed) ? null : parsed;
         } else if (rawDate instanceof Date) datePayment = rawDate;
 
-        if (startDate && datePayment && datePayment < startDate) return;
-        if (endDate && datePayment && datePayment > endDate) return;
+        if (startDate && datePayment && datePayment < startDate) {
+          console.log('[PaymentsService] Skipping doc, before startDate:', datePayment, '<', startDate);
+          return;
+        }
+        if (endDate && datePayment && datePayment > endDate) {
+          console.log('[PaymentsService] Skipping doc, after endDate:', datePayment, '>', endDate);
+          return;
+        }
 
+        console.log('[PaymentsService] Adding payment:', docSnap.id, data);
         results.push({
           id: docSnap.id,
           amount: typeof data.amount === 'number' ? data.amount : Number(data.amount) || 0,
           date_payment: datePayment,
           method: data.method || '',
           studentEmail: data.studentEmail || '',
+          studentName: data.studentName || '',
           subject: data.subject || '',
           transactionID: data.transactionID || data.transactionId || '',
           tutorEmail: data.tutorEmail || '',

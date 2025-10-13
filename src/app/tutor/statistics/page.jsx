@@ -38,10 +38,10 @@ export default function TutorStatistics() {
   
   // Filters
   const [selectedSubject, setSelectedSubject] = useState("all");
-  const [selectedTimeframe, setSelectedTimeframe] = useState("month");
+  const [selectedTimeframe, setSelectedTimeframe] = useState("year");
   const [selectedPeriod, setSelectedPeriod] = useState(() => {
     const now = new Date();
-    const start = new Date(now.getFullYear(), now.getMonth(), 1);
+    const start = new Date(now.getFullYear(), 0, 1); // Cambiar a inicio del año
     const formatDate = (d) => {
       const year = d.getFullYear();
       const month = String(d.getMonth() + 1).padStart(2, '0');
@@ -105,10 +105,15 @@ export default function TutorStatistics() {
       
       // Cargar pagos del tutor desde Firebase (PaymentsService)
       const paymentsData = await PaymentsService.getPaymentsByTutor(user.email);
+      console.log('[TutorStatistics] Total payments from Firebase:', paymentsData.length);
+      console.log('[TutorStatistics] Payments data:', paymentsData);
       setPayments(paymentsData);
 
       // Filtrar pagos según materia/periodo
       const filteredPayments = filterPayments(paymentsData);
+      console.log('[TutorStatistics] Filtered payments:', filteredPayments.length);
+      console.log('[TutorStatistics] Filtered data:', filteredPayments);
+      
       const calculatedStats = calculateStatistics(filteredPayments);
       // Cargar calificación promedio desde colección user
       const rating = await fetchTutorRating(user.email);
@@ -116,6 +121,8 @@ export default function TutorStatistics() {
       
       // Generar historial de transacciones desde pagos
       const transactionHistory = generateTransactionHistory(filteredPayments);
+      console.log('[TutorStatistics] Transaction history:', transactionHistory.length);
+      console.log('[TutorStatistics] Transactions:', transactionHistory);
       setTransactions(transactionHistory);
       
     } catch (error) {
@@ -155,6 +162,9 @@ export default function TutorStatistics() {
   };
 
   const filterPayments = (paymentsData) => {
+    console.log('[TutorStatistics] filterPayments - Input:', paymentsData.length, 'payments');
+    console.log('[TutorStatistics] Filter settings - Subject:', selectedSubject, 'Period:', selectedPeriod);
+    
     let filtered = paymentsData;
     
     // Filter by subject
@@ -162,6 +172,7 @@ export default function TutorStatistics() {
       filtered = filtered.filter(p => 
         (p.subject || '').toLowerCase().includes(selectedSubject.toLowerCase())
       );
+      console.log('[TutorStatistics] After subject filter:', filtered.length, 'payments');
     }
     
     const periodStart = new Date(selectedPeriod.start);
@@ -169,12 +180,20 @@ export default function TutorStatistics() {
     const periodEnd = new Date(selectedPeriod.end);
     periodEnd.setHours(23, 59, 59, 999);
     
+    console.log('[TutorStatistics] Date range:', periodStart, 'to', periodEnd);
+    
     filtered = filtered.filter(p => {
       const d = p.date_payment instanceof Date ? p.date_payment : (p.date_payment ? new Date(p.date_payment) : null);
-      if (!d) return false;
-      return d >= periodStart && d <= periodEnd;
+      if (!d) {
+        console.log('[TutorStatistics] Skipping payment with invalid date:', p.id);
+        return false;
+      }
+      const isInRange = d >= periodStart && d <= periodEnd;
+      console.log('[TutorStatistics] Payment', p.id, 'date:', d, 'in range:', isInRange);
+      return isInRange;
     });
     
+    console.log('[TutorStatistics] After date filter:', filtered.length, 'payments');
     return filtered;
   };
 
