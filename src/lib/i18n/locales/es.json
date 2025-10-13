@@ -349,7 +349,14 @@
   "welcome": {
     "greeting": "Bienvenido",
     "greetingWithName": "Bienvenidx, {name}",
-    "findTutor": "Encuentra el tutor para ti"
+    "findTutor": "Encuentra el tutor para ti",
+    "badge": "✨ Nueva Plataforma",
+    "subtitle": "Tu plataforma de aprendizaje personalizado en Uniandes",
+    "features": {
+      "verifiedTutors": "Tutores verificados",
+      "flexibleSchedule": "Horarios flexibles",
+      "personalizedLearning": "Aprendizaje personalizado"
+    }
   },
   "studentHome": {
     "scheduledSessions": "Mis Tutorías Programadas 📚",
@@ -358,7 +365,29 @@
     "needHelpText": "Encuentra tutores expertos para mejorar en cualquier materia.",
     "searchTutors": "🔍 Buscar Tutores",
     "exploreSubjects": "🌟 Explorar Materias",
-    "yourSubjects": "Tus materias este semestre"
+    "yourSubjects": "Tus materias este semestre",
+    "subjectsDescription": "Materias en las que puedes recibir ayuda",
+    "stats": {
+      "sessionsThisWeek": "Sesiones esta semana",
+      "activeSubjects": "Materias activas",
+      "totalSessions": "Total de sesiones",
+      "averageRating": "Calificación promedio"
+    },
+    "quickAccess": {
+      "title": "Acceso Rápido",
+      "history": "Historial de tutorías",
+      "favorites": "Tutores favoritos",
+      "profile": "Mi perfil"
+    },
+    "noSubjects": {
+      "title": "¡Explora nuevas materias!",
+      "description": "Descubre todas las materias disponibles y encuentra el tutor perfecto para ti.",
+      "exploreSubjects": "Explorar materias"
+    },
+    "achievement": {
+      "title": "¡Sigues mejorando! 🎉",
+      "description": "Has completado 24 sesiones este semestre. ¡Mantén el excelente trabajo!"
+    }
   },
   "tutoringSummary": {
     "loading": "Cargando...",
@@ -678,10 +707,14 @@
   "tutorHome": {
     "title": "Panel de Tutor 🎓",
     "welcome": "Bienvenido a tu espacio de trabajo. Aquí puedes gestionar todo tu trabajo como tutor.",
-    "quickActions": "Accesos rápidos",
+    "quickActions": {
+      "title": "Acciones Rápidas"
+    },
     "myTutorings": "📚 Mis Tutorías",
     "manageSubjects": "📖 Gestionar Materias",
     "availability": "📅 Disponibilidad",
+    "payments": "💰 Pagos",
+    "addSubject": "Agregar materia",
     "stats": {
       "thisMonth": "Este mes",
       "sessions": "Sesiones",
@@ -700,6 +733,23 @@
     "noUpcomingSession": "Sin sesión próxima",
     "upcomingTutorials": "Próximas Tutorías 📚",
     "viewAllTutorials": "Ver todas",
+    "calendar": {
+      "title": "Integración de Calendario",
+      "description": "Conecta tu calendario de Google para sincronizar automáticamente tu disponibilidad.",
+      "autoSync": "Sincronización Automática",
+      "autoSyncDesc": "Tu disponibilidad se actualiza automáticamente con tu calendario de Google."
+    },
+    "performance": {
+      "title": "Rendimiento Semanal",
+      "weeklySessions": "Sesiones esta semana",
+      "weeklyEarnings": "Ingresos esta semana",
+      "studentRetention": "Retención de estudiantes"
+    },
+    "achievement": {
+      "title": "¡Excelente trabajo! 🏆",
+      "description": "Has ayudado a 12 estudiantes este mes y mantienes una calificación de 4.9 estrellas.",
+      "progress": "+15% este mes"
+    },
     "newFeatures": {
       "title": "✨ Nuevas Funcionalidades Disponibles",
       "description": "Ahora tienes acceso completo al panel de tutor con navegación dedicada:",

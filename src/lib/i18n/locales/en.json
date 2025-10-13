@@ -349,7 +349,14 @@
   "welcome": {
     "greeting": "Welcome",
     "greetingWithName": "Welcome, {name}",
-    "findTutor": "Find the right tutor for you"
+    "findTutor": "Find the right tutor for you",
+    "badge": "✨ New Platform",
+    "subtitle": "Your personalized learning platform at Uniandes",
+    "features": {
+      "verifiedTutors": "Verified tutors",
+      "flexibleSchedule": "Flexible schedules",
+      "personalizedLearning": "Personalized learning"
+    }
   },
   "studentHome": {
     "scheduledSessions": "My Scheduled Tutoring Sessions 📚",
@@ -358,7 +365,29 @@
     "needHelpText": "Find expert tutors to improve in any subject.",
     "searchTutors": "🔍 Search Tutors",
     "exploreSubjects": "🌟 Explore Subjects",
-    "yourSubjects": "Your subjects this semester"
+    "yourSubjects": "Your subjects this semester",
+    "subjectsDescription": "Subjects where you can receive help",
+    "stats": {
+      "sessionsThisWeek": "Sessions this week",
+      "activeSubjects": "Active subjects",
+      "totalSessions": "Total sessions",
+      "averageRating": "Average rating"
+    },
+    "quickAccess": {
+      "title": "Quick Access",
+      "history": "Tutoring history",
+      "favorites": "Favorite tutors",
+      "profile": "My profile"
+    },
+    "noSubjects": {
+      "title": "Explore new subjects!",
+      "description": "Discover all available subjects and find the perfect tutor for you.",
+      "exploreSubjects": "Explore subjects"
+    },
+    "achievement": {
+      "title": "Keep improving! 🎉",
+      "description": "You've completed 24 sessions this semester. Keep up the excellent work!"
+    }
   },
   "tutoringSummary": {
     "loading": "Loading...",
@@ -678,10 +707,14 @@
   "tutorHome": {
     "title": "Tutor Dashboard 🎓",
     "welcome": "Welcome to your workspace. Here you can manage everything related to your tutoring work.",
-    "quickActions": "Quick actions",
+    "quickActions": {
+      "title": "Quick Actions"
+    },
     "myTutorings": "📚 My Tutorings",
     "manageSubjects": "📖 Manage Subjects",
     "availability": "📅 Availability",
+    "payments": "💰 Payments",
+    "addSubject": "Add subject",
     "stats": {
       "thisMonth": "This month",
       "sessions": "Sessions",
@@ -700,6 +733,23 @@
     "noUpcomingSession": "No upcoming session",
     "upcomingTutorials": "Upcoming Tutorings 📚",
     "viewAllTutorials": "View all",
+    "calendar": {
+      "title": "Calendar Integration",
+      "description": "Connect your Google calendar to automatically sync your availability.",
+      "autoSync": "Automatic Sync",
+      "autoSyncDesc": "Your availability updates automatically with your Google calendar."
+    },
+    "performance": {
+      "title": "Weekly Performance",
+      "weeklySessions": "Sessions this week",
+      "weeklyEarnings": "Earnings this week",
+      "studentRetention": "Student retention"
+    },
+    "achievement": {
+      "title": "Excellent work! 🏆",
+      "description": "You've helped 12 students this month and maintain a 4.9 star rating.",
+      "progress": "+15% this month"
+    },
     "newFeatures": {
       "title": "✨ New Features Available",
       "description": "You now have full access to the tutor dashboard with dedicated navigation:",
