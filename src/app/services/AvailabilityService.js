@@ -142,7 +142,24 @@ export class AvailabilityService {
         console.log('Firebase unavailable, trying Google Calendar...');
       }
       
+      // Si no hay conexión a Google Calendar y no hay datos en Firebase, 
+      // intentar cargar datos de Firebase directamente como fallback
       if (!isConnected) {
+        try {
+          const firebaseFallbackResult = await this.getAvailabilitiesFromFirebase();
+          if (firebaseFallbackResult.success && firebaseFallbackResult.availabilitySlots.length > 0) {
+            console.log(`Loaded ${firebaseFallbackResult.availabilitySlots.length} availability slots from Firebase (no calendar connection)`);
+            return {
+              ...firebaseFallbackResult,
+              connected: false,
+              source: 'firebase',
+              usingMockData: false
+            };
+          }
+        } catch (firebaseFallbackError) {
+          console.log('Firebase fallback also unavailable');
+        }
+        
         return {
           success: true,
           connected: false,
