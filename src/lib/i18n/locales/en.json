@@ -23,6 +23,7 @@
     "amount": "Amount",
     "status": "Status",
     "method": "Method",
+    "verifyingPermissions": "Verifying permissions...",
     "from": "From",
     "to": "To",
     "period": "Period",
@@ -457,6 +458,7 @@
     "creating": "Creating...",
     "save": "Save",
     "connectCalendarRequired": "You must connect your Google Calendar to create events",
+    "syncSuccessful": "Sync successful",
     "errorCreatingEvent": "Error creating event",
     "mustBeConnectedToSync": "You must be connected to Google Calendar to sync",
     "syncSuccess": "Sync successful!",
@@ -486,6 +488,10 @@
     "loading": "Loading notifications...",
     "empty": "You have no notifications",
     "emptyDescription": "All your notifications will appear here",
+<<<<<<< HEAD
+=======
+    "markAllAsReadButton": "Mark all as read",
+>>>>>>> 0a9149bb96d9e4cbcbf7bff1320496f44e41b724
     "close": "Close",
     "viewAll": "View all notifications",
     "defaultTutorName": "Tutor",
@@ -598,6 +604,7 @@
     "message": "Thank you for your feedback. It helps us a lot!",
     "close": "Close"
   },
+<<<<<<< HEAD
   "landing": {
     "header": {
       "viewProfile": "View Profile",
@@ -671,6 +678,126 @@
         "title": "Our Mission",
         "description": "Transform the educational experience at Uniandes, creating an ecosystem where knowledge flows freely among students. We seek to eliminate barriers in learning and foster a culture of collaboration and academic excellence."
       }
+=======
+
+  "tutorHome": {
+    "title": "Tutor Dashboard 🎓",
+    "welcome": "Welcome to your workspace. Here you can manage everything related to your tutoring work.",
+    "quickActions": "Quick actions",
+    "myTutorings": "📚 My Tutorings",
+    "manageSubjects": "📖 Manage Subjects",
+    "availability": "📅 Availability",
+    "stats": {
+      "thisMonth": "This month",
+      "sessions": "Sessions",
+      "earnings": "Earnings",
+      "rating": "Rating",
+      "tutorialsToday": "Tutorings Today",
+      "scheduled": "Scheduled",
+      "students": "Students",
+      "income": "Income"
+    },
+    "subjectsTitle": "Available subjects for tutoring",
+    "subjectsDescription": "These are the subjects where you can offer tutoring",
+    "viewAll": "View all →",
+    "noSubjects": "No subjects available",
+    "upcomingSession": "Next session",
+    "noUpcomingSession": "No upcoming session",
+    "upcomingTutorials": "Upcoming Tutorings 📚",
+    "viewAllTutorials": "View all",
+    "newFeatures": {
+      "title": "✨ New Features Available",
+      "description": "You now have full access to the tutor dashboard with dedicated navigation:",
+      "startPanel": "Dashboard with statistics",
+      "completeManagement": "Complete tutoring management",
+      "subjectsAdmin": "Subject administration",
+      "availabilityManagement": "Availability management",
+      "paymentControl": "Payment and income control"
+    }
+  },
+
+  "tutorPayments": {
+    "title": "Payments and Earnings 💰",
+    "subtitle": "Manage your income and payment history",
+    "requestWithdrawal": "💸 Request Withdrawal",
+    "cards": {
+      "totalEarnings": "Total Earnings",
+      "pending": "Pending",
+      "thisMonth": "This Month",
+      "growthRate": "Growth Rate",
+      "availableBalance": "Available Balance"
+    },
+    "filters": {
+      "view": "View:",
+      "week": "Week",
+      "month": "Month",
+      "quarter": "Quarter",
+      "year": "Year"
+    },
+    "transactions": {
+      "title": "Transaction History",
+      "viewDetails": "View details"
+    },
+    "paymentSettings": {
+      "title": "Payment Settings",
+      "mainAccount": "🏦 Main Bank Account",
+      "bank": "Bank:",
+      "accountType": "Account type:",
+      "accountNumber": "Account number:",
+      "idNumber": "ID number:",
+      "addAccount": "Add account",
+      "edit": "Edit",
+      "paymentMethod": "💳 Preferred Payment Method",
+      "bankTransfer": "Bank Transfer",
+      "configure": "Configure"
+    }
+  },
+
+  "tutorSubjects": {
+    "title": "My Subjects �",
+    "subtitle": "Manage the subjects you teach and their settings",
+    "addSubject": "+ Add Subject",
+    "categories": {
+      "all": "All subjects",
+      "mathematics": "Mathematics",
+      "sciences": "Sciences",
+      "engineering": "Engineering"
+    },
+    "demand": {
+      "high": "high",
+      "medium": "medium",
+      "low": "low"
+    },
+    "card": {
+      "active": "Active",
+      "students": "👥 Students",
+      "ratePerHour": "💰 Rate/hour",
+      "edit": "Edit"
+    },
+    "stats": {
+      "activeSubjects": "Active Subjects",
+      "totalStudents": "Total Students",
+      "averageRate": "Average Rate",
+      "successRate": "Success Rate"
+    }
+  },
+
+  "studentAvailability": {
+    "title": "Tutor Availability",
+    "loading": "Loading...",
+    "updating": "🔄 Updating...",
+    "refresh": "🔄 Refresh",
+    "error": "⚠️ Error: {message}",
+    "retry": "Retry",
+    "loadingAvailability": "Loading availability...",
+    "foundSlots": "Found {count} available slots in {days} days",
+    "noResults": "No results",
+    "noSlotsAvailable": "No slots available",
+    "contactTutor": "Contact tutor",
+    "slotDetails": {
+      "recurring": "Recurring",
+      "available": "Available"
+>>>>>>> 0a9149bb96d9e4cbcbf7bff1320496f44e41b724
     }
   }
 }
