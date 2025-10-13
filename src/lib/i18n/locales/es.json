@@ -23,6 +23,7 @@
     "amount": "Monto",
     "status": "Estado",
     "method": "Método",
+    "verifyingPermissions": "Verificando permisos...",
     "from": "Desde",
     "to": "Hasta",
     "period": "Período",
@@ -458,7 +459,6 @@
     "save": "Guardar",
     "connectCalendarRequired": "Debes conectar tu Google Calendar para crear eventos",
     "syncSuccessful": "Sincronización exitosa",
-    "syncFailed": "Error en sincronización",
     "errorCreatingEvent": "Error al crear evento",
     "mustBeConnectedToSync": "Debes estar conectado a Google Calendar para sincronizar",
     "syncSuccess": "¡Sincronización exitosa!",
@@ -487,7 +487,7 @@
     "loading": "Cargando notificaciones...",
     "empty": "No tienes notificaciones",
     "emptyDescription": "Todas tus notificaciones aparecerán aquí",
-    "markAllAsRead": "Marcar todas como leídas",
+    "markAllAsReadButton": "Marcar todas como leídas",
     "close": "Cerrar",
     "viewAll": "Ver todas las notificaciones",
     "defaultTutorName": "Tutor",
@@ -599,6 +599,7 @@
     "message": "Gracias por tus comentarios. ¡Nos ayuda mucho!",
     "close": "Cerrar"
   },
+<<<<<<< HEAD
   "landing": {
     "header": {
       "viewProfile": "Ver Perfil",
@@ -672,6 +673,126 @@
         "title": "Nuestra Misión",
         "description": "Transformar la experiencia educativa en Uniandes, creando un ecosistema donde el conocimiento fluya libremente entre estudiantes. Buscamos eliminar barreras en el aprendizaje y fomentar una cultura de colaboración y excelencia académica."
       }
+=======
+
+  "tutorHome": {
+    "title": "Panel de Tutor 🎓",
+    "welcome": "Bienvenido a tu espacio de trabajo. Aquí puedes gestionar todo tu trabajo como tutor.",
+    "quickActions": "Accesos rápidos",
+    "myTutorings": "📚 Mis Tutorías",
+    "manageSubjects": "📖 Gestionar Materias",
+    "availability": "📅 Disponibilidad",
+    "stats": {
+      "thisMonth": "Este mes",
+      "sessions": "Sesiones",
+      "earnings": "Ganancias",
+      "rating": "Calificación",
+      "tutorialsToday": "Tutorías Hoy",
+      "scheduled": "Programadas",
+      "students": "Estudiantes",
+      "income": "Ingresos"
+    },
+    "subjectsTitle": "Materias disponibles para tutoría",
+    "subjectsDescription": "Estas son las materias donde puedes ofrecer tutorías",
+    "viewAll": "Ver todas →",
+    "noSubjects": "No hay materias disponibles",
+    "upcomingSession": "Próxima sesión",
+    "noUpcomingSession": "Sin sesión próxima",
+    "upcomingTutorials": "Próximas Tutorías 📚",
+    "viewAllTutorials": "Ver todas",
+    "newFeatures": {
+      "title": "✨ Nuevas Funcionalidades Disponibles",
+      "description": "Ahora tienes acceso completo al panel de tutor con navegación dedicada:",
+      "startPanel": "Panel de inicio con estadísticas",
+      "completeManagement": "Gestión completa de tutorías",
+      "subjectsAdmin": "Administración de materias",
+      "availabilityManagement": "Gestión de disponibilidad",
+      "paymentControl": "Control de pagos e ingresos"
+    }
+  },
+
+  "tutorPayments": {
+    "title": "Pagos y Ganancias 💰",
+    "subtitle": "Gestiona tus ingresos y historial de pagos",
+    "requestWithdrawal": "💸 Solicitar Retiro",
+    "cards": {
+      "totalEarnings": "Ganancias Totales",
+      "pending": "Pendiente",
+      "thisMonth": "Este Mes",
+      "growthRate": "Tasa de Crecimiento",
+      "availableBalance": "Balance Disponible"
+    },
+    "filters": {
+      "view": "Ver:",
+      "week": "Semana",
+      "month": "Mes",
+      "quarter": "Trimestre",
+      "year": "Año"
+    },
+    "transactions": {
+      "title": "Historial de Transacciones",
+      "viewDetails": "Ver detalles"
+    },
+    "paymentSettings": {
+      "title": "Configuración de Pagos",
+      "mainAccount": "🏦 Cuenta Bancaria Principal",
+      "bank": "Banco:",
+      "accountType": "Tipo de cuenta:",
+      "accountNumber": "Número de cuenta:",
+      "idNumber": "Número de identificación:",
+      "addAccount": "Agregar cuenta",
+      "edit": "Editar",
+      "paymentMethod": "💳 Método de Pago Preferido",
+      "bankTransfer": "Transferencia Bancaria",
+      "configure": "Configurar"
+    }
+  },
+
+  "tutorSubjects": {
+    "title": "Mis Materias �",
+    "subtitle": "Administra las materias que enseñas y sus configuraciones",
+    "addSubject": "+ Agregar Materia",
+    "categories": {
+      "all": "Todas las materias",
+      "mathematics": "Matemáticas",
+      "sciences": "Ciencias",
+      "engineering": "Ingeniería"
+    },
+    "demand": {
+      "high": "alta",
+      "medium": "media",
+      "low": "baja"
+    },
+    "card": {
+      "active": "Activo",
+      "students": "👥 Estudiantes",
+      "ratePerHour": "💰 Tarifa/hora",
+      "edit": "Editar"
+    },
+    "stats": {
+      "activeSubjects": "Materias Activas",
+      "totalStudents": "Total Estudiantes",
+      "averageRate": "Tarifa Promedio",
+      "successRate": "Tasa de Éxito"
+    }
+  },
+
+  "studentAvailability": {
+    "title": "Disponibilidad de Tutores",
+    "loading": "Cargando...",
+    "updating": "🔄 Actualizando...",
+    "refresh": "🔄 Actualizar",
+    "error": "⚠️ Error: {message}",
+    "retry": "Reintentar",
+    "loadingAvailability": "Cargando disponibilidades...",
+    "foundSlots": "Se encontraron {count} horarios disponibles en {days} días",
+    "noResults": "No hay resultados",
+    "noSlotsAvailable": "No hay horarios disponibles",
+    "contactTutor": "Contactar tutor",
+    "slotDetails": {
+      "recurring": "Recurrente",
+      "available": "Disponible"
+>>>>>>> 0a9149bb96d9e4cbcbf7bff1320496f44e41b724
     }
   },
   "auth": {

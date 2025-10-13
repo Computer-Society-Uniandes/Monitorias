@@ -1,8 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
+import { useI18n } from "../../../lib/i18n";
 
 export default function TutorMaterias() {
+  const { t } = useI18n();
   const [selectedCategory, setSelectedCategory] = useState("todas");
 
   const mockMaterias = [
@@ -39,10 +41,10 @@ export default function TutorMaterias() {
   ];
 
   const categorias = [
-    { id: "todas", nombre: "Todas las materias", icon: "📚" },
-    { id: "matematicas", nombre: "Matemáticas", icon: "📊" },
-    { id: "ciencias", nombre: "Ciencias", icon: "🔬" },
-    { id: "ingenieria", nombre: "Ingeniería", icon: "⚙️" }
+    { id: "todas", nombre: t('tutorSubjects.categories.all'), icon: "📚" },
+    { id: "matematicas", nombre: t('tutorSubjects.categories.mathematics'), icon: "📊" },
+    { id: "ciencias", nombre: t('tutorSubjects.categories.sciences'), icon: "🔬" },
+    { id: "ingenieria", nombre: t('tutorSubjects.categories.engineering'), icon: "⚙️" }
   ];
 
   const getDemandaColor = (demanda) => {
@@ -64,15 +66,15 @@ export default function TutorMaterias() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold text-gray-800 mb-2">
-            Mis Materias 📖
+            {t('tutorSubjects.title')}
           </h1>
           <p className="text-gray-600">
-            Administra las materias que enseñas y sus configuraciones
+            {t('tutorSubjects.subtitle')}
           </p>
         </div>
         
         <button className="mt-4 md:mt-0 bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium transition-colors">
-          + Agregar Materia
+          {t('tutorSubjects.addSubject')}
         </button>
       </div>
 
@@ -110,7 +112,7 @@ export default function TutorMaterias() {
               
               <div className="flex items-center gap-2">
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${getDemandaColor(materia.demanda)}`}>
-                  {materia.demanda}
+                  {t(`tutorSubjects.demand.${materia.demanda}`)}
                 </span>
                 {materia.activa ? (
                   <span className="w-3 h-3 bg-green-500 rounded-full"></span>
@@ -122,19 +124,19 @@ export default function TutorMaterias() {
 
             <div className="space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-gray-600">👥 Estudiantes</span>
+                <span className="text-gray-600">{t('tutorSubjects.card.students')}</span>
                 <span className="font-semibold">{materia.estudiantes}</span>
               </div>
               
               <div className="flex justify-between items-center">
-                <span className="text-gray-600">💰 Tarifa/hora</span>
+                <span className="text-gray-600">{t('tutorSubjects.card.ratePerHour')}</span>
                 <span className="font-semibold">${materia.tarifa.toLocaleString()}</span>
               </div>
             </div>
 
             <div className="flex gap-2 mt-6">
               <button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-medium transition-colors">
-                Editar
+                {t('tutorSubjects.card.edit')}
               </button>
             </div>
           </div>
@@ -145,19 +147,19 @@ export default function TutorMaterias() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-8">
         <div className="bg-white rounded-xl p-6 shadow-sm text-center">
           <p className="text-2xl font-bold text-blue-600">4</p>
-          <p className="text-sm text-gray-600">Materias Activas</p>
+          <p className="text-sm text-gray-600">{t('tutorSubjects.stats.activeSubjects')}</p>
         </div>
         <div className="bg-white rounded-xl p-6 shadow-sm text-center">
           <p className="text-2xl font-bold text-green-600">48</p>
-          <p className="text-sm text-gray-600">Total Estudiantes</p>
+          <p className="text-sm text-gray-600">{t('tutorSubjects.stats.totalStudents')}</p>
         </div>
         <div className="bg-white rounded-xl p-6 shadow-sm text-center">
           <p className="text-2xl font-bold text-yellow-600">$29,500</p>
-          <p className="text-sm text-gray-600">Tarifa Promedio</p>
+          <p className="text-sm text-gray-600">{t('tutorSubjects.stats.averageRate')}</p>
         </div>
         <div className="bg-white rounded-xl p-6 shadow-sm text-center">
           <p className="text-2xl font-bold text-purple-600">85%</p>
-          <p className="text-sm text-gray-600">Tasa de Éxito</p>
+          <p className="text-sm text-gray-600">{t('tutorSubjects.stats.successRate')}</p>
         </div>
       </div>
 
