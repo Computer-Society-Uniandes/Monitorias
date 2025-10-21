@@ -33,7 +33,7 @@ Este documento define la estructura exacta de las colecciones en Firebase Firest
   "isTutor": true, // true para tutores, false para estudiantes
   
   // Campos automáticos
-  "createdAt": "2025-01-15T10:30:00Z",
+  "created_at": "2025-01-15T10:30:00Z",
   "updatedAt": "2025-01-15T10:30:00Z",
   
   // Campos opcionales para tutores
@@ -73,7 +73,7 @@ Este documento define la estructura exacta de las colecciones en Firebase Firest
   "totalSessions": 67,
   "hourlyRate": 30000,
   "bio": "Monitora de matemáticas con 2 años de experiencia",
-  "createdAt": "2024-08-15T10:30:00Z",
+  "created_at": "2024-08-15T10:30:00Z",
   "updatedAt": "2025-01-15T10:30:00Z"
 }
 ```
@@ -89,7 +89,7 @@ Este documento define la estructura exacta de las colecciones en Firebase Firest
   "isTutor": false,
   "semester": 3,
   "enrolledCourses": ["MATE1105", "FISI1018"],
-  "createdAt": "2024-09-01T14:20:00Z",
+  "created_at": "2024-09-01T14:20:00Z",
   "updatedAt": "2025-01-15T14:20:00Z"
 }
 ```
@@ -194,7 +194,7 @@ Este documento define la estructura exacta de las colecciones en Firebase Firest
   "fromAvailabilityCalendar": true // Indica que viene del calendario específico
   
   // Campos de control
-  "createdAt": "2025-01-15T10:30:00Z",
+  "created_at": "2025-01-15T10:30:00Z",
   "updatedAt": "2025-01-15T10:30:00Z",
   "syncedAt": "2025-01-15T10:30:00Z",
   
@@ -225,7 +225,7 @@ Este documento define la estructura exacta de las colecciones en Firebase Firest
   "sourceCalendarId": "disponibilidad-maria@group.calendar.google.com",
   "sourceCalendarName": "Disponibilidad",
   "fromAvailabilityCalendar": true,
-  "createdAt": "2025-01-15T10:30:00.000Z",
+  "created_at": "2025-01-15T10:30:00.000Z",
   "updatedAt": "2025-01-15T10:30:00.000Z",
   "syncedAt": "2025-01-15T10:30:00.000Z",
   "isBooked": false,
@@ -327,7 +327,7 @@ Este documento define la estructura exacta de las colecciones en Firebase Firest
   },
   
   // Control
-  "createdAt": "2025-01-20T10:00:00Z",
+  "created_at": "2025-01-20T10:00:00Z",
   "updatedAt": "2025-01-22T15:30:00Z"
 }
 ```
@@ -361,7 +361,7 @@ Este documento define la estructura exacta de las colecciones en Firebase Firest
   
   // Control
   "bookedAt": "2025-01-20T10:00:00Z",
-  "createdAt": "2025-01-20T10:00:00Z",
+  "created_at": "2025-01-20T10:00:00Z",
   "updatedAt": "2025-01-20T10:00:00Z"
 }
 ```
@@ -401,7 +401,7 @@ Este documento define la estructura exacta de las colecciones en Firebase Firest
   "readAt": "2025-01-20T10:15:00Z", // Solo si fue leída
   
   // Control
-  "createdAt": "2025-01-20T10:00:00Z",
+  "created_at": "2025-01-20T10:00:00Z",
   "updatedAt": "2025-01-20T10:00:00Z"
 }
 ```
@@ -434,7 +434,7 @@ Este documento define la estructura exacta de las colecciones en Firebase Firest
   "gatewayProvider": "wompi", // wompi, payu, etc.
   
   // Fechas
-  "createdAt": "2025-01-22T14:00:00Z",
+  "created_at": "2025-01-22T14:00:00Z",
   "completedAt": "2025-01-22T14:05:00Z"
 }
 ```
@@ -543,7 +543,7 @@ await db.collection('user').doc('maria.rodriguez@uniandes.edu.co').set({
   rating: 4.8,
   totalSessions: 45,
   hourlyRate: 30000,
-  createdAt: new Date(),
+  created_at: new Date(),
   updatedAt: new Date()
 });
 
@@ -556,7 +556,7 @@ await db.collection('user').doc('carlos.mesa@uniandes.edu.co').set({
   isTutor: false,
   semester: 3,
   enrolledCourses: ['MATE1105', 'FISI1018'],
-  createdAt: new Date(),
+  created_at: new Date(),
   updatedAt: new Date()
 });
 ```

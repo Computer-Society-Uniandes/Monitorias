@@ -252,7 +252,7 @@ const AvailabilityCalendar = ({
         slotId: selectedSlotForBooking.id,
         googleEventId: selectedSlotForBooking.googleEventId,
         status: 'pending',
-        tutorApprovalStatus: 'pending',
+        tutorApprovalStatus: '  ',
         paymentStatus: 'pending',
         requestedAt: new Date()
       };

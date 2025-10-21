@@ -320,7 +320,7 @@ export default function NotificationDropdown() {
                           {getNotificationTypeLabel(notification.type)}
                         </span>
                         <span className="notification-time">
-                          {formatTimeAgo(notification.createdAt)}
+                          {formatTimeAgo(notification.created_at)}
                         </span>
                       </div>
                       

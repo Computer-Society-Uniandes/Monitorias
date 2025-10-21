@@ -155,7 +155,7 @@ async function rescheduleSessionLogic(sessionId, newSlot, reason) {
     slotStartTime: new Date(newSlot.startDateTime),
     slotEndTime: new Date(newSlot.endDateTime),
     subject: session.subject,
-    createdAt: serverTimestamp(),
+    created_at: serverTimestamp(),
     updatedAt: serverTimestamp()
   };
 
@@ -176,7 +176,7 @@ async function rescheduleSessionLogic(sessionId, newSlot, reason) {
       title: 'Sesión Reprogramada',
       message: `${session.studentName} ha reprogramado la tutoría de ${session.subject}. Motivo: ${reason}`,
       isRead: false,
-      createdAt: serverTimestamp(),
+      created_at: serverTimestamp(),
       updatedAt: serverTimestamp()
     };
 

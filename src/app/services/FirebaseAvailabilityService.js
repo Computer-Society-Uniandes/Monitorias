@@ -37,10 +37,10 @@ export class FirebaseAvailabilityService {
         syncedAt: serverTimestamp()
       };
 
-      // Si es un nuevo documento, agregar createdAt
+      // Si es un nuevo documento, agregar created_at
       const docSnap = await getDoc(docRef);
       if (!docSnap.exists()) {
-        firestoreData.createdAt = serverTimestamp();
+        firestoreData.created_at = serverTimestamp();
       }
 
       await setDoc(docRef, firestoreData, { merge: true });
@@ -70,7 +70,7 @@ export class FirebaseAvailabilityService {
           id: docSnap.id,
           ...docSnap.data(),
           // Convertir timestamps a objetos Date
-          createdAt: docSnap.data().createdAt?.toDate(),
+          created_at: docSnap.data().created_at?.toDate(),
           updatedAt: docSnap.data().updatedAt?.toDate(),
           syncedAt: docSnap.data().syncedAt?.toDate(),
           startDateTime: docSnap.data().startDateTime?.toDate(),
@@ -99,7 +99,7 @@ export class FirebaseAvailabilityService {
           results.push({
             id: docSnap.id,
             ...docSnap.data(),
-            createdAt: docSnap.data().createdAt?.toDate(),
+            created_at: docSnap.data().created_at?.toDate(),
             updatedAt: docSnap.data().updatedAt?.toDate(),
             syncedAt: docSnap.data().syncedAt?.toDate(),
             startDateTime: docSnap.data().startDateTime?.toDate(),
@@ -197,7 +197,7 @@ export class FirebaseAvailabilityService {
               id: doc.id,
               ...doc.data(),
               // Convertir timestamps a objetos Date
-              createdAt: doc.data().createdAt?.toDate(),
+              created_at: doc.data().created_at?.toDate(),
               updatedAt: doc.data().updatedAt?.toDate(),
               syncedAt: doc.data().syncedAt?.toDate(),
               startDateTime: doc.data().startDateTime?.toDate(),
@@ -223,7 +223,7 @@ export class FirebaseAvailabilityService {
               availabilities.push({
                 id: doc.id,
                 ...doc.data(),
-                createdAt: doc.data().createdAt?.toDate(),
+                created_at: doc.data().created_at?.toDate(),
                 updatedAt: doc.data().updatedAt?.toDate(),
                 syncedAt: doc.data().syncedAt?.toDate(),
                 startDateTime: doc.data().startDateTime?.toDate(),
@@ -252,7 +252,7 @@ export class FirebaseAvailabilityService {
             availabilities.push({
               id: doc.id,
               ...doc.data(),
-              createdAt: doc.data().createdAt?.toDate(),
+              created_at: doc.data().created_at?.toDate(),
               updatedAt: doc.data().updatedAt?.toDate(),
               syncedAt: doc.data().syncedAt?.toDate(),
               startDateTime: doc.data().startDateTime?.toDate(),
@@ -278,7 +278,7 @@ export class FirebaseAvailabilityService {
               availabilities.push({
                 id: doc.id,
                 ...doc.data(),
-                createdAt: doc.data().createdAt?.toDate(),
+                created_at: doc.data().created_at?.toDate(),
                 updatedAt: doc.data().updatedAt?.toDate(),
                 syncedAt: doc.data().syncedAt?.toDate(),
                 startDateTime: doc.data().startDateTime?.toDate(),
@@ -328,7 +328,7 @@ export class FirebaseAvailabilityService {
           id: doc.id,
           ...doc.data(),
           // Convertir timestamps a objetos Date
-          createdAt: doc.data().createdAt?.toDate(),
+          created_at: doc.data().created_at?.toDate(),
           updatedAt: doc.data().updatedAt?.toDate(),
           syncedAt: doc.data().syncedAt?.toDate(),
           startDateTime: doc.data().startDateTime?.toDate(),

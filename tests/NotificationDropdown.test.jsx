@@ -101,7 +101,7 @@ describe('NotificationDropdown Components', () => {
       title: 'New Session Request',
       message: 'John Doe has requested a tutoring session for Math',
       isRead: false,
-      createdAt: new Date('2024-01-15T10:00:00Z'),
+      created_at: new Date('2024-01-15T10:00:00Z'),
       sessionId: 'session1',
       studentName: 'John Doe',
       subject: 'Math'
@@ -112,7 +112,7 @@ describe('NotificationDropdown Components', () => {
       title: 'Session Cancelled',
       message: 'Your session with Jane Smith has been cancelled',
       isRead: true,
-      createdAt: new Date('2024-01-15T09:00:00Z'),
+      created_at: new Date('2024-01-15T09:00:00Z'),
       sessionId: 'session2',
       studentName: 'Jane Smith'
     }

@@ -36,7 +36,7 @@ export class NotificationService {
         title: 'New Tutoring Request',
         message: `${sessionData.studentName} has requested a tutoring session for ${sessionData.subject}`,
         isRead: false,
-        createdAt: serverTimestamp(),
+        created_at: serverTimestamp(),
         updatedAt: serverTimestamp()
       };
 
@@ -55,7 +55,7 @@ export class NotificationService {
       const q = query(
         collection(db, this.COLLECTION_NAME),
         where('tutorEmail', '==', tutorEmail),
-        orderBy('createdAt', 'desc'),
+        orderBy('created_at', 'desc'),
         limit(limitCount)
       );
 
@@ -66,7 +66,7 @@ export class NotificationService {
         notifications.push({
           id: doc.id,
           ...doc.data(),
-          createdAt: doc.data().createdAt?.toDate(),
+          created_at: doc.data().created_at?.toDate(),
           updatedAt: doc.data().updatedAt?.toDate(),
           scheduledDateTime: doc.data().scheduledDateTime?.toDate(),
         });
@@ -141,7 +141,7 @@ export class NotificationService {
         title: 'Session Accepted',
         message: `Your tutoring session for ${sessionData.subject} has been accepted`,
         isRead: false,
-        createdAt: serverTimestamp(),
+        created_at: serverTimestamp(),
         updatedAt: serverTimestamp()
       };
 
@@ -167,7 +167,7 @@ export class NotificationService {
         title: 'Session Declined',
         message: `Your tutoring session for ${sessionData.subject} has been declined`,
         isRead: false,
-        createdAt: serverTimestamp(),
+        created_at: serverTimestamp(),
         updatedAt: serverTimestamp()
       };
 
@@ -197,7 +197,7 @@ export class NotificationService {
         title: 'Session Cancelled',
         message: `Your tutoring session for ${sessionData.subject} has been cancelled by the ${cancellerRole}. ${sessionData.reason || 'No reason provided'}`,
         isRead: false,
-        createdAt: serverTimestamp(),
+        created_at: serverTimestamp(),
         updatedAt: serverTimestamp()
       };
 
@@ -241,7 +241,7 @@ export class NotificationService {
         title: 'Session Rescheduled',
         message: `Your tutoring session with ${sessionData.studentName} for ${sessionData.subject} has been rescheduled from ${oldDate} to ${newDate}. ${sessionData.reason || 'No reason provided'}`,
         isRead: false,
-        createdAt: serverTimestamp(),
+        created_at: serverTimestamp(),
         updatedAt: serverTimestamp()
       };
 
@@ -260,7 +260,7 @@ export class NotificationService {
       const q = query(
         collection(db, this.COLLECTION_NAME),
         where('studentEmail', '==', studentEmail),
-        orderBy('createdAt', 'desc'),
+        orderBy('created_at', 'desc'),
         limit(limitCount)
       );
 
@@ -271,7 +271,7 @@ export class NotificationService {
         notifications.push({
           id: doc.id,
           ...doc.data(),
-          createdAt: doc.data().createdAt?.toDate(),
+          created_at: doc.data().created_at?.toDate(),
           updatedAt: doc.data().updatedAt?.toDate(),
           scheduledDateTime: doc.data().scheduledDateTime?.toDate(),
         });
@@ -294,7 +294,7 @@ export class NotificationService {
         title: 'Session Rejected',
         message: `Your tutoring session request has been rejected${sessionData.reason ? `: ${sessionData.reason}` : ''}`,
         isRead: false,
-        createdAt: serverTimestamp(),
+        created_at: serverTimestamp(),
         updatedAt: serverTimestamp()
       };
 
@@ -317,7 +317,7 @@ export class NotificationService {
         title: 'Session Reminder',
         message: `Reminder: You have a tutoring session for ${sessionData.subject} with ${sessionData.tutorName}`,
         isRead: false,
-        createdAt: serverTimestamp(),
+        created_at: serverTimestamp(),
         updatedAt: serverTimestamp()
       };
 
@@ -340,7 +340,7 @@ export class NotificationService {
         title: 'Payment Reminder',
         message: `Please complete the payment for your tutoring session in ${sessionData.subject}`,
         isRead: false,
-        createdAt: serverTimestamp(),
+        created_at: serverTimestamp(),
         updatedAt: serverTimestamp()
       };
 
