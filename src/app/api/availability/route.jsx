@@ -72,7 +72,7 @@ export async function GET(request) {
       date: availability.startDateTime ? 
         availability.startDateTime.toISOString().split('T')[0] : 
         '',
-      created_at: availability.created_at,
+      createdAt: availability.createdAt,
       updatedAt: availability.updatedAt
     }));
 

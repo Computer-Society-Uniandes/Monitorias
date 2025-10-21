@@ -11,8 +11,8 @@ export class FavoritesService {
     if (!userSnap.exists()) return { courses: [], tutors: [] };
 
     const data = userSnap.data();
-    const courseIds = Array.isArray(data.favoritesCourses) ? data.favoritesCourses : [];
-    const tutorIds  = Array.isArray(data.favoritesTutors)  ? data.favoritesTutors  : [];
+    const courseIds = Array.isArray(data.favoriteCourses) ? data.favoriteCourses : [];
+    const tutorIds  = Array.isArray(data.favoriteTutors)  ? data.favoriteTutors  : [];
 
     const courses = await Promise.all(
       courseIds.map(async (cid) => {
@@ -42,7 +42,7 @@ export class FavoritesService {
           subjects: Array.isArray(t.subjects) ? t.subjects : [],
           profileImage: t.profileImage ?? null,
           // confidenciales: NO se exponen en UI, pero los dejamos por si los necesitas luego
-          mail: t.mail ?? "",
+          email: t.email ?? "",
           phone_number: t.phone_number ?? "",
           majorName,
         };
@@ -55,14 +55,14 @@ export class FavoritesService {
   static async toggleCourseFavorite(userEmail, courseId, active) {
     if (!userEmail || !courseId) return;
     await updateDoc(doc(db, "user", userEmail), {
-      favoritesCourses: active ? arrayRemove(courseId) : arrayUnion(courseId),
+      favoriteCourses: active ? arrayRemove(courseId) : arrayUnion(courseId),
     });
   }
 
   static async toggleTutorFavorite(userEmail, tutorId, active) {
     if (!userEmail || !tutorId) return;
     await updateDoc(doc(db, "user", userEmail), {
-      favoritesTutors: active ? arrayRemove(tutorId) : arrayUnion(tutorId),
+      favoriteTutors: active ? arrayRemove(tutorId) : arrayUnion(tutorId),
     });
   }
 

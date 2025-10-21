@@ -152,13 +152,13 @@ export class TutorSearchService {
           const qAll = query(collection(db, 'user'), where('isTutor', '==', true));
           const qsAll = await getDocs(qAll);
           qsAll.forEach((d) => {
-            if (ids.includes(d.id) || ids.includes(d.data()?.mail)) {
+            if (ids.includes(d.id) || ids.includes(d.data()?.email)) {
               const t = this.sanitizeTutor(d, {
                 availabilities: avails.filter(
                   (a) =>
                     a.tutorId === d.id ||
                     a.tutorEmail === d.id ||
-                    a.tutorId === d.data()?.mail ||
+                    a.tutorId === d.data()?.email ||
                     a.tutorEmail === d.data()?.mail
                 ),
               });

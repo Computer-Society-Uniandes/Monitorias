@@ -25,12 +25,12 @@ export async function GET(request) {
       const data = docSnap.data();
       const item = { id: docSnap.id, ...data };
       // Asegurar campo mail/email
-      const mail = item.mail || item.email || item.id;
-      if (!mail) return; // sin correo, omitimos
-      // Evitar duplicados por mail
-      if (!tutorEmails.includes(mail)) {
-        tutors.push({ ...item, mail });
-        tutorEmails.push(mail);
+      const email = item.email || item.mail || item.id;
+      if (!email) return; // sin correo, omitimos
+      // Evitar duplicados por email
+      if (!tutorEmails.includes(email)) {
+        tutors.push({ ...item, email });
+        tutorEmails.push(email);
       }
     };
 
@@ -130,8 +130,8 @@ export async function GET(request) {
         totalSlots: slots.length,
       });
       // Opcional: añadir un tutor "mínimo" para mostrar en la lista
-      if (!tutors.find((t) => t.mail === email)) {
-        tutors.push({ id: email, name: 'Tutor', mail: email, rating: 4.5, totalSessions: slots.length });
+      if (!tutors.find((t) => t.email === email)) {
+        tutors.push({ id: email, name: 'Tutor', email: email, rating: 4.5, totalSessions: slots.length });
       }
     }
 

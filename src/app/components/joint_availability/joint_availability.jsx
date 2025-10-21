@@ -85,7 +85,7 @@ export default function JointAvailability({ subject = "Matemáticas" }) {
 
       // Mostrar información detallada por tutor
       data.availabilities.forEach(({ tutorEmail, slots, connected, error }) => {
-        const tutor = data.tutors.find(t => t.mail === tutorEmail);
+        const tutor = data.tutors.find(t => t.email === tutorEmail);
         console.log(`👤 ${tutor?.name || tutorEmail}: ${slots.length} slots, connected: ${connected}${error ? `, error: ${error}` : ''}`);
       });
 
@@ -121,7 +121,7 @@ export default function JointAvailability({ subject = "Matemáticas" }) {
     const enrichedSlots = jointSlots.map(slot => ({
       ...slot,
       tutors: slot.tutors.map(tutorRef => {
-        const tutor = tutors.find(t => t.mail === tutorRef.email);
+        const tutor = tutors.find(t => t.email === tutorRef.email);
         return {
           ...tutorRef,
           name: tutor?.name || 'Tutor desconocido',
@@ -274,7 +274,7 @@ export default function JointAvailability({ subject = "Matemáticas" }) {
               </div>
             ) : (
               tutors.map((tutor) => {
-                const availability = allAvailabilities.find(a => a.tutorEmail === tutor.mail);
+                const availability = allAvailabilities.find(a => a.tutorEmail === tutor.email);
                 const isConnected = availability?.connected || false;
                 const hasError = availability?.error;
                 const slotsCount = availability?.slots?.length || 0;
@@ -306,7 +306,7 @@ export default function JointAvailability({ subject = "Matemáticas" }) {
                         </span>
                       ) : (
                         <>
-                          {getTutorSummarySlots(tutor.mail).map((time, index) => (
+                          {getTutorSummarySlots(tutor.email).map((time, index) => (
                             <span key={index} className="time-slot-chip">
                               {time}
                             </span>

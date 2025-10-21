@@ -76,7 +76,7 @@ export default function ReviewModal({ session, onClose, currentUser = null }) {
       comment,
       reviewerEmail: user.email,
       reviewerName: user.displayName || user.name || user.email || "Anonymous",
-      created_at: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
 

@@ -1,59 +1,96 @@
 /**
- * Representa una sesión de tutoria entre un tutor y un estudiante.
+ * Core TutoringSession interface representing a tutoring session.
+ * This is the main session object used throughout the application.
  */
 export interface TutoringSession {
-    id?: string;
-    studentName: string;
-    tutorName: string;
-    studentEmail: string;
-    tutorEmail: string;
-    subject: string;
-    price: number;
-    status: 'scheduled' | 'completed' | 'cancelled' | 'pending' | 'rejected' | 'en_verificación';
-    tutorApprovalStatus?: 'approved' | 'rejected' | 'pending';
-    paymentStatus?: 'pending' | 'paid' | 'failed' | 'cancelled' | 'en_verificación';
-    notes?: string;
-    location?: string;
-    parentAvailabilityId?: string;
-    slotId?: string;
-    slotIndex?: number;
-    requiresApproval?: boolean; // Whether session requires tutor approval
-    requestedAt: Date;
-    acceptedAt?: Date;
-    scheduledDateTime: Date;
-    endDateTime: Date;
-    googleEventId?: string;
-    calicoCalendarEventId?: string;
-    calicoCalendarHtmlLink?: string;
-    paymentProof?: PaymentProof; // Consolidated payment proof object
-    paymentProofFileId?: string; // Legacy field for backward compatibility
-    paymentProofFileName?: string; // Legacy field for backward compatibility
-    paymentProofUrl?: string; // Legacy field for backward compatibility
-    paymentProofThumbnail?: string; // Legacy field for backward compatibility
-    reviews?: Review[]; // Array of reviews for this session
-    oldDateTime?: Date; // For rescheduling - original scheduled time
-    newDateTime?: Date; // For rescheduling - new scheduled time
-    reason?: string; // Reason for rescheduling or cancellation
-    created_at: Date;
-    updatedAt?: Date;
-  }
+  // Core identification
+  id?: string;
+  
+  // Participants
+  studentName: string;
+  studentEmail: string;
+  tutorName: string;
+  tutorEmail: string;
+  
+  // Session details
+  subject: string;
+  price: number;
+  notes?: string;
+  location?: string;
+  
+  // Status management
+  status: 'scheduled' | 'completed' | 'cancelled' | 'pending' | 'rejected' | 'en_verificación';
+  tutorApprovalStatus?: 'approved' | 'rejected' | 'pending';
+  paymentStatus?: 'pending' | 'paid' | 'failed' | 'cancelled' | 'en_verificación';
+  
+  // Scheduling
+  scheduledDateTime: Date;
+  endDateTime: Date;
+  requestedAt: Date;
+  acceptedAt?: Date;
+  
+  // Slot management
+  parentAvailabilityId?: string;
+  slotId?: string;
+  slotIndex?: number;
+  requiresApproval?: boolean;
+  
+  // Calendar integration
+  googleEventId?: string;
+  calicoCalendarEventId?: string;
+  calicoCalendarHtmlLink?: string;
+  
+  // Timestamps
+  createdAt: Date;
+  updatedAt?: Date;
+}
 
-  // Supporting interfaces for TutoringSession model
-  export interface PaymentProof {
-    url?: string;
-    fileName?: string;
-    amountSent?: number;
-    senderName?: string;
-    transactionNumber?: string;
-    submittedAt?: Date;
-  }
+/**
+ * Extended tutoring session with additional data.
+ * This is used for detailed session information that's not always needed.
+ */
+export interface TutoringSessionDetails extends TutoringSession {
+  // Payment proof
+  paymentProof?: PaymentProof;
+  
+  // Reviews
+  reviews?: SessionReview[];
+  
+  // Rescheduling data
+  oldDateTime?: Date;
+  newDateTime?: Date;
+  reason?: string;
+  
+  // Legacy payment proof fields (for backward compatibility)
+  paymentProofFileId?: string;
+  paymentProofFileName?: string;
+  paymentProofUrl?: string;
+  paymentProofThumbnail?: string;
+}
 
-  export interface Review {
-    id?: string;
-    reviewerEmail: string;
-    reviewerName: string;
-    stars: number;
-    comment?: string;
-    createdAt: Date;
-  }
+/**
+ * Payment proof data structure.
+ * This is used for storing payment verification information.
+ */
+export interface PaymentProof {
+  url?: string;
+  fileName?: string;
+  amountSent?: number;
+  senderName?: string;
+  transactionNumber?: string;
+  submittedAt?: Date;
+}
+
+/**
+ * Session review data structure.
+ * This is used for storing reviews within a session.
+ */
+export interface SessionReview {
+  id?: string;
+  reviewerEmail: string;
+  reviewerName: string;
+  stars: number;
+  comment?: string;
+  createdAt: Date;
+}
   

@@ -98,7 +98,7 @@ const AvailabilityCalendar = ({
         const tutors = Array.isArray(data.tutors) ? data.tutors : [];
         const tutorNameByEmail = {};
         tutors.forEach(t => {
-          if (t?.mail) tutorNameByEmail[t.mail] = t.name || t.mail;
+          if (t?.email) tutorNameByEmail[t.email] = t.name || t.email;
         });
 
         const flattened = (data.availabilities || []).flatMap(item => {

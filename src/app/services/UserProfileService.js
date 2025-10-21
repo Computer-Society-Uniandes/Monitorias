@@ -112,7 +112,7 @@ export class UserProfileService {
       await setDoc(docRef, {
         tutorEmail,
         ...subjectData,
-        created_at: serverTimestamp(),
+        createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       });
 
@@ -192,7 +192,7 @@ export class UserProfileService {
         await setDoc(userDocRef, {
           ...userData,
           email: userEmail,
-          created_at: serverTimestamp(),
+          createdAt: serverTimestamp(),
           updatedAt: serverTimestamp()
         });
 

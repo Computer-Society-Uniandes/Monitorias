@@ -38,7 +38,7 @@ export class TutoringSessionService {
         tutorApprovalStatus: requiresApproval ? 'pending' : 'approved',
         requestedAt: requiresApproval ? serverTimestamp() : null,
         paymentStatus: 'pending',
-        created_at: serverTimestamp(),
+        createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       });
 
@@ -205,7 +205,7 @@ export class TutoringSessionService {
     try {
       const docRef = await addDoc(collection(db, this.SLOT_BOOKINGS_COLLECTION), {
         ...bookingData,
-        created_at: serverTimestamp(),
+        createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       });
 
@@ -237,7 +237,7 @@ export class TutoringSessionService {
         id: doc.id,
         ...doc.data(),
         bookedAt: doc.data().bookedAt?.toDate(),
-        created_at: doc.data().created_at?.toDate(),
+        createdAt: doc.data().createdAt?.toDate(),
         updatedAt: doc.data().updatedAt?.toDate(),
         slotStartTime: doc.data().slotStartTime?.toDate(),
         slotEndTime: doc.data().slotEndTime?.toDate(),
@@ -264,7 +264,7 @@ export class TutoringSessionService {
           id: doc.id,
           ...doc.data(),
           bookedAt: doc.data().bookedAt?.toDate(),
-          created_at: doc.data().created_at?.toDate(),
+          createdAt: doc.data().createdAt?.toDate(),
           updatedAt: doc.data().updatedAt?.toDate(),
           slotStartTime: doc.data().slotStartTime?.toDate(),
           slotEndTime: doc.data().slotEndTime?.toDate(),
@@ -295,7 +295,7 @@ export class TutoringSessionService {
           id: doc.id,
           ...doc.data(),
           bookedAt: doc.data().bookedAt?.toDate(),
-          created_at: doc.data().created_at?.toDate(),
+          createdAt: doc.data().createdAt?.toDate(),
           updatedAt: doc.data().updatedAt?.toDate(),
           slotStartTime: doc.data().slotStartTime?.toDate(),
           slotEndTime: doc.data().slotEndTime?.toDate(),
@@ -371,7 +371,7 @@ export class TutoringSessionService {
         sessions.push({
           id: doc.id,
           ...doc.data(),
-          created_at: doc.data().created_at?.toDate(),
+          createdAt: doc.data().createdAt?.toDate(),
           updatedAt: doc.data().updatedAt?.toDate(),
           scheduledDateTime: doc.data().scheduledDateTime?.toDate(),
           endDateTime: doc.data().endDateTime?.toDate(),
@@ -408,7 +408,7 @@ export class TutoringSessionService {
           sessions.push({
             id: doc.id,
             ...sessionData,
-            created_at: sessionData.created_at?.toDate(),
+            createdAt: sessionData.createdAt?.toDate(),
             updatedAt: sessionData.updatedAt?.toDate(),
             scheduledDateTime: sessionData.scheduledDateTime?.toDate(),
             endDateTime: sessionData.endDateTime?.toDate(),
@@ -742,7 +742,7 @@ export class TutoringSessionService {
           sessions.push({
             id: doc.id,
             ...sessionData,
-            created_at: sessionData.created_at?.toDate(),
+            createdAt: sessionData.createdAt?.toDate(),
             updatedAt: sessionData.updatedAt?.toDate(),
             scheduledDateTime: sessionData.scheduledDateTime?.toDate(),
             endDateTime: sessionData.endDateTime?.toDate(),
@@ -1064,7 +1064,7 @@ export class TutoringSessionService {
       return {
         id: docSnap.id,
         ...docSnap.data(),
-        created_at: docSnap.data().created_at?.toDate(),
+        createdAt: docSnap.data().createdAt?.toDate(),
         updatedAt: docSnap.data().updatedAt?.toDate(),
         scheduledDateTime: docSnap.data().scheduledDateTime?.toDate(),
         endDateTime: docSnap.data().endDateTime?.toDate(),

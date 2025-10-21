@@ -1,23 +1,56 @@
+/**
+ * Core Payment interface representing a payment transaction.
+ * This is the main payment object used throughout the application.
+ */
 export interface Payment {
-    id?: string;
-    amount: number;
-    currency: string;
-    method: string;
-    gatewayProvider: string;
-    status: 'pending' | 'completed' | 'failed' | 'refunded' | string;
-    sessionId: string;
-    transactionID: string; // Keep both naming conventions for compatibility
-    transactionId?: string; // Alternative naming used in implementation
-    studentEmail: string;
-    studentName?: string; // Student name for payment context
-    tutorEmail: string;
-    tutorName?: string; // Tutor name for payment context
-    subject?: string; // Subject for payment context
-    date_payment?: Date; // Primary date field used in implementation
-    created_at?: Date; // Legacy field for backward compatibility
-    completedAt?: Date;
-    completed_at?: Date; // Alternative naming used in implementation
-    pagado?: boolean; // Payment status boolean used in implementation
-    raw?: any; // Raw data storage used in implementation
-  }
+  // Core identification
+  id?: string;
+  
+  // Payment details
+  amount: number;
+  currency: string;
+  method: string;
+  gatewayProvider: string;
+  status: 'pending' | 'completed' | 'failed' | 'refunded' | string;
+  
+  // Transaction reference
+  transactionId: string;
+  sessionId: string;
+  
+  // Participants
+  studentEmail: string;
+  tutorEmail: string;
+  
+  // Payment context
+  subject?: string;
+  
+  // Timestamps
+  paymentDate: Date;
+  completedAt?: Date;
+  createdAt: Date;
+  updatedAt?: Date;
+}
+
+/**
+ * Extended payment with additional data.
+ * This is used for detailed payment information that's not always needed.
+ */
+export interface PaymentDetails extends Payment {
+  // Additional participant information
+  studentName?: string;
+  tutorName?: string;
+  
+  // Payment status boolean (for UI compatibility)
+  isPaid?: boolean;
+  
+  // Raw data storage (for debugging/audit)
+  raw?: any;
+  
+  // Legacy fields (for backward compatibility)
+  transactionID?: string; // Alternative naming
+  date_payment?: Date; // Alternative naming
+  created_at?: Date; // Alternative naming
+  completed_at?: Date; // Alternative naming
+  pagado?: boolean; // Alternative naming
+}
   
