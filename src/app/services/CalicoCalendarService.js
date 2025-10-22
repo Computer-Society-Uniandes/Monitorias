@@ -1,6 +1,10 @@
 import { google } from 'googleapis';
 
 /**
+ * @typedef {import('../models/tutoring_session.model').TutoringSession} TutoringSession
+ */
+
+/**
  * Servicio para gestionar eventos en el calendario central de Calico
  * usando una Service Account de Google Calendar API
  */

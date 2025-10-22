@@ -2,6 +2,12 @@
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../../firebaseConfig';
 
+/**
+ * @typedef {import('../models/user.model').User} User
+ * @typedef {import('../models/availability.model').Availability} Availability
+ * @typedef {import('../models/availability.model').AvailabilitySlot} AvailabilitySlot
+ */
+
 export class JointAvailabilityService {
   
   /**

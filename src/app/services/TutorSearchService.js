@@ -10,6 +10,11 @@ import {
 import { FirebaseAvailabilityService } from './FirebaseAvailabilityService';
 import pino from 'pino';
 
+/**
+ * @typedef {import('../models/user.model').User} User
+ * @typedef {import('../models/availability.model').Availability} Availability
+ */
+
 const logger = pino({ name: 'TutorSearchService' });
 
 export class TutorSearchService {

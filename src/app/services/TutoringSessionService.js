@@ -17,11 +17,22 @@ import {
 } from 'firebase/firestore';
 import { NotificationService } from './NotificationService';
 
+/**
+ * @typedef {import('../models/tutoring_session.model').TutoringSession} TutoringSession
+ * @typedef {import('../models/tutoring_session.model').TutoringSessionDetails} TutoringSessionDetails
+ * @typedef {import('../models/slot_bookings.model').SlotBooking} SlotBooking
+ * @typedef {import('../models/availability.model').AvailabilitySlot} AvailabilitySlot
+ */
+
 export class TutoringSessionService {
   static COLLECTION_NAME = 'tutoring_sessions';
   static SLOT_BOOKINGS_COLLECTION = 'slot_bookings';
 
-  // Crear una nueva sesión de tutoría para un slot específico
+  /**
+   * Crear una nueva sesión de tutoría para un slot específico
+   * @param {Partial<TutoringSession>} sessionData - Session data
+   * @returns {Promise<{success: boolean, id?: string}>}
+   */
   static async createTutoringSession(sessionData) {
     try {
       // Validar y limpiar datos antes de enviar a Firebase

@@ -12,11 +12,20 @@ import {
   serverTimestamp
 } from 'firebase/firestore';
 
+/**
+ * @typedef {import('../models/user.model').User} User
+ * @typedef {import('../models/user.model').UserProfile} UserProfile
+ */
+
 export class UserProfileService {
   static USER_COLLECTION = 'user';
   static TUTOR_SUBJECTS_COLLECTION = 'tutor_subjects';
 
-  // Get user profile data
+  /**
+   * Get user profile data
+   * @param {string} userEmail - User's email address
+   * @returns {Promise<{success: boolean, data?: User, error?: string}>}
+   */
   static async getUserProfile(userEmail) {
     try {
       const userDocRef = doc(db, this.USER_COLLECTION, userEmail);
@@ -46,7 +55,12 @@ export class UserProfileService {
     }
   }
 
-  // Update user profile data
+  /**
+   * Update user profile data
+   * @param {string} userEmail - User's email address
+   * @param {Partial<User>} updateData - Data to update
+   * @returns {Promise<{success: boolean, error?: string}>}
+   */
   static async updateUserProfile(userEmail, updateData) {
     try {
       const userDocRef = doc(db, this.USER_COLLECTION, userEmail);

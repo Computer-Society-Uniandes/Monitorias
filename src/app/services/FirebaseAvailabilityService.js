@@ -14,6 +14,12 @@ import {
   Timestamp
 } from 'firebase/firestore';
 
+/**
+ * @typedef {import('../models/availability.model').Availability} Availability
+ * @typedef {import('../models/availability.model').AvailabilitySlot} AvailabilitySlot
+ * @typedef {import('../models/availability.model').AvailabilityDetails} AvailabilityDetails
+ */
+
 export class FirebaseAvailabilityService {
   static COLLECTION_NAME = 'availabilities';
 

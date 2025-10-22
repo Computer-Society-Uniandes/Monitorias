@@ -1,11 +1,16 @@
 import { collection, query, where, orderBy, getDocs, doc, getDoc } from 'firebase/firestore';
 import { db } from '../../firebaseConfig';
 
+/**
+ * @typedef {import('../models/tutoring_session.model').TutoringSession} TutoringSession
+ * @typedef {import('../models/tutoring_session.model').TutoringSessionDetails} TutoringSessionDetails
+ */
+
 class TutoringHistoryService {
   /**
    * Obtiene todas las tutorías de un estudiante específico
    * @param {string} studentEmail - Email del estudiante
-   * @returns {Array} Lista de tutorías del estudiante
+   * @returns {Promise<TutoringSessionDetails[]>} Lista de tutorías del estudiante
    */
   async getStudentTutoringHistory(studentEmail) {
     try {

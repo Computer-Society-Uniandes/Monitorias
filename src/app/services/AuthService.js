@@ -7,6 +7,10 @@ import {
   updateProfile
 } from 'firebase/auth';
 
+/**
+ * @typedef {import('../models/user.model').User} User
+ */
+
 export class AuthService {
   
   // Iniciar sesión con email y contraseña

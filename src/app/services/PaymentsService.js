@@ -3,6 +3,11 @@
 import { db } from '../../firebaseConfig';
 import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
 
+/**
+ * @typedef {import('../models/payment.model').Payment} Payment
+ * @typedef {import('../models/payment.model').PaymentDetails} PaymentDetails
+ */
+
 export class PaymentsService {
   static COLLECTION_NAME = 'payments';
 
@@ -10,7 +15,7 @@ export class PaymentsService {
  * Obtiene pagos por email del estudiante autenticado.
  * @param {string} studentEmail
  * @param {{ startDate?: Date|null, endDate?: Date|null, limit?: number }} options
- * @returns {Promise<Array>} Lista de pagos normalizados
+ * @returns {Promise<PaymentDetails[]>} Lista de pagos normalizados
  */
 
 

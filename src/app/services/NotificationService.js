@@ -16,6 +16,12 @@ import {
   addDoc,
   writeBatch
 } from 'firebase/firestore';
+
+/**
+ * @typedef {import('../models/notification.model').Notification} Notification
+ * @typedef {import('../models/notification.model').NotificationDetails} NotificationDetails
+ */
+
 // Note: Service files should not use i18n directly. 
 // Translation should be handled in the UI components that use this service.
 

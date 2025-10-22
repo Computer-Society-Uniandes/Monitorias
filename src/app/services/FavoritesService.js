@@ -2,6 +2,11 @@
 import { db } from "../../firebaseConfig";
 import { doc, getDoc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
 
+/**
+ * @typedef {import('../models/user.model').User} User
+ * @typedef {import('../models/course.model').Course} Course
+ */
+
 export class FavoritesService {
   static async getFavorites(userEmail) {
     if (!userEmail) return { courses: [], tutors: [] };

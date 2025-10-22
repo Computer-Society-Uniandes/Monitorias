@@ -1,6 +1,16 @@
+/**
+ * @typedef {import('../models/availability.model').Availability} Availability
+ * @typedef {import('../models/availability.model').AvailabilitySlot} AvailabilitySlot
+ * @typedef {import('../models/slot_bookings.model').SlotBooking} SlotBooking
+ */
+
 export class SlotService {
   
-  // Dividir una disponibilidad en slots de 1 hora
+  /**
+   * Dividir una disponibilidad en slots de 1 hora
+   * @param {Availability} availability - Availability to split into slots
+   * @returns {AvailabilitySlot[]} Array of hourly slots
+   */
   static generateHourlySlots(availability) {
     const slots = [];
     const startTime = new Date(availability.startDateTime);
