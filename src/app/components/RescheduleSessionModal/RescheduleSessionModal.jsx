@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { AvailabilityService } from "../../services/AvailabilityService";
-import { SlotService } from "../../services/SlotService";
+import { AvailabilityService } from "../../services/core/AvailabilityService";
+import { SlotService } from "../../services/utils/SlotService";
 import "./RescheduleSessionModal.css";
 import { useI18n } from "../../../lib/i18n";
 

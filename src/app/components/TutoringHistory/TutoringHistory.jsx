@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../context/SecureAuthContext";
-import TutoringHistoryService from "../../services/TutoringHistoryService";
+import { TutoringHistoryService } from "../../services/utils/TutoringHistoryService";
 import "./TutoringHistory.css";
 import PaymentHistory from "../PaymentHistory/PaymentHistory";
 import ReviewModal from "../ReviewModal/ReviewModal"; 

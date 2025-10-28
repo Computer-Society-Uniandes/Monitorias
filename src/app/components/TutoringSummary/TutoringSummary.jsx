@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
-import { TutoringSessionService } from "../../services/TutoringSessionService";
+import { TutoringSessionService } from "../../services/core/TutoringSessionService";
 import { useAuth } from "../../context/SecureAuthContext";
 import { useI18n } from "../../../lib/i18n";
 import TutoringDetailsModal from "../TutoringDetailsModal/TutoringDetailsModal";

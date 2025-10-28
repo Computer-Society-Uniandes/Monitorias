@@ -1,5 +1,5 @@
 import { cookies } from 'next/headers';
-import { findAvailabilityCalendar, listEventsFromCalendar } from '../../../services/GoogleCalendarService';
+import { findAvailabilityCalendar, listEventsFromCalendar } from '../../../services/integrations/GoogleCalendarService';
 
 export async function GET(request) {
   try {

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { FirebaseAvailabilityService } from '../../../services/FirebaseAvailabilityService';
+import { FirebaseAvailabilityService } from '../../../services/utils/FirebaseAvailabilityService';
 
 export async function POST(request) {
   try {

@@ -5,7 +5,7 @@ import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import "./joint_availability.css";
 import { Calendar as CalendarIcon, Users, Clock, ChevronRight, ArrowLeft, RefreshCw } from "lucide-react";
-import { JointAvailabilityService } from "../../services/JointAvailabilityService";
+import { JointAvailabilityService } from "../../services/utils/JointAvailabilityService";
 import Header from "../Header/Header";
 import { useRouter } from "next/navigation";
 

@@ -18,7 +18,7 @@ import {
 import WelcomeBanner from "../Welcome/Welcome";
 import BoxSubject from "../BoxSubject/BoxSubject";
 import TutoringSummary from "../TutoringSummary/TutoringSummary";
-import { getMaterias } from "../../services/HomeService.service";
+import { getMaterias } from "../../services/utils/HomeService.service";
 import { useI18n } from "../../../lib/i18n";
 import routes from "../../../routes";
 

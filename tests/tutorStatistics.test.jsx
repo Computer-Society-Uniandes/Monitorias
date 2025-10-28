@@ -9,10 +9,9 @@ jest.mock('../src/app/context/SecureAuthContext', () => ({
   }),
 }));
 
-// Mock PaymentsService to control data
-jest.mock('../src/app/services/PaymentsService', () => ({
-  __esModule: true,
-  default: {
+// Mock PaymentService to control data
+jest.mock('../src/app/services/core/PaymentService', () => ({
+  PaymentService: {
     getPaymentsByTutor: jest.fn(async (email) => {
       const now = Date.now();
       const d1 = new Date(now - 3 * 24 * 60 * 60 * 1000); // dentro del mes
@@ -40,14 +39,14 @@ jest.mock('firebase/firestore', () => ({
 }));
 
 import TutorStatistics from '../src/app/tutor/statistics/page.jsx';
-import PaymentsService from '../src/app/services/PaymentsService';
+import { PaymentService } from '../src/app/services/core/PaymentService';
 
 describe('TutorStatistics page', () => {
   test('renders statistics layout and fetches tutor payments', async () => {
     render(<TutorStatistics />);
 
     // It should call the service to load data
-    expect(PaymentsService.getPaymentsByTutor).toHaveBeenCalledWith('tutor@example.com');
+    expect(PaymentService.getPaymentsByTutor).toHaveBeenCalledWith('tutor@example.com');
 
     // Basic sections should render
     expect(await screen.findByRole('heading', { name: /statistics/i })).toBeInTheDocument();
@@ -149,7 +148,7 @@ describe('TutorStatistics page', () => {
 
   test('applies status class and method icon mapping', async () => {
     // Override payments to have clear methods with dates early in the month
-    const Svc = (await import('../src/app/services/PaymentsService')).default;
+    const { PaymentService: Svc } = await import('../src/app/services/core/PaymentService');
     const now = new Date();
     const dateInMonth = new Date(now.getFullYear(), now.getMonth(), 5); // 5th of current month
     Svc.getPaymentsByTutor.mockResolvedValue([

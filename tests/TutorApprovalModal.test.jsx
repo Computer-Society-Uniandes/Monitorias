@@ -2,10 +2,10 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import TutorApprovalModal from '../src/app/components/TutorApprovalModal/TutorApprovalModal';
-import { TutoringSessionService } from '../src/app/services/TutoringSessionService';
+import { TutoringSessionService } from '../src/app/services/core/TutoringSessionService';
 
 // Mock dependencies
-jest.mock('../src/app/services/TutoringSessionService');
+jest.mock('../src/app/services/core/TutoringSessionService');
 
 // Mock SessionBookedModal
 jest.mock('../src/app/components/SessionBookedModal/SessionBookedModal', () => {

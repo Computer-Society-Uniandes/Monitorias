@@ -15,7 +15,7 @@ import {
 import routes from '../../../routes';
 import { useAuth } from '../../context/SecureAuthContext';
 import { useI18n } from '../../../lib/i18n';
-import { UserProfileService } from '../../services/UserProfileService';
+import { UserProfileService } from '../../services/core/UserProfileService';
 import './Profile.css';
 
 const TUTOR_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSdxeOSt5jjjSVtXY9amQRiXeufm65-11N4FMvJ96fcxyiN58A/viewform?usp=sharing&ouid=102056237631790140503'; 

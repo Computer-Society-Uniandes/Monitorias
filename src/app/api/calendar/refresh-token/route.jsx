@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { refreshAccessTokenFromCookies } from '../../../services/CalendarAuthService';
+import { refreshAccessTokenFromCookies } from '../../../services/integrations/CalendarAuthService';
 
 export async function POST() {
   try {

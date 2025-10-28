@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { findAvailabilityCalendar } from '../../../services/GoogleCalendarService';
+import { findAvailabilityCalendar } from '../../../services/integrations/GoogleCalendarService';
 
 export async function GET() {
   try {

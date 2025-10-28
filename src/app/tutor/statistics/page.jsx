@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../context/SecureAuthContext";
-import PaymentsService from "../../services/PaymentsService";
+import { PaymentService } from "../../services/core/PaymentService";
 import { db } from "../../../firebaseConfig";
 import { doc, getDoc, collection, query, where, getDocs, limit } from "firebase/firestore";
 import { 
@@ -103,8 +103,8 @@ export default function TutorStatistics() {
     try {
       setLoading(true);
       
-      // Cargar pagos del tutor desde Firebase (PaymentsService)
-      const paymentsData = await PaymentsService.getPaymentsByTutor(user.email);
+      // Cargar pagos del tutor desde Firebase (PaymentService)
+      const paymentsData = await PaymentService.getPaymentsByTutor(user.email);
       console.log('[TutorStatistics] Total payments from Firebase:', paymentsData.length);
       console.log('[TutorStatistics] Payments data:', paymentsData);
       setPayments(paymentsData);

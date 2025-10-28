@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers';
-import { findAvailabilityCalendar, createEventInCalendar } from '../../../services/GoogleCalendarService.js';
-import { FirebaseAvailabilityService } from '../../../services/FirebaseAvailabilityService.js';
+import { findAvailabilityCalendar, createEventInCalendar } from '../../../services/integrations/GoogleCalendarService.js';
+import { FirebaseAvailabilityService } from '../../../services/utils/FirebaseAvailabilityService.js';
 
 export async function POST(request) {
   try {

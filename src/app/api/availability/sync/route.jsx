@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { findAvailabilityCalendar, listEventsFromCalendar } from '../../../services/GoogleCalendarService';
-import { FirebaseAvailabilityService } from '../../../services/FirebaseAvailabilityService';
+import { findAvailabilityCalendar, listEventsFromCalendar } from '../../../services/integrations/GoogleCalendarService';
+import { FirebaseAvailabilityService } from '../../../services/utils/FirebaseAvailabilityService';
 
 export async function POST(request) {
   try {

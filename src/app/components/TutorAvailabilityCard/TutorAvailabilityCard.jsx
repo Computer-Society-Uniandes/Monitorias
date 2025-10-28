@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from 'next/navigation';
-import { TutorSearchService } from "../../services/TutorSearchService";
+import { TutorSearchService } from "../../services/utils/TutorSearchService";
 import CalendlyStyleScheduler from "../CalendlyStyleScheduler/CalendlyStyleScheduler";
 import routes from "../../../routes";
 import "./TutorAvailabilityCard.css";

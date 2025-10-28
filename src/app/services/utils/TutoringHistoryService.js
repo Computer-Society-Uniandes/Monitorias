@@ -203,4 +203,5 @@ class TutoringHistoryService {
 }
 
 const tutoringHistoryService = new TutoringHistoryService();
+export { TutoringHistoryService };
 export default tutoringHistoryService;

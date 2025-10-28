@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, Suspense, useCallback } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
-import { TutorSearchService } from '../../services/TutorSearchService';
+import { TutorSearchService } from '../../services/utils/TutorSearchService';
 import { useUser } from '../../hooks/useUser';
 import { useDebounce } from '../../hooks/useDebounce';
 import { useFavorites } from '../../hooks/useFavorites';

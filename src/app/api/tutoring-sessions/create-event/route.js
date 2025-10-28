@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { CalicoCalendarService } from '../../../services/CalicoCalendarService';
+import { CalicoCalendarService } from '../../../services/integrations/CalicoCalendarService';
 
 export async function POST(request) {
   try {

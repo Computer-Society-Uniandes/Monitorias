@@ -1,4 +1,4 @@
-import { getAuthUrl } from '../../../services/GoogleCalendarService';
+import { getAuthUrl } from '../../../services/integrations/GoogleCalendarService';
 
 export async function GET() {
   try {

@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers';
 import { google } from 'googleapis';
-import { createEvent, deleteEvent } from '../../../services/GoogleCalendarService';
+import { createEvent, deleteEvent } from '../../../services/integrations/GoogleCalendarService';
 
 export async function GET() {
   try {

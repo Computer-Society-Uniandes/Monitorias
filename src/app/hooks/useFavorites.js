@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/SecureAuthContext';
-import FavoritesService from '../services/FavoritesService';
+import { FavoritesService } from '../services/core/FavoritesService';
 
 export function useFavorites() {
     const { user } = useAuth();

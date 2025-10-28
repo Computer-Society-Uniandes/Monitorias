@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, Search } from 'lucide-react';
-import { TutorSearchService } from '../../services/TutorSearchService';
+import { TutorSearchService } from '../../services/utils/TutorSearchService';
 import ModernTutorCard from '../../components/ModernTutorCard/ModernTutorCard';
 import { useI18n } from '../../../lib/i18n';
 import './FindTutorView.css';

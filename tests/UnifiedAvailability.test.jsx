@@ -2,15 +2,15 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import UnifiedAvailability from '../src/app/components/UnifiedAvailability/UnifiedAvailability';
-import { TutoringSessionService } from '../src/app/services/TutoringSessionService';
-import { AvailabilityService } from '../src/app/services/AvailabilityService';
-import { NotificationService } from '../src/app/services/NotificationService';
+import { TutoringSessionService } from '../src/app/services/core/TutoringSessionService';
+import { AvailabilityService } from '../src/app/services/core/AvailabilityService';
+import { NotificationService } from '../src/app/services/core/NotificationService';
 
 // Mock dependencies
 jest.mock('../src/app/context/SecureAuthContext');
-jest.mock('../src/app/services/TutoringSessionService');
-jest.mock('../src/app/services/AvailabilityService');
-jest.mock('../src/app/services/NotificationService');
+jest.mock('../src/app/services/core/TutoringSessionService');
+jest.mock('../src/app/services/core/AvailabilityService');
+jest.mock('../src/app/services/core/NotificationService');
 
 // Mock window.alert
 global.alert = jest.fn();

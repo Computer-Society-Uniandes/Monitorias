@@ -1,7 +1,7 @@
 "use client"
 import React, { useState, useEffect } from "react";
 import BoxNewSubject from "../../components/BoxNewSubject/BoxNewSubject";
-import { getFacultades } from "../../services/ExploreService.service";
+import { getFacultades } from "../../services/utils/ExploreService.service";
 import ExploreBanner from "app/app/components/ExploreBanner/ExploreBanner";
 import { useI18n } from "../../../lib/i18n";
 

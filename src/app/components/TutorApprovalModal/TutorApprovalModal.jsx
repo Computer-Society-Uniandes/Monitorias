@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { X, Calendar, Clock, MapPin, User, BookOpen, MessageSquare, AlertTriangle, CheckCircle } from "lucide-react";
-import { TutoringSessionService } from "../../services/TutoringSessionService";
+import { TutoringSessionService } from "../../services/core/TutoringSessionService";
 import SessionBookedModal from "../SessionBookedModal/SessionBookedModal";
 import "./TutorApprovalModal.css";
 

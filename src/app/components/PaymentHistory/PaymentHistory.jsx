@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../../context/SecureAuthContext';
-import PaymentsService from '../../services/PaymentsService';
+import { PaymentService } from '../../services/core/PaymentService';
 import PaymentCard from '../PaymentCard/PaymentCard';
 import { useI18n } from '../../../lib/i18n';
 
@@ -53,7 +53,7 @@ export default function PaymentHistory({ subjectQuery = '', startDate = null, en
       try {
         setLoading(true);
         console.log('[PaymentHistory] Fetching payments for:', email, 'source:', source);
-        const list = await PaymentsService.getPaymentsByStudent(email);
+        const list = await PaymentService.getPaymentsByStudent(email);
         console.log('[PaymentHistory] Payments fetched:', list.length);
         if (mounted) setPayments(list);
       } catch (e) {

@@ -20,8 +20,8 @@ jest.mock('../src/app/services/SlotService', () => ({
 // Mock fetch
 global.fetch = jest.fn();
 
-import { AvailabilityService } from '../src/app/services/AvailabilityService';
-import { SlotService } from '../src/app/services/SlotService';
+import { AvailabilityService } from '../src/app/services/core/AvailabilityService';
+import { SlotService } from '../src/app/services/utils/SlotService';
 
 describe('RescheduleSessionModal', () => {
   const mockSession = {

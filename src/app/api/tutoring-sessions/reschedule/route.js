@@ -14,7 +14,7 @@ import {
 } from 'firebase/firestore';
 
 // Import services that work on server side
-import { CalicoCalendarService } from '../../../services/CalicoCalendarService';
+import { CalicoCalendarService } from '../../../services/integrations/CalicoCalendarService';
 
 // Helper function to reschedule a session
 async function rescheduleSessionLogic(sessionId, newSlot, reason) {

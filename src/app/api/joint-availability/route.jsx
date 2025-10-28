@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { FirebaseAvailabilityService } from '../../services/FirebaseAvailabilityService';
+import { FirebaseAvailabilityService } from '../../services/utils/FirebaseAvailabilityService';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../../../firebaseServerConfig';
 

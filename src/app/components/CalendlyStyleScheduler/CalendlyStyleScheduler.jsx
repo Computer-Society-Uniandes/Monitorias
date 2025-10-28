@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { SlotService } from "../../services/SlotService";
+import { SlotService } from "../../services/utils/SlotService";
 import "./CalendlyStyleScheduler.css";
 
 export default function CalendlyStyleScheduler({ tutor, availabilities, materia, onBookingComplete }) {

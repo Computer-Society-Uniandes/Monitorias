@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { PaymentService } from "../../services/PaymentService";
+import { PaymentService } from "../../services/core/PaymentService";
 import { useI18n } from "app/lib/i18n";
 
 export default function SessionConfirmationModal({ 

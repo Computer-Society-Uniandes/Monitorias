@@ -4,7 +4,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { auth, db } from '../../firebaseConfig';
-import { AuthService } from '../services/AuthService';
+import { AuthService } from '../services/utils/AuthService';
 
 const SecureAuthContext = createContext();
 

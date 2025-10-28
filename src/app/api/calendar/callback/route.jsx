@@ -1,4 +1,4 @@
-import { getTokens } from '../../../services/GoogleCalendarService';
+import { getTokens } from '../../../services/integrations/GoogleCalendarService';
 
 export async function GET(request) {
   try {

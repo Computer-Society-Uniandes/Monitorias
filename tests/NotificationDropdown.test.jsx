@@ -4,13 +4,13 @@ import '@testing-library/jest-dom';
 import NotificationDropdown from '../src/app/components/NotificationDropdown/NotificationDropdown';
 import StudentNotificationDropdown from '../src/app/components/NotificationDropdown/StudentNotificationDropdown';
 import { useAuth } from '../src/app/context/SecureAuthContext';
-import { NotificationService } from '../src/app/services/NotificationService';
-import { TutoringSessionService } from '../src/app/services/TutoringSessionService';
+import { NotificationService } from '../src/app/services/core/NotificationService';
+import { TutoringSessionService } from '../src/app/services/core/TutoringSessionService';
 
 // Mock dependencies
 jest.mock('../src/app/context/SecureAuthContext');
-jest.mock('../src/app/services/NotificationService');
-jest.mock('../src/app/services/TutoringSessionService');
+jest.mock('../src/app/services/core/NotificationService');
+jest.mock('../src/app/services/core/TutoringSessionService');
 
 // Mock next/navigation
 jest.mock('next/navigation', () => ({

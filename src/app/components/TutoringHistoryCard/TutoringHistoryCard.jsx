@@ -1,6 +1,6 @@
 import React from 'react';
 import { User, Calendar, DollarSign, ExternalLink, CreditCard } from 'lucide-react';
-import TutoringHistoryService from '../../services/TutoringHistoryService';
+import { TutoringHistoryService } from '../../services/utils/TutoringHistoryService';
 import './TutoringHistoryCard.css';
 
 const TutoringHistoryCard = ({ session }) => {

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { TutoringSessionService } from "../../services/TutoringSessionService";
+import { TutoringSessionService } from "../../services/core/TutoringSessionService";
 import { useAuth } from "../../context/SecureAuthContext";
 import { useI18n } from "../../../lib/i18n";
 import RescheduleSessionModal from "../RescheduleSessionModal/RescheduleSessionModal";

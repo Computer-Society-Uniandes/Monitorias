@@ -1,33 +1,61 @@
 "use client";
 
-import { db } from '../../firebaseConfig';
+import { db } from '../../../firebaseConfig';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
+import app from '../../../firebaseConfig';
 
 /**
- * @typedef {import('../models/payment.model').Payment} Payment
- * @typedef {import('../models/payment.model').PaymentDetails} PaymentDetails
+ * @typedef {import('../../models/payment.model').Payment} Payment
+ * @typedef {import('../../models/payment.model').PaymentDetails} PaymentDetails
  */
 
-export class PaymentsService {
+/**
+ * Payment Service - Gestiona pagos y comprobantes
+ * Fusión de PaymentService.js y PaymentsService.js
+ */
+export class PaymentService {
   static COLLECTION_NAME = 'payments';
 
-/**
- * Obtiene pagos por email del estudiante autenticado.
- * @param {string} studentEmail
- * @param {{ startDate?: Date|null, endDate?: Date|null, limit?: number }} options
- * @returns {Promise<PaymentDetails[]>} Lista de pagos normalizados
- */
+  /**
+   * Sube un archivo de comprobante de pago a Firebase Storage
+   * @param {string} sessionId - ID de la sesión de tutoría
+   * @param {File} file - Archivo de comprobante
+   * @returns {Promise<{success: boolean, url?: string, error?: string}>}
+   */
+  static async uploadPaymentProofFile(sessionId, file) {
+    try {
+      if (!app) throw new Error('Firebase app no inicializado');
+      if (!sessionId) throw new Error('sessionId es requerido');
+      if (!file) throw new Error('file es requerido');
 
+      const storage = getStorage(app);
+      const storageRef = ref(storage, `payment_proofs/${sessionId}/${Date.now()}_${file.name}`);
 
+      const snapshot = await uploadBytes(storageRef, file);
+      const url = await getDownloadURL(snapshot.ref);
+
+      return { success: true, url, path: snapshot.ref.fullPath, fileName: file.name };
+    } catch (error) {
+      console.error('Error subiendo comprobante:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Obtiene pagos por email del estudiante
+   * @param {string} studentEmail - Email del estudiante
+   * @param {{startDate?: Date, endDate?: Date, limit?: number}} options - Opciones de filtro
+   * @returns {Promise<PaymentDetails[]>}
+   */
   static async getPaymentsByStudent(studentEmail, options = {}) {
     if (!studentEmail) return [];
     const { startDate = null, endDate = null } = options;
     const normalizedEmail = String(studentEmail).trim().toLowerCase();
 
     try {
-      console.log('[PaymentsService] getPaymentsByStudent for:', normalizedEmail);
-      // Construir consulta base: por estudiante, ordenados por fecha
-      // Nota: orderBy en Firestore requiere índices; si da error, hacemos fallback sin orderBy
+      console.log('[PaymentService] getPaymentsByStudent for:', normalizedEmail);
+      
       let snapshot = null;
       try {
         const q = query(
@@ -36,29 +64,27 @@ export class PaymentsService {
           orderBy('date_payment', 'desc')
         );
         snapshot = await getDocs(q);
-        console.log('[PaymentsService] primary query size:', snapshot.size);
+        console.log('[PaymentService] primary query size:', snapshot.size);
       } catch (eOrder) {
-        console.warn('[PaymentsService] orderBy(date_payment) no disponible, usando fallback sin orderBy', eOrder);
+        console.warn('[PaymentService] orderBy(date_payment) no disponible, usando fallback sin orderBy', eOrder);
         const q = query(
           collection(db, this.COLLECTION_NAME),
           where('studentEmail', '==', normalizedEmail)
         );
         snapshot = await getDocs(q);
-        console.log('[PaymentsService] fallback (no orderBy) size:', snapshot.size);
+        console.log('[PaymentService] fallback (no orderBy) size:', snapshot.size);
       }
 
       const results = [];
 
       snapshot.forEach((docSnap) => {
         const data = docSnap.data();
-        // Normalizar email almacenado para evitar falsos negativos
         const storedEmail = (data.studentEmail ? String(data.studentEmail) : '').trim().toLowerCase();
-        if (storedEmail !== normalizedEmail) {
-          return; // Ignorar si no coincide tras normalizar
-        }
+        if (storedEmail !== normalizedEmail) return;
+
         const rawDate = data.date_payment;
         let datePayment = null;
-        // Fecha puede venir como Timestamp (toDate) o string/ISO
+        
         if (rawDate?.toDate) {
           datePayment = rawDate.toDate();
         } else if (typeof rawDate === 'string') {
@@ -68,7 +94,6 @@ export class PaymentsService {
           datePayment = rawDate;
         }
 
-        // Filtro por rango si aplica
         if (startDate && datePayment && datePayment < startDate) return;
         if (endDate && datePayment && datePayment > endDate) return;
 
@@ -85,7 +110,7 @@ export class PaymentsService {
         });
       });
 
-      // Si no hubo resultados, intentar un fallback con 'in' y variantes comunes
+      // Fallback con 'in' query si no hay resultados
       if (results.length === 0) {
         try {
           const variants = [
@@ -94,27 +119,30 @@ export class PaymentsService {
             String(studentEmail).toLowerCase(),
             String(studentEmail).trim().toLowerCase()
           ];
-          // Remover duplicados
           const unique = Array.from(new Set(variants));
-          console.log('[PaymentsService] IN variants:', unique);
-          // Firestore 'in' limita a 10 elementos; aquí son <= 4
+          console.log('[PaymentService] IN variants:', unique);
+          
           const qIn = query(
             collection(db, this.COLLECTION_NAME),
             where('studentEmail', 'in', unique)
           );
           const snapIn = await getDocs(qIn);
-          console.log('[PaymentsService] IN query size:', snapIn.size);
+          console.log('[PaymentService] IN query size:', snapIn.size);
+          
           snapIn.forEach((docSnap) => {
             const data = docSnap.data();
             const rawDate = data.date_payment;
             let datePayment = null;
+            
             if (rawDate?.toDate) datePayment = rawDate.toDate();
             else if (typeof rawDate === 'string') {
               const parsed = new Date(rawDate);
               datePayment = isNaN(parsed) ? null : parsed;
             } else if (rawDate instanceof Date) datePayment = rawDate;
+            
             if (startDate && datePayment && datePayment < startDate) return;
             if (endDate && datePayment && datePayment > endDate) return;
+            
             results.push({
               id: docSnap.id,
               amount: typeof data.amount === 'number' ? data.amount : Number(data.amount) || 0,
@@ -128,64 +156,29 @@ export class PaymentsService {
             });
           });
         } catch (eIn) {
-          console.warn('[PaymentsService] Fallback IN query failed, trying full scan (dev only):', eIn);
+          console.warn('[PaymentService] Fallback IN query failed:', eIn);
         }
       }
 
-      // Último recurso en dev: escanear primeros 200 pagos y filtrar por email normalizado
-      if (results.length === 0) {
-        try {
-          const snapAll = await getDocs(collection(db, this.COLLECTION_NAME));
-          console.log('[PaymentsService] full scan size:', snapAll.size);
-          snapAll.forEach((docSnap) => {
-            const data = docSnap.data();
-            const storedEmail = (data.studentEmail ? String(data.studentEmail) : '').trim().toLowerCase();
-            if (storedEmail !== normalizedEmail) return;
-            const rawDate = data.date_payment;
-            let datePayment = null;
-            if (rawDate?.toDate) datePayment = rawDate.toDate();
-            else if (typeof rawDate === 'string') {
-              const parsed = new Date(rawDate);
-              datePayment = isNaN(parsed) ? null : parsed;
-            } else if (rawDate instanceof Date) datePayment = rawDate;
-            if (startDate && datePayment && datePayment < startDate) return;
-            if (endDate && datePayment && datePayment > endDate) return;
-            results.push({
-              id: docSnap.id,
-              amount: typeof data.amount === 'number' ? data.amount : Number(data.amount) || 0,
-              date_payment: datePayment,
-              method: data.method || '',
-              studentEmail: data.studentEmail || '',
-              subject: data.subject || '',
-              transactionID: data.transactionID || data.transactionId || '',
-              tutorEmail: data.tutorEmail || '',
-              raw: data
-            });
-          });
-        } catch (eAll) {
-          console.warn('[PaymentsService] Full scan failed:', eAll);
-        }
-      }
-
-      // Ordenar si no se pudo en la consulta
+      // Ordenar por fecha descendente
       results.sort((a, b) => {
         const ad = a.date_payment ? a.date_payment.getTime() : 0;
         const bd = b.date_payment ? b.date_payment.getTime() : 0;
-        return bd - ad; // desc
+        return bd - ad;
       });
 
       return results;
     } catch (error) {
-      console.error('[PaymentsService] Error obteniendo pagos:', error);
+      console.error('[PaymentService] Error obteniendo pagos:', error);
       return [];
     }
   }
 
   /**
-   * Obtiene pagos por email del tutor autenticado.
-   * @param {string} tutorEmail
-   * @param {{ startDate?: Date|null, endDate?: Date|null }} options
-   * @returns {Promise<Array>} Lista de pagos normalizados
+   * Obtiene pagos por email del tutor
+   * @param {string} tutorEmail - Email del tutor
+   * @param {{startDate?: Date, endDate?: Date}} options - Opciones de filtro
+   * @returns {Promise<Array>}
    */
   static async getPaymentsByTutor(tutorEmail, options = {}) {
     if (!tutorEmail) return [];
@@ -193,7 +186,8 @@ export class PaymentsService {
     const normalizedEmail = String(tutorEmail).trim().toLowerCase();
 
     try {
-      console.log('[PaymentsService] getPaymentsByTutor for:', normalizedEmail);
+      console.log('[PaymentService] getPaymentsByTutor for:', normalizedEmail);
+      
       let snapshot = null;
       try {
         const q = query(
@@ -202,15 +196,15 @@ export class PaymentsService {
           orderBy('date_payment', 'desc')
         );
         snapshot = await getDocs(q);
-        console.log('[PaymentsService] tutor primary query size:', snapshot.size);
+        console.log('[PaymentService] tutor primary query size:', snapshot.size);
       } catch (eOrder) {
-        console.warn('[PaymentsService] tutor orderBy(date_payment) no disponible, fallback sin orderBy', eOrder);
+        console.warn('[PaymentService] tutor orderBy(date_payment) no disponible, fallback sin orderBy', eOrder);
         const q = query(
           collection(db, this.COLLECTION_NAME),
           where('tutorEmail', '==', normalizedEmail)
         );
         snapshot = await getDocs(q);
-        console.log('[PaymentsService] tutor fallback (no orderBy) size:', snapshot.size);
+        console.log('[PaymentService] tutor fallback (no orderBy) size:', snapshot.size);
       }
 
       const results = [];
@@ -220,16 +214,18 @@ export class PaymentsService {
         if (typeof val === 'number') return val === 1;
         return Boolean(val);
       };
+
       snapshot.forEach((docSnap) => {
         const data = docSnap.data();
         const storedEmail = (data.tutorEmail ? String(data.tutorEmail) : '').trim().toLowerCase();
         if (storedEmail !== normalizedEmail) {
-          console.log('[PaymentsService] Skipping doc, email mismatch:', storedEmail, 'vs', normalizedEmail);
+          console.log('[PaymentService] Skipping doc, email mismatch:', storedEmail, 'vs', normalizedEmail);
           return;
         }
 
         const rawDate = data.date_payment;
         let datePayment = null;
+        
         if (rawDate?.toDate) datePayment = rawDate.toDate();
         else if (typeof rawDate === 'string') {
           const parsed = new Date(rawDate);
@@ -237,15 +233,15 @@ export class PaymentsService {
         } else if (rawDate instanceof Date) datePayment = rawDate;
 
         if (startDate && datePayment && datePayment < startDate) {
-          console.log('[PaymentsService] Skipping doc, before startDate:', datePayment, '<', startDate);
+          console.log('[PaymentService] Skipping doc, before startDate:', datePayment, '<', startDate);
           return;
         }
         if (endDate && datePayment && datePayment > endDate) {
-          console.log('[PaymentsService] Skipping doc, after endDate:', datePayment, '>', endDate);
+          console.log('[PaymentService] Skipping doc, after endDate:', datePayment, '>', endDate);
           return;
         }
 
-        console.log('[PaymentsService] Adding payment:', docSnap.id, data);
+        console.log('[PaymentService] Adding payment:', docSnap.id, data);
         results.push({
           id: docSnap.id,
           amount: typeof data.amount === 'number' ? data.amount : Number(data.amount) || 0,
@@ -261,7 +257,7 @@ export class PaymentsService {
         });
       });
 
-      // Ordenar por fecha desc si no se pudo en la consulta
+      // Ordenar por fecha desc
       results.sort((a, b) => {
         const ad = a.date_payment ? a.date_payment.getTime() : 0;
         const bd = b.date_payment ? b.date_payment.getTime() : 0;
@@ -270,10 +266,11 @@ export class PaymentsService {
 
       return results;
     } catch (error) {
-      console.error('[PaymentsService] Error obteniendo pagos por tutor:', error);
+      console.error('[PaymentService] Error obteniendo pagos por tutor:', error);
       return [];
     }
   }
 }
 
-export default PaymentsService;
+export default PaymentService;
+

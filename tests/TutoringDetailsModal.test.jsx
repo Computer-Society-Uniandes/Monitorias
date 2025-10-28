@@ -35,7 +35,7 @@ jest.mock('../src/app/components/RescheduleSessionModal/RescheduleSessionModal',
   };
 });
 
-import { TutoringSessionService } from '../src/app/services/TutoringSessionService';
+import { TutoringSessionService } from '../src/app/services/core/TutoringSessionService';
 
 describe('TutoringDetailsModal', () => {
   const mockSession = {

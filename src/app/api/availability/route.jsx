@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { FirebaseAvailabilityService } from '../../services/FirebaseAvailabilityService';
+import { FirebaseAvailabilityService } from '../../services/utils/FirebaseAvailabilityService';
 
 export async function GET(request) {
   try {
