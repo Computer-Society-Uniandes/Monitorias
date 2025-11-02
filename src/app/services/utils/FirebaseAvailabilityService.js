@@ -1,18 +1,5 @@
-import { db, auth } from '../../../firebaseServerConfig';
-import { 
-  collection, 
-  doc, 
-  getDoc, 
-  getDocs, 
-  setDoc, 
-  deleteDoc, 
-  query, 
-  where, 
-  orderBy, 
-  limit,
-  serverTimestamp,
-  Timestamp
-} from 'firebase/firestore';
+import { auth } from '../../../firebaseServerConfig';
+import { AvailabilityRepository } from '../../repositories/availability.repository';
 
 /**
  * @typedef {import('../models/availability.model').Availability} Availability
@@ -21,40 +8,23 @@ import {
  */
 
 export class FirebaseAvailabilityService {
-  static COLLECTION_NAME = 'availabilities';
-
   // Crear o actualizar una disponibilidad en Firestore
   static async saveAvailability(googleEventId, availabilityData) {
     try {
       // Verificar autenticación si está disponible
       if (auth.currentUser) {
-        console.log('Saving with authenticated user:', auth.currentUser.email);
+        console.log('[FirebaseAvailabilityService] Saving with authenticated user:', auth.currentUser.email);
       } else {
-        console.log('Saving without authentication (using permissive rules)');
+        console.log('[FirebaseAvailabilityService] Saving without authentication (using permissive rules)');
       }
 
-      const docRef = doc(db, this.COLLECTION_NAME, googleEventId);
+      // Use repository for data access
+      const id = await AvailabilityRepository.save(googleEventId, availabilityData);
       
-      // Preparar datos para Firestore
-      const firestoreData = {
-        ...availabilityData,
-        googleEventId,
-        updatedAt: serverTimestamp(),
-        syncedAt: serverTimestamp()
-      };
-
-      // Si es un nuevo documento, agregar created_at
-      const docSnap = await getDoc(docRef);
-      if (!docSnap.exists()) {
-        firestoreData.createdAt = serverTimestamp();
-      }
-
-      await setDoc(docRef, firestoreData, { merge: true });
-      
-      console.log('Availability saved to Firebase:', googleEventId);
-      return { success: true, id: googleEventId };
+      console.log('[FirebaseAvailabilityService] Availability saved to Firebase:', googleEventId);
+      return { success: true, id };
     } catch (error) {
-      console.error('Error saving availability to Firebase:', error);
+      console.error('[FirebaseAvailabilityService] Error saving availability to Firebase:', error);
       
       // Dar información más específica sobre el error
       if (error.code === 'permission-denied') {
@@ -68,25 +38,11 @@ export class FirebaseAvailabilityService {
   // Obtener una disponibilidad específica por Google Event ID
   static async getAvailabilityById(googleEventId) {
     try {
-      const docRef = doc(db, this.COLLECTION_NAME, googleEventId);
-      const docSnap = await getDoc(docRef);
-
-      if (docSnap.exists()) {
-        return {
-          id: docSnap.id,
-          ...docSnap.data(),
-          // Convertir timestamps a objetos Date
-          createdAt: docSnap.data().createdAt?.toDate(),
-          updatedAt: docSnap.data().updatedAt?.toDate(),
-          syncedAt: docSnap.data().syncedAt?.toDate(),
-          startDateTime: docSnap.data().startDateTime?.toDate(),
-          endDateTime: docSnap.data().endDateTime?.toDate(),
-        };
-      }
-      
-      return null;
+      // Use repository for data access
+      const availability = await AvailabilityRepository.findById(googleEventId);
+      return availability;
     } catch (error) {
-      console.error('Error getting availability from Firebase:', error);
+      console.error('[FirebaseAvailabilityService] Error getting availability from Firebase:', error);
       throw new Error(`Error obteniendo disponibilidad: ${error.message}`);
     }
   }
@@ -94,86 +50,13 @@ export class FirebaseAvailabilityService {
   // Obtener todas las disponibilidades de un tutor (por tutorId o tutorEmail)
   static async getAvailabilitiesByTutor(tutorId, limitCount = 50) {
     try {
-      const results = [];
-      const seen = new Set();
-
-      // Helper para procesar snapshots
-      const pushFromSnapshot = (snapshot) => {
-        snapshot.forEach((docSnap) => {
-          if (seen.has(docSnap.id)) return;
-          seen.add(docSnap.id);
-          results.push({
-            id: docSnap.id,
-            ...docSnap.data(),
-            createdAt: docSnap.data().createdAt?.toDate(),
-            updatedAt: docSnap.data().updatedAt?.toDate(),
-            syncedAt: docSnap.data().syncedAt?.toDate(),
-            startDateTime: docSnap.data().startDateTime?.toDate(),
-            endDateTime: docSnap.data().endDateTime?.toDate(),
-          });
-        });
-      };
-
-      // 1) Intentar por tutorId con orderBy
-      try {
-        const qById = query(
-          collection(db, this.COLLECTION_NAME),
-          where('tutorId', '==', tutorId),
-          orderBy('startDateTime', 'asc'),
-          limit(limitCount)
-        );
-        const snapById = await getDocs(qById);
-        pushFromSnapshot(snapById);
-      } catch (e1) {
-        console.warn('getAvailabilitiesByTutor: fallo consulta por tutorId con orderBy, usando fallback sin orderBy');
-        try {
-          const qByIdNoOrder = query(
-            collection(db, this.COLLECTION_NAME),
-            where('tutorId', '==', tutorId),
-            limit(limitCount)
-          );
-          const snapByIdNoOrder = await getDocs(qByIdNoOrder);
-          pushFromSnapshot(snapByIdNoOrder);
-        } catch (e1b) {
-          console.warn('getAvailabilitiesByTutor: fallo fallback por tutorId sin orderBy', e1b);
-        }
-      }
-
-      // 2) Intentar por tutorEmail con orderBy
-      try {
-        const qByEmail = query(
-          collection(db, this.COLLECTION_NAME),
-          where('tutorEmail', '==', tutorId),
-          orderBy('startDateTime', 'asc'),
-          limit(limitCount)
-        );
-        const snapByEmail = await getDocs(qByEmail);
-        pushFromSnapshot(snapByEmail);
-      } catch (e2) {
-        console.warn('getAvailabilitiesByTutor: fallo consulta por tutorEmail con orderBy, usando fallback sin orderBy');
-        try {
-          const qByEmailNoOrder = query(
-            collection(db, this.COLLECTION_NAME),
-            where('tutorEmail', '==', tutorId),
-            limit(limitCount)
-          );
-          const snapByEmailNoOrder = await getDocs(qByEmailNoOrder);
-          pushFromSnapshot(snapByEmailNoOrder);
-        } catch (e2b) {
-          console.warn('getAvailabilitiesByTutor: fallo fallback por tutorEmail sin orderBy', e2b);
-        }
-      }
-
-      // Ordenar por fecha de inicio
-      results.sort((a, b) => {
-        const da = a.startDateTime ? new Date(a.startDateTime) : new Date(0);
-        const dbd = b.startDateTime ? new Date(b.startDateTime) : new Date(0);
-        return da - dbd;
-      });
-
+      // Use repository for data access
+      const results = await AvailabilityRepository.findByTutor(tutorId, limitCount);
+      
+      console.log(`[FirebaseAvailabilityService] Found ${results.length} availabilities for tutor: ${tutorId}`);
       return results;
     } catch (error) {
-      console.error('Error getting availabilities by tutor:', error);
+      console.error('[FirebaseAvailabilityService] Error getting availabilities by tutor:', error);
       throw new Error(`Error obteniendo disponibilidades del tutor: ${error.message}`);
     }
   }
@@ -181,7 +64,23 @@ export class FirebaseAvailabilityService {
   // Obtener disponibilidades por materia
   static async getAvailabilitiesBySubject(subject, limitCount = 50) {
     try {
-      console.log(`🔍 Buscando disponibilidades para materia: ${subject}`);
+      console.log(`[FirebaseAvailabilityService] 🔍 Buscando disponibilidades para materia: ${subject}`);
+      
+      // Use repository for data access
+      const availabilities = await AvailabilityRepository.findBySubject(subject, limitCount);
+      
+      console.log(`[FirebaseAvailabilityService] ✅ Encontradas ${availabilities.length} disponibilidades para: ${subject}`);
+      return availabilities;
+    } catch (error) {
+      console.error('[FirebaseAvailabilityService] Error getting availabilities by subject:', error);
+      throw new Error(`Error obteniendo disponibilidades por materia: ${error.message}`);
+    }
+  }
+
+  // Legacy method - kept for backwards compatibility
+  static async getAvailabilitiesBySubject_OLD(subject, limitCount = 50) {
+    try {
+      console.log(`[FirebaseAvailabilityService] 🔍 Buscando disponibilidades para materia: ${subject}`);
       
       const availabilities = [];
       const processedIds = new Set(); // Para evitar duplicados

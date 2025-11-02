@@ -1,5 +1,5 @@
-import { collection, query, where, orderBy, getDocs, doc, getDoc } from 'firebase/firestore';
-import { db } from '../../../firebaseConfig';
+import { TutoringSessionRepository } from '../../repositories/tutoring-session.repository';
+import { UserRepository } from '../../repositories/user.repository';
 
 /**
  * @typedef {import('../models/tutoring_session.model').TutoringSession} TutoringSession
@@ -16,32 +16,24 @@ class TutoringHistoryService {
     try {
       console.log('🔍 Buscando historial de tutorías para:', studentEmail);
       
-      const tutoringSessionsRef = collection(db, 'tutoring_sessions');
-      const q = query(
-        tutoringSessionsRef,
-        where('studentEmail', '==', studentEmail),
-        orderBy('scheduledDateTime', 'desc')
+      // Use repository for data access
+      const sessions = await TutoringSessionRepository.findByStudent(studentEmail);
+      
+      // Enrich with tutor information
+      const enrichedSessions = await Promise.all(
+        sessions.map(async (session) => {
+          const tutorInfo = await this.getTutorInfo(session.tutorEmail);
+          
+          return {
+            ...session,
+            tutorName: tutorInfo?.name || tutorInfo?.displayName || session.tutorEmail,
+            tutorProfilePicture: tutorInfo?.profileImage || null,
+          };
+        })
       );
 
-      const querySnapshot = await getDocs(q);
-      const tutoringSessions = [];
-
-      for (const docSnap of querySnapshot.docs) {
-        const sessionData = docSnap.data();
-        
-        // Obtener información adicional del tutor
-        const tutorInfo = await this.getTutorInfo(sessionData.tutorEmail);
-        
-        tutoringSessions.push({
-          id: docSnap.id,
-          ...sessionData,
-          tutorName: tutorInfo?.name || tutorInfo?.displayName || sessionData.tutorEmail,
-          tutorProfilePicture: tutorInfo?.profilePicture || null,
-        });
-      }
-
-      console.log('✅ Historial obtenido:', tutoringSessions.length, 'tutorías encontradas');
-      return tutoringSessions;
+      console.log('✅ Historial obtenido:', enrichedSessions.length, 'tutorías encontradas');
+      return enrichedSessions;
     } catch (error) {
       console.error('❌ Error obteniendo historial de tutorías:', error);
       throw error;
@@ -55,15 +47,9 @@ class TutoringHistoryService {
    */
   async getTutorInfo(tutorEmail) {
     try {
-      const usersRef = collection(db, 'users');
-      const q = query(usersRef, where('email', '==', tutorEmail));
-      const querySnapshot = await getDocs(q);
-
-      if (!querySnapshot.empty) {
-        return querySnapshot.docs[0].data();
-      }
-      
-      return null;
+      // Use repository instead of direct Firebase access
+      const tutor = await UserRepository.findByEmail(tutorEmail);
+      return tutor;
     } catch (error) {
       console.error('Error obteniendo información del tutor:', error);
       return null;
