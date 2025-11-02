@@ -7,7 +7,7 @@ import { Users, BookOpen, Award, Clock } from "lucide-react";
 import Logo from "../../../../public/CalicoLogo.png";
 import Logo2 from "../../../../public/Logo2.png";
 import CalicoLogo from "../../../../public/CalicoLogo.png";
-import routes from "app/routes";
+import routes from "../../../routes";
 import styles from "./Landing.module.css";
 import { useAuth } from "../../context/SecureAuthContext";
 import { useI18n } from "../../../lib/i18n";
