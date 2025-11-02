@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { PaymentService } from "../../services/core/PaymentService";
-import { useI18n } from "app/lib/i18n";
+import { useI18n } from "../../../lib/i18n";
 
 export default function SessionConfirmationModal({ 
   isOpen, 

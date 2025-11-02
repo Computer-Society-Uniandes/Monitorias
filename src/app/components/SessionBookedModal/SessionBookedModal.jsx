@@ -4,7 +4,7 @@ import React from "react";
 import Image from "next/image";
 import { CheckCircle, Calendar, Clock, User, BookOpen, MapPin } from "lucide-react";
 import "./SessionBookedModal.css";
-import { useI18n } from "app/lib/i18n";
+import { useI18n } from "../../../lib/i18n";
 
 export default function SessionBookedModal({ 
   isOpen, 

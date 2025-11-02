@@ -1,6 +1,6 @@
 // Servicio para manejar la disponibilidad conjunta de múltiples tutores
 import { collection, query, where, getDocs } from 'firebase/firestore';
-import { db } from '../../firebaseConfig';
+import { db } from '../../../firebaseConfig';
 
 /**
  * @typedef {import('../models/user.model').User} User

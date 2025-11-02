@@ -7,7 +7,7 @@ import { doc, setDoc, collection, getDocs } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../context/SecureAuthContext';
 import { useI18n } from '../../../lib/i18n';
-import routes from 'app/routes';
+import routes from '../../../routes';
 import { FcGoogle } from "react-icons/fc";
 import CalicoLogo from "../../../../public/CalicoLogo.png";
 import Image from "next/image";

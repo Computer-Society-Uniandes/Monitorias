@@ -1,5 +1,5 @@
 // Servicio para manejar la disponibilidad del tutor
-import { auth } from '../../firebaseConfig';
+import { auth } from '../../../firebaseConfig';
 
 export class AvailabilityService {
   

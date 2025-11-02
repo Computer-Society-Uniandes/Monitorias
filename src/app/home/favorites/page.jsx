@@ -6,7 +6,7 @@ import { useAuth } from "../../context/SecureAuthContext";
 import { useFavorites } from "../../hooks/useFavorites";
 import { useI18n } from "../../../lib/i18n";
 import FavoriteButton from "../../components/FavoriteButton/FavoriteButton";
-import routes from "app/routes";
+import routes from "../../../routes";
 import "./Favorites.css";
 
 export default function FavoritesPage() {

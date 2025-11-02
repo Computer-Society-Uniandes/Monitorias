@@ -1,5 +1,5 @@
 // Servicio de Favoritos (Firebase)
-import { db } from "../../firebaseConfig";
+import { db } from "../../../firebaseConfig";
 import { doc, getDoc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
 
 /**

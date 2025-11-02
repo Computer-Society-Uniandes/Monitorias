@@ -6,7 +6,7 @@ import { TutorSearchService } from "../../services/utils/TutorSearchService";
 import CalendlyStyleScheduler from "../CalendlyStyleScheduler/CalendlyStyleScheduler";
 import routes from "../../../routes";
 import "./TutorAvailabilityCard.css";
-import { useI18n } from "app/lib/i18n";
+import { useI18n } from "../../../lib/i18n";
 
 export default function TutorAvailabilityCard({ tutor, materia }) {
   const { t, locale, formatCurrency } = useI18n();

@@ -1,5 +1,5 @@
 import { collection, query, where, orderBy, getDocs, doc, getDoc } from 'firebase/firestore';
-import { db } from '../../firebaseConfig';
+import { db } from '../../../firebaseConfig';
 
 /**
  * @typedef {import('../models/tutoring_session.model').TutoringSession} TutoringSession

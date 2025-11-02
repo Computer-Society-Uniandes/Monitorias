@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../context/SecureAuthContext';
 import { useI18n } from '../../../lib/i18n';
-import routes from 'app/routes';
+import routes from '../../../routes';
 import './Login.css';
 import CalicoLogo from "../../../../public/CalicoLogo.png";
 import Image from "next/image";
