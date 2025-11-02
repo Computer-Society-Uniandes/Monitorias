@@ -17,7 +17,7 @@ const TutoringHistory = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Modal de reseña
+  
   const [showModal, setShowModal] = useState(false);
   const [selectedSession, setSelectedSession] = useState(null);
 
@@ -75,7 +75,9 @@ const TutoringHistory = () => {
     let filtered = [...sessions];
 
     if (dateFilter.startDate || dateFilter.endDate) {
-      const startDate = dateFilter.startDate ? new Date(dateFilter.startDate) : null;
+      const startDate = dateFilter.startDate
+        ? new Date(dateFilter.startDate)
+        : null;
       const endDate = dateFilter.endDate ? new Date(dateFilter.endDate) : null;
       filtered = TutoringHistoryService.filterByDate(filtered, startDate, endDate);
     }
@@ -113,7 +115,7 @@ const TutoringHistory = () => {
     setShowSuggestions(value.trim().length > 0);
   };
 
- 
+  
   const openModal = (session) => {
     setSelectedSession(session);
     setShowModal(true);
@@ -151,6 +153,7 @@ const TutoringHistory = () => {
     );
   }
 
+  
   return (
     <div className="tutoring-history-container">
       {/* Header */}
@@ -173,24 +176,25 @@ const TutoringHistory = () => {
                 type="text"
                 value={subjectFilter}
                 onChange={(e) => handleSubjectInputChange(e.target.value)}
-                onFocus={() => setShowSuggestions(subjectFilter.trim().length > 0)}
+                onFocus={() =>
+                  setShowSuggestions(subjectFilter.trim().length > 0)
+                }
                 onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
                 className="subject-input"
                 placeholder={t("studentHistory.filters.searchSubject") + "..."}
               />
-
               {showSuggestions && getSubjectSuggestions().length > 0 && (
                 <div className="suggestions-dropdown">
-                  {getSubjectSuggestions().map((suggestion, index) => (
+                  {getSubjectSuggestions().map((s, i) => (
                     <div
-                      key={index}
+                      key={i}
                       className="suggestion-item"
                       onClick={() => {
-                        setSubjectFilter(suggestion);
+                        setSubjectFilter(s);
                         setShowSuggestions(false);
                       }}
                     >
-                      {suggestion}
+                      {s}
                     </div>
                   ))}
                 </div>
@@ -198,7 +202,7 @@ const TutoringHistory = () => {
             </div>
           </div>
 
-          {/* Fechas */}
+          {}
           <div className="filter-group">
             <label className="filter-label">{t("studentHistory.filters.selectDate")}</label>
             <div className="date-inputs">
@@ -292,7 +296,6 @@ const TutoringHistory = () => {
             </div>
           )}
 
-          {/* Historial de pagos */}
           <div style={{ marginTop: 24 }}>
             <PaymentHistory
               subjectQuery={subjectFilter}
@@ -304,7 +307,7 @@ const TutoringHistory = () => {
         </div>
       </div>
 
-      {/* Modal de reseña */}
+      {}
       {showModal && selectedSession && (
         <ReviewModal session={selectedSession} onClose={closeModal} />
       )}
