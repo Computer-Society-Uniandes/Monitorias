@@ -11,6 +11,7 @@ export default function SuccessModal({ onClose }) {
       className="modal-overlay success-overlay"
       onClick={onClose}
       style={{ zIndex: 10000 }}
+      data-testid="success-modal"
     >
       <div
         className="modal-content large success-modal"

@@ -110,7 +110,7 @@ export default function ReviewModal({ session, onClose, currentUser = null }) {
       }, SUCCESS_MS);
     } catch (err) {
       console.error("Error al guardar/actualizar la reseña:", err);
-      alert("Error al guardar la reseña");
+      alert(t("review.errors.saveError"));
     } finally {
       setIsSubmitting(false);
     }

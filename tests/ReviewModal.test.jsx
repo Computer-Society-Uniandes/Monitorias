@@ -39,8 +39,7 @@ jest.mock("../src/lib/i18n", () => ({
 
 
 jest.mock("../src/app/components/ReviewModal/NotificationReview", () => {
-  return function MockSuccessModal({ open, onClose }) {
-    if (!open) return null;
+  return function MockSuccessModal({ onClose }) {
     return (
       <div data-testid="success-modal">
         <button onClick={onClose}>successModal.close</button>
