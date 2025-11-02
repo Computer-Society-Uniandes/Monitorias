@@ -147,10 +147,11 @@ describe('TutorStatistics page', () => {
   });
 
   test('applies status class and method icon mapping', async () => {
-    // Override payments to have clear methods with dates early in the month
+    // Override payments to have clear methods with dates in the past (5 days ago)
     const { PaymentService: Svc } = await import('../src/app/services/core/PaymentService');
     const now = new Date();
-    const dateInMonth = new Date(now.getFullYear(), now.getMonth(), 5); // 5th of current month
+    const dateInMonth = new Date(now);
+    dateInMonth.setDate(now.getDate() - 5); // 5 days ago to ensure it's in the past
     Svc.getPaymentsByTutor.mockResolvedValue([
       { id: '1', amount: 10000, pagado: true, method: 'transfer', subject: 'Cálculo', studentEmail: 'a@b.com', studentName: 'Student A', date_payment: dateInMonth },
       { id: '2', amount: 20000, pagado: false, method: 'cash', subject: 'Álgebra', studentEmail: 'c@d.com', studentName: 'Student C', date_payment: dateInMonth },

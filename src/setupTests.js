@@ -50,8 +50,49 @@ jest.mock('./firebaseConfig', () => ({
 	db: 'mock-db'
 }));
 
-// Mock services
-jest.mock('./app/services/TutoringSessionService', () => ({
+// Mock repositories (for service layer tests)
+jest.mock('./app/repositories/user.repository', () => ({
+	UserRepository: {
+		findByEmail: jest.fn(),
+		create: jest.fn(),
+		update: jest.fn(),
+		delete: jest.fn(),
+		exists: jest.fn(),
+		findAllTutors: jest.fn(),
+		findTutorsBySubject: jest.fn(),
+		findTutorSubjects: jest.fn(),
+		addTutorSubject: jest.fn(),
+		removeTutorSubject: jest.fn()
+	}
+}));
+
+jest.mock('./app/repositories/tutoring-session.repository', () => ({
+	TutoringSessionRepository: {
+		findById: jest.fn(),
+		create: jest.fn(),
+		update: jest.fn(),
+		delete: jest.fn(),
+		findByStudent: jest.fn(),
+		findByTutor: jest.fn(),
+		findPendingByTutor: jest.fn(),
+		findByStatus: jest.fn(),
+		findByTutorAndStatus: jest.fn()
+	}
+}));
+
+jest.mock('./app/repositories/availability.repository', () => ({
+	AvailabilityRepository: {
+		findById: jest.fn(),
+		save: jest.fn(),
+		delete: jest.fn(),
+		findByTutor: jest.fn(),
+		findBySubject: jest.fn(),
+		findUpcoming: jest.fn()
+	}
+}));
+
+// Mock services (updated paths after refactoring)
+jest.mock('./app/services/core/TutoringSessionService', () => ({
 	TutoringSessionService: {
 		getTutorSessions: jest.fn(),
 		createTutoringSession: jest.fn(),
@@ -63,7 +104,7 @@ jest.mock('./app/services/TutoringSessionService', () => ({
 	}
 }));
 
-jest.mock('./app/services/NotificationService', () => ({
+jest.mock('./app/services/core/NotificationService', () => ({
 	NotificationService: {
 		getTutorNotifications: jest.fn(),
 		getStudentNotifications: jest.fn(),
@@ -77,7 +118,7 @@ jest.mock('./app/services/NotificationService', () => ({
 	}
 }));
 
-jest.mock('./app/services/CalicoCalendarService', () => ({
+jest.mock('./app/services/integrations/CalicoCalendarService', () => ({
 	CalicoCalendarService: {
 		getTutorAvailability: jest.fn(),
 		syncWithGoogleCalendar: jest.fn(),

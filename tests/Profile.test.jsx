@@ -24,7 +24,7 @@ jest.mock("../src/lib/i18n", () => ({
 }));
 
 // Mock the UserProfileService
-jest.mock("../src/app/services/UserProfileService", () => ({
+jest.mock("../src/app/services/core/UserProfileService", () => ({
   UserProfileService: {
     getUserProfile: jest.fn(() => Promise.resolve({
       success: true,

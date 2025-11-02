@@ -3,13 +3,13 @@ import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import RescheduleSessionModal from '../src/app/components/RescheduleSessionModal/RescheduleSessionModal';
 
 // Mock services
-jest.mock('../src/app/services/AvailabilityService', () => ({
+jest.mock('../src/app/services/core/AvailabilityService', () => ({
   AvailabilityService: {
     getAvailabilitiesByTutorAndRange: jest.fn(),
   },
 }));
 
-jest.mock('../src/app/services/SlotService', () => ({
+jest.mock('../src/app/services/utils/SlotService', () => ({
   SlotService: {
     generateHourlySlotsFromAvailabilities: jest.fn(),
     getAvailableSlots: jest.fn(),

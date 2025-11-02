@@ -13,7 +13,7 @@ jest.mock('../src/app/context/SecureAuthContext', () => ({
 }));
 
 // Mock TutoringSessionService
-jest.mock('../src/app/services/TutoringSessionService', () => ({
+jest.mock('../src/app/services/core/TutoringSessionService', () => ({
   TutoringSessionService: {
     cancelSession: jest.fn(),
     canCancelSession: jest.fn(),
@@ -38,6 +38,12 @@ jest.mock('../src/app/components/RescheduleSessionModal/RescheduleSessionModal',
 import { TutoringSessionService } from '../src/app/services/core/TutoringSessionService';
 
 describe('TutoringDetailsModal', () => {
+  // Use a future date (3 days from now) to ensure session can be cancelled
+  const futureDate = new Date();
+  futureDate.setDate(futureDate.getDate() + 3);
+  const endDate = new Date(futureDate);
+  endDate.setHours(futureDate.getHours() + 1);
+  
   const mockSession = {
     id: 'session-123',
     subject: 'Cálculo I',
@@ -46,8 +52,8 @@ describe('TutoringDetailsModal', () => {
     tutorName: 'John Doe',
     studentEmail: 'student@example.com',
     studentName: 'Jane Smith',
-    scheduledDateTime: '2025-10-15T10:00:00Z',
-    endDateTime: '2025-10-15T11:00:00Z',
+    scheduledDateTime: futureDate.toISOString(),
+    endDateTime: endDate.toISOString(),
     location: 'Building ML, Room 301',
     price: 50000,
     notes: 'Please bring your textbook',

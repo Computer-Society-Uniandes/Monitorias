@@ -3,7 +3,7 @@ import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import SessionConfirmationModal from '../src/app/components/SessionConfirmationModal/SessionConfirmationModal';
 
 // Mock PaymentService
-jest.mock('../src/app/services/PaymentService', () => ({
+jest.mock('../src/app/services/core/PaymentService', () => ({
   PaymentService: {
     uploadPaymentProof: jest.fn(),
   },
