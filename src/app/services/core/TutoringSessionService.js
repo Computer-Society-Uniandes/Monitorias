@@ -1,3 +1,4 @@
+import { TutoringSessionRepository } from '../../repositories/tutoring-session.repository';
 import { db } from '../../../firebaseConfig';
 import { 
   collection, 
@@ -43,18 +44,16 @@ export class TutoringSessionService {
       // Determinar si es una sesión que requiere aprobación del tutor
       const requiresApproval = sessionData.requiresApproval !== false; // Por defecto requiere aprobación
       
-      const docRef = await addDoc(collection(db, this.COLLECTION_NAME), {
+      const id = await TutoringSessionRepository.create({
         ...cleanedData,
         status: requiresApproval ? 'pending' : 'scheduled',
         tutorApprovalStatus: requiresApproval ? 'pending' : 'approved',
-        requestedAt: requiresApproval ? serverTimestamp() : null,
-        paymentStatus: 'pending',
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
+        requestedAt: requiresApproval ? new Date() : null,
+        paymentStatus: 'pending'
       });
 
-      console.log('✅ Tutoring session created with ID:', docRef.id, 'Status:', requiresApproval ? 'pending' : 'scheduled');
-      return { success: true, id: docRef.id };
+      console.log('✅ Tutoring session created with ID:', id, 'Status:', requiresApproval ? 'pending' : 'scheduled');
+      return { success: true, id };
     } catch (error) {
       console.error('❌ Error creating tutoring session:', error);
       console.error('🔍 Session data that caused error:', sessionData);
@@ -369,27 +368,7 @@ export class TutoringSessionService {
   // Obtener sesiones de un estudiante (manteniendo compatibilidad)
   static async getStudentSessions(studentEmail) {
     try {
-      const q = query(
-        collection(db, this.COLLECTION_NAME),
-        where('studentEmail', '==', studentEmail),
-        orderBy('scheduledDateTime', 'desc')
-      );
-
-      const querySnapshot = await getDocs(q);
-      const sessions = [];
-
-      querySnapshot.forEach((doc) => {
-        sessions.push({
-          id: doc.id,
-          ...doc.data(),
-          createdAt: doc.data().createdAt?.toDate(),
-          updatedAt: doc.data().updatedAt?.toDate(),
-          scheduledDateTime: doc.data().scheduledDateTime?.toDate(),
-          endDateTime: doc.data().endDateTime?.toDate(),
-        });
-      });
-
-      return sessions;
+      return await TutoringSessionRepository.findByStudent(studentEmail);
     } catch (error) {
       console.error('Error getting student sessions:', error);
       throw new Error(`Error obteniendo sesiones del estudiante: ${error.message}`);
@@ -401,32 +380,13 @@ export class TutoringSessionService {
     try {
       console.log('tutorEmail', tutorEmail);
       
-      // Obtener todas las sesiones del tutor
-      const q = query(
-        collection(db, this.COLLECTION_NAME),
-        where('tutorEmail', '==', tutorEmail),
-        orderBy('scheduledDateTime', 'desc')
+      // Obtener todas las sesiones del tutor usando el repositorio
+      const allSessions = await TutoringSessionRepository.findByTutor(tutorEmail);
+      
+      // Filtrar sesiones pendientes de aprobación (business logic)
+      const sessions = allSessions.filter(session => 
+        session.status !== 'pending' && session.tutorApprovalStatus !== 'pending'
       );
-
-      const querySnapshot = await getDocs(q);
-      const sessions = [];
-
-      querySnapshot.forEach((doc) => {
-        const sessionData = doc.data();
-        
-        // Filtrar sesiones pendientes de aprobación
-        if (sessionData.status !== 'pending' && sessionData.tutorApprovalStatus !== 'pending') {
-          sessions.push({
-            id: doc.id,
-            ...sessionData,
-            createdAt: sessionData.createdAt?.toDate(),
-            updatedAt: sessionData.updatedAt?.toDate(),
-            scheduledDateTime: sessionData.scheduledDateTime?.toDate(),
-            endDateTime: sessionData.endDateTime?.toDate(),
-            requestedAt: sessionData.requestedAt?.toDate(),
-          });
-        }
-      });
       
       console.log('sessions (excluding pending):', sessions.length);
 
@@ -734,33 +694,8 @@ export class TutoringSessionService {
   // Get pending sessions for a tutor
   static async getPendingSessionsForTutor(tutorEmail) {
     try {
-      // Buscar sesiones que están pendientes de aprobación del tutor
-      const q = query(
-        collection(db, this.COLLECTION_NAME),
-        where('tutorEmail', '==', tutorEmail),
-        where('status', '==', 'pending'),
-        orderBy('requestedAt', 'desc')
-      );
-
-      const querySnapshot = await getDocs(q);
-      const sessions = [];
-
-      querySnapshot.forEach((doc) => {
-        const sessionData = doc.data();
-        
-        // Solo incluir sesiones que realmente están pendientes de aprobación
-        if (sessionData.tutorApprovalStatus === 'pending') {
-          sessions.push({
-            id: doc.id,
-            ...sessionData,
-            createdAt: sessionData.createdAt?.toDate(),
-            updatedAt: sessionData.updatedAt?.toDate(),
-            scheduledDateTime: sessionData.scheduledDateTime?.toDate(),
-            endDateTime: sessionData.endDateTime?.toDate(),
-            requestedAt: sessionData.requestedAt?.toDate(),
-          });
-        }
-      });
+      // Buscar sesiones que están pendientes de aprobación del tutor usando el repositorio
+      const sessions = await TutoringSessionRepository.findPendingByTutor(tutorEmail);
 
       console.log(`Found ${sessions.length} pending sessions for tutor:`, tutorEmail);
       return sessions;
@@ -795,16 +730,7 @@ export class TutoringSessionService {
   // Método para actualizar una sesión de tutoría existente
   static async updateTutoringSession(sessionId, updateData) {
     try {
-      // Eliminar campos con valores undefined o null para evitar errores de Firestore
-      const cleanedData = Object.fromEntries(
-        Object.entries(updateData).filter(([_, value]) => value !== undefined && value !== null)
-      );
-
-      const docRef = doc(db, this.COLLECTION_NAME, sessionId);
-      await updateDoc(docRef, {
-        ...cleanedData,
-        updatedAt: serverTimestamp()
-      });
+      await TutoringSessionRepository.update(sessionId, updateData);
 
       console.log('Tutoring session updated:', sessionId);
       return { success: true, id: sessionId };
@@ -1065,22 +991,7 @@ export class TutoringSessionService {
   // Obtener una sesión de tutoría por ID
   static async getTutoringSessionById(sessionId) {
     try {
-      const docRef = doc(db, this.COLLECTION_NAME, sessionId);
-      const docSnap = await getDoc(docRef);
-
-      if (!docSnap.exists()) {
-        return null;
-      }
-
-      return {
-        id: docSnap.id,
-        ...docSnap.data(),
-        createdAt: docSnap.data().createdAt?.toDate(),
-        updatedAt: docSnap.data().updatedAt?.toDate(),
-        scheduledDateTime: docSnap.data().scheduledDateTime?.toDate(),
-        endDateTime: docSnap.data().endDateTime?.toDate(),
-        cancelledAt: docSnap.data().cancelledAt?.toDate(),
-      };
+      return await TutoringSessionRepository.findById(sessionId);
     } catch (error) {
       console.error('Error getting tutoring session by ID:', error);
       throw new Error(`Error obteniendo sesión: ${error.message}`);

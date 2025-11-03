@@ -1,8 +1,7 @@
 "use client";
 
-import { db } from '../../../firebaseConfig';
+import { PaymentRepository } from '../../repositories/payment.repository';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
 import app from '../../../firebaseConfig';
 
 /**
@@ -51,121 +50,47 @@ export class PaymentService {
   static async getPaymentsByStudent(studentEmail, options = {}) {
     if (!studentEmail) return [];
     const { startDate = null, endDate = null } = options;
-    const normalizedEmail = String(studentEmail).trim().toLowerCase();
 
     try {
-      console.log('[PaymentService] getPaymentsByStudent for:', normalizedEmail);
+      console.log('[PaymentService] getPaymentsByStudent for:', studentEmail);
       
-      let snapshot = null;
-      try {
-        const q = query(
-          collection(db, this.COLLECTION_NAME),
-          where('studentEmail', '==', normalizedEmail),
-          orderBy('date_payment', 'desc')
+      let payments = [];
+      
+      // Use repository with date filtering if specified
+      if (startDate && endDate) {
+        payments = await PaymentRepository.findByStudentAndDateRange(
+          studentEmail,
+          startDate,
+          endDate
         );
-        snapshot = await getDocs(q);
-        console.log('[PaymentService] primary query size:', snapshot.size);
-      } catch (eOrder) {
-        console.warn('[PaymentService] orderBy(date_payment) no disponible, usando fallback sin orderBy', eOrder);
-        const q = query(
-          collection(db, this.COLLECTION_NAME),
-          where('studentEmail', '==', normalizedEmail)
-        );
-        snapshot = await getDocs(q);
-        console.log('[PaymentService] fallback (no orderBy) size:', snapshot.size);
-      }
-
-      const results = [];
-
-      snapshot.forEach((docSnap) => {
-        const data = docSnap.data();
-        const storedEmail = (data.studentEmail ? String(data.studentEmail) : '').trim().toLowerCase();
-        if (storedEmail !== normalizedEmail) return;
-
-        const rawDate = data.date_payment;
-        let datePayment = null;
+      } else {
+        payments = await PaymentRepository.findByStudent(studentEmail);
         
-        if (rawDate?.toDate) {
-          datePayment = rawDate.toDate();
-        } else if (typeof rawDate === 'string') {
-          const parsed = new Date(rawDate);
-          datePayment = isNaN(parsed) ? null : parsed;
-        } else if (rawDate instanceof Date) {
-          datePayment = rawDate;
-        }
-
-        if (startDate && datePayment && datePayment < startDate) return;
-        if (endDate && datePayment && datePayment > endDate) return;
-
-        results.push({
-          id: docSnap.id,
-          amount: typeof data.amount === 'number' ? data.amount : Number(data.amount) || 0,
-          date_payment: datePayment,
-          method: data.method || '',
-          studentEmail: data.studentEmail || '',
-          subject: data.subject || '',
-          transactionID: data.transactionID || data.transactionId || '',
-          tutorEmail: data.tutorEmail || '',
-          raw: data
-        });
-      });
-
-      // Fallback con 'in' query si no hay resultados
-      if (results.length === 0) {
-        try {
-          const variants = [
-            String(studentEmail),
-            String(studentEmail).trim(),
-            String(studentEmail).toLowerCase(),
-            String(studentEmail).trim().toLowerCase()
-          ];
-          const unique = Array.from(new Set(variants));
-          console.log('[PaymentService] IN variants:', unique);
-          
-          const qIn = query(
-            collection(db, this.COLLECTION_NAME),
-            where('studentEmail', 'in', unique)
-          );
-          const snapIn = await getDocs(qIn);
-          console.log('[PaymentService] IN query size:', snapIn.size);
-          
-          snapIn.forEach((docSnap) => {
-            const data = docSnap.data();
-            const rawDate = data.date_payment;
-            let datePayment = null;
-            
-            if (rawDate?.toDate) datePayment = rawDate.toDate();
-            else if (typeof rawDate === 'string') {
-              const parsed = new Date(rawDate);
-              datePayment = isNaN(parsed) ? null : parsed;
-            } else if (rawDate instanceof Date) datePayment = rawDate;
-            
-            if (startDate && datePayment && datePayment < startDate) return;
-            if (endDate && datePayment && datePayment > endDate) return;
-            
-            results.push({
-              id: docSnap.id,
-              amount: typeof data.amount === 'number' ? data.amount : Number(data.amount) || 0,
-              date_payment: datePayment,
-              method: data.method || '',
-              studentEmail: data.studentEmail || '',
-              subject: data.subject || '',
-              transactionID: data.transactionID || data.transactionId || '',
-              tutorEmail: data.tutorEmail || '',
-              raw: data
-            });
+        // Apply date filters if only one is specified
+        if (startDate || endDate) {
+          payments = payments.filter(payment => {
+            if (!payment.date_payment) return false;
+            if (startDate && payment.date_payment < startDate) return false;
+            if (endDate && payment.date_payment > endDate) return false;
+            return true;
           });
-        } catch (eIn) {
-          console.warn('[PaymentService] Fallback IN query failed:', eIn);
         }
       }
 
-      // Ordenar por fecha descendente
-      results.sort((a, b) => {
-        const ad = a.date_payment ? a.date_payment.getTime() : 0;
-        const bd = b.date_payment ? b.date_payment.getTime() : 0;
-        return bd - ad;
-      });
+      console.log('[PaymentService] Found payments:', payments.length);
+
+      // Normalize and format results for UI
+      const results = payments.map(payment => ({
+        id: payment.id,
+        amount: typeof payment.amount === 'number' ? payment.amount : Number(payment.amount) || 0,
+        date_payment: payment.date_payment,
+        method: payment.method || '',
+        studentEmail: payment.studentEmail || '',
+        subject: payment.subject || '',
+        transactionID: payment.transactionID || payment.transactionId || '',
+        tutorEmail: payment.tutorEmail || '',
+        raw: payment
+      }));
 
       return results;
     } catch (error) {
@@ -183,31 +108,36 @@ export class PaymentService {
   static async getPaymentsByTutor(tutorEmail, options = {}) {
     if (!tutorEmail) return [];
     const { startDate = null, endDate = null } = options;
-    const normalizedEmail = String(tutorEmail).trim().toLowerCase();
 
     try {
-      console.log('[PaymentService] getPaymentsByTutor for:', normalizedEmail);
+      console.log('[PaymentService] getPaymentsByTutor for:', tutorEmail);
       
-      let snapshot = null;
-      try {
-        const q = query(
-          collection(db, this.COLLECTION_NAME),
-          where('tutorEmail', '==', normalizedEmail),
-          orderBy('date_payment', 'desc')
+      let payments = [];
+      
+      // Use repository with date filtering if specified
+      if (startDate && endDate) {
+        payments = await PaymentRepository.findByTutorAndDateRange(
+          tutorEmail,
+          startDate,
+          endDate
         );
-        snapshot = await getDocs(q);
-        console.log('[PaymentService] tutor primary query size:', snapshot.size);
-      } catch (eOrder) {
-        console.warn('[PaymentService] tutor orderBy(date_payment) no disponible, fallback sin orderBy', eOrder);
-        const q = query(
-          collection(db, this.COLLECTION_NAME),
-          where('tutorEmail', '==', normalizedEmail)
-        );
-        snapshot = await getDocs(q);
-        console.log('[PaymentService] tutor fallback (no orderBy) size:', snapshot.size);
+      } else {
+        payments = await PaymentRepository.findByTutor(tutorEmail);
+        
+        // Apply date filters if only one is specified
+        if (startDate || endDate) {
+          payments = payments.filter(payment => {
+            if (!payment.date_payment) return false;
+            if (startDate && payment.date_payment < startDate) return false;
+            if (endDate && payment.date_payment > endDate) return false;
+            return true;
+          });
+        }
       }
 
-      const results = [];
+      console.log('[PaymentService] Found payments:', payments.length);
+
+      // Normalize boolean values
       const normalizeBool = (val) => {
         if (typeof val === 'boolean') return val;
         if (typeof val === 'string') return val.toLowerCase() === 'true';
@@ -215,54 +145,20 @@ export class PaymentService {
         return Boolean(val);
       };
 
-      snapshot.forEach((docSnap) => {
-        const data = docSnap.data();
-        const storedEmail = (data.tutorEmail ? String(data.tutorEmail) : '').trim().toLowerCase();
-        if (storedEmail !== normalizedEmail) {
-          console.log('[PaymentService] Skipping doc, email mismatch:', storedEmail, 'vs', normalizedEmail);
-          return;
-        }
-
-        const rawDate = data.date_payment;
-        let datePayment = null;
-        
-        if (rawDate?.toDate) datePayment = rawDate.toDate();
-        else if (typeof rawDate === 'string') {
-          const parsed = new Date(rawDate);
-          datePayment = isNaN(parsed) ? null : parsed;
-        } else if (rawDate instanceof Date) datePayment = rawDate;
-
-        if (startDate && datePayment && datePayment < startDate) {
-          console.log('[PaymentService] Skipping doc, before startDate:', datePayment, '<', startDate);
-          return;
-        }
-        if (endDate && datePayment && datePayment > endDate) {
-          console.log('[PaymentService] Skipping doc, after endDate:', datePayment, '>', endDate);
-          return;
-        }
-
-        console.log('[PaymentService] Adding payment:', docSnap.id, data);
-        results.push({
-          id: docSnap.id,
-          amount: typeof data.amount === 'number' ? data.amount : Number(data.amount) || 0,
-          date_payment: datePayment,
-          method: data.method || '',
-          studentEmail: data.studentEmail || '',
-          studentName: data.studentName || '',
-          subject: data.subject || '',
-          transactionID: data.transactionID || data.transactionId || '',
-          tutorEmail: data.tutorEmail || '',
-          pagado: normalizeBool(data.pagado),
-          raw: data
-        });
-      });
-
-      // Ordenar por fecha desc
-      results.sort((a, b) => {
-        const ad = a.date_payment ? a.date_payment.getTime() : 0;
-        const bd = b.date_payment ? b.date_payment.getTime() : 0;
-        return bd - ad;
-      });
+      // Normalize and format results for UI
+      const results = payments.map(payment => ({
+        id: payment.id,
+        amount: typeof payment.amount === 'number' ? payment.amount : Number(payment.amount) || 0,
+        date_payment: payment.date_payment,
+        method: payment.method || '',
+        studentEmail: payment.studentEmail || '',
+        studentName: payment.studentName || '',
+        subject: payment.subject || '',
+        transactionID: payment.transactionID || payment.transactionId || '',
+        tutorEmail: payment.tutorEmail || '',
+        pagado: normalizeBool(payment.pagado),
+        raw: payment
+      }));
 
       return results;
     } catch (error) {

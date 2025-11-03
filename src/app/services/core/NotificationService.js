@@ -1,20 +1,14 @@
+import { NotificationRepository } from '../../repositories/notification.repository';
 import { db } from '../../../firebaseConfig';
 import { 
   collection, 
-  doc, 
-  getDoc, 
-  getDocs, 
-  setDoc, 
-  updateDoc,
-  deleteDoc, 
   query, 
   where, 
-  orderBy, 
-  limit,
+  getDocs, 
+  writeBatch,
   serverTimestamp,
-  Timestamp,
-  addDoc,
-  writeBatch
+  deleteDoc,
+  doc
 } from 'firebase/firestore';
 
 /**
@@ -40,15 +34,12 @@ export class NotificationService {
         scheduledDateTime: sessionData.scheduledDateTime,
         type: 'pending_session_request',
         title: 'New Tutoring Request',
-        message: `${sessionData.studentName} has requested a tutoring session for ${sessionData.subject}`,
-        isRead: false,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
+        message: `${sessionData.studentName} has requested a tutoring session for ${sessionData.subject}`
       };
 
-      const docRef = await addDoc(collection(db, this.COLLECTION_NAME), notificationData);
-      console.log('Pending session notification created with ID:', docRef.id);
-      return { success: true, id: docRef.id };
+      const id = await NotificationRepository.create(notificationData);
+      console.log('Pending session notification created with ID:', id);
+      return { success: true, id };
     } catch (error) {
       console.error('Error creating pending session notification:', error);
       throw new Error(`Failed to create notification: ${error.message}`);
@@ -58,27 +49,7 @@ export class NotificationService {
   // Get notifications for a tutor
   static async getTutorNotifications(tutorEmail, limitCount = 50) {
     try {
-      const q = query(
-        collection(db, this.COLLECTION_NAME),
-        where('tutorEmail', '==', tutorEmail),
-        orderBy('createdAt', 'desc'),
-        limit(limitCount)
-      );
-
-      const querySnapshot = await getDocs(q);
-      const notifications = [];
-
-      querySnapshot.forEach((doc) => {
-        notifications.push({
-          id: doc.id,
-          ...doc.data(),
-          createdAt: doc.data().createdAt?.toDate(),
-          updatedAt: doc.data().updatedAt?.toDate(),
-          scheduledDateTime: doc.data().scheduledDateTime?.toDate(),
-        });
-      });
-
-      return notifications;
+      return await NotificationRepository.findByTutor(tutorEmail, limitCount);
     } catch (error) {
       console.error('Error getting tutor notifications:', error);
       throw new Error(`Failed to retrieve notifications: ${error.message}`);
@@ -88,13 +59,7 @@ export class NotificationService {
   // Mark notification as read
   static async markNotificationAsRead(notificationId) {
     try {
-      const notificationRef = doc(db, this.COLLECTION_NAME, notificationId);
-      await updateDoc(notificationRef, {
-        isRead: true,
-        readAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
-      });
-
+      await NotificationRepository.markAsRead(notificationId);
       console.log('Notification marked as read:', notificationId);
       return { success: true };
     } catch (error) {
@@ -120,14 +85,8 @@ export class NotificationService {
   // Get unread notification count for a tutor
   static async getUnreadNotificationCount(tutorEmail) {
     try {
-      const q = query(
-        collection(db, this.COLLECTION_NAME),
-        where('tutorEmail', '==', tutorEmail),
-        where('isRead', '==', false)
-      );
-
-      const querySnapshot = await getDocs(q);
-      return querySnapshot.size;
+      const unreadNotifications = await NotificationRepository.findUnreadByTutor(tutorEmail);
+      return unreadNotifications.length;
     } catch (error) {
       console.error('Error getting unread notification count:', error);
       return 0;
@@ -145,15 +104,12 @@ export class NotificationService {
         scheduledDateTime: sessionData.scheduledDateTime,
         type: 'session_accepted',
         title: 'Session Accepted',
-        message: `Your tutoring session for ${sessionData.subject} has been accepted`,
-        isRead: false,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
+        message: `Your tutoring session for ${sessionData.subject} has been accepted`
       };
 
-      const docRef = await addDoc(collection(db, this.COLLECTION_NAME), notificationData);
-      console.log('Session accepted notification created with ID:', docRef.id);
-      return { success: true, id: docRef.id };
+      const id = await NotificationRepository.create(notificationData);
+      console.log('Session accepted notification created with ID:', id);
+      return { success: true, id };
     } catch (error) {
       console.error('Error creating session accepted notification:', error);
       throw new Error(`Failed to create notification: ${error.message}`);
@@ -171,15 +127,12 @@ export class NotificationService {
         scheduledDateTime: sessionData.scheduledDateTime,
         type: 'session_declined',
         title: 'Session Declined',
-        message: `Your tutoring session for ${sessionData.subject} has been declined`,
-        isRead: false,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
+        message: `Your tutoring session for ${sessionData.subject} has been declined`
       };
 
-      const docRef = await addDoc(collection(db, this.COLLECTION_NAME), notificationData);
-      console.log('Session declined notification created with ID:', docRef.id);
-      return { success: true, id: docRef.id };
+      const id = await NotificationRepository.create(notificationData);
+      console.log('Session declined notification created with ID:', id);
+      return { success: true, id };
     } catch (error) {
       console.error('Error creating session declined notification:', error);
       throw new Error(`Failed to create notification: ${error.message}`);
@@ -201,15 +154,12 @@ export class NotificationService {
         reason: sessionData.reason || 'No reason provided',
         type: 'session_cancelled',
         title: 'Session Cancelled',
-        message: `Your tutoring session for ${sessionData.subject} has been cancelled by the ${cancellerRole}. ${sessionData.reason || 'No reason provided'}`,
-        isRead: false,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
+        message: `Your tutoring session for ${sessionData.subject} has been cancelled by the ${cancellerRole}. ${sessionData.reason || 'No reason provided'}`
       };
 
-      const docRef = await addDoc(collection(db, this.COLLECTION_NAME), notificationData);
-      console.log('Session cancelled notification created with ID:', docRef.id);
-      return { success: true, id: docRef.id };
+      const id = await NotificationRepository.create(notificationData);
+      console.log('Session cancelled notification created with ID:', id);
+      return { success: true, id };
     } catch (error) {
       console.error('Error creating session cancelled notification:', error);
       throw new Error(`Failed to create notification: ${error.message}`);
@@ -245,15 +195,12 @@ export class NotificationService {
         reason: sessionData.reason || 'No reason provided',
         type: 'session_rescheduled',
         title: 'Session Rescheduled',
-        message: `Your tutoring session with ${sessionData.studentName} for ${sessionData.subject} has been rescheduled from ${oldDate} to ${newDate}. ${sessionData.reason || 'No reason provided'}`,
-        isRead: false,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
+        message: `Your tutoring session with ${sessionData.studentName} for ${sessionData.subject} has been rescheduled from ${oldDate} to ${newDate}. ${sessionData.reason || 'No reason provided'}`
       };
 
-      const docRef = await addDoc(collection(db, this.COLLECTION_NAME), notificationData);
-      console.log('Session rescheduled notification created with ID:', docRef.id);
-      return { success: true, id: docRef.id };
+      const id = await NotificationRepository.create(notificationData);
+      console.log('Session rescheduled notification created with ID:', id);
+      return { success: true, id };
     } catch (error) {
       console.error('Error creating session rescheduled notification:', error);
       throw new Error(`Failed to create notification: ${error.message}`);
@@ -263,27 +210,7 @@ export class NotificationService {
   // Get notifications for a student
   static async getStudentNotifications(studentEmail, limitCount = 50) {
     try {
-      const q = query(
-        collection(db, this.COLLECTION_NAME),
-        where('studentEmail', '==', studentEmail),
-        orderBy('createdAt', 'desc'),
-        limit(limitCount)
-      );
-
-      const querySnapshot = await getDocs(q);
-      const notifications = [];
-
-      querySnapshot.forEach((doc) => {
-        notifications.push({
-          id: doc.id,
-          ...doc.data(),
-          createdAt: doc.data().createdAt?.toDate(),
-          updatedAt: doc.data().updatedAt?.toDate(),
-          scheduledDateTime: doc.data().scheduledDateTime?.toDate(),
-        });
-      });
-
-      return notifications;
+      return await NotificationRepository.findByStudent(studentEmail, limitCount);
     } catch (error) {
       console.error('Error getting student notifications:', error);
       throw new Error(`Failed to retrieve notifications: ${error.message}`);
@@ -298,15 +225,12 @@ export class NotificationService {
         sessionId: sessionData.sessionId,
         type: 'session_rejected',
         title: 'Session Rejected',
-        message: `Your tutoring session request has been rejected${sessionData.reason ? `: ${sessionData.reason}` : ''}`,
-        isRead: false,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
+        message: `Your tutoring session request has been rejected${sessionData.reason ? `: ${sessionData.reason}` : ''}`
       };
 
-      const docRef = await addDoc(collection(db, this.COLLECTION_NAME), notificationData);
-      console.log('Session rejected notification created with ID:', docRef.id);
-      return { success: true, id: docRef.id };
+      const id = await NotificationRepository.create(notificationData);
+      console.log('Session rejected notification created with ID:', id);
+      return { success: true, id };
     } catch (error) {
       console.error('Error creating session rejected notification:', error);
       throw new Error(`Failed to create notification: ${error.message}`);
@@ -321,15 +245,12 @@ export class NotificationService {
         sessionId: sessionData.sessionId,
         type: 'session_reminder',
         title: 'Session Reminder',
-        message: `Reminder: You have a tutoring session for ${sessionData.subject} with ${sessionData.tutorName}`,
-        isRead: false,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
+        message: `Reminder: You have a tutoring session for ${sessionData.subject} with ${sessionData.tutorName}`
       };
 
-      const docRef = await addDoc(collection(db, this.COLLECTION_NAME), notificationData);
-      console.log('Session reminder notification created with ID:', docRef.id);
-      return { success: true, id: docRef.id };
+      const id = await NotificationRepository.create(notificationData);
+      console.log('Session reminder notification created with ID:', id);
+      return { success: true, id };
     } catch (error) {
       console.error('Error creating session reminder notification:', error);
       throw new Error(`Failed to create notification: ${error.message}`);
@@ -344,15 +265,12 @@ export class NotificationService {
         sessionId: sessionData.sessionId,
         type: 'payment_reminder',
         title: 'Payment Reminder',
-        message: `Please complete the payment for your tutoring session in ${sessionData.subject}`,
-        isRead: false,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
+        message: `Please complete the payment for your tutoring session in ${sessionData.subject}`
       };
 
-      const docRef = await addDoc(collection(db, this.COLLECTION_NAME), notificationData);
-      console.log('Payment reminder notification created with ID:', docRef.id);
-      return { success: true, id: docRef.id };
+      const id = await NotificationRepository.create(notificationData);
+      console.log('Payment reminder notification created with ID:', id);
+      return { success: true, id };
     } catch (error) {
       console.error('Error creating payment reminder notification:', error);
       throw new Error(`Failed to create notification: ${error.message}`);

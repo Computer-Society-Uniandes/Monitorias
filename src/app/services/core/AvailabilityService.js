@@ -36,7 +36,7 @@ export class AvailabilityService {
   
   // Obtener disponibilidad para la semana actual
   static async getWeeklyAvailability() {
-    const now = new Date();
+    const now = new Date();M
     const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
     const endOfWeek = new Date(startOfWeek.getTime() + 7 * 24 * 60 * 60 * 1000);
     

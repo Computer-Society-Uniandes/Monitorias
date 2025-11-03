@@ -1,6 +1,6 @@
 // Servicio para manejar la disponibilidad conjunta de múltiples tutores
-import { collection, query, where, getDocs } from 'firebase/firestore';
-import { db } from '../../../firebaseConfig';
+import { UserRepository } from '../../repositories/user.repository';
+import { AvailabilityRepository } from '../../repositories/availability.repository';
 
 /**
  * @typedef {import('../models/user.model').User} User
@@ -15,23 +15,13 @@ export class JointAvailabilityService {
    */
   static async getTutorsBySubject(subject) {
     try {
-      const tutorsQuery = query(
-        collection(db, 'user'),
-        where('isTutor', '==', true),
-        where('subjects', 'array-contains', subject)
-      );
+      // Use repository for data access
+      const tutors = await UserRepository.findTutorsBySubject(subject);
       
-      const tutorsSnapshot = await getDocs(tutorsQuery);
-      const tutors = [];
-      
-      tutorsSnapshot.forEach((doc) => {
-        tutors.push({ id: doc.id, ...doc.data() });
-      });
-      
-      console.log(`Found ${tutors.length} tutors for subject: ${subject}`);
+      console.log(`[JointAvailabilityService] Found ${tutors.length} tutors for subject: ${subject}`);
       return tutors;
     } catch (error) {
-      console.error('Error getting tutors by subject:', error);
+      console.error('[JointAvailabilityService] Error getting tutors by subject:', error);
       throw error;
     }
   }
@@ -99,45 +89,33 @@ export class JointAvailabilityService {
    */
   static async getAvailabilityFromFirebase(tutorEmail) {
     try {
-      const availabilityQuery = query(
-        collection(db, 'availabilities'),
-        where('tutorEmail', '==', tutorEmail)
-      );
+      // Use repository for data access
+      const availabilities = await AvailabilityRepository.findByTutor(tutorEmail);
       
-      const querySnapshot = await getDocs(availabilityQuery);
-      const slots = [];
+      // Transform repository data to slot format for UI
+      const slots = availabilities
+        .filter(data => data.startDateTime && data.endDateTime)
+        .map(data => ({
+          id: data.id,
+          title: data.title || 'Disponible',
+          date: data.startDateTime.toISOString().split('T')[0],
+          startTime: data.startDateTime.toTimeString().substring(0, 5),
+          endTime: data.endDateTime.toTimeString().substring(0, 5),
+          start: data.startDateTime.toISOString(),
+          end: data.endDateTime.toISOString(),
+          tutorEmail: data.tutorEmail,
+          subject: data.subject,
+          description: data.description,
+          location: data.location,
+          recurring: data.recurring || false,
+          available: true,
+          source: 'firebase'
+        }));
       
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        
-        // Convertir Firestore timestamp a fecha
-        const startDateTime = data.startDateTime?.toDate();
-        const endDateTime = data.endDateTime?.toDate();
-        
-        if (startDateTime && endDateTime) {
-          slots.push({
-            id: doc.id,
-            title: data.title || 'Disponible',
-            date: startDateTime.toISOString().split('T')[0],
-            startTime: startDateTime.toTimeString().substring(0, 5),
-            endTime: endDateTime.toTimeString().substring(0, 5),
-            start: startDateTime.toISOString(),
-            end: endDateTime.toISOString(),
-            tutorEmail: data.tutorEmail,
-            subject: data.subject,
-            description: data.description,
-            location: data.location,
-            recurring: data.recurring || false,
-            available: true,
-            source: 'firebase'
-          });
-        }
-      });
-      
-      console.log(`Firebase fallback found ${slots.length} slots for ${tutorEmail}`);
+      console.log(`[JointAvailabilityService] Firebase fallback found ${slots.length} slots for ${tutorEmail}`);
       return slots;
     } catch (error) {
-      console.error('Error getting availability from Firebase:', error);
+      console.error('[JointAvailabilityService] Error getting availability from Firebase:', error);
       return [];
     }
   }

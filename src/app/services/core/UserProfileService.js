@@ -1,16 +1,4 @@
-import { db } from '../../../firebaseConfig';
-import { 
-  doc, 
-  getDoc, 
-  setDoc, 
-  updateDoc,
-  deleteDoc,
-  collection,
-  getDocs,
-  query,
-  where,
-  serverTimestamp
-} from 'firebase/firestore';
+import { UserRepository } from '../../repositories/user.repository';
 
 /**
  * @typedef {import('../models/user.model').User} User
@@ -28,17 +16,12 @@ export class UserProfileService {
    */
   static async getUserProfile(userEmail) {
     try {
-      const userDocRef = doc(db, this.USER_COLLECTION, userEmail);
-      const userSnap = await getDoc(userDocRef);
+      const user = await UserRepository.findByEmail(userEmail);
       
-      if (userSnap.exists()) {
-        const data = userSnap.data();
+      if (user) {
         return {
           success: true,
-          data: {
-            ...data,
-            email: userEmail
-          }
+          data: user
         };
       } else {
         return {
@@ -63,17 +46,7 @@ export class UserProfileService {
    */
   static async updateUserProfile(userEmail, updateData) {
     try {
-      const userDocRef = doc(db, this.USER_COLLECTION, userEmail);
-      
-      // Clean the data to remove undefined values
-      const cleanedData = Object.fromEntries(
-        Object.entries(updateData).filter(([_, value]) => value !== undefined && value !== null && value !== '')
-      );
-
-      await updateDoc(userDocRef, {
-        ...cleanedData,
-        updatedAt: serverTimestamp()
-      });
+      await UserRepository.update(userEmail, updateData);
 
       console.log('User profile updated successfully');
       return { success: true };
@@ -89,20 +62,7 @@ export class UserProfileService {
   // Get tutor subjects for a specific tutor
   static async getTutorSubjects(tutorEmail) {
     try {
-      const q = query(
-        collection(db, this.TUTOR_SUBJECTS_COLLECTION),
-        where('tutorEmail', '==', tutorEmail)
-      );
-
-      const querySnapshot = await getDocs(q);
-      const subjects = [];
-
-      querySnapshot.forEach((doc) => {
-        subjects.push({
-          id: doc.id,
-          ...doc.data()
-        });
-      });
+      const subjects = await UserRepository.findTutorSubjects(tutorEmail);
 
       return {
         success: true,
@@ -121,19 +81,12 @@ export class UserProfileService {
   // Add a subject for a tutor
   static async addTutorSubject(tutorEmail, subjectData) {
     try {
-      const docRef = doc(collection(db, this.TUTOR_SUBJECTS_COLLECTION));
-      
-      await setDoc(docRef, {
-        tutorEmail,
-        ...subjectData,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
-      });
+      const id = await UserRepository.addTutorSubject(tutorEmail, subjectData);
 
       console.log('Tutor subject added successfully');
       return { 
         success: true, 
-        id: docRef.id 
+        id 
       };
     } catch (error) {
       console.error('Error adding tutor subject:', error);
@@ -147,8 +100,7 @@ export class UserProfileService {
   // Remove a subject for a tutor
   static async removeTutorSubject(subjectId) {
     try {
-      const subjectRef = doc(db, this.TUTOR_SUBJECTS_COLLECTION, subjectId);
-      await deleteDoc(subjectRef);
+      await UserRepository.removeTutorSubject(subjectId);
 
       console.log('Tutor subject removed successfully');
       return { success: true };
@@ -195,20 +147,14 @@ export class UserProfileService {
   // Create or update user profile if it doesn't exist
   static async createOrUpdateUserProfile(userEmail, userData) {
     try {
-      const userDocRef = doc(db, this.USER_COLLECTION, userEmail);
-      const userSnap = await getDoc(userDocRef);
+      const exists = await UserRepository.exists(userEmail);
       
-      if (userSnap.exists()) {
+      if (exists) {
         // Update existing profile
         return await this.updateUserProfile(userEmail, userData);
       } else {
         // Create new profile
-        await setDoc(userDocRef, {
-          ...userData,
-          email: userEmail,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp()
-        });
+        await UserRepository.create(userEmail, userData);
 
         console.log('User profile created successfully');
         return { success: true };

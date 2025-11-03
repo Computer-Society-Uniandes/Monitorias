@@ -1,4 +1,5 @@
 import { auth } from '../../../firebaseServerConfig';
+import { Timestamp } from 'firebase/firestore';
 import { AvailabilityRepository } from '../../repositories/availability.repository';
 
 /**
@@ -214,36 +215,11 @@ export class FirebaseAvailabilityService {
   // Obtener disponibilidades en un rango de fechas
   static async getAvailabilitiesInDateRange(startDate, endDate, limitCount = 100) {
     try {
-      const startTimestamp = Timestamp.fromDate(startDate);
-      const endTimestamp = Timestamp.fromDate(endDate);
-
-      const q = query(
-        collection(db, this.COLLECTION_NAME),
-        where('startDateTime', '>=', startTimestamp),
-        where('startDateTime', '<=', endTimestamp),
-        orderBy('startDateTime', 'asc'),
-        limit(limitCount)
-      );
-
-      const querySnapshot = await getDocs(q);
-      const availabilities = [];
-
-      querySnapshot.forEach((doc) => {
-        availabilities.push({
-          id: doc.id,
-          ...doc.data(),
-          // Convertir timestamps a objetos Date
-                createdAt: doc.data().createdAt?.toDate(),
-          updatedAt: doc.data().updatedAt?.toDate(),
-          syncedAt: doc.data().syncedAt?.toDate(),
-          startDateTime: doc.data().startDateTime?.toDate(),
-          endDateTime: doc.data().endDateTime?.toDate(),
-        });
-      });
-
+      // Use repository for data access
+      const availabilities = await AvailabilityRepository.findInDateRange(startDate, endDate, limitCount);
       return availabilities;
     } catch (error) {
-      console.error('Error getting availabilities in date range:', error);
+      console.error('[FirebaseAvailabilityService] Error getting availabilities in date range:', error);
       throw new Error(`Error obteniendo disponibilidades por rango de fechas: ${error.message}`);
     }
   }
@@ -251,13 +227,13 @@ export class FirebaseAvailabilityService {
   // Eliminar una disponibilidad de Firestore
   static async deleteAvailability(googleEventId) {
     try {
-      const docRef = doc(db, this.COLLECTION_NAME, googleEventId);
-      await deleteDoc(docRef);
+      // Use repository for data access
+      await AvailabilityRepository.delete(googleEventId);
       
-      console.log('Availability deleted from Firebase:', googleEventId);
+      console.log('[FirebaseAvailabilityService] Availability deleted from Firebase:', googleEventId);
       return { success: true, id: googleEventId };
     } catch (error) {
-      console.error('Error deleting availability from Firebase:', error);
+      console.error('[FirebaseAvailabilityService] Error deleting availability from Firebase:', error);
       throw new Error(`Error eliminando disponibilidad: ${error.message}`);
     }
   }
@@ -265,11 +241,10 @@ export class FirebaseAvailabilityService {
   // Verificar si una disponibilidad existe en Firebase
   static async availabilityExists(googleEventId) {
     try {
-      const docRef = doc(db, this.COLLECTION_NAME, googleEventId);
-      const docSnap = await getDoc(docRef);
-      return docSnap.exists();
+      // Use repository for data access
+      return await AvailabilityRepository.exists(googleEventId);
     } catch (error) {
-      console.error('Error checking availability existence:', error);
+      console.error('[FirebaseAvailabilityService] Error checking availability existence:', error);
       return false;
     }
   }
