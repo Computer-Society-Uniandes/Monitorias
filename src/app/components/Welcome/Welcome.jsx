@@ -28,12 +28,6 @@ const WelcomeBanner = ({ usuario }) => {
       <div className="relative z-10 flex flex-col md:flex-row items-center justify-between px-8 md:px-16 text-white py-12 h-full">
         <div className="flex flex-col justify-center w-full md:w-2/3">
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
-              <Sparkles className="w-6 h-6" />
-            </div>
-            <span className="text-sm font-medium bg-white/20 px-3 py-1 rounded-full backdrop-blur-sm">
-              {t('welcome.badge')}
-            </span>
           </div>
           
           <h1 className="text-4xl md:text-6xl font-bold mb-4 leading-tight">

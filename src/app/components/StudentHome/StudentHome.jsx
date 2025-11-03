@@ -49,14 +49,14 @@ export default function StudentHome({ userName }) {
             </div>
           </div>
 
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-blue-100 hover:shadow-xl transition-all duration-300">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-orange-100 hover:shadow-xl transition-all duration-300">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">{t('studentHome.stats.activeSubjects')}</p>
-                <p className="text-2xl font-bold text-blue-600">{materias.length}</p>
+                  <p className="text-2xl font-bold text-orange-600">{materias.length}</p>
               </div>
-              <div className="p-3 bg-blue-100 rounded-xl">
-                <BookOpen className="w-6 h-6 text-blue-600" />
+              <div className="p-3 bg-orange-100 rounded-xl">
+                <BookOpen className="w-6 h-6 text-orange-600" />
               </div>
             </div>
           </div>
@@ -65,10 +65,10 @@ export default function StudentHome({ userName }) {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">{t('studentHome.stats.totalSessions')}</p>
-                <p className="text-2xl font-bold text-green-600">24</p>
+                <p className="text-2xl font-bold text-orange-600">24</p>
               </div>
-              <div className="p-3 bg-green-100 rounded-xl">
-                <TrendingUp className="w-6 h-6 text-green-600" />
+              <div className="p-3 bg-orange-100 rounded-xl">
+                <TrendingUp className="w-6 h-6 text-orange-600" />
               </div>
             </div>
           </div>
@@ -77,13 +77,23 @@ export default function StudentHome({ userName }) {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">{t('studentHome.stats.averageRating')}</p>
-                <p className="text-2xl font-bold text-purple-600">4.8</p>
+                <p className="text-2xl font-bold text-orange-600">4.8</p>
               </div>
-              <div className="p-3 bg-purple-100 rounded-xl">
-                <Star className="w-6 h-6 text-purple-600" />
+              <div className="p-3 bg-orange-100 rounded-xl">
+                <Star className="w-6 h-6 text-orange-600" />
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Scheduled Sessions */}
+        <div className="mb-8">
+          <TutoringSummary 
+            userType="student"
+            title={t('studentHome.scheduledSessions')}
+            linkText={t('studentHome.viewHistory')}
+            linkHref={routes.SEARCH_TUTORS}
+          />
         </div>
 
         {/* Main Action Cards */}
@@ -127,8 +137,8 @@ export default function StudentHome({ userName }) {
           {/* Quick Access Card */}
           <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-lg border border-gray-100">
             <div className="flex items-center gap-3 mb-6">
-              <div className="p-3 bg-blue-100 rounded-xl">
-                <Clock className="w-6 h-6 text-blue-600" />
+              <div className="p-3 bg-orange-100 rounded-xl">
+                <Clock className="w-6 h-6 text-orange-600" />
               </div>
               <h2 className="text-2xl font-bold text-gray-800">{t('studentHome.quickAccess.title')}</h2>
             </div>
@@ -174,16 +184,6 @@ export default function StudentHome({ userName }) {
               </Link>
             </div>
           </div>
-        </div>
-
-        {/* Scheduled Sessions */}
-        <div className="mb-8">
-          <TutoringSummary 
-            userType="student"
-            title={t('studentHome.scheduledSessions')}
-            linkText={t('studentHome.viewHistory')}
-            linkHref={routes.SEARCH_TUTORS}
-          />
         </div>
 
         {/* Your Subjects Section */}

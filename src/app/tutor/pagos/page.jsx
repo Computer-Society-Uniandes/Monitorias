@@ -49,7 +49,7 @@ export default function TutorPagos() {
       case "transferencia": return "🏦";
       case "efectivo": return "💵";
       case "tarjeta": return "💳";
-      default: return "💰";
+      default: return "";
     }
   };
 
@@ -63,7 +63,7 @@ export default function TutorPagos() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold text-gray-800 mb-2">
-            Pagos y Ganancias 💰
+            Pagos y Ganancias 
           </h1>
           <p className="text-gray-600">
             Gestiona tus ingresos y historial de pagos
@@ -83,7 +83,7 @@ export default function TutorPagos() {
               <p className="text-green-100 text-sm">Ingresos del Mes</p>
               <p className="text-2xl font-bold">${totalIngresos.toLocaleString()}</p>
             </div>
-            <span className="text-3xl">💰</span>
+            <span className="text-3xl"></span>
           </div>
         </div>
 
@@ -93,7 +93,6 @@ export default function TutorPagos() {
               <p className="text-gray-600 text-sm">Pendientes</p>
               <p className="text-2xl font-bold text-yellow-600">$35.000</p>
             </div>
-            <span className="text-3xl">⏳</span>
           </div>
         </div>
 

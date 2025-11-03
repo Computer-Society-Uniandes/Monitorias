@@ -437,7 +437,7 @@
     "tomorrow": "Mañana",
     "student": "Estudiante:",
     "tutor": "Tutor:",
-    "pendingApproval": "⏳ Pendiente de aprobación",
+    "pendingApproval": "Pendiente de aprobación",
     "statusScheduled": "Programada",
     "statusPending": "Pendiente"
   },
@@ -750,7 +750,7 @@
     "myTutorings": "📚 Mis Tutorías",
     "manageSubjects": "📖 Gestionar Materias",
     "availability": "📅 Disponibilidad",
-    "payments": "💰 Pagos",
+    "payments": " Pagos",
     "addSubject": "Agregar materia",
     "stats": {
       "thisMonth": "Este mes",
@@ -768,7 +768,7 @@
     "noSubjects": "No hay materias disponibles",
     "upcomingSession": "Próxima sesión",
     "noUpcomingSession": "Sin sesión próxima",
-    "upcomingTutorials": "Próximas Tutorías 📚",
+    "upcomingTutorials": "Próximas Tutorías",
     "viewAllTutorials": "Ver todas",
     "calendar": {
       "title": "Integración de Calendario",
@@ -799,7 +799,7 @@
   },
 
   "tutorPayments": {
-    "title": "Pagos y Ganancias 💰",
+    "title": "Pagos y Ganancias ",
     "subtitle": "Gestiona tus ingresos y historial de pagos",
     "requestWithdrawal": "💸 Solicitar Retiro",
     "cards": {
@@ -853,7 +853,7 @@
     "card": {
       "active": "Activo",
       "students": "👥 Estudiantes",
-      "ratePerHour": "💰 Tarifa/hora",
+      "ratePerHour": " Tarifa/hora",
       "edit": "Editar"
     },
     "stats": {

@@ -183,7 +183,7 @@ export default function StudentAvailabilityViewer() {
                       <div className="slot-time">
                         {formatDateTime(slot.startDateTime)} - {formatDateTime(slot.endDateTime)}
                       </div>
-                      {slot.location && <div className="slot-location">📍 {slot.location}</div>}
+                      {slot.location && <div className="slot-location"> {slot.location}</div>}
                       {slot.description && <div className="slot-description">{slot.description}</div>}
                     </div>
                   ))}

@@ -12,7 +12,7 @@ const BoxNewSubject = ({name, number}) => {
 
         <span 
             className="material-symbols-outlined"
-            style={{ fontSize: "60px", color: "#1A237E" }}
+            style={{ fontSize: "60px", color: "orange" }}
             >
             emoji_objects
         </span>
@@ -38,14 +38,14 @@ const BoxNewSubject = ({name, number}) => {
       >
         <path 
           d="M13 6L19 12L13 18" 
-          stroke="#1A237E" 
+          stroke="#fc9230" 
           strokeWidth="1" 
           strokeLinecap="round" 
           strokeLinejoin="round"
         />
         <path 
           d="M5 12H19" 
-          stroke="#1A237E" 
+          stroke="#fc9230" 
           strokeWidth="1" 
           strokeLinecap="round" 
           strokeLinejoin="round"

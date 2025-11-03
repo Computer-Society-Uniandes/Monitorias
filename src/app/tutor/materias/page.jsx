@@ -146,19 +146,19 @@ export default function TutorMaterias() {
       {/* Estadísticas */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-8">
         <div className="bg-white rounded-xl p-6 shadow-sm text-center">
-          <p className="text-2xl font-bold text-blue-600">4</p>
+          <p className="text-2xl font-bold text-orange-600">4</p>
           <p className="text-sm text-gray-600">{t('tutorSubjects.stats.activeSubjects')}</p>
         </div>
         <div className="bg-white rounded-xl p-6 shadow-sm text-center">
-          <p className="text-2xl font-bold text-green-600">48</p>
+          <p className="text-2xl font-bold text-orange-600">48</p>
           <p className="text-sm text-gray-600">{t('tutorSubjects.stats.totalStudents')}</p>
         </div>
         <div className="bg-white rounded-xl p-6 shadow-sm text-center">
-          <p className="text-2xl font-bold text-yellow-600">$29,500</p>
+          <p className="text-2xl font-bold text-orange-600">$29,500</p>
           <p className="text-sm text-gray-600">{t('tutorSubjects.stats.averageRate')}</p>
         </div>
         <div className="bg-white rounded-xl p-6 shadow-sm text-center">
-          <p className="text-2xl font-bold text-purple-600">85%</p>
+          <p className="text-2xl font-bold text-orange-600">85%</p>
           <p className="text-sm text-gray-600">{t('tutorSubjects.stats.successRate')}</p>
         </div>
       </div>

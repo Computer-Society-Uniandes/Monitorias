@@ -414,7 +414,7 @@ export default function UnifiedAvailability() {
                           <p className="slot-description">{slot.description}</p>
                         )}
                         {slot.location && (
-                          <p className="slot-location">📍 {slot.location}</p>
+                          <p className="slot-location"> {slot.location}</p>
                         )}
                       </div>
                       <div className="slot-status">

@@ -134,7 +134,7 @@ export default function CalendlyStyleScheduler({ tutor, availabilities, materia,
                       <span className="end-time">- {formatTime(slot.endDateTime)}</span>
                     </div>
                     {slot.location && (
-                      <div className="slot-location">📍 {slot.location}</div>
+                      <div className="slot-location"> {slot.location}</div>
                     )}
                     {slot.description && (
                       <div className="slot-description">
