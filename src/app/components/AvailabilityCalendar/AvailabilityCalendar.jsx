@@ -1,0 +1,498 @@
+"use client";
+
+import React, { useState, useEffect } from 'react';
+import Calendar from 'react-calendar';
+import { Clock, User, Users, ChevronLeft, ChevronRight } from 'lucide-react';
+import './AvailabilityCalendar.css';
+import { AvailabilityService } from '../../services/core/AvailabilityService';
+import { SlotService } from '../../services/utils/SlotService';
+import { TutoringSessionService } from '../../services/utils/TutoringSessionService';
+import { PaymentService } from '../../services/utils/PaymentService';
+import { GoogleDriveService } from '../../services/utils/GoogleDriveService';
+import { useAuth } from '../../context/SecureAuthContext';
+import { TutorSearchService } from '../../services/utils/TutorSearchService';
+import { useI18n } from '../../../lib/i18n';
+import SessionConfirmationModal from '../SessionConfirmationModal/SessionConfirmationModal';
+import SessionBookedModal from '../SessionBookedModal/SessionBookedModal';
+import { set } from 'zod';
+
+/**
+ * AvailabilityCalendar Component
+ * 
+ * Modes:
+ * - 'individual': Shows availability for a specific tutor (requires tutorId)
+ *   - When mode='individual' and tutorId is provided, shows ONLY that tutor's availability
+ *   - course parameter is optional and only used for display/metadata
+ * - 'joint': Shows combined availability for all tutors teaching a course (requires course)
+ *   - When mode='joint' and course is provided, shows availability from ALL tutors for that course
+ * 
+ * @param {string} tutorId - Tutor ID/email (required for individual mode)
+ * @param {string} tutorName - Tutor name (for display in individual mode)
+ * @param {string} course - Course name (required for joint mode, optional for individual)
+ * @param {string} mode - 'individual' or 'joint' (default: 'individual')
+ */
+const AvailabilityCalendar = ({ 
+  tutorId = null,        // Para modo individual
+  tutorName = null,      // Para modo individual  
+  course = null,        // Para modo conjunto (Nombre)
+  courseId = null,      // ID del curso (opcional, para booking)
+  mode = 'individual',   // 'individual' o 'joint'
+  onDateSelect, 
+  selectedDate, 
+  loading = false 
+}) => {
+  const { user } = useAuth();
+  const { t, locale } = useI18n();
+  const [date, setDate] = useState(selectedDate || new Date());
+  const [selectedDaySlots, setSelectedDaySlots] = useState([]);
+  const [availabilityData, setAvailabilityData] = useState([]);
+  const [loadingData, setLoadingData] = useState(false);
+  const [error, setError] = useState(null);
+  const [availabilityDataReady, setAvailabilityDataReady] = useState(false);
+  const localeStr = locale === 'en' ? 'en-US' : 'es-ES';
+  
+  // Estados para el modal de confirmación
+  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+  const [selectedSlotForBooking, setSelectedSlotForBooking] = useState(null);
+  const [confirmLoading, setConfirmLoading] = useState(false);
+  
+  // Estados para el modal de sesión reservada
+  const [showBookedModal, setShowBookedModal] = useState(false);
+  const [bookedSessionData, setBookedSessionData] = useState(null);
+
+  useEffect(() => {
+    if (selectedDate) {
+      setDate(selectedDate);
+    }
+  }, [selectedDate]);
+
+  useEffect(() => {
+    loadAvailabilityData();
+  }, [tutorId, course, mode]);
+
+  useEffect(() => {
+    if (Array.isArray(availabilityData) && availabilityData.length > 0) {
+        console.log('availabilityData está listo y tiene datos:', availabilityData);
+        setAvailabilityDataReady(true);
+    } else {
+        console.log('availabilityData no está listo o está vacío:', availabilityData);
+        setAvailabilityDataReady(false);
+    }
+  }, [availabilityData]);
+
+  useEffect(() => {
+    if (availabilityDataReady) {
+        console.log('Generando slots con availabilityData actualizado:', availabilityData);
+        generateSlotsForSelectedDay();
+    } else {
+        console.log('availabilityData aún no está listo o está vacío:', availabilityData);
+    }
+  }, [availabilityDataReady, date]);
+
+  const loadAvailabilityData = async () => {
+    if (!tutorId && !course) return;
+    try {
+      setLoadingData(true);
+      setError(null);
+
+      // Priority 1: Individual mode with tutorId - always use individual availability
+      if (mode === 'individual' && tutorId) {
+        try {
+          console.log('Loading individual availability for tutor:', tutorId);
+          const tutorAvailability = await AvailabilityService.getAvailabilities(tutorId);
+          console.log('Individual tutor availability loaded:', {
+            tutorId,
+            count: Array.isArray(tutorAvailability) ? tutorAvailability.length : 0,
+            course: course || 'not specified'
+          });
+          setAvailabilityData(Array.isArray(tutorAvailability) ? tutorAvailability : []);
+        } catch (err) {
+          console.error('Error loading individual tutor availability:', err);
+          throw err; // Re-throw to be caught by outer catch
+        }
+      } else if (mode === 'joint' && course) {
+        console.log('Loading joint availability for course:', course);
+        // Get joint availability for all tutors teaching this course
+        const result = await AvailabilityService.getJointAvailabilityByCourse(course);
+        console.log('Result of getJointAvailabilityByCourse:', result);
+        
+        if (!result.success) {
+          throw new Error('Failed to load joint availability');
+        }
+
+        // Backend returns tutorsAvailability array with structure:
+        // [{ tutorId, tutorEmail, tutorName, connected, availabilities: [...], totalSlots, ... }]
+        const tutorsAvailability = result.tutorsAvailability || [];
+        
+        // Flatten all availabilities from all tutors into a single array
+        // Each tutor's data contains an array of availabilities, not slots
+        const flattened = tutorsAvailability.flatMap(tutorData => {
+          const tutorId = tutorData.id
+          const tutorName = tutorData.tutorName || tutorData.name || tutorId;
+          // Backend returns availabilities (not slots), which are availability windows
+          const availabilities = tutorData.availabilities || tutorData.slots || [];
+          
+          // Each availability is an availability window that will be converted to slots later
+          return availabilities.map(availability => ({
+            id: availability.id || availability.availabilityId || `${tutorId}-${availability.startDateTime || Math.random()}`,
+            tutorId: tutorId,
+            tutorEmail: tutorId,
+            tutorName: tutorName,
+            title: availability.title || availability.summary || t('availability.calendar.slots.tutorAvailable'),
+            description: availability.description || '',
+            startDateTime: availability.startDateTime || availability.start,
+            endDateTime: availability.endDateTime || availability.end,
+            location: availability.location || 'Virtual',
+            course: availability.course || course,
+            color: '#2196F3',
+            googleEventId: availability.googleEventId || availability.eventId,
+            isBooked: availability.isBooked || false,
+          }));
+        });
+
+        console.log('Joint availability loaded:', {
+          tutors: tutorsAvailability.length,
+          availabilities: flattened.length,
+          connectedTutors: result.connectedTutors,
+          totalSlots: result.totalSlots,
+        });
+        
+        setAvailabilityData(flattened);
+      } else {
+        // If mode is individual but no tutorId, or mode is joint but no course
+        console.warn('AvailabilityCalendar: Invalid configuration', {
+          mode,
+          tutorId: tutorId || 'missing',
+          course: course || 'missing'
+        });
+        setAvailabilityData([]);
+        setError(t('availability.calendar.errors.load'));
+      }
+    } catch (error) {
+      console.error('Error loading availability data:', error);
+      setError(t('availability.calendar.errors.load'));
+      setAvailabilityData([]);
+    } finally {
+      setLoadingData(false);
+    }
+  };
+
+  const generateSlotsForSelectedDay = async () => {
+    try {
+      console.log('Availability data:', availabilityData);
+      if (!Array.isArray(availabilityData) || availabilityData.length === 0) {
+        console.warn('generateSlotsForSelectedDay: availabilityData no es un array válido o está vacío');
+        setSelectedDaySlots([]);
+        return;
+      }
+
+      const generatedSlots = SlotService.generateHourlySlotsFromAvailabilities(availabilityData);
+      const allBookings = await SlotService.getAllBookingsForAvailabilities(
+        availabilityData,
+        TutoringSessionService
+      );
+      const slotsWithBookings = SlotService.applySavedBookingsToSlots(generatedSlots, allBookings);
+      const availableSlots = SlotService.getAvailableSlots(slotsWithBookings);
+
+      // Usar componentes de fecha local para evitar problemas con UTC
+      const selectedYear = date.getFullYear();
+      const selectedMonth = String(date.getMonth() + 1).padStart(2, '0');
+      const selectedDay = String(date.getDate()).padStart(2, '0');
+      const selectedDateStr = `${selectedYear}-${selectedMonth}-${selectedDay}`;
+
+      console.log('🗓️ Fecha seleccionada (local):', selectedDateStr);
+
+      const daySlots = availableSlots.filter(slot => {
+        const slotDate = new Date(slot.startDateTime);
+        const slotYear = slotDate.getFullYear();
+        const slotMonth = String(slotDate.getMonth() + 1).padStart(2, '0');
+        const slotDay = String(slotDate.getDate()).padStart(2, '0');
+        const slotDateStr = `${slotYear}-${slotMonth}-${slotDay}`;
+        
+        const matches = slotDateStr === selectedDateStr;
+        if (matches) {
+          console.log(' Slot coincide:', slotDateStr, slot.startDateTime);
+        }
+        
+        return matches;
+      });
+
+      console.log(`📊 Slots encontrados para ${selectedDateStr}:`, daySlots.length);
+      setSelectedDaySlots(daySlots);
+    } catch (error) {
+      console.error('Error generando slots:', error);
+      setError(t('availability.calendar.errors.generate'));
+    }
+  };
+
+  const handleDateChange = (newDate) => {
+    setDate(newDate);
+    if (onDateSelect) {
+      onDateSelect(newDate);
+    }
+  };
+
+  const formatSelectedDate = (date) => {
+    return date.toLocaleDateString(localeStr, {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
+  const handleSlotSelect = async (slot) => {
+    try {
+      const realTimeCheck = await SlotService.checkSlotAvailabilityRealTime(
+        slot,
+        TutoringSessionService
+      );
+
+      if (!realTimeCheck.available) {
+        setError(t('availability.calendar.errors.slotNotAvailable'));
+        await generateSlotsForSelectedDay();
+        return;
+      }
+
+      console.log('Slot seleccionado:', slot);
+      
+      // Abrir modal de confirmación
+      setSelectedSlotForBooking(slot);
+      setShowConfirmationModal(true);
+      setError(null);
+    } catch (error) {
+      console.error('Error seleccionando slot:', error);
+      setError(t('availability.calendar.errors.selecting'));
+    }
+  };
+
+  const handleBookingConfirm = async ({ transaction, tutoringSession, paymentId }) => {
+    try {
+
+      setConfirmLoading(true);
+      setError(null);
+
+      const sessionId = tutoringSession.id;
+      const method = transaction.paymentMethodType || 'WOMPI';
+
+      // 1. Update session:
+      const sessionUpdateData = {
+        paymentStatus: 'paid',
+        paymentId: paymentId
+      };
+
+      const updatedSession = await TutoringSessionService.updateSession(sessionId, sessionUpdateData);
+
+      console.log('Sesión actualizada tras confirmación de pago:', updatedSession);
+
+      // 2. Update payment
+      const paymentUpdateData = {
+        status: 'paid',
+        paymentMethod: method
+      };
+
+      const updatedPayment = await PaymentService.updatePayment(paymentId, paymentUpdateData);
+      console.log('Pago actualizado tras confirmación:', updatedPayment);
+
+      // Mostrar modal de sesión reservada
+      setShowConfirmationModal(false);
+      setBookedSessionData({
+        tutorName:  selectedSlotForBooking.tutorName,
+        course: selectedSlotForBooking.course,
+        scheduledDateTime: selectedSlotForBooking.startDateTime,
+        endDateTime: selectedSlotForBooking.endDateTime,
+        location: selectedSlotForBooking.location,
+        studentEmail: user?.email || '',
+      });
+      setSelectedSlotForBooking(null);
+      setShowBookedModal(true);
+
+      // Refrescar disponibilidad y regenerar slots
+      await loadAvailabilityData();
+      // Esperar un momento para que availabilityData se actualice
+      setTimeout(() => {
+        generateSlotsForSelectedDay();
+      }, 500);
+    } catch (error) {
+      console.error('❌ Error creando la sesión:', error);
+    }  finally {
+      setConfirmLoading(false);
+    }
+  };
+
+  const handleCloseConfirmationModal = () => {
+    setShowConfirmationModal(false);
+    setSelectedSlotForBooking(null);
+    setError(null);
+  };
+
+  const getTileClassName = ({ date: tileDate, view }) => {
+    if (view !== 'month') return '';
+
+    const baseClass = 'calendar-tile';
+    
+    // Usar componentes de fecha local para evitar problemas con UTC
+    const selectedYear = date.getFullYear();
+    const selectedMonth = String(date.getMonth() + 1).padStart(2, '0');
+    const selectedDay = String(date.getDate()).padStart(2, '0');
+    const selectedDateStr = `${selectedYear}-${selectedMonth}-${selectedDay}`;
+    
+    let tileDateStr = null;
+    if (tileDate instanceof Date && !isNaN(tileDate)) {
+      const tileYear = tileDate.getFullYear();
+      const tileMonth = String(tileDate.getMonth() + 1).padStart(2, '0');
+      const tileDay = String(tileDate.getDate()).padStart(2, '0');
+      tileDateStr = `${tileYear}-${tileMonth}-${tileDay}`;
+    }
+
+    const isSelected = tileDateStr && selectedDateStr === tileDateStr;
+    const isPast = tileDate < new Date().setHours(0, 0, 0, 0);
+    const hasAvailability = Array.isArray(availabilityData) && availabilityData.some(slot => {
+      const slotDate = slot.startDateTime ? new Date(slot.startDateTime) : null;
+      if (!slotDate || !(slotDate instanceof Date) || isNaN(slotDate)) return false;
+      
+      const slotYear = slotDate.getFullYear();
+      const slotMonth = String(slotDate.getMonth() + 1).padStart(2, '0');
+      const slotDay = String(slotDate.getDate()).padStart(2, '0');
+      const slotDateStr = `${slotYear}-${slotMonth}-${slotDay}`;
+      
+      return slotDateStr === tileDateStr;
+    });
+
+    let classes = [baseClass];
+
+    if (isSelected) classes.push('selected');
+    if (hasAvailability && !isPast) classes.push('has-availability');
+    if (isPast) classes.push('past-date');
+
+    return classes.join(' ');
+  };
+
+  return (
+    <div className="availability-calendar-container">
+      <div className="calendar-panel">
+        <div className="calendar-header">
+          <h3 className="calendar-title">
+            {mode === 'joint' ? (
+              <>
+                <Users size={24} />
+                {t('availability.calendar.header.jointTitle')}
+              </>
+            ) : (
+              <>
+                <User size={24} />
+                {tutorName 
+                  ? t('availability.calendar.header.individualTitle', { tutor: tutorName })
+                  : t('availability.calendar.header.individualFallback')}
+              </>
+            )}
+          </h3>
+        </div>
+
+        {loadingData || loading ? (
+          <div className="calendar-loading">
+            <div className="loading-spinner"></div>
+            <p>{t('availability.calendar.loading')}</p>
+          </div>
+        ) : (
+          <Calendar
+            onChange={handleDateChange}
+            value={date}
+            locale={localeStr}
+            minDate={new Date()}
+            tileClassName={getTileClassName}
+            navigationLabel={({ date }) => (
+              `${date.toLocaleDateString(localeStr, { month: 'long', year: 'numeric' })}`
+            )}
+            nextLabel={<ChevronRight size={16} />}
+            prevLabel={<ChevronLeft size={16} />}
+            next2Label={null}
+            prev2Label={null}
+          />
+        )}
+      </div>
+
+      <div className="slots-panel">
+        <div className="slots-header">
+          <h3 className="slots-title">
+            <Clock size={20} />
+            {t('availability.calendar.slots.title')}
+          </h3>
+          <p className="selected-date">{formatSelectedDate(date)}</p>
+        </div>
+
+        <div className="slots-list">
+          {selectedDaySlots.length === 0 ? (
+            <div className="no-slots">
+              <div className="no-slots-icon">📅</div>
+              <h4>{t('availability.calendar.slots.noneTitle')}</h4>
+              <p>{t('availability.calendar.slots.noneHint')}</p>
+            </div>
+          ) : (
+            selectedDaySlots.map((slot) => (
+              <div 
+                key={slot.id} 
+                className="slot-item"
+                onClick={() => handleSlotSelect(slot)}
+              >
+                <div className="slot-time">
+                  <Clock size={16} />
+                  {`${new Date(slot.startDateTime).toLocaleTimeString(localeStr, { hour: '2-digit', minute: '2-digit' })} - ${new Date(slot.endDateTime).toLocaleTimeString(localeStr, { hour: '2-digit', minute: '2-digit' })}`}
+                </div>
+                <div className="slot-tutor">
+                  <User size={14} />
+                  <span>{slot.tutorName || t('availability.calendar.slots.tutorAvailable')}</span>
+                </div>
+                <button className="book-slot-btn">
+                  {mode === 'joint' ? t('availability.calendar.slots.viewOptions') : t('availability.calendar.slots.book')}
+                </button>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+
+      {/* Modal de confirmación de reserva */}
+      {showConfirmationModal && selectedSlotForBooking && (
+        <SessionConfirmationModal
+          isOpen={showConfirmationModal}
+          onClose={handleCloseConfirmationModal}
+          session={{
+            tutorId: tutorId || selectedSlotForBooking.tutorId,
+            studentId: user?.uid || null,
+            tutorName: tutorName || selectedSlotForBooking.tutorName || t('availability.calendar.defaultTutorName'),
+            tutorEmail: tutorId || selectedSlotForBooking.tutorEmail,
+            course: course || selectedSlotForBooking.course || t('availability.calendar.defaultCourse'),
+            courseId: courseId || selectedSlotForBooking.courseId,
+            scheduledDateTime: selectedSlotForBooking.startDateTime,
+            endDateTime: selectedSlotForBooking.endDateTime,
+            location: selectedSlotForBooking.location || 'Virtual',
+            price: selectedSlotForBooking.price || 50000,
+            studentEmail: user?.email || '',
+            parentAvailabilityId: selectedSlotForBooking.parentAvailabilityId,
+            slotId: selectedSlotForBooking.id,
+            slotIndex: selectedSlotForBooking.slotIndex,
+          }}
+          onConfirm={handleBookingConfirm}
+          confirmLoading={confirmLoading}
+        />
+      )}
+
+      {/* Modal de sesión reservada */}
+      {showBookedModal && bookedSessionData && (
+        <SessionBookedModal
+          isOpen={showBookedModal}
+          onClose={async () => {
+            setShowBookedModal(false);
+            setBookedSessionData(null);
+            // Regenerar slots después de cerrar el modal para asegurar que los slots reservados no se muestren
+            await generateSlotsForSelectedDay();
+          }}
+          sessionData={bookedSessionData}
+        />
+      )}
+    </div>
+  );
+};
+
+export default AvailabilityCalendar;

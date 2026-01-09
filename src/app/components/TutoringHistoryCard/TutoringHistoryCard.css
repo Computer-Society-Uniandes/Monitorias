@@ -1,0 +1,296 @@
+/* Card principal */
+.tutoring-history-card {
+  background: #FFFFFF;
+  border: 2px solid #FDAE1E;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 8px rgba(253, 174, 30, 0.1);
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.tutoring-history-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(253, 174, 30, 0.15);
+}
+
+/* Header de la card */
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #FFF8F0;
+}
+
+.tutor-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+}
+
+.tutor-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FDAE1E, #FF9505);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+  font-weight: 600;
+  font-size: 1.2rem;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.tutor-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.tutor-details {
+  min-width: 0;
+  flex: 1;
+}
+
+.tutor-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #101F24;
+  margin: 0 0 0.25rem 0;
+  line-height: 1.3;
+}
+
+.tutor-email {
+  font-size: 0.85rem;
+  color: #6B7280;
+  margin: 0;
+  line-height: 1.2;
+}
+
+/* Estado de pago */
+.payment-status {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Contenido principal */
+.card-content {
+  margin-bottom: 1rem;
+}
+
+.session-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #101F24;
+  min-height: 24px;
+}
+
+.detail-item svg {
+  color: #FF9505;
+  flex-shrink: 0;
+}
+
+.detail-text {
+  font-size: 0.9rem;
+  line-height: 1.4;
+  flex: 1;
+}
+
+.price-text {
+  font-weight: 600;
+  color: #101F24;
+  font-size: 1rem;
+}
+
+/* Badge de materia */
+.course-badge {
+  background: linear-gradient(135deg, #FDAE1E, #FF9505);
+  color: #FFFFFF;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(253, 174, 30, 0.2);
+  border: none;
+  display: inline-block;
+  max-width: fit-content;
+}
+
+/* Footer de la card */
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 1rem;
+  border-top: 1px solid #FFF8F0;
+  gap: 1rem;
+}
+
+.session-status {
+  flex: 1;
+}
+
+.status-indicator {
+  padding: 0.4rem 0.8rem;
+  border-radius: 16px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.status-indicator.completed {
+  background: #DEF7EC;
+  color: #03543F;
+  border: 1px solid #84E1BC;
+}
+
+.status-indicator.cancelled {
+  background: #FEE2E2;
+  color: #9B1C1C;
+  border: 1px solid #F87171;
+}
+
+.status-indicator.scheduled {
+  background: #E0F2FE;
+  color: #0C4A6E;
+  border: 1px solid #38BDF8;
+}
+
+.status-indicator.pending {
+  background: #FEF3C7;
+  color: #92400E;
+  border: 1px solid #F59E0B;
+}
+
+/* Botón de ver detalles */
+.view-details-btn {
+  background: #FFFFFF;
+  border: 2px solid #FDAE1E;
+  color: #FF9505;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.view-details-btn:hover {
+  background: #FFF8F0;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(253, 174, 30, 0.2);
+}
+
+.view-details-btn:active {
+  transform: translateY(0);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .tutoring-history-card {
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .tutor-info {
+    width: 100%;
+  }
+
+  .payment-status {
+    align-self: flex-end;
+    font-size: 0.75rem;
+    padding: 0.4rem 0.6rem;
+  }
+
+  .tutor-name {
+    font-size: 1rem;
+  }
+
+  .tutor-email {
+    font-size: 0.8rem;
+  }
+
+  .detail-text {
+    font-size: 0.85rem;
+  }
+
+  .card-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .view-details-btn {
+    align-self: flex-end;
+    font-size: 0.8rem;
+    padding: 0.4rem 0.8rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .tutoring-history-card {
+    padding: 0.75rem;
+  }
+
+  .tutor-avatar {
+    width: 45px;
+    height: 45px;
+    font-size: 1.1rem;
+  }
+
+  .session-details {
+    gap: 0.6rem;
+  }
+
+  .detail-item {
+    gap: 0.6rem;
+  }
+
+  .detail-item svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .course-badge {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.8rem;
+  }
+
+  .status-indicator {
+    font-size: 0.75rem;
+    padding: 0.35rem 0.7rem;
+  }
+}

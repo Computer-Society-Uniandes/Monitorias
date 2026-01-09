@@ -1,0 +1,650 @@
+.calendly-scheduler {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  scroll-behavior: smooth;
+}
+
+.scheduler-header {
+  text-align: center;
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.scheduler-header h3 {
+  font-size: 28px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 8px;
+}
+
+.course-info {
+  font-size: 16px;
+  color: #6b7280;
+  margin-bottom: 4px;
+}
+
+.slot-info {
+  font-size: 14px;
+  color: #059669;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.price-info {
+  font-size: 14px;
+  color: #059669;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.slots-summary {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.slots-count {
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.refresh-slots-btn {
+  background: none;
+  border: 1px solid #d1d5db;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+.refresh-slots-btn:hover {
+  background-color: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+/* Loading states */
+.loading-spinner-large {
+  font-size: 32px;
+  animation: spin 1s linear infinite;
+  margin: 20px 0;
+}
+
+.loading-text {
+  font-size: 14px;
+  color: #6b7280;
+  margin-top: 8px;
+  font-style: italic;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Messages */
+.error-message {
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.success-message {
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* No availability message */
+.no-availability-message {
+  text-align: center;
+  padding: 64px 32px;
+  background-color: #f9fafb;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+}
+
+.no-availability-message .icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.no-availability-message h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 8px;
+}
+
+.no-availability-message p {
+  color: #6b7280;
+  margin: 4px 0;
+}
+
+.no-availability-message .hint {
+  font-style: italic;
+  font-size: 14px;
+}
+
+.refresh-btn {
+  background-color: #FF7A7A;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 16px;
+  transition: all 0.2s ease;
+}
+
+.refresh-btn:hover {
+  background-color: #ff6b6b;
+}
+
+/* Available dates */
+.available-dates {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.date-section {
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.2s ease;
+}
+
+.date-section:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.date-header {
+  background-color: #f9fafb;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.date-header h4 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+  text-transform: capitalize;
+}
+
+.date-header .slots-count {
+  font-size: 12px;
+  color: #6b7280;
+  background-color: #e5e7eb;
+  padding: 4px 10px;
+  border-radius: 16px;
+}
+
+/* Time slots - Updated for hourly slots */
+.time-slots {
+  padding: 16px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.time-slot {
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: white;
+  position: relative;
+  min-height: 100px;
+  display: flex;
+  flex-direction: column;
+}
+
+.time-slot:hover {
+  border-color: #FF7A7A;
+  background-color: #fef8f8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.time-slot.selected {
+  border-color: #FF7A7A;
+  background-color: #FF7A7A;
+  color: white;
+}
+
+.time-slot.hourly-slot {
+  border-left: 4px solid #10b981;
+}
+
+.time-slot.hourly-slot.selected {
+  border-left: 4px solid #ffffff;
+}
+
+/* Slot time display */
+.slot-time {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.start-time {
+  font-size: 16px;
+}
+
+.end-time {
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+.duration-badge {
+  background-color: #10b981;
+  color: white;
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-weight: 600;
+  margin-left: auto;
+}
+
+.time-slot.selected .duration-badge {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+.slot-location {
+  font-size: 13px;
+  margin-bottom: 6px;
+  opacity: 0.8;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.slot-description {
+  font-size: 12px;
+  opacity: 0.7;
+  line-height: 1.4;
+  margin-bottom: 8px;
+  flex-grow: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.time-slot.selected .slot-location,
+.time-slot.selected .slot-description {
+  opacity: 0.9;
+}
+
+/* Slot footer */
+.slot-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px solid #f3f4f6;
+}
+
+.time-slot.selected .slot-footer {
+  border-top-color: rgba(255, 255, 255, 0.3);
+}
+
+.slot-index {
+  font-size: 11px;
+  font-weight: 500;
+  color: #6b7280;
+  background-color: #f3f4f6;
+  padding: 2px 6px;
+  border-radius: 8px;
+}
+
+.time-slot.selected .slot-index {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.recurring-indicator {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+/* Booking modal updates */
+.booking-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(17, 24, 39, 0.4);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.booking-form {
+  background-color: white;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.booking-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.booking-header h4 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.close-btn:hover {
+  background-color: #f3f4f6;
+}
+
+.booking-details {
+  padding: 24px;
+}
+
+.selected-slot-info,
+.tutor-info,
+.slot-details {
+  margin-bottom: 20px;
+  padding: 16px;
+  background-color: #f9fafb;
+  border-radius: 8px;
+}
+
+.selected-slot-info h5,
+.tutor-info h5,
+.slot-details h5 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 8px;
+}
+
+.slot-datetime {
+  font-size: 16px;
+  font-weight: 500;
+  color: #1f2937;
+  margin-bottom: 4px;
+}
+
+.slot-time-range {
+  font-size: 18px;
+  font-weight: 600;
+  color: #059669;
+  margin-bottom: 8px;
+}
+
+.slot-duration {
+  font-size: 14px;
+  color: #dc2626;
+  margin-bottom: 4px;
+}
+
+.session-price {
+  font-size: 16px;
+  font-weight: 600;
+  color: #059669;
+  background-color: #ecfdf5;
+  padding: 6px 10px;
+  border-radius: 6px;
+  display: inline-block;
+}
+
+.availability-note {
+  font-size: 12px;
+  color: #6b7280;
+  font-style: italic;
+  margin-top: 8px;
+  background-color: #fffbeb;
+  padding: 8px;
+  border-radius: 6px;
+  border-left: 3px solid #f59e0b;
+}
+
+.slot-location {
+  font-size: 14px;
+  color: #6b7280;
+  margin-bottom: 2px;
+}
+
+.notes-section {
+  margin-bottom: 24px;
+}
+
+.notes-section label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 8px;
+}
+
+.notes-section textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
+}
+
+.notes-section textarea:focus {
+  outline: none;
+  border-color: #FF7A7A;
+  box-shadow: 0 0 0 3px rgba(255, 122, 122, 0.1);
+}
+
+.booking-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.cancel-btn,
+.confirm-btn {
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.cancel-btn {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.cancel-btn:hover:not(:disabled) {
+  background-color: #e5e7eb;
+}
+
+.confirm-btn {
+  background-color: #FF7A7A;
+  color: white;
+}
+
+.confirm-btn:hover:not(:disabled) {
+  background-color: #ff6b6b;
+}
+
+.cancel-btn:disabled,
+.confirm-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .calendly-scheduler {
+    padding: 16px;
+    /* Mantener scroll en móviles */
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .scheduler-header h3 {
+    font-size: 24px;
+  }
+
+  .slots-summary {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .time-slots {
+    grid-template-columns: 1fr;
+    padding: 12px;
+  }
+  
+  .time-slot {
+    min-height: 90px;
+    padding: 12px;
+  }
+  
+  .date-header {
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+  }
+  
+  .booking-modal {
+    padding: 12px;
+  }
+  
+  .booking-details {
+    padding: 16px;
+  }
+  
+  .booking-actions {
+    flex-direction: column-reverse;
+  }
+  
+  .cancel-btn,
+  .confirm-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .calendly-scheduler {
+    /* Asegurar scroll en pantallas pequeñas */
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 12px;
+  }
+
+  .scheduler-header {
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+  }
+  
+  .scheduler-header h3 {
+    font-size: 20px;
+  }
+  
+  .available-dates {
+    gap: 16px;
+  }
+  
+  .date-header {
+    padding: 12px 16px;
+  }
+  
+  .time-slots {
+    padding: 8px;
+    gap: 8px;
+  }
+  
+  .time-slot {
+    min-height: 85px;
+    padding: 10px;
+  }
+  
+  .slot-time {
+    font-size: 14px;
+  }
+  
+  .start-time {
+    font-size: 15px;
+  }
+  
+  .scheduler-overlay {
+    padding: 8px;
+  }
+  
+  .scheduler-header-bar {
+    padding: 12px 16px;
+  }
+} 

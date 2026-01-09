@@ -1,0 +1,727 @@
+/* ============================================ */
+/*           PROFILE PAGE RESPONSIVE            */
+/* ============================================ */
+
+.profile-page-container {
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+@media (min-width: 640px) {
+    .profile-page-container {
+        padding: 1.5rem;
+    }
+}
+
+@media (min-width: 768px) {
+    .profile-page-container {
+        padding: 2rem 1.5rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .profile-page-container {
+        padding: 3rem 2rem;
+    }
+}
+
+.profile-content-wrapper {
+    max-width: 64rem; /* 1024px */
+    margin: 0 auto;
+    width: 100%;
+}
+
+.background-profile {
+    background: linear-gradient(180deg, #8892d6, #1A237E );
+    height: 100vh;
+    position: relative;
+    overflow: hidden;
+}
+
+/* ============================================ */
+/*           PROFILE CARD STYLES                */
+/* ============================================ */
+
+.profile-card {
+    width: 100%;
+    padding: 1.25rem;
+    border-radius: 1rem;
+}
+
+@media (min-width: 640px) {
+    .profile-card {
+        padding: 1.75rem;
+        border-radius: 1.25rem;
+    }
+}
+
+@media (min-width: 768px) {
+    .profile-card {
+        padding: 2.5rem;
+        border-radius: 1.5rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .profile-card {
+        padding: 3rem;
+    }
+}
+
+/* Profile Header */
+.profile-card .flex.flex-col.md\:flex-row {
+    gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .profile-card .flex.flex-col.md\:flex-row {
+        gap: 2rem;
+    }
+}
+
+/* Profile Avatar */
+.profile-avatar img {
+    width: 5rem;
+    height: 5rem;
+}
+
+@media (min-width: 640px) {
+    .profile-avatar img {
+        width: 6rem;
+        height: 6rem;
+    }
+}
+
+@media (min-width: 768px) {
+    .profile-avatar img {
+        width: 6rem;
+        height: 6rem;
+    }
+}
+
+/* Profile Name */
+.profile-card h2 {
+    font-size: 1.5rem;
+    line-height: 1.3;
+}
+
+@media (min-width: 640px) {
+    .profile-card h2 {
+        font-size: 1.75rem;
+    }
+}
+
+@media (min-width: 768px) {
+    .profile-card h2 {
+        font-size: 2rem;
+    }
+}
+
+/* Profile Info Text */
+.profile-card .text-sm {
+    font-size: 0.875rem;
+    /* Ensure profile info (email/phone) sit inline with the avatar emoji */
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 0.5rem;
+    align-items: center !important;
+}
+
+@media (min-width: 640px) {
+    .profile-card .text-sm {
+        flex-direction: row;
+        gap: 1rem;
+        align-items: center !important;
+    }
+}
+
+/* Action Buttons Container */
+.profile-card .flex.flex-col.sm\:flex-row {
+    width: 100%;
+}
+
+.profile-card button {
+    width: 100%;
+    justify-content: center;
+}
+
+@media (min-width: 640px) {
+    .profile-card button {
+        width: auto;
+    }
+}
+
+/* ============================================ */
+/*           RATING CARDS GRID                  */
+/* ============================================ */
+
+/* Rating Grid */
+.grid.grid-cols-1.md\:grid-cols-3 {
+    gap: 1rem;
+}
+
+@media (min-width: 640px) {
+    .grid.grid-cols-1.md\:grid-cols-3 {
+        gap: 1.25rem;
+    }
+}
+
+@media (min-width: 768px) {
+    .grid.grid-cols-1.md\:grid-cols-3 {
+        gap: 1.5rem;
+    }
+}
+
+.rating-card {
+    padding: 1.25rem !important;
+}
+
+@media (min-width: 640px) {
+    .rating-card {
+        padding: 1.5rem !important;
+    }
+}
+
+@media (min-width: 768px) {
+    .rating-card {
+        padding: 2rem !important;
+    }
+}
+
+.rating-card .text-3xl {
+    font-size: 1.75rem;
+}
+
+@media (min-width: 640px) {
+    .rating-card .text-3xl {
+        font-size: 2rem;
+    }
+}
+
+@media (min-width: 768px) {
+    .rating-card .text-3xl {
+        font-size: 2.25rem;
+    }
+}
+
+.rating-card p {
+    font-size: 0.875rem;
+}
+
+@media (min-width: 768px) {
+    .rating-card p {
+        font-size: 1rem;
+    }
+}
+
+/* ============================================ */
+/*           SECTIONS STYLES                    */
+/* ============================================ */
+
+/* Section spacing */
+.profile-card .mb-8 {
+    margin-bottom: 1.5rem;
+}
+
+@media (min-width: 640px) {
+    .profile-card .mb-8 {
+        margin-bottom: 2rem;
+    }
+}
+
+@media (min-width: 768px) {
+    .profile-card .mb-8 {
+        margin-bottom: 2rem;
+    }
+}
+
+.profile-card h3 {
+    font-size: 1.125rem;
+    margin-bottom: 1rem;
+}
+
+@media (min-width: 640px) {
+    .profile-card h3 {
+        font-size: 1.25rem;
+        margin-bottom: 1.25rem;
+    }
+}
+
+@media (min-width: 768px) {
+    .profile-card h3 {
+        font-size: 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+}
+
+/* About Section Text */
+.profile-card .text-gray-600.leading-relaxed {
+    font-size: 0.95rem;
+    line-height: 1.7;
+}
+
+@media (min-width: 768px) {
+    .profile-card .text-gray-600.leading-relaxed {
+        font-size: 1rem;
+    }
+}
+
+/* ============================================ */
+/*           COURSES SECTION                   */
+/* ============================================ */
+
+.course-tag {
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+}
+
+@media (min-width: 640px) {
+    .course-tag {
+        padding: 0.75rem 1.25rem;
+        font-size: 0.95rem;
+    }
+}
+
+/* ============================================ */
+/*           AVAILABILITY CARD                  */
+/* ============================================ */
+
+.availability-card {
+    padding: 1.25rem !important;
+}
+
+@media (min-width: 768px) {
+    .availability-card {
+        padding: 2rem !important;
+    }
+}
+
+.availability-card .flex {
+    flex-direction: column;
+    gap: 1rem;
+}
+
+@media (min-width: 768px) {
+    .availability-card .flex {
+        flex-direction: row;
+        align-items: center;
+        gap: 2rem;
+    }
+}
+
+.availability-card button {
+    width: 100%;
+}
+
+@media (min-width: 768px) {
+    .availability-card button {
+        width: auto;
+        white-space: nowrap;
+    }
+}
+
+/* ============================================ */
+/*           CONTAINER STYLES                   */
+/* ============================================ */
+
+.container.mx-auto {
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+@media (min-width: 640px) {
+    .container.mx-auto {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+    }
+}
+
+@media (min-width: 768px) {
+    .container.mx-auto {
+        padding-left: 2rem;
+        padding-right: 2rem;
+    }
+}
+
+.py-12 {
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+}
+
+@media (min-width: 640px) {
+    .py-12 {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+    }
+}
+
+@media (min-width: 768px) {
+    .py-12 {
+        padding-top: 3rem;
+        padding-bottom: 3rem;
+    }
+}
+
+/* ============================================ */
+/*           LOADING STATE                      */
+/* ============================================ */
+
+.min-h-screen.bg-gradient-to-br {
+    min-height: 100vh;
+    padding: 1rem;
+}
+
+.min-h-screen.bg-gradient-to-br .text-center {
+    padding: 2rem 1rem;
+}
+
+@media (min-width: 640px) {
+    .min-h-screen.bg-gradient-to-br .text-center {
+        padding: 3rem 1.5rem;
+    }
+}
+
+.min-h-screen.bg-gradient-to-br .animate-spin {
+    width: 3rem;
+    height: 3rem;
+}
+
+@media (min-width: 640px) {
+    .min-h-screen.bg-gradient-to-br .animate-spin {
+        width: 3.5rem;
+        height: 3.5rem;
+    }
+}
+
+.min-h-screen.bg-gradient-to-br p {
+    font-size: 0.95rem;
+    margin-top: 1rem;
+}
+
+@media (min-width: 640px) {
+    .min-h-screen.bg-gradient-to-br p {
+        font-size: 1rem;
+    }
+}
+
+/* ============================================ */
+/*           BUTTON RESPONSIVE STYLES           */
+/* ============================================ */
+
+/* Ensure buttons are touch-friendly on mobile */
+button {
+    min-height: 44px; /* iOS recommended touch target */
+    font-size: 0.95rem;
+    padding: 0.75rem 1rem;
+}
+
+@media (min-width: 640px) {
+    button {
+        font-size: 1rem;
+        padding: 0.875rem 1.25rem;
+    }
+}
+
+/* Edit Profile Button */
+button .flex.items-center {
+    gap: 0.5rem;
+}
+
+@media (min-width: 640px) {
+    button .flex.items-center {
+        gap: 0.625rem;
+    }
+}
+
+/* ============================================ */
+/*           MODAL RESPONSIVE                   */
+/* ============================================ */
+
+/* Modal Backdrop */
+.fixed.inset-0.bg-black\/50 {
+    padding: 0.75rem;
+    align-items: flex-start;
+    padding-top: 1rem;
+}
+
+@media (min-width: 640px) {
+    .fixed.inset-0.bg-black\/50 {
+        padding: 1rem;
+        align-items: center;
+    }
+}
+
+@media (min-width: 768px) {
+    .fixed.inset-0.bg-black\/50 {
+        padding: 1.5rem;
+    }
+}
+
+/* Modal Content */
+.fixed.inset-0.bg-black\/50 > div {
+    max-width: 100%;
+    width: 100%;
+    padding: 1.25rem;
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
+    margin-top: 0;
+    border-radius: 1rem;
+}
+
+@media (min-width: 640px) {
+    .fixed.inset-0.bg-black\/50 > div {
+        padding: 1.5rem;
+        max-height: 90vh;
+        border-radius: 1.25rem;
+        margin-top: auto;
+    }
+}
+
+@media (min-width: 768px) {
+    .fixed.inset-0.bg-black\/50 > div {
+        max-width: 28rem;
+        padding: 2rem;
+        border-radius: 1.5rem;
+    }
+}
+
+/* Modal Title */
+.fixed.inset-0.bg-black\/50 h2,
+.fixed.inset-0.bg-black\/50 h3 {
+    font-size: 1.375rem;
+}
+
+@media (min-width: 640px) {
+    .fixed.inset-0.bg-black\/50 h2,
+    .fixed.inset-0.bg-black\/50 h3 {
+        font-size: 1.5rem;
+    }
+}
+
+@media (min-width: 768px) {
+    .fixed.inset-0.bg-black\/50 h2,
+    .fixed.inset-0.bg-black\/50 h3 {
+        font-size: 1.875rem;
+    }
+}
+
+/* Modal Input Fields */
+.fixed.inset-0.bg-black\/50 input,
+.fixed.inset-0.bg-black\/50 textarea {
+    font-size: 1rem;
+    padding: 0.875rem 1rem;
+    width: 100%;
+    border-radius: 0.75rem;
+    min-height: 44px; /* Touch-friendly */
+}
+
+@media (min-width: 640px) {
+    .fixed.inset-0.bg-black\/50 input,
+    .fixed.inset-0.bg-black\/50 textarea {
+        font-size: 1rem;
+        padding: 1rem 1.25rem;
+        border-radius: 0.875rem;
+    }
+}
+
+.fixed.inset-0.bg-black\/50 textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+/* Modal Labels */
+.fixed.inset-0.bg-black\/50 label {
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+@media (min-width: 640px) {
+    .fixed.inset-0.bg-black\/50 label {
+        font-size: 0.95rem;
+        margin-bottom: 0.625rem;
+    }
+}
+
+/* Modal Form Spacing */
+.fixed.inset-0.bg-black\/50 .space-y-4 > * + * {
+    margin-top: 1rem;
+}
+
+@media (min-width: 640px) {
+    .fixed.inset-0.bg-black\/50 .space-y-4 > * + * {
+        margin-top: 1.25rem;
+    }
+}
+
+/* Modal Buttons */
+.fixed.inset-0.bg-black\/50 .flex.gap-3 {
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+    .fixed.inset-0.bg-black\/50 .flex.gap-3 {
+        flex-direction: row;
+        gap: 0.75rem;
+    }
+}
+
+.fixed.inset-0.bg-black\/50 button {
+    width: 100%;
+}
+
+@media (min-width: 640px) {
+    .fixed.inset-0.bg-black\/50 button {
+        width: auto;
+    }
+}
+
+.wave-container svg {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 0;
+}
+
+.title {
+    font-size: 35px;
+    color: #FF7A7A;
+    font-weight: 700;
+    font-family: "Poppins", sans-serif;
+    text-decoration: none;
+}
+
+.text-campos {
+    font-size: 20px;
+    color: #FF7A7A;
+    font-weight: 550;
+    font-family: "Poppins", sans-serif;
+    text-decoration: none;
+}
+
+.text-info {
+    font-size: 20px;
+    color: #1a227e9e;
+    font-weight: 300;
+    font-family: "Poppins", sans-serif;
+    text-decoration: none;
+}
+
+.btn-logout {
+    background-color: #FF7A7A;
+    color: white;
+}
+
+.btn-logout:hover {
+    background-color: #f91212;
+}
+
+.btn-editar {
+    background-color: transparent;
+    border: 2px solid #FF7A7A;
+    color: #FF7A7A;
+}
+
+.btn-editar:hover {
+    background-color: #FF7A7A;
+    color: white;
+}
+
+/* Layout interno más flexible en móvil */
+.profile-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+.avatar-wrap { display: grid; place-items: center; }
+
+@media (min-width: 768px) {
+  .profile-grid {
+    grid-template-columns: 180px 1fr;
+    align-items: start;
+  }
+}
+
+/* Tarjeta de Rol */
+.role-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 18px;
+  background: linear-gradient(180deg, #ffffff, #ffffff);
+  box-shadow: 0 8px 18px rgba(0,0,0,.05);
+}
+.role-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.role-chip {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-family: "Poppins", sans-serif;
+  font-size: 14px;
+}
+.chip-student { background: #eef2ff; color: #1A237E; }
+.chip-tutor { background: #ffe2e2; color: #FF7A7A; }
+
+.role-text {
+  color: #374151;
+  font-size: 15px;
+  margin: 6px 0 12px;
+}
+
+.role-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.buttons-row { display: flex; gap: 12px; flex-wrap: wrap; }
+
+/* Modal */
+.modal-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(17, 24, 39, 0.4);
+  backdrop-filter: blur(4px);
+  display: grid; place-items: center;
+  z-index: 60;
+  animation: fadeIn .15s ease-out;
+}
+.modal-card {
+  width: min(92vw, 520px);
+  background: #fff;
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow: 0 18px 40px rgba(0,0,0,.18);
+}
+.modal-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1A237E;
+  margin-bottom: 6px;
+  font-family: "Poppins", sans-serif;
+}
+.modal-text { color: #374151; margin-bottom: 14px; }
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
+
+@keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+
+/* Botones coherentes con tu estilo existente */
+.btn-header {
+  border: 2px solid #1A237E;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-weight: 600;
+  color: #1A237E;
+  background: transparent;
+}
+.btn-header:hover { background: #1A237E; color: #fff; }
+
+.btn-header--primary {
+  border-color: #FF7A7A;
+  color: #fff;
+  background: #FF7A7A;
+}
+.btn-header--primary:hover { background: #f91212; border-color: #f91212; }
+
+/* (ya tenías) */
+.background-profile { background: linear-gradient(180deg, #8892d6); height: 100vh; position: relative; overflow: auto; }
