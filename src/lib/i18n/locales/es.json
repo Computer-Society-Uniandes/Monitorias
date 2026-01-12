@@ -109,7 +109,6 @@
   "search": {
     "tabs": {
       "tutors": "Tutores",
-      "courses": "Cursos",
       "courses": "Materias",
       "both": "Ambos"
     },
@@ -744,6 +743,16 @@
         "title": "Nuestra Misión",
         "description": "Transformar la experiencia educativa en Uniandes, creando un ecosistema donde el conocimiento fluya libremente entre estudiantes. Buscamos eliminar barreras en el aprendizaje y fomentar una cultura de colaboración y excelencia académica."
       }
+    },
+    "footer": {
+      "tagline": "Tu plataforma de tutorías en Uniandes",
+      "links": {
+        "title": "Enlaces Rápidos",
+        "privacyPolicy": "Política de Privacidad",
+        "findTutors": "Buscar Tutores",
+        "register": "Registrarse"
+      },
+      "rights": "Todos los derechos reservados."
     }
   },
 

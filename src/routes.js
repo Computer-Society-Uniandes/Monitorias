@@ -9,6 +9,7 @@ const routes = {
     PROFILE: "/home/profile",
     FAVORITES: "/home/favorites",
     HISTORY: "/home/history",
+    PRIVACY_POLICY: "/privacy-policy",
     
     // Disponibilidad individual y conjunta
     INDIVIDUAL_AVAILABILITY: "/availability/individual",

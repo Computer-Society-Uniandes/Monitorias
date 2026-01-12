@@ -278,6 +278,54 @@ export default function Landing() {
           </div>
         </div>
       </section>
+
+      {/* ------------------------  FOOTER  ------------------------ */}
+      <footer className={styles.footer}>
+        <div className={styles.footerInner}>
+          <div className={styles.footerContent}>
+            <div className={styles.footerBrand}>
+              <Image src={CalicoLogo} alt="Calico" className={styles.footerLogo} />
+              <p className={styles.footerTagline}>{t('landing.footer.tagline')}</p>
+            </div>
+            
+            <div className={styles.footerLinks}>
+              <h4 className={styles.footerLinksTitle}>{t('landing.footer.links.title')}</h4>
+              <ul className={styles.footerLinksList}>
+                <li>
+                  <button 
+                    onClick={() => router.push(routes.PRIVACY_POLICY)} 
+                    className={styles.footerLink}
+                  >
+                    {t('landing.footer.links.privacyPolicy')}
+                  </button>
+                </li>
+                <li>
+                  <button 
+                    onClick={() => router.push(routes.HOME)} 
+                    className={styles.footerLink}
+                  >
+                    {t('landing.footer.links.findTutors')}
+                  </button>
+                </li>
+                <li>
+                  <button 
+                    onClick={() => router.push(routes.REGISTER)} 
+                    className={styles.footerLink}
+                  >
+                    {t('landing.footer.links.register')}
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </div>
+          
+          <div className={styles.footerBottom}>
+            <p className={styles.footerCopyright}>
+              © 2026 Calico Tutorías. {t('landing.footer.rights')}
+            </p>
+          </div>
+        </div>
+      </footer>
     </>
   );
 }

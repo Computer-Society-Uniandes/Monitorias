@@ -1162,3 +1162,136 @@
     font-size: 3rem;
   }
 }
+
+/* ---------- FOOTER ---------- */
+.footer {
+  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+  color: #ffffff;
+  padding: 3rem 1rem 1.5rem 1rem;
+  margin-top: 0;
+}
+
+@media (min-width: 768px) {
+  .footer {
+    padding: 4rem 2rem 2rem 2rem;
+  }
+}
+
+.footerInner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.footerContent {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+@media (min-width: 768px) {
+  .footerContent {
+    grid-template-columns: 2fr 1fr;
+    gap: 3rem;
+  }
+}
+
+.footerBrand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .footerBrand {
+    align-items: flex-start;
+  }
+}
+
+.footerLogo {
+  height: 3rem;
+  width: auto;
+}
+
+.footerTagline {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  text-align: center;
+}
+
+@media (min-width: 768px) {
+  .footerTagline {
+    text-align: left;
+  }
+}
+
+.footerLinks {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+@media (min-width: 768px) {
+  .footerLinks {
+    align-items: flex-start;
+  }
+}
+
+.footerLinksTitle {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #fdb61e;
+  margin-bottom: 1rem;
+}
+
+.footerLinksList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+@media (min-width: 768px) {
+  .footerLinksList {
+    align-items: flex-start;
+  }
+}
+
+.footerLink {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: color 0.3s ease, transform 0.3s ease;
+  padding: 0;
+  text-align: center;
+}
+
+@media (min-width: 768px) {
+  .footerLink {
+    text-align: left;
+  }
+}
+
+.footerLink:hover {
+  color: #fdb61e;
+  transform: translateX(4px);
+}
+
+.footerBottom {
+  text-align: center;
+  padding-top: 1.5rem;
+}
+
+.footerCopyright {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.875rem;
+}

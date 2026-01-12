@@ -110,7 +110,6 @@
     "tabs": {
       "tutors": "Tutors",
       "courses": "Courses",
-      "courses": "Courses",
       "both": "Both"
     },
     "cta": {
@@ -735,6 +734,16 @@
         "title": "Our Mission",
         "description": "Transform the educational experience at Uniandes, creating an ecosystem where knowledge flows freely among students. We seek to eliminate barriers in learning and foster a culture of collaboration and academic excellence."
       }
+    },
+    "footer": {
+      "tagline": "Your tutoring platform at Uniandes",
+      "links": {
+        "title": "Quick Links",
+        "privacyPolicy": "Privacy Policy",
+        "findTutors": "Find Tutors",
+        "register": "Sign Up"
+      },
+      "rights": "All rights reserved."
     }
   },
 
