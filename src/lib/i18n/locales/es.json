@@ -675,6 +675,7 @@
       "viewProfile": "Ver Perfil",
       "signUp": "Regístrate",
       "login": "Iniciar Sesión",
+      "termsAndConditions": "Términos y Condiciones",
       "privacyPolicy": "Política de Privacidad"
     },
     "hero": {
@@ -749,6 +750,7 @@
       "tagline": "Tu plataforma de tutorías en Uniandes",
       "links": {
         "title": "Enlaces Rápidos",
+        "termsAndConditions": "Términos y Condiciones",
         "privacyPolicy": "Política de Privacidad",
         "findTutors": "Buscar Tutores",
         "register": "Registrarse"

@@ -671,6 +671,7 @@
       "viewProfile": "View Profile",
       "signUp": "Sign Up",
       "login": "Log In",
+      "termsAndConditions": "Terms and Conditions",
       "privacyPolicy": "Privacy Policy"
     },
     "hero": {
@@ -740,6 +741,7 @@
       "tagline": "Your tutoring platform at Uniandes",
       "links": {
         "title": "Quick Links",
+        "termsAndConditions": "Terms and Conditions",
         "privacyPolicy": "Privacy Policy",
         "findTutors": "Find Tutors",
         "register": "Sign Up"

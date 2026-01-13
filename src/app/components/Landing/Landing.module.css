@@ -71,6 +71,7 @@
   transition: color 0.3s ease;
   padding: 0.5rem;
   text-decoration: underline;
+  display: inline-block;
 }
 
 .header.scrolled .privacyLink {
@@ -84,6 +85,13 @@
 @media (min-width: 768px) {
   .privacyLink {
     font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .privacyLink {
+    font-size: 0.75rem;
+    padding: 0.25rem;
   }
 }
 
