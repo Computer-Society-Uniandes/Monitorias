@@ -48,6 +48,12 @@ export default function Landing() {
 
           {/* Acciones */}
           <div className={styles.actions}>
+            <button
+              className={styles.privacyLink}
+              onClick={() => router.push(routes.PRIVACY_POLICY)}
+            >
+              {t('landing.header.privacyPolicy')}
+            </button>
             {user.isLoggedIn ? (
               <button
                 className={`${styles.btn} ${

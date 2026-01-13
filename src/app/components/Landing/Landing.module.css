@@ -61,6 +61,32 @@
   }
 }
 
+.privacyLink {
+  background: none;
+  border: none;
+  color: #ffffff;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.3s ease;
+  padding: 0.5rem;
+  text-decoration: underline;
+}
+
+.header.scrolled .privacyLink {
+  color: #4b5563;
+}
+
+.privacyLink:hover {
+  color: #fdb61e;
+}
+
+@media (min-width: 768px) {
+  .privacyLink {
+    font-size: 0.95rem;
+  }
+}
+
 /* ---------- BUTTONS ---------- */
 .btn {
   display: inline-flex;

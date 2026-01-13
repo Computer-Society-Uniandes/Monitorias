@@ -674,7 +674,8 @@
     "header": {
       "viewProfile": "Ver Perfil",
       "signUp": "Regístrate",
-      "login": "Iniciar Sesión"
+      "login": "Iniciar Sesión",
+      "privacyPolicy": "Política de Privacidad"
     },
     "hero": {
       "badge": "✨ Nueva Plataforma",

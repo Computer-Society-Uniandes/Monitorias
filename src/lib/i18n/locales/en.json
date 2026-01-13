@@ -670,7 +670,8 @@
     "header": {
       "viewProfile": "View Profile",
       "signUp": "Sign Up",
-      "login": "Log In"
+      "login": "Log In",
+      "privacyPolicy": "Privacy Policy"
     },
     "hero": {
       "badge": "New Platform",
