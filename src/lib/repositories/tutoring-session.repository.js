@@ -46,11 +46,11 @@ export async function findById(id) {
 export async function findByTutor(tutorId, limit = 100) {
   try {
     const db = getFirestore();
+    // Temporal fix: Ordenar en memoria hasta que se cree el índice compuesto en Firestore
+    // TODO: Crear índice compuesto en Firestore: collection(tutoringSessions) -> tutorId(Ascending) + scheduledStart(Descending)
     const snapshot = await db
       .collection(COLLECTION)
       .where('tutorId', '==', tutorId)
-      .orderBy('scheduledStart', 'desc')
-      .limit(limit)
       .get();
 
     const sessions = [];
@@ -66,7 +66,15 @@ export async function findByTutor(tutorId, limit = 100) {
       });
     });
 
-    return sessions;
+    // Ordenar en memoria por scheduledStart descendente
+    sessions.sort((a, b) => {
+      const dateA = a.scheduledStart instanceof Date ? a.scheduledStart : new Date(a.scheduledStart);
+      const dateB = b.scheduledStart instanceof Date ? b.scheduledStart : new Date(b.scheduledStart);
+      return dateB - dateA; // Descendente (más reciente primero)
+    });
+
+    // Aplicar límite después de ordenar
+    return sessions.slice(0, limit);
   } catch (error) {
     console.error('Error finding tutoring sessions by tutor:', error);
     throw error;
@@ -82,11 +90,11 @@ export async function findByTutor(tutorId, limit = 100) {
 export async function findByStudent(studentId, limit = 100) {
   try {
     const db = getFirestore();
+    // Temporal fix: Ordenar en memoria hasta que se cree el índice compuesto en Firestore
+    // TODO: Crear índice compuesto en Firestore: collection(tutoringSessions) -> studentId(Ascending) + scheduledStart(Descending)
     const snapshot = await db
       .collection(COLLECTION)
       .where('studentId', '==', studentId)
-      .orderBy('scheduledStart', 'desc')
-      .limit(limit)
       .get();
 
     const sessions = [];
@@ -102,7 +110,15 @@ export async function findByStudent(studentId, limit = 100) {
       });
     });
 
-    return sessions;
+    // Ordenar en memoria por scheduledStart descendente
+    sessions.sort((a, b) => {
+      const dateA = a.scheduledStart instanceof Date ? a.scheduledStart : new Date(a.scheduledStart);
+      const dateB = b.scheduledStart instanceof Date ? b.scheduledStart : new Date(b.scheduledStart);
+      return dateB - dateA; // Descendente (más reciente primero)
+    });
+
+    // Aplicar límite después de ordenar
+    return sessions.slice(0, limit);
   } catch (error) {
     console.error('Error finding tutoring sessions by student:', error);
     throw error;
@@ -168,12 +184,12 @@ export async function deleteSession(id) {
 export async function findByTutorAndApprovalStatus(tutorId, approvalStatus, limit = 50) {
   try {
     const db = getFirestore();
+    // Temporal fix: Ordenar en memoria hasta que se cree el índice compuesto en Firestore
+    // TODO: Crear índice compuesto en Firestore: collection(tutoringSessions) -> tutorId(Ascending) + tutorApprovalStatus(Ascending) + scheduledStart(Descending)
     const snapshot = await db
       .collection(COLLECTION)
       .where('tutorId', '==', tutorId)
       .where('tutorApprovalStatus', '==', approvalStatus)
-      .orderBy('scheduledStart', 'desc')
-      .limit(limit)
       .get();
 
     const sessions = [];
@@ -189,7 +205,15 @@ export async function findByTutorAndApprovalStatus(tutorId, approvalStatus, limi
       });
     });
 
-    return sessions;
+    // Ordenar en memoria por scheduledStart descendente
+    sessions.sort((a, b) => {
+      const dateA = a.scheduledStart instanceof Date ? a.scheduledStart : new Date(a.scheduledStart);
+      const dateB = b.scheduledStart instanceof Date ? b.scheduledStart : new Date(b.scheduledStart);
+      return dateB - dateA; // Descendente (más reciente primero)
+    });
+
+    // Aplicar límite después de ordenar
+    return sessions.slice(0, limit);
   } catch (error) {
     console.error('Error finding tutoring sessions by tutor and approval status:', error);
     throw error;
