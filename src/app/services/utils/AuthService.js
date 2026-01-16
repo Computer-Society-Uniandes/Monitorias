@@ -202,8 +202,8 @@ export const AuthService = {
         return { success: false, error: 'No token available' };
       }
 
-      // Ensure API_URL is defined
-      const baseUrl = API_URL || 'http://localhost:3001/api';
+      // Use monolithic API URL (no fallback to old backend)
+      const baseUrl = API_URL;
       console.log(`[AuthService] Fetching user profile from: ${baseUrl}/auth/me`);
 
       try {
