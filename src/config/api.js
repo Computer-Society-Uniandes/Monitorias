@@ -1,1 +1,2 @@
-export const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001/api';
+// Monolithic architecture - API routes are served by Next.js
+export const API_URL = '/api';
