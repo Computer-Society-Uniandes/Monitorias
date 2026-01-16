@@ -6,7 +6,7 @@
  */
 
 import { NextResponse } from 'next/server';
-import * as academicService from '@/lib/services/academic.service';
+import * as academicService from '../../../lib/services/academic.service';
 
 /**
  * GET /api/majors/[id]

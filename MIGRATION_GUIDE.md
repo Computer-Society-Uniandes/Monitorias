@@ -163,13 +163,13 @@ Use the new path alias:
 
 ```javascript
 // New imports in API routes
-import * as availabilityService from '@/lib/services/availability.service';
-import { getFirestore } from '@/lib/firebase/admin';
+import * as availabilityService from '../../../../lib/services/availability.service';
+import { getFirestore } from '../../../../lib/firebase/admin';
 ```
 
 ## Common Issues & Solutions
 
-### Issue 1: "Module not found: @/lib/..."
+### Issue 1: "Module not found: ../../../../lib/..."
 
 **Solution:** Check `jsconfig.json`:
 ```json

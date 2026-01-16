@@ -5,7 +5,7 @@
 
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import * as calendarService from '@/lib/services/calendar.service';
+import * as calendarService from '../../../../lib/services/calendar.service';
 
 /**
  * GET /api/calendar/events
