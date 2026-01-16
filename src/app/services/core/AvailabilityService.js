@@ -4,8 +4,6 @@
  * Service to manage tutor availability by communicating with the backend API
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
-
 class AvailabilityServiceClass {
   constructor() {
     this.autoSyncInterval = null;
