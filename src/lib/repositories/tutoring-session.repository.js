@@ -53,6 +53,12 @@ export async function findByTutor(tutorId, limit = 100) {
       .where('tutorId', '==', tutorId)
       .get();
 
+    // Si la colección está vacía, devolver array vacío
+    if (snapshot.empty) {
+      console.warn(`No sessions found for tutor ${tutorId} or collection '${COLLECTION}' is empty`);
+      return [];
+    }
+
     const sessions = [];
     snapshot.forEach((doc) => {
       const data = doc.data();
@@ -77,6 +83,14 @@ export async function findByTutor(tutorId, limit = 100) {
     return sessions.slice(0, limit);
   } catch (error) {
     console.error('Error finding tutoring sessions by tutor:', error);
+    console.error('Collection name:', COLLECTION);
+    
+    // Si la colección no existe, devolver array vacío en lugar de lanzar error
+    if (error.code === 5 || error.message?.includes('NOT_FOUND')) {
+      console.warn(`Collection '${COLLECTION}' not found or inaccessible. Returning empty array.`);
+      return [];
+    }
+    
     throw error;
   }
 }
@@ -96,6 +110,12 @@ export async function findByStudent(studentId, limit = 100) {
       .collection(COLLECTION)
       .where('studentId', '==', studentId)
       .get();
+
+    // Si la colección está vacía, devolver array vacío
+    if (snapshot.empty) {
+      console.warn(`No sessions found for student ${studentId} or collection '${COLLECTION}' is empty`);
+      return [];
+    }
 
     const sessions = [];
     snapshot.forEach((doc) => {
@@ -121,6 +141,15 @@ export async function findByStudent(studentId, limit = 100) {
     return sessions.slice(0, limit);
   } catch (error) {
     console.error('Error finding tutoring sessions by student:', error);
+    console.error('Collection name:', COLLECTION);
+    console.error('Student ID:', studentId);
+    
+    // Si la colección no existe, devolver array vacío en lugar de lanzar error
+    if (error.code === 5 || error.message?.includes('NOT_FOUND')) {
+      console.warn(`Collection '${COLLECTION}' not found or inaccessible. Returning empty array.`);
+      return [];
+    }
+    
     throw error;
   }
 }
@@ -192,6 +221,12 @@ export async function findByTutorAndApprovalStatus(tutorId, approvalStatus, limi
       .where('tutorApprovalStatus', '==', approvalStatus)
       .get();
 
+    // Si la colección está vacía, devolver array vacío
+    if (snapshot.empty) {
+      console.warn(`No sessions found for tutor ${tutorId} with status ${approvalStatus} or collection '${COLLECTION}' is empty`);
+      return [];
+    }
+
     const sessions = [];
     snapshot.forEach((doc) => {
       const data = doc.data();
@@ -216,6 +251,14 @@ export async function findByTutorAndApprovalStatus(tutorId, approvalStatus, limi
     return sessions.slice(0, limit);
   } catch (error) {
     console.error('Error finding tutoring sessions by tutor and approval status:', error);
+    console.error('Collection name:', COLLECTION);
+    
+    // Si la colección no existe, devolver array vacío en lugar de lanzar error
+    if (error.code === 5 || error.message?.includes('NOT_FOUND')) {
+      console.warn(`Collection '${COLLECTION}' not found or inaccessible. Returning empty array.`);
+      return [];
+    }
+    
     throw error;
   }
 }

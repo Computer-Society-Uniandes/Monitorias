@@ -5,7 +5,7 @@
  * Can fetch enriched data from backend API when needed
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
 
 const STORAGE_KEYS = {
   FAVORITE_TUTORS: 'calico_favorite_tutors',

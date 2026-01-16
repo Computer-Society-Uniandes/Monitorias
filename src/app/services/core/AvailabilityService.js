@@ -20,13 +20,14 @@ class AvailabilityServiceClass {
    */
   async getAvailabilities(tutorId = null, course = null, startDate = null, endDate = null, limit = null) {
     try {
-      const url = new URL(`${this.apiBase}/availability`, window.location.origin);
-      
-      if (tutorId) url.searchParams.append('tutorId', tutorId);
-      if (course) url.searchParams.append('course', course);
-      if (startDate) url.searchParams.append('startDate', startDate);
-      if (endDate) url.searchParams.append('endDate', endDate);
-      if (limit) url.searchParams.append('limit', limit.toString());
+      const params = new URLSearchParams();
+      if (tutorId) params.append('tutorId', tutorId);
+      if (course) params.append('course', course);
+      if (startDate) params.append('startDate', startDate);
+      if (endDate) params.append('endDate', endDate);
+      if (limit) params.append('limit', limit.toString());
+      const queryString = params.toString();
+      const url = `${this.apiBase}/availability${queryString ? `?${queryString}` : ''}`;
 
       const response = await fetch(url.toString(), {
         headers: {
@@ -99,10 +100,12 @@ class AvailabilityServiceClass {
    */
   async checkEventExists(eventId) {
     try {
-      const url = new URL(`${this.apiBase}/availability/check-event`, window.location.origin);
-      url.searchParams.append('eventId', eventId);
+      const params = new URLSearchParams();
+      params.append('eventId', eventId);
+      const queryString = params.toString();
+      const url = `${this.apiBase}/availability/check-event?${queryString}`;
 
-      const response = await fetch(url.toString(), {
+      const response = await fetch(url, {
         headers: {
           'Content-Type': 'application/json',
         },
@@ -234,11 +237,13 @@ class AvailabilityServiceClass {
    */
   async deleteAvailabilityEvent(eventId, accessToken, calendarId = null) {
     try {
-      const url = new URL(`${this.apiBase}/availability/delete`, window.location.origin);
-      url.searchParams.append('eventId', eventId);
-      if (calendarId) url.searchParams.append('calendarId', calendarId);
+      const params = new URLSearchParams();
+      params.append('eventId', eventId);
+      if (calendarId) params.append('calendarId', calendarId);
+      const queryString = params.toString();
+      const url = `${this.apiBase}/availability/delete?${queryString}`;
       
-      const response = await fetch(url.toString(), {
+      const response = await fetch(url, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
