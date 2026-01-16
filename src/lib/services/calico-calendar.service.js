@@ -8,7 +8,6 @@ import { google } from 'googleapis';
 
 let auth = null;
 let calendarId = null;
-let initialized = false;
 
 /**
  * Initialize Service Account authentication
@@ -17,45 +16,31 @@ let initialized = false;
 export async function initializeAuth() {
   try {
     if (auth) {
-      return auth; // Already initialized
+      return auth;
     }
 
-    // Get service account key from environment
-    const serviceAccountKey = process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
-    if (!serviceAccountKey) {
-      console.warn('GOOGLE_SERVICE_ACCOUNT_KEY not set - Calico Calendar features will be disabled');
+    // Load calendar ID from environment
+    calendarId = process.env.CALICO_CALENDAR_ID || null;
+
+    if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET || !process.env.GOOGLE_REFRESH_TOKEN) {
+      console.warn('⚠️ Google Calendar Service Account credentials are not fully configured in environment variables.');
       return null;
     }
 
-    // Get central calendar ID
-    calendarId = process.env.CALICO_CALENDAR_ID;
-    if (!calendarId) {
-      console.warn('CALICO_CALENDAR_ID not set - Calico Calendar features will be disabled');
-      return null;
-    }
+    // Get Client ID and Secret from env
+    const oauth2Client = new google.auth.OAuth2(
+      process.env.GOOGLE_CLIENT_ID,
+      process.env.GOOGLE_CLIENT_SECRET,
+      'https://developers.google.com/oauthplayground' // El redirect URI que usaste
+    );
 
-    // Parse credentials JSON
-    let credentials;
-    try {
-      credentials = typeof serviceAccountKey === 'string' 
-        ? JSON.parse(serviceAccountKey) 
-        : serviceAccountKey;
-    } catch (parseError) {
-      console.error(`Failed to parse GOOGLE_SERVICE_ACCOUNT_KEY: ${parseError.message}`);
-      throw new Error(`Failed to parse GOOGLE_SERVICE_ACCOUNT_KEY: ${parseError.message}`);
-    }
-
-    // Configure Google Auth with Service Account
-    auth = new google.auth.GoogleAuth({
-      credentials: credentials,
-      scopes: [
-        'https://www.googleapis.com/auth/calendar',
-        'https://www.googleapis.com/auth/calendar.events',
-      ],
+    // Configuramos el cliente con el token permanente
+    oauth2Client.setCredentials({
+      refresh_token: process.env.GOOGLE_REFRESH_TOKEN
     });
 
-    initialized = true;
-    console.log('✅ Google Calendar Service Account initialized successfully');
+    auth = oauth2Client;
+
     return auth;
   } catch (error) {
     console.error('❌ Error initializing Google Calendar Service Account:', error);
@@ -209,25 +194,22 @@ export async function createTutoringSessionEvent(sessionData) {
     // Configure event WITHOUT attendees to avoid permission issues
     const event = {
       summary: summary,
-      description:
-        description ||
-        `Sesión de tutoría agendada a través de Calico.\n\nTutor: ${tutorName || tutorEmail}\nEstudiante: ${studentName}\n\nNOTA: Este evento se creó en el calendario central de Calico. Los participantes serán notificados por separado.`,
-      start: {
-        dateTime: start,
-        timeZone: timeZone,
-      },
-      end: {
-        dateTime: end,
-        timeZone: timeZone,
-      },
+      description: description || `Sesión de tutoría agendada a través de Calico.\n\nTutor: ${tutorName || tutorEmail}\nEstudiante: ${studentName}\n\nNOTA: Este evento se creó en el calendario central de Calico. Los participantes serán notificados por separado.`,
+      start: { dateTime: start, timeZone: timeZone, },
+      end: { dateTime: end, timeZone: timeZone, },
       location: location,
+
+      attendees: normalizedAttendees,
 
       // 🎥 Add Google Meet automatically
       conferenceData: {
         createRequest: {
           requestId: `meet-${Date.now()}-${Math.random().toString(36).substring(7)}`,
-          conferenceSolutionKey: {
-            type: 'hangoutsMeet',
+          conferenceSolutionKey: { type: 'hangoutsMeet', },
+          conferenceConfiguration: {
+            accessConstraints: {
+              accessType: 'ANYONE'
+            },
           },
         },
       },
@@ -235,9 +217,7 @@ export async function createTutoringSessionEvent(sessionData) {
       // Additional configurations
       status: 'confirmed',
       visibility: 'default',
-      guestsCanInviteOthers: false,
       guestsCanModify: false,
-      guestsCanSeeOtherGuests: false,
 
       // Reminders
       reminders: {
