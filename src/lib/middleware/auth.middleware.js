@@ -52,8 +52,9 @@ export async function requireAuth(request) {
   }
 }
 
-export default {
+const authMiddleware = {
   verifyAuthToken,
   requireAuth,
 };
 
+export default authMiddleware;

@@ -4,8 +4,8 @@
  */
 
 import { NextResponse } from 'next/server';
-import { requireAuth } from '@/lib/middleware/auth.middleware';
-import * as userService from '@/lib/services/user.service';
+import { requireAuth } from '../../../../lib/middleware/auth.middleware';
+import * as userService from '../../../../lib/services/user.service';
 
 /**
  * GET /api/auth/me
