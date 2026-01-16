@@ -12,7 +12,8 @@ import * as tutoringSessionService from '../../../../lib/services/tutoring-sessi
  */
 export async function GET(request, { params }) {
   try {
-    const { id } = params;
+    const resolvedParams = await params;
+    const { id } = resolvedParams;
     const session = await tutoringSessionService.getSessionById(id);
     
     return NextResponse.json({

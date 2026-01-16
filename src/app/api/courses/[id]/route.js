@@ -13,7 +13,8 @@ import * as academicService from '../../../lib/services/academic.service';
  */
 export async function GET(request, { params }) {
   try {
-    const { id } = params;
+    const resolvedParams = await params;
+    const { id } = resolvedParams;
     const course = await academicService.getCourseById(id);
     
     if (!course) {

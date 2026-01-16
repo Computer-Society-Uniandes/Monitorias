@@ -16,7 +16,8 @@ initializeFirebaseAdmin();
  */
 export async function GET(request, { params }) {
   try {
-    const { id } = params;
+    const resolvedParams = await params;
+    const { id } = resolvedParams;
     const user = await userService.getUserById(id);
 
     if (!user) {
@@ -47,7 +48,8 @@ export async function GET(request, { params }) {
  */
 export async function PUT(request, { params }) {
   try {
-    const { id } = params;
+    const resolvedParams = await params;
+    const { id } = resolvedParams;
     const body = await request.json();
 
     await userService.saveUser(id, body);

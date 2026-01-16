@@ -8,7 +8,7 @@ import * as tutoringSessionRepository from '../repositories/tutoring-session.rep
 import * as slotBookingRepository from '../repositories/slot-booking.repository';
 import * as calicoCalendarService from './calico-calendar.service';
 import * as userService from './user.service';
-import { courseHelper } from '../utils/course.helper';
+import * as courseHelper from '../utils/course.helper';
 
 /**
  * Get session by ID
