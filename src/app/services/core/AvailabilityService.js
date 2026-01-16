@@ -44,7 +44,7 @@ class AvailabilityServiceClass {
       return data.availabilities || [];
     } catch (error) {
       console.error('Error fetching availabilities:', error);
-      throw error;
+        throw error;
     }
   }
 
