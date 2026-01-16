@@ -4,7 +4,7 @@
  */
 
 import { NextResponse } from 'next/server';
-import * as tutoringSessionService from '../../../../lib/services/tutoring-session.service';
+import * as tutoringSessionService from '../../../../../lib/services/tutoring-session.service';
 
 /**
  * GET /api/tutoring-sessions/student/[studentId]
@@ -12,7 +12,8 @@ import * as tutoringSessionService from '../../../../lib/services/tutoring-sessi
  */
 export async function GET(request, { params }) {
   try {
-    const { studentId } = params;
+    const resolvedParams = await params;
+    const { studentId } = resolvedParams;
     const { searchParams } = new URL(request.url);
     const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit'), 10) : 50;
     
@@ -24,7 +25,8 @@ export async function GET(request, { params }) {
       count: sessions.length,
     });
   } catch (error) {
-    console.error(`Error getting sessions for student ${params.studentId}:`, error);
+    const resolvedParams = await params;
+    console.error(`Error getting sessions for student ${resolvedParams.studentId}:`, error);
     return NextResponse.json(
       {
         success: false,

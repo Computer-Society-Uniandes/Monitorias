@@ -49,9 +49,25 @@ export async function findAllCourses() {
   try {
     const db = getFirestore();
     const snapshot = await db.collection(COURSE_COLLECTION).get();
+    
+    // Si la colección está vacía, devolver array vacío en lugar de error
+    if (snapshot.empty) {
+      console.warn(`Collection '${COURSE_COLLECTION}' is empty or does not exist yet`);
+      return [];
+    }
+    
     return snapshot.docs.map((doc) => mapCourseDoc(doc));
   } catch (error) {
     console.error('Error fetching courses:', error);
+    console.error('Collection name:', COURSE_COLLECTION);
+    console.error('Verify that the collection exists in Firestore and rules allow read access');
+    
+    // Si la colección no existe, devolver array vacío en lugar de lanzar error
+    if (error.code === 5 || error.message?.includes('NOT_FOUND')) {
+      console.warn(`Collection '${COURSE_COLLECTION}' not found. Returning empty array.`);
+      return [];
+    }
+    
     throw error;
   }
 }
@@ -194,9 +210,25 @@ export async function findAllMajors() {
   try {
     const db = getFirestore();
     const snapshot = await db.collection(MAJOR_COLLECTION).get();
+    
+    // Si la colección está vacía, devolver array vacío en lugar de error
+    if (snapshot.empty) {
+      console.warn(`Collection '${MAJOR_COLLECTION}' is empty or does not exist yet`);
+      return [];
+    }
+    
     return snapshot.docs.map((doc) => mapMajorDoc(doc));
   } catch (error) {
     console.error('Error fetching majors:', error);
+    console.error('Collection name:', MAJOR_COLLECTION);
+    console.error('Verify that the collection exists in Firestore and rules allow read access');
+    
+    // Si la colección no existe, devolver array vacío en lugar de lanzar error
+    if (error.code === 5 || error.message?.includes('NOT_FOUND')) {
+      console.warn(`Collection '${MAJOR_COLLECTION}' not found. Returning empty array.`);
+      return [];
+    }
+    
     throw error;
   }
 }
