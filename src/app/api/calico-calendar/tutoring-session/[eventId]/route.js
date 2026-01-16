@@ -6,8 +6,8 @@
  */
 
 import { NextResponse } from 'next/server';
-import * as calicoCalendarService from '@/lib/services/calico-calendar.service';
-import { initializeFirebaseAdmin } from '@/lib/firebase/admin';
+import * as calicoCalendarService from '../../../../lib/services/calico-calendar.service';
+import { initializeFirebaseAdmin } from '../../../../lib/firebase/admin';
 
 // Initialize Firebase Admin
 initializeFirebaseAdmin();

@@ -368,4 +368,8 @@ class AvailabilityServiceClass {
 // Create singleton instance
 const AvailabilityService = new AvailabilityServiceClass();
 
+// Named export for components that use: import { AvailabilityService } from '...'
+export { AvailabilityService };
+
+// Default export for components that use: import AvailabilityService from '...'
 export default AvailabilityService;

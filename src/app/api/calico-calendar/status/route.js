@@ -4,7 +4,7 @@
  */
 
 import { NextResponse } from 'next/server';
-import * as calicoCalendarService from '@/lib/services/calico-calendar.service';
+import * as calicoCalendarService from '../../../../lib/services/calico-calendar.service';
 
 /**
  * GET /api/calico-calendar/status

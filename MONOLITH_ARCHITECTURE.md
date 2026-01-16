@@ -68,7 +68,7 @@ src/
 Example: `src/app/api/availability/route.js`
 ```javascript
 import { NextResponse } from 'next/server';
-import * as availabilityService from '@/lib/services/availability.service';
+import * as availabilityService from '../../../../lib/services/availability.service';
 
 export async function GET(request) {
   const availabilities = await availabilityService.getAvailabilities();
@@ -250,7 +250,7 @@ To migrate additional backend modules:
 3. **Create API Route** (`src/app/api/module/route.js`)
    ```javascript
    import { NextResponse } from 'next/server';
-   import * as moduleService from '@/lib/services/module.service';
+   import * as moduleService from '../../../../lib/services/module.service';
    
    export async function GET(request) {
      const data = await moduleService.getById(id);
@@ -309,7 +309,7 @@ Set these in your deployment platform:
 
 ## Troubleshooting
 
-### "Cannot find module '@/lib/...'"
+### "Cannot find module '../../../../lib/...'"
 - Check `jsconfig.json` has correct path aliases
 - Restart your editor/IDE
 

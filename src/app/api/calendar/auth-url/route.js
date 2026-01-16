@@ -4,7 +4,7 @@
  */
 
 import { NextResponse } from 'next/server';
-import * as calendarService from '@/lib/services/calendar.service';
+import * as calendarService from '../../../../lib/services/calendar.service';
 
 /**
  * GET /api/calendar/auth-url

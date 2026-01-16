@@ -4,7 +4,7 @@
  */
 
 import { NextResponse } from 'next/server';
-import * as tutoringSessionService from '@/lib/services/tutoring-session.service';
+import * as tutoringSessionService from '../../../../lib/services/tutoring-session.service';
 
 /**
  * GET /api/tutoring-sessions/tutor/[tutorId]/pending
