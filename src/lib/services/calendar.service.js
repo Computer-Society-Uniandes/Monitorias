@@ -159,6 +159,7 @@ export async function createEvent(accessToken, calendarId, eventData) {
     const response = await calendar.events.insert({
       calendarId,
       requestBody: eventData,
+      conferenceDataVersion: 1,
     });
 
     return response.data;

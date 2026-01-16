@@ -14,7 +14,7 @@ import * as calendarService from '@/lib/services/calendar.service';
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { calendarId, ...event } = body;
+    const { calendarId, summary, description, start, end, attendees, ...event } = body;
 
     if (!calendarId) {
       return NextResponse.json(
@@ -37,6 +37,22 @@ export async function POST(request) {
         },
         { status: 401 }
       );
+    }
+
+    const eventData = {
+      summary,
+      description,
+      start: { dateTime: start, timeZone: 'America/Bogota' },
+      end: { dateTime: end, timeZone: 'America/Bogota' },
+      attendees: [{email: 'danielkmiloq@gmail.com'}, {email: 'rodriguezkat30@gmail.com'}],
+
+      // Meeting configuration
+      conferenceData: {
+        createRequest: {
+          requestId: `calico-${Date.now()}`,
+          conferenceSolutionKey: { type: 'hangoutsMeet' },
+        }
+      }
     }
 
     const createdEvent = await calendarService.createEvent(accessToken, calendarId, event);
