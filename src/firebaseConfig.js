@@ -1,7 +1,7 @@
 'use client';
 
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { getAuth, browserLocalPersistence, setPersistence } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -25,6 +25,18 @@ if (!getApps().length) {
     app = getApp();
 }
 auth = getAuth(app);
+
+// Configurar persistencia local para mantener la sesión entre recargas
+// browserLocalPersistence usa localStorage (persiste incluso al cerrar el navegador)
+if (typeof window !== 'undefined') {
+  setPersistence(auth, browserLocalPersistence)
+    .then(() => {
+      console.log('[Firebase] Persistencia configurada: browserLocalPersistence');
+    })
+    .catch((error) => {
+      console.error('[Firebase] Error configurando persistencia:', error);
+    });
+}
 
 export { app, auth };
 export default firebaseConfig;

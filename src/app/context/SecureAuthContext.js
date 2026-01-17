@@ -71,6 +71,11 @@ export const AuthProvider = ({ children }) => {
   };
 
   useEffect(() => {
+    // Inicializar el listener de estado de autenticación de Firebase
+    // Esto mantiene el token sincronizado y maneja la persistencia
+    AuthService.initAuthStateListener();
+
+    // Cargar datos del usuario actual
     loadMe();
   }, []);
 

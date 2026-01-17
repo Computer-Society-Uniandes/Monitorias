@@ -5,21 +5,23 @@ import { z } from "zod";
 import "./ReviewModal.css";
 import SuccessModal from "./NotificationReview";
 import { useAuth } from "../../context/SecureAuthContext";
-import { useI18n } from "../../../lib/i18n"; 
-import { TutoringSessionService } from "../../services/utils/TutoringSessionService";
+import { useI18n } from "../../../lib/i18n";
+import { ReviewService } from "../../services/utils/ReviewService";
 
 const reviewSchema = z.object({
   stars: z.number().min(1, "Debes seleccionar al menos 1 estrella").max(5),
   comment: z.string().max(500).optional().or(z.literal("")),
 });
 
-export default function ReviewModal({ session, onClose, currentUser = null }) {
+export default function ReviewModal({ session, onClose, currentUser = null, onReviewSubmitted = null }) {
   const { t, lang } = useI18n();
   const [stars, setStars] = useState(0);
   const [comment, setComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [hasExistingReview, setHasExistingReview] = useState(false);
+  const [canReview, setCanReview] = useState(true);
+  const [reviewError, setReviewError] = useState(null);
 
   const { user: authUser } = useAuth ? useAuth() : { user: null };
   const user = currentUser || authUser;
@@ -27,25 +29,29 @@ export default function ReviewModal({ session, onClose, currentUser = null }) {
   useEffect(() => {
     const checkExistingReview = async () => {
       if (!user?.email || !session?.id) return;
-      
+
       try {
-        const sessionData = await TutoringSessionService.getSessionById(session.id);
-        const sessionObj = sessionData?.session || sessionData;
-        if (sessionObj) {
-          const reviews = sessionObj.reviews || [];
-          const existing = reviews.find((r) => r.reviewerEmail === user.email);
-          if (existing) {
-            setHasExistingReview(true);
-            setStars(existing.stars || 0);
-            setComment(existing.comment || "");
-          }
+        // Usar el nuevo ReviewService para verificar reseñas existentes
+        const result = await ReviewService.checkExistingReview(session.id, user.email);
+
+        if (result.hasReview && result.review) {
+          setHasExistingReview(true);
+          setStars(result.review.rating || result.review.stars || 0);
+          setComment(result.review.comment || "");
+        }
+
+        // Verificar si puede dejar reseña
+        const canReviewResult = await ReviewService.canReviewSession(session, user.email);
+        setCanReview(canReviewResult.canReview);
+        if (!canReviewResult.canReview) {
+          setReviewError(canReviewResult.reason);
         }
       } catch (error) {
         console.error("Error checking existing review:", error);
       }
     };
     checkExistingReview();
-  }, [user, session?.id]);
+  }, [user, session?.id, session]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -61,29 +67,45 @@ export default function ReviewModal({ session, onClose, currentUser = null }) {
       return;
     }
 
+    if (!canReview) {
+      alert(reviewError || "No puedes dejar una reseña para esta sesión.");
+      return;
+    }
+
     setIsSubmitting(true);
 
     const reviewData = {
-      stars,
+      sessionId: session.id,
+      tutorId: session.tutorId,
+      rating: stars,
       comment,
-      reviewerEmail: user.email, 
+      reviewerEmail: user.email,
       reviewerName: user.displayName || user.name || user.email || "Anonymous",
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      course: session.course || "",
     };
 
     try {
-      await TutoringSessionService.addReview(session.id, reviewData);
+      const result = await ReviewService.createReview(reviewData);
 
-      setShowSuccess(true);
-      const SUCCESS_MS = 1900;
-      setTimeout(() => {
-        setShowSuccess(false);
-        if (typeof onClose === "function") onClose();
-      }, SUCCESS_MS);
+      if (result.success) {
+        setShowSuccess(true);
+
+        // Notificar al componente padre si existe el callback
+        if (typeof onReviewSubmitted === "function") {
+          onReviewSubmitted(result.review);
+        }
+
+        const SUCCESS_MS = 1900;
+        setTimeout(() => {
+          setShowSuccess(false);
+          if (typeof onClose === "function") onClose();
+        }, SUCCESS_MS);
+      } else {
+        throw new Error(result.error || "Error al guardar la reseña");
+      }
     } catch (err) {
       console.error("Error al guardar/actualizar la reseña:", err);
-      alert(t("review.errors.saveError"));
+      alert(err.message || t("review.errors.saveError"));
     } finally {
       setIsSubmitting(false);
     }
@@ -120,6 +142,13 @@ export default function ReviewModal({ session, onClose, currentUser = null }) {
               <strong>{t("review.fields.price")}:</strong> ${session.price} COP
             </p>
 
+            {/* Mostrar error si no puede dejar reseña */}
+            {!canReview && reviewError && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+                {reviewError}
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="mt-6 space-y-4">
               <div>
                 <label className="block font-medium mb-1">{t("review.fields.rating")}</label>
@@ -128,8 +157,11 @@ export default function ReviewModal({ session, onClose, currentUser = null }) {
                     <button
                       key={n}
                       type="button"
-                      onClick={() => setStars(n)}
-                      className={`text-3xl ${n <= stars ? "text-yellow-500" : "text-gray-300"}`}
+                      onClick={() => canReview && setStars(n)}
+                      disabled={!canReview}
+                      className={`text-3xl transition-colors ${
+                        n <= stars ? "text-yellow-500" : "text-gray-300"
+                      } ${!canReview ? "cursor-not-allowed opacity-50" : "hover:text-yellow-400"}`}
                     >
                       <FaStar />
                     </button>
@@ -145,16 +177,18 @@ export default function ReviewModal({ session, onClose, currentUser = null }) {
                   placeholder={t("review.placeholders.comment")}
                   className="border p-2 w-full rounded h-32 resize-none"
                   maxLength={500}
+                  disabled={!canReview}
                 />
+                <p className="text-sm text-gray-500 mt-1">{comment.length}/500</p>
               </div>
 
               <div className="flex justify-end gap-2">
                 <button
                   type="submit"
-                  disabled={stars === 0 || isSubmitting}
-                  className="px-4 py-2 rounded text-white font-semibold"
+                  disabled={stars === 0 || isSubmitting || !canReview}
+                  className="px-4 py-2 rounded text-white font-semibold transition-colors"
                   style={{
-                    background: stars > 0 && !isSubmitting ? "#ff9505" : "#9ca3af",
+                    background: stars > 0 && !isSubmitting && canReview ? "#ff9505" : "#9ca3af",
                   }}
                 >
                   {isSubmitting
@@ -165,7 +199,7 @@ export default function ReviewModal({ session, onClose, currentUser = null }) {
                 </button>
                 <button
                   type="button"
-                  className="px-4 py-2 rounded border"
+                  className="px-4 py-2 rounded border hover:bg-gray-50 transition-colors"
                   onClick={onClose}
                 >
                   {t("review.buttons.close")}

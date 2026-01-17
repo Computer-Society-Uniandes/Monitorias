@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Bash(dir /b \"c:\\\\Users\\\\USER\\\\Documents\\\\Calico\\\\Monitorias\")"
+      "Bash(dir /b \"c:\\\\Users\\\\USER\\\\Documents\\\\Calico\\\\Monitorias\")",
+      "Bash(npm run build:*)",
+      "Bash(node:*)",
+      "Bash(npx eslint:*)"
     ]
   }
 }

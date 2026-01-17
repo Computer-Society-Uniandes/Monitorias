@@ -1,9 +1,12 @@
-import { signInWithEmailAndPassword, signInWithCustomToken, signOut as firebaseSignOut } from 'firebase/auth';
+import { signInWithEmailAndPassword, signInWithCustomToken, signOut as firebaseSignOut, onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../../../firebaseConfig';
 import { API_URL } from '../../../config/api';
 
 // Token storage key
 const TOKEN_STORAGE_KEY = 'firebase_id_token';
+
+// Flag para evitar múltiples listeners
+let authListenerInitialized = false;
 
 /**
  * Token management utilities
@@ -339,14 +342,54 @@ export const AuthService = {
       if (!auth.currentUser) {
         throw new Error('No user logged in');
       }
-      
+
       const idToken = await auth.currentUser.getIdToken(true); // Force refresh
       TokenManager.saveToken(idToken);
-      
+
       return { success: true, token: idToken };
     } catch (error) {
       console.error('Error refreshing token:', error);
       return { success: false, error: error.message };
     }
+  },
+
+  /**
+   * Initialize auth state listener
+   * This ensures tokens are refreshed when Firebase auth state changes
+   * Call this once when the app starts
+   */
+  initAuthStateListener: () => {
+    if (authListenerInitialized || typeof window === 'undefined') {
+      return;
+    }
+
+    authListenerInitialized = true;
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        try {
+          // Usuario autenticado - obtener y guardar el token actualizado
+          const idToken = await user.getIdToken();
+          TokenManager.saveToken(idToken);
+          console.log('[AuthService] Token actualizado desde auth state listener');
+        } catch (error) {
+          console.error('[AuthService] Error obteniendo token en auth state change:', error);
+        }
+      } else {
+        // Usuario no autenticado - limpiar token
+        TokenManager.removeToken();
+        console.log('[AuthService] Token eliminado - usuario no autenticado');
+      }
+    });
+
+    console.log('[AuthService] Auth state listener inicializado');
+  },
+
+  /**
+   * Check if there's a valid session
+   * Returns true if user is authenticated
+   */
+  isAuthenticated: () => {
+    return !!auth.currentUser || !!TokenManager.getToken();
   },
 };
